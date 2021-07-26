@@ -1,0 +1,21 @@
+*{
+    margin: 0px;
+    padding:0px;
+
+}
+body{
+    background-color: rgb(43, 41, 41);
+    color: seashell;
+}
+.mainBody{
+    margin-left: 10%;
+    margin-top: 2%;
+}
+#wizardofoz{
+    margin-top: -5%;
+}
+.sideVideos{
+    float: right;
+    margin-top: -45%;
+    margin-right: 12%;
+}
