@@ -19,3 +19,11 @@ body{
     margin-top: -45%;
     margin-right: 12%;
 }
+
+@media only screen and (max-width:412px){
+    .sideVideos{
+        margin-left: 20%;
+        margin-top: 4%;
+    
+    }
+}
