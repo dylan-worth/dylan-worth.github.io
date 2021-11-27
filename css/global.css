@@ -70,6 +70,12 @@ body{
     margin-left: 20%;
 
 
+
+}
+
+#videos{
+    margin-top: 10%;
+    margin-left: -50%;
 }
 #duck{
     margin-top: 10%;;
@@ -88,11 +94,30 @@ body{
     width: 60%;
     
 }
+.videobrowser{
+    display: flex;
+    left:50%;
+    top: 50%;
+    margin-left: 20%;
+    justify-content: center;
+    border: black solid 2px;
+    background-color: #282A35;
+    margin-top: 4%;
+    height: 600px;
+    overflow-y: scroll;
+    width: 60%;
+    
+}
 
 @media only screen and (max-width:412px){
     .sideVideos{
         margin-left: 20%;
         margin-top: 4%;
     
+    }
+    body{
+        background: url(../img/layout/wall-paper.png);
+        background-repeat: repeat-y 100%;
+        
     }
 }
