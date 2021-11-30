@@ -1,6 +1,27 @@
-.main-body{
+.title{
     display: flex;
     justify-content: center;
     margin-top: 20%;
     font-size: 22px;
+}
+.links{
+    display: flex;
+    justify-content: center;
+    font-size: 22px;
+}
+.favorites {
+    margin-left: 40%;
+}
+.favorites li{
+    display: inline-flex;
+}
+.profile{
+    margin-left: 25%;
+}
+.pfp{
+    margin-top: -9%;
+    margin-left: 27%;
+}
+.name{
+    margin-left: 30%;
 }
