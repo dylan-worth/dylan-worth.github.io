@@ -25,3 +25,20 @@
 .name{
     margin-left: 30%;
 }
+
+
+@media screen and (max-width: 380px){
+    .profile{
+     margin-left: 0px;
+    }
+    .pfp{
+        margin-top: -13%;
+        margin-left: 24%;
+    }
+    .name{
+        margin-left: 33%;
+    }
+    .background-pfp {
+        width: 500px;
+    }
+}
