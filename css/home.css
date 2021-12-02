@@ -19,11 +19,25 @@
     margin-left: 25%;
 }
 .pfp{
-    margin-top: -9%;
-    margin-left: 27%;
+    margin-top: -3%;
+    margin-left: 2%;
+    margin-right: 0%;
 }
 .name{
-    margin-left: 30%;
+   margin-left: 5%;
+   float: center;
+}
+.profile-links{
+    display: inline-flex;
+}
+.profile-links li{
+    padding-left: 10%;
+    list-style-type: none;
+}
+.profile-links li a{
+    color: seashell;
+    text-decoration: none;
+
 }
 
 
