@@ -1,7 +1,4 @@
-.main-body{
-    
-    
-}
+
 .title{
     display: flex;
     justify-content: center;
@@ -79,7 +76,8 @@
         margin-left: 0px;
     }
     .profile{
-        width: 103%;
+        width: 100%;
+        margin-left: 0px;
         
     }
     .post-section{
