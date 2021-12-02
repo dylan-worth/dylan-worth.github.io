@@ -76,11 +76,14 @@
     }
     .background-pfp {
         width: 300px;
+        margin-left: 0px;
     }
     .profile{
         width: 100%;
+        
     }
     .post-section{
         width: 70%;
+    
     }
 }
