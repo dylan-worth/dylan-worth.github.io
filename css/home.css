@@ -63,7 +63,7 @@
 }
 
 
-@media screen and (max-width: 380px){
+@media screen and (max-width: 500px){
     .profile{
      margin-left: 0px;
     }
@@ -76,5 +76,11 @@
     }
     .background-pfp {
         width: 500px;
+    }
+    .profile{
+        width: 60%;
+    }
+    .post-section{
+        width: 60%;
     }
 }
