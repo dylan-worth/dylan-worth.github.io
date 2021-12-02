@@ -75,7 +75,7 @@
         margin-left: 33%;
     }
     .background-pfp {
-        width: 300px;
+        width: 100%;
         margin-left: 0px;
     }
     .profile{
@@ -84,6 +84,7 @@
     }
     .post-section{
         width: 70%;
+        margin-left: 0px;
     
     }
 }
