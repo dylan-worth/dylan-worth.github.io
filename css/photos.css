@@ -20,9 +20,10 @@
 }
 @media screen and (max-width: 500px){
     .photo-section{
-        width: 95%;
+        width: 90%;
         margin-left: 0px;
         padding-left: 18%;
+        padding-right: 0px;
     
     }
     
