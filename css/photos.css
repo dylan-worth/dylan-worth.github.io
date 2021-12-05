@@ -7,10 +7,22 @@
     padding: 2%;
     margin-top: 4%;
 }
+
+.album-cover{
+    height: 250px;
+    width: 250px;
+    border: black solid 4px;
+    border-radius: 25px;
+    
+}
+.album-cover:hover{
+    opacity: .8;
+}
 @media screen and (max-width: 500px){
     .photo-section{
         width: 95%;
         margin-left: 0px;
     
     }
+    
 }
