@@ -18,11 +18,21 @@
 .album-cover:hover{
     opacity: .8;
 }
+
+.blog-section{
+
+    margin-left: 10%;
+    width: 56%;
+    background-color: rgb(43, 40, 40);
+    border-radius: 25px;
+    padding: 2%;
+    margin-top: 4%;
+}
 @media screen and (max-width: 500px){
     .photo-section{
         width: 87%;
         margin-left: 0px;
-        padding-left: 18%;
+        padding-left: 14%;
         padding-right: 0px;
     
     }
