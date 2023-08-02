@@ -19,6 +19,22 @@
     opacity: .8;
 }
 
+.evelyn-8-1-2023 {
+    transition:transform 0.25s ease; 
+    border: seashell 3px solid; 
+    border-radius: 2%; 
+    margin-top: 2%;
+    
+}
+.evelyn-8-1-2023:hover {
+-webkit-transform:scale(1.5); /* or some other value */
+    transform:scale(1.5);
+}
+
+
+
+
+
 @media screen and (max-width: 500px){
     .photo-section{
         width: 80%;
