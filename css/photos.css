@@ -43,5 +43,12 @@
         padding-right: 0px;
     
     }
+    .evelyn-8-1-2023 {
+        height: 300px;
+        width: 450px;
+    }
+    .evelyn-8-1-2023:hover {
+        transform: none;
+        }
     
 }
