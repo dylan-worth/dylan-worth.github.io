@@ -88,4 +88,8 @@
     .name{
         margin-left: 12%;
     }
+    .profile-links li{
+        padding-left: 2%;
+        list-style-type: none;
+    }
 }
