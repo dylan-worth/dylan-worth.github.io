@@ -89,12 +89,18 @@ body{
 @media screen and (max-width: 1000px){ 
 
     .video-cats {
-        height: 50px;
-        width: 50px;
+        height: 300px;
+        width: 350px;
+        margin-right: 2%;
+        margin-left: -6%;
     }
     .featured {
-        height: 150px;
-        width: 200px;;
+        height: 300px;
+        width: 350px;
+        margin-right: 2%;
+        margin-left: -6%;
+        margin-top: 1%;
+       
     }
     .video-post-section {
         width: 80%;
