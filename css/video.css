@@ -73,7 +73,6 @@ body{
     .video-section{
         width: 80%;
         margin-left: 0px;
-        padding-left: 14%;
         padding-right: 0px;
     
     }
@@ -92,13 +91,13 @@ body{
         height: 300px;
         width: 350px;
         margin-right: 2%;
-        margin-left: -6%;
+        margin-left: -7%;
     }
     .featured {
         height: 300px;
         width: 350px;
         margin-right: 2%;
-        margin-left: -6%;
+        margin-left: -7%;
         margin-top: 1%;
        
     }
