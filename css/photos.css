@@ -13,8 +13,13 @@
     width: 250px;
     border: black solid 4px;
     border-radius: 25px;
+    transition:transform 0.25s ease; 
     
 }
+.album-cover:hover {
+    -webkit-transform:scale(1.5); /* or some other value */
+        transform:scale(1.5);
+    }
 .album-cover:hover{
     opacity: .8;
 }
