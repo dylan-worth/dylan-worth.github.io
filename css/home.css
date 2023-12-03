@@ -60,7 +60,7 @@
 }
 
 
-@media screen and (max-width: 500px){
+@media screen and (max-width: 1000px){
     .profile{
      margin-left: 0px;
     }

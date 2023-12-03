@@ -6,7 +6,8 @@ body{
     background-color: #121212;
     color: seashell;
 }
-.video-section{
+.video-section {
+
     margin-left: 20%;
     width: 100%;
     background-color: rgb(43, 40, 40);
@@ -14,12 +15,50 @@ body{
     padding: 2%;
     margin-top: 4%;
 }
+.video-post-section {
+    margin-left: 20%;
+    overflow: scroll;
+    width: 57%;
+    background-color: rgb(43, 40, 40);
+    border-radius: 25px;
+    padding: 2%;
+    margin-top: 4%;
+
+}
+.video-cats{
+    transition:transform 0.25s ease; 
+    height: 100px;
+    width: 170px;
+    border: 2px solid seashell;
+    border-radius: 25px;
+    margin-left: 2%;
+}
 .featured{
     transition:transform 0.25s ease; 
-    height: 350px;
-    width: 500px;
+    height: 200px;
+    width: 400px;
     border: 2px solid seashell;
-    border-radius: 15%;
+    border-radius: 25px;
+    margin-left: 2%;
+    margin-bottom: 2%;
+}
+.video-viewmore {
+    float: right;
+    color: seashell;
+    text-decoration: none;
+}
+.video-viewmore:hover{
+    color: darkcyan;
+}
+.video-hr {
+    color: seashell;
+    margin-bottom: 2%;
+    opacity: 20%;
+}
+.video-cats:hover{
+    -webkit-transform:scale(1.25); /* or some other value */
+    transform:scale(1.25);
+    border: darkcyan 2px solid;
 }
 .featured:hover{
     -webkit-transform:scale(1.25); /* or some other value */
@@ -27,7 +66,7 @@ body{
 }
 .videos{
     height: 100px;
-    width: 150px;;
+    width: 350px;;
 }
 
 @media screen and (max-width: 500px){
@@ -46,4 +85,25 @@ body{
         transform: none;
         }
     
+}
+@media screen and (max-width: 1000px){ 
+
+    .video-cats {
+        height: 50px;
+        width: 50px;
+    }
+    .featured {
+        height: 150px;
+        width: 200px;;
+    }
+    .video-post-section {
+        width: 80%;
+        margin-left: 10px;
+        margin-right: 20px;
+        padding-left: 14%;
+        padding-right: 0px;
+        
+    }
+
+
 }
