@@ -24,6 +24,11 @@
     text-align: center;
     font-size: 23px;
 }
+.cat_dropcaps{
+    float: left;
+    height: 150px;
+    width: 200px;
+}
 .profile{
     
     /*background-color: rgb(43, 40, 40);*/
