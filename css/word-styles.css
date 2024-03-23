@@ -1,0 +1,17 @@
+.dictionary_foss {
+    position: relative;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.dictionary_foss:hover::after{
+    content: "Foss is an acronym for Free & Open Source";
+    position: absolute;
+    left: 0;
+    top: 100;
+    width: 60px;
+    background-color: #fff;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(53, 53, 53, 0.13);
+}

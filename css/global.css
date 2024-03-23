@@ -3,7 +3,8 @@
     padding: 0px;
 }
 body{
-   background-color: #15141A;;
-   background-repeat: repeat;
+   /*ackground-color: #15141A;;*/
+   background: linear-gradient(135deg, #000000, #010142, #000000);
     color: seashell;
 }
+
