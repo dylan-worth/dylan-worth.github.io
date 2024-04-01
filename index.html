@@ -5,175 +5,75 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/home.css">
-    <link rel="stylesheet" href="./css/photos.css">
+    <link rel="stylesheet" href="css/homepage.css">
+    <link rel="stylesheet" href="css/photo-album.css">
     <title>Home</title>
 </head>
 <body>
-   
-    <div>
-         <div class="profile">
-             <img class="background-pfp" src="images/profile/video-background.gif" height="400" width="1000">
-             <br>
-             <img src="images/profile/pfp.jpg" class="pfp" height="200" width="200" style=" border-radius: 50%; border: solid 3px black;">
-                <br>
-             <b class="name">Dylan Worth</b>
-             <br>
-             <br>
-             <hr style="width:94%;">
-             <br>
-             <br>
-            <ul class="profile-links">
-                <li><a style="color: darkcyan; text-decoration: underline;" href="./index.html">Home</a></li> 
-                <li><a href="blog.html">Blogs</a></li>
-                <li><a href="dreams.html">Dreams</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="photos.html">Photos</a></li>
-                <li><a href="videos.html">Videos</a></li>
-                
-            </ul>
-            
-         
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="./index.html" class="navbar-brand">Home</a>
+            <div class="navbar-links">
+                <a href="blog.html">Blogs</a>
+                <a href="dreams.html">Dreams</a>
+                <a href="about.html">About</a>
+                <a href="photos.html">Photos</a>
+                <a href="videos.html">Videos</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <div class="profile-header">
+            <img class="background-pfp" src="images/profile/video-background.gif" alt="Profile Background">
+            <img src="images/profile/pfp.jpg" class="pfp" alt="Profile">
+            <h1 class="name">Dylan Worth</h1>
+        </div>
+
+        <!-- Repeat this section for each post -->
+        <div class="post-section">
+            <div class="post-header">
+                <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                <div class="post-info">
+                    <span class="post-date">April 1st, 2024</span>
+                    <span class="post-type">Post</span>
+                </div>
+            </div>
+            <p>This weekend was pretty great, got to spend time with my love, my babies, and support the company I work for.</p>
+             <!-- Photo Album Container -->
+    <div class="album-container">
+        <!-- Thumbnails will be loaded here by JavaScript -->
     </div>
 
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        March 21st, 2024, <br>
-        Blog
-        <br>
-        <br>
-        <p> We use apps to store our data and share memories with friends. However, these large companies take advantage and sell your personal data. It may not seem like a big deal 
-            but we should choose who we share our data with. If you are looking for a drive alternative to Google, Microsoft or other big companies, learn more about Nextcloud  <a style="color:darkcyan" href="">here</a>.
-        </p>
+    <!-- Modal for viewing full photo -->
+    <div class="modal" id="photoModal">
+        <span class="close" id="closeModal">&times;</span>
+        <span class="arrow left" id="prevArrow">&#10094;</span>
+        <span class="arrow right" id="nextArrow">&#10095;</span>
+        <img class="full-photo" id="fullPhoto" src="" alt="">
+        <button class="zoom-control" id="zoomIn">+</button>
+        <button class="zoom-control" id="zoomOut">-</button>
     </div>
+</div>
+        <!-- End of a post-section -->
 
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        March 9th, 2024, <br>
-        FOSS News/Updates
-        <br>
-        <br>
-        <p> Alpha but playable. I have seen activity on the forums from the devs of answering questions but sadly haven't seen an update in a few months. However, I thought I'd share my findings here. FreeRCT isn't like OpenRTC, 
-            it is open source like OpenRCT but OpenRCT requires you to use the official assets of RCT. FreeRCT is made from scratch with their own assets. <a style="color:darkcyan" href="https://freerct.net">FreeRCT</a>
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        February 29, 2024, 
-        <br>
-        <br>
-        <p> My baby girl had <a style="color:darkcyan" href="https://seuss.fandom.com/wiki/Dr._Seuss_Wiki">Dr Seus</a> week at her Preschool. I can not believe how big she is getting. She turns 
-            six years old this week which is unbelievable. I love her so much and I thought I'd share with the world. 
-            <br>
-            <a href="https://dylan-worth.github.io/images/blogs/elaina1.jpg" target = "_blank"><img class="evelyn-8-1-2023" src="./images/blogs/dr_seus/elaina1.jpg" height="450" width="500" alt=""></a> 
-            <a href="https://dylan-worth.github.io/images/blogs/dr_seus/elaina2.jpg" target = "_blank"><img class="evelyn-8-1-2023" src="./images/blogs/dr_seus/elaina2.jpg" height="450" width="500" alt=""></a>
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        January 22, 2024, 
-        <br>
-        <br>
-        <p> I needed to make a website post for this cover photo. Facebook tends to have terms and conditions about using photos posted. These photos are not allowed to be 
-            used for commercial use, they are subject to copyright. 
-            <br>
-            <a href="https://dylan-worth.github.io/images/photos/facebook-cover.jpg" target = "_blank"><img class="evelyn-8-1-2023" src="./images/photos/facebook-cover.jpg" height="450" width="500" alt=""></a>
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        December 4, 2023, 
-        <br>
-        <br>
-        <p> I have plenty of hobbies that I try to accomplish in my super limited time, but I always come back to this one. I finally have reached close to 200 updates 
-            for the hobby project located here: <a style="color:darkcyan;" href="https://gitlab.com/custom-09/open881" target="_blank">Open881</a>.
-            <a href="https://dylan-worth.github.io/images/photos/First100.gif" target = "_blank"><img class="evelyn-8-1-2023" src="./images/photos/First100.gif" height="450" width="500" alt=""></a>
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        August 1, 2023,
-        <br>
-        <br>
-        <p>This is my baby Evelyn, she is almost 10 months old and is so full of life. She means the absolute world to me as do my other babies. 
-            <br>
-            <a href="https://dylan-worth.github.io/images/photos/Evelyn-8-1-2023.jpg" target = "_blank"><img class="evelyn-8-1-2023" src="./images/photos/Evelyn-8-1-2023.jpg" height="450" width="500" alt=""></a>
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        July 30, 2023,
-        <br>
-        <br>
-        <p>I created a new section all together for my blogs. This section will more than likely be my "News" section where I post things linking towards 
-            <a style="color: darkcyan;" href="blog.html">Blogs</a>, <a style="color: darkcyan;" href="videos.html">Videos</a>, <a style="color: darkcyan;" href="dreams.html">Dreams</a>, and more! I will more than likely post a photo in
-            this like if it was a regular social media post and then also have it in my <a style="color: darkcyan;" href="photos.html">Albums</a>.
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        April 8, 2023,
-        <br>
-        <br>
-        <p>As you can see, I started a blog back in 2021 thinking that I could maintain it. I thought about keeping a new section on here
-            all about dreams. I've been having very vivid dreams and I'd love to bring my opinions into it. You can check out my latest dream journal here:
-            <a style="color: darkcyan;" href="./dreams/invasion.html">Invasion</a>.
-        </p>
-    </div>
-
-    <div class="post-section">
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        December 2nd, 2021,
-        <br>
-        <br>
-        <p>In this blog post I demonstrate what the first blog will look like in terms of a different page but also introduce
-            my son! <a style="color: darkcyan;" href="blogs/2021/December/12-02-2021.html">Read More</a>.
-        </p>
-    </div>
-     
-    <div class="post-section">
+        <!-- Add more post sections here -->
+        <div class="post-section">
+            <div class="post-header">
+                <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                <div class="post-info">
+                    <span class="post-date">March 23rd, 2024</span>
+                    <span class="post-type">Blog</span>
+                </div>
+            </div>
+            <p>We use apps to store our data and share memories with friends. However, these large companies take advantage and sell your personal data. It may not seem like a big deal 
+                but we should choose who we share our data with. If you are looking for a drive alternative to Google, Microsoft or other big companies, learn more about Nextcloud  <a style="color:darkcyan" href="./blogs/2024/nextcloud.html">here</a>.
+            </p>
+            </div>
         
-        <img src="images/profile/pfp.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        December 1st, 2021,
-        <br>
-        <br>
-        <p> While this is not the most complete website and most likely will be a long work in progress I would just like to state that this 
-            website may look funky at times. It is best viewed on desktop as I'm typing this but later will become more mobile friendly. I have 
-            been looking for my little corner of the internet for awhile now and even though this is being hosted by GitHub, I will eventually
-            move this to my own server so I no longer will have to keep it a static website. 
-            <br>
-            <br>
-            My first goals with this website is to start getting a small foundation of a Facebook-feel profile that I can use since 
-            I really enjoy the look. It will not share the full Facebook look as I like to switch it up with my own feel at times. I am not 
-            using this website professionally at this time and will be focusing primarily on just getting small fun things for myself 
-            and people close to me. 
-            <br>
-            <br>
-            This pretty much sums up my first little blog post and I will continue to post my feelings here since this is a safe place 
-            and eventually even create an archive for all of them. This post will be the only post where it takes up the screen 
-            since I will be making seperate web pages for you to view the entire thing. I just want this as the pinned post on the blog 
-            and if you would like to learn a little more about me check out my about page using the links or <a style="color:darkcyan" href="about.html">here</a>.</p>
-    </div>
-    
-    
-    
+
+    </main>
+
+    <script src="./js/photoalbum.js"></script>
 </body>
 </html>
-

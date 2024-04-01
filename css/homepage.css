@@ -1,0 +1,140 @@
+/* Global Styles */
+body, h1, h2, h3, p, ul, li, a {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    color: #E4E6EB; /* Light grey text for readability on dark backgrounds */
+}
+
+body {
+    background-color: #18191A; /* Dark background */
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Navigation Bar Styles */
+.navbar {
+    background-color: #242526; /* Darker shade for the navbar */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,.5); /* Stronger shadow for depth */
+    z-index: 1000;
+}
+
+.navbar-inner {
+    max-width: 1200px;
+    margin: auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar-brand, .navbar-links a {
+    color: #E4E6EB; /* Light text for contrast */
+    padding: 0 15px;
+}
+
+/* Adjusting navbar-inner to position elements correctly */
+.navbar-inner {
+    position: relative; /* Ensures the .messenger-button can be positioned absolutely relative to this container */
+    max-width: 1200px;
+    width: 100%;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Profile Header Styles */
+.profile-header {
+    padding-top: 60px; /* Offset for fixed navbar */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.background-pfp {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.pfp {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 5px solid #242526; /* Dark border for the profile picture */
+    position: relative;
+    top: -100px; /* Half above the profile background */
+    margin-bottom: -100px; /* Adjust the space after the profile image */
+}
+
+.name {
+    font-size: 24px;
+    color: #E4E6EB; /* Light text for name */
+    margin: 10px 0;
+}
+
+/* Post Section Styles */
+.post-section {
+    background-color: #242526; /* Dark background for post sections */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.5); /* Enhanced shadow for depth on dark theme */
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 600px; /* Similar to Facebook post width */
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.post-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #E4E6EB;
+    margin-right: 10px;
+}
+
+.post-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-date, .post-type {
+    color: #B0B3B8; /* Grey text for metadata */
+}
+
+p {
+    color: #E4E6EB; /* Adjusted for dark theme */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-inner, .content, .profile-header, .post-section {
+        width: 90%;
+        margin: auto;
+    }
+
+    .background-pfp {
+        height: 200px; /* Smaller background for smaller screens */
+    }
+
+    .pfp {
+        width: 150px;
+        height: 150px;
+    }
+}

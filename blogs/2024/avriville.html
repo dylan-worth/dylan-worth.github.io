@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book-like Style with Page Numbers</title>
+<style>
+   body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+  .book {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 80%;
+    margin: 2px auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .page {
+    width: 100%;
+    min-height: 60vh;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page:last-child {
+    margin-right: 0;
+  }
+  .page-number {
+    position: absolute;
+    bottom: 10px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+<div class="book">
+  <div class="page">
+    <h1>Chapter 1: Arrival in Aetheria</h1>
+    <p> <p>
+        Redwood trees towered above them as they awoke. In the distance, an eerie sound echoed, accompanied by faint mumbling, as if from a small creature. Matthew was the first to regain consciousness, his face clouded with confusion as they realized they were all lost. Rising from the unfamiliar ground, he searched for his friends. In the distance, he spotted a few of them lying on the ground. He approached Garrett, who was stirring awake. Together, they roused Jason, Adam, and Dustin.
+      </p>
+      <p style="float:left;">
+        'Where are we?' Garrett asked.
+        <br>
+        'I don't know, but it seems to be some sort of forest,' Matthew replied.
+      </p>
+      <p>
+        They were all puzzled as they began to look around, trying to gauge their surroundings. What surrounded them was a forest unlike anything they had ever seen before. As they looked up, they noticed that the trees towered over them. As the wind brushed against the leaves, it almost sounded as if the wind were fingers brushing against a harp. They all thought they were dreaming when they noticed frogs hopping on top of a log covered in vines. Every time the frogs hit the ground, a splash of fog emanated from beneath them.
+      </p>
+      <p>
+        Emerging from the bushes where they had been hiding were the Yuks, diminutive creatures resembling tree stumps. They appeared to be in a state of panic as they sought the attention of the group. Matthew reassured them that they were safe, and the Yuks began to implore them for assistance.
+      </p>
+      <p>
+        "Our city is under attack, and we are losing hope. We are too small to fight against the armies of the Dark Lord!" exclaimed the figure who appeared to be the Yuk commander. "What about a Dark Lord? Slow down. Where are we?" asked one of the group.
+        <br>
+        "We are in the Elysian Forest, of course!" exclaimed the Yuk.
+        <br>
+        "Where might that be, then?" Garrett inquired.
+        <br>
+        Before the Yuk could reply, a deep growl rumbled through the forest. Urged by the Yuk commander, they swiftly departed, for he knew the way. Through the winding paths of the Elysian Forest they ventured until they reached a small village. "Seems we've left Earth behind," remarked Jason. The Yuk commander guided them to a modest hut. "Here we shall find shelter for the night. At first light tomorrow, we'll journey to Anchorian. Rest now, for the road ahead is long and wearying."
+      </p></p>
+    <span class="page-number">Page 1</span>
+  </div>
+  <div class="page">
+    <p>
+        They conversed amongst themselves, reflecting on their experiences before gently shooing away the fireflies that cast a soft glow within the room. As dawn broke, they emerged from their hut, greeted by the enchanting sight of the surrounding town.
+      </p>
+      <p>
+        Surrounded by majestic oak trees adorned with twinkling fairy lights and streets paved with paths of leaves, the town exuded a magical aura. Quaint oakwood buildings dotted the landscape, bustling with activity as cheerful gnomes went about their day. Giant toadstools served as modes of transportation, pulled by centipedes the size of horses, while sunlight filtered through the towering redwood trees, illuminating the village center.
+      </p>
+      <p>
+        Stepping outside, Matt was approached by a gnome adorned in a small leather vest, offering to sell him street food. Before he could respond, the Yuk commander intervened, presenting the gnome with magical mushrooms. Curious, Matt and his companions accepted the offered food. At first glance, it appeared unusual, adorned with candied rocks and adorned with vegetation sprouting from the bottom.
+      </p>
+      <p>
+        "So what's going on with Anchorian?" asked Adam.
+        <br>
+        "Glad you asked. Anchorian is known as the City of Leaves. It was founded in 284 ND."
+        <br>
+        "ND? You mean AD?"
+        <br>
+        "No, ND. Haven't you learned about the eras in school? ND stands for New Dimension. Before 284 ND, Anchorian was a humble hamlet, nestled amidst the verdant embrace of the forests, where druids communed with Terraflora, the benevolent goddess of nature. She is the very essence that birthed Aetheria into existence, sculpting its landscapes and breathing life into its inhabitants. It was Terraflora who crafted both the majestic world we inhabit and the Titans that once guarded its delicate equilibrium, before the sinister presence of the Dark Lord, Necrothorn, tainted its harmony."
+      </p>
+      <p>
+        In times past, Necrothorn set in motion his campaign to disrupt the balance, unleashing his army of the dead upon multiple nations. Though our King, Aric Brightleaf, fought bravely, the relentless onslaught proved too formidable for him to withstand alone.
+      </p>
+    <span class="page-number">Page 2</span>
+  </div>
+  <!-- more pages go here -->
+</div>
+</body>
+</html>
