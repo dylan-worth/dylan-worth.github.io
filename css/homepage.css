@@ -122,6 +122,118 @@ p {
     color: #E4E6EB; /* Adjusted for dark theme */
 }
 
+
+.forum-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #2F3136;
+    border-radius: 8px;
+}
+
+.forum-header {
+    background: #36393F;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.background-pfp {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+.profile-info {
+    text-align: center;
+}
+
+.profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #202225;
+    margin-top: -50px;
+}
+
+h1 {
+    color: #FFFFFF;
+}
+
+.forum-nav ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+.forum-nav a {
+    color: #00AFF4;
+    text-decoration: none;
+    padding: 10px 15px;
+}
+
+.forum-nav a:hover {
+    text-decoration: underline;
+}
+
+.forum-post {
+    background-color: #36393F;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.post-metadata {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.post-avatar {
+    width: 50px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+h2, h3 {
+    color: #FFFFFF;
+}
+
+p, li {
+    color: #D7DADC;
+    line-height: 1.6;
+}
+
+a {
+    color: #00AFF4;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #202225;
+    margin: 20px 0;
+}
+
+.conclusion {
+    margin-top: 20px;
+}
+
+/* Add responsive design rules as needed */
+@media (max-width: 768px) {
+    .forum-container {
+        margin: 20px;
+        padding: 10px;
+    }
+
+    .profile-pic {
+        margin-top: -30px;
+    }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .navbar-inner, .content, .profile-header, .post-section {
