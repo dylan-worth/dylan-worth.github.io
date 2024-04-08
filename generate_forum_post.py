@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from tkinter import PhotoImage
+from PIL import Image, ImageTk
 from datetime import datetime
 
 
@@ -131,9 +132,13 @@ toolbar.pack(fill='x')
 toolbar = tk.Frame(app, bg='#333333')
 toolbar.pack(side='bottom', fill='x')
 
-bold_icon = PhotoImage(file='font_bold.gif')
-italic_icon = PhotoImage(file='font_italic.gif')
-underline_icon = PhotoImage(file='font_underline.gif')
+bold_image = Image.open("font_bold.png")
+italic_image = Image.open("font_italic.png")
+underline_image = Image.open("font_underline.png")
+
+bold_icon = ImageTk.PhotoImage(bold_image)
+italic_icon = ImageTk.PhotoImage(italic_image)
+underline_icon = ImageTk.PhotoImage(underline_image)
 
 bold_btn = tk.Button(toolbar, image=bold_icon, command=lambda: apply_tag('bold'))
 bold_btn.pack(side='left', padx=2, pady=2)
