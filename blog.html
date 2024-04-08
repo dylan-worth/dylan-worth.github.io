@@ -4,68 +4,84 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/home.css">
-    <link rel="stylesheet" href="./css/photos.css">
     <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
-    <title>blog</title>
+    <link rel="stylesheet" href="css/blog.css">
+    <link rel="stylesheet" href="css/photo-album.css">
+    <title>Blog Hub - Dylan Worth</title>
 </head>
 <body>
-    <div>
-         <div class="profile">
-             <img class="background-pfp" src="images/profile/video-background.gif" height="400" width="1000">
-             <br>
-             <img src="images/profile/pfp.jpg" class="pfp" height="200" width="200" style=" border-radius: 50%; border: solid 3px black;">
-                <br>
-             <b class="name">Dylan Worth</b>
-             <br>
-             <br>
-             <hr style="width:70%;">
-             <br>
-             <br>
-            <ul class="profile-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a style="color: darkcyan; text-decoration: underline;" href="blog.html">Blog</a></li>
-                <li><a href="dreams.html">Dreams</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="photos.html">Photos</a></li>
-                <li><a href="videos.html">Videos</a></li>
-            </ul>
-         
-    </div>
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="./index.html" class="navbar-brand">Home</a>
+            <div class="navbar-links">
+                <a href="blog.html">Blogs</a>
+                <a href="dreams.html">Dreams</a>
+                <a href="about.html">About</a>
+                <a href="photos.html">Photos</a>
+                <a href="videos.html">Videos</a>
+            </div>
+        </div>
+    </nav>
 
-    <div class="post-section">
-        <img src="images/icons/nextcloud.png" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        March 23, 2024,
-        <br>
-        <br>
-        <p> In this blog post, We use apps to store our data and share memories with friends. However, these large companies take advantage and sell your personal data. It may not seem like a big deal 
-            but we should choose who we share our data with. If you are looking for a drive alternative to Google, Microsoft or other big companies. You can read more 
-            clicking <a style="color: darkcyan;" href="blogs/2024/nextcloud.html">here</a>. 
-        </p>
-        </div>
-    <div class="post-section">
-        <img src="images/blogs/7-30-2023/cows.png" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        July 30, 2023,
-        <br>
-        <br>
-        <p> In this blog post, I talk about the horrors of the Food Industry and other things to watch out for. I sound like a loony toon obviously, but stats do not lie and 
-            it is better to be safe than sorry! You can read more 
-            clicking <a style="color: darkcyan;" href="blogs/2023/7.30.23.html">here</a>. 
-        </p>
-        </div>
-    <div class="post-section">
-        <img src="images/blogs/12-02-2021/ezra.jpg" height="100" width="100" style="margin-left: 40%; border-radius: 50%; border: solid 3px black;">
-        <br>
-        December 2nd, 2021,
-        <br>
-        <br>
-        <p> In this blog post, I just talk about my future goals with the website and share a brief post about my two year old son and his birthday party. You can read more 
-            clicking <a style="color: darkcyan;" href="blogs/2021/December/12-02-2021.html">here</a>. 
-        </p>
-    </div>
+    <header class="profile-header">
+        <img class="background-pfp" src="images/profile/video-background.gif" alt="Profile Background">
+        <img src="images/profile/pfp.jpg" class="pfp" alt="Profile Picture">
+        <h1 class="name">Dylan Worth</h1>
+    </header>
+
+    <main class="content">
+        <!-- Featured Blog Post -->
+        <section class="featured-post">
+            <h2>Featured Blog</h2>
+            <div class="post-section">
+                <div class="post-header">
+                    <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                    <div class="post-info">
+                        <span class="post-date">April 8th, 2024</span>
+                        <span class="post-type">Blog</span>
+                    </div>
+                </div>
+                <p>
+                    As Amazon deploys robots in its warehouses and Walmart tests the skies with drone deliveries, we find ourselves at a crossroads: embracing the efficiency and innovation of automation while wrestling with the implications for human labor. Is a future dominated by machines and AI what we truly desire, or should we strive for a balance where technology enhances rather than replaces the human touch?
+                    <a style="color:darkcyan" href="./forum_posts/robotics.html"><br><br>Is this the future we want? Read more..</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Regular Blog Posts -->
+        <section class="regular-posts">
+            <h2>Latest Blogs</h2>
+            <!-- Example Post 1 -->
+            <div class="post-section">
+                <div class="post-header">
+                    <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                    <div class="post-info">
+                        <span class="post-date">April 8th, 2024</span>
+                        <span class="post-type">Blog</span>
+                    </div>
+                </div>
+                <p>
+                    As Amazon deploys robots in its warehouses and Walmart tests the skies with drone deliveries, we find ourselves at a crossroads: embracing the efficiency and innovation of automation while wrestling with the implications for human labor. Is a future dominated by machines and AI what we truly desire, or should we strive for a balance where technology enhances rather than replaces the human touch?
+                    <a style="color:darkcyan" href="./forum_posts/robotics.html"><br><br>Is this the future we want? Read more..</a>
+                </p>
+            </div>
+
+            <!-- Example Post 2 -->
+            <div class="post-section">
+                <div class="post-header">
+                    <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                    <div class="post-info">
+                        <span class="post-date">March 23rd, 2024</span>
+                        <span class="post-type">Blog</span>
+                    </div>
+                </div>
+                <p>
+                    We use apps to store our data and share memories with friends. However, these large companies take advantage and sell your personal data. It may not seem like a big deal but we should choose who we share our data with. If you are looking for a drive alternative to Google, Microsoft, or other big companies, learn more about Nextcloud <a style="color:darkcyan" href="./forum_posts/nextcloud.html">here</a>.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="./js/photoalbum.js"></script>
 </body>
 </html>
-

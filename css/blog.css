@@ -1,0 +1,137 @@
+/* General Resets */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #333;
+    color: #fff;
+    overflow: hidden;
+}
+
+.navbar-inner {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.navbar-brand, .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-links a:hover {
+    background-color: #555;
+}
+
+/* Profile Header */
+.profile-header {
+    text-align: center;
+    background: #333;
+    color: #fff;
+    padding: 2rem 1rem;
+    position: relative;
+}
+
+.background-pfp {
+    filter: blur(8px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.pfp {
+    border-radius: 50%;
+    border: 5px solid #fff;
+    margin-bottom: 1rem;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    position: relative;
+    top: -100px; /* Half above the profile background */
+    margin-bottom: -100px; /* Adjust the space after the profile image */
+}
+
+
+
+.name {
+    margin: 0.5rem 0;
+}
+
+/* Blog Posts */
+.content {
+    padding: 20px;
+}
+
+.post-section {
+    background-color: #fff;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.post-avatar {
+    border-radius: 50%;
+    margin-right: 1rem;
+    width: 50px;
+    height: 50px;
+    border: 2px solid #E4E6EB;
+}
+
+.post-info {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.post-info span + span {
+    margin-left: 10px;
+}
+
+a {
+    color: darkcyan;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Media Queries for Responsive Design */
+@media (min-width: 768px) {
+    .navbar-inner {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .content {
+        max-width: 1200px;
+        margin: auto;
+    }
+}
