@@ -1,0 +1,152 @@
+/* about.css */
+
+/* Ensure the body takes the full viewport height and set the base styles */
+/* Importing a custom font, assuming 'Raleway' is close to what was used in the design */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+body {
+    font-family: 'Raleway', sans-serif;
+    line-height: 1.6;
+    background-color: seashell;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+}
+
+
+
+/* Styles for the navigation bar */
+/* Sticky Navbar Styles */
+.navbar {
+    background-color: #333;
+    color: #fff;
+    overflow: hidden;
+    position: fixed; /* Keeps navbar at the top */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensures navbar stays above other content */
+    box-shadow: 0 2px 5px rgba(0,0,0,.3); /* Adds shadow for depth */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+.navbar-inner {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    max-width: 1200px;
+    margin: auto; /* Centers navbar contents */
+}
+
+.navbar-brand, .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-links a:hover {
+    background-color: #555;
+}
+.navbar.solid {
+    background-color: #222; /* Slightly darker to indicate active state */
+}
+
+.info-card {
+    width: 100%;
+    max-width: 350px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background: #1d1d1d;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    margin-bottom: 10px;
+    margin-top: 10px;;
+}
+
+.card-header h2 {
+    margin: 10px 0;
+}
+
+.card-header p {
+    font-size: 0.95em;
+    margin-bottom: 20px;
+}
+
+.card-body {
+    padding: 20px;
+    background: #363535;
+}
+
+.card-body h3 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.skills-list {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.skills-list li {
+    text-indent: -20px;
+    margin-bottom: 5px;
+}
+
+.card-footer {
+    background: #f7f7f7;
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.card-footer a {
+    color: #333;
+    text-decoration: none;
+    font-size: 0.95em;
+}
+
+.card-footer a:hover {
+    text-decoration: underline;
+}
+
+.trail {
+    position: absolute;
+    height: 5px; /* trail dot size */
+    width: 5px; /* trail dot size */
+    border-radius: 50%;
+    background: #333; /* trail dot color */
+    pointer-events: none; /* Ensures the trail doesn’t interfere with other mouse events */
+    opacity: 1;
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Trail fades out */
+.fade-out {
+    opacity: 0;
+    transform: scale(1.5); /* Enlarges the trail dot slightly as it fades */
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .info-card {
+        width: 90%;
+        max-width: none;
+    }
+}
+
+

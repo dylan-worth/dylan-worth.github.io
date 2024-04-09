@@ -1,59 +1,219 @@
-.photo-section{
-
-    margin-left: 20%;
-    width: 56%;
-    background-color: rgb(43, 40, 40);
-    border-radius: 25px;
-    padding: 2%;
-    margin-top: 4%;
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
 }
 
-.album-cover{
-    height: 250px;
-    width: 250px;
-    border: black solid 4px;
-    border-radius: 25px;
-    transition:transform 0.25s ease; 
-    
+.profile-header {
+    text-align: center;
+    background: #333;
+    color: #fff;
+    padding: 4rem 1rem 2rem; /* Increased top padding */
+    margin-top: 60px; /* Push down to compensate for the navbar */
+    position: relative;
 }
-.album-cover:hover {
-    -webkit-transform:scale(1.5); /* or some other value */
-        transform:scale(1.5);
+
+
+.background-pfp {
+    filter: blur(8px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pfp {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    margin: auto;
+    display: block; /* Centers the profile picture */
+}
+/* Styles for the navigation bar */
+/* Sticky Navbar Styles */
+.navbar {
+    background-color: #333;
+    color: #fff;
+    overflow: hidden;
+    position: fixed; /* Keeps navbar at the top */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensures navbar stays above other content */
+    box-shadow: 0 2px 5px rgba(0,0,0,.3); /* Adds shadow for depth */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+.navbar-inner {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    max-width: 1200px;
+    margin: auto; /* Centers navbar contents */
+}
+
+.navbar-brand, .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-links a:hover {
+    background-color: #555;
+}
+.navbar.solid {
+    background-color: #222; /* Slightly darker to indicate active state */
+}
+
+.name {
+    display: block;
+    font-weight: bold;
+}
+
+.divider {
+    width: 70%;
+    margin: 20px auto;
+}
+
+.profile-links {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+.profile-links li {
+    display: inline;
+    margin: 0 10px;
+}
+
+.profile-links a {
+    color: black;
+    text-decoration: none;
+}
+
+.profile-links a:hover, .profile-links a:focus {
+    color: darkcyan;
+    text-decoration: underline;
+}
+
+.photo-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Create a responsive grid */
+    gap: 20px; /* Space between albums */
+    padding: 20px;
+}
+
+.album {
+    position: relative;
+    overflow: hidden; /* Ensures nothing spills out of the album div */
+}
+
+.album-cover {
+    width: 100%;
+    height: auto;
+    border-radius: 8px; /* Optional: rounds the corners of the album cover */
+    transition: transform 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.album-info {
+    text-align: center; /* Centers the album title and description */
+    padding: 10px;
+}
+
+.album:hover .album-cover {
+    transform: scale(1.05); /* Zoom effect on hover */
+}
+
+.lightbox {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+.lightbox-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+}
+
+.close {
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+@media only screen and (max-width: 768px) {
+    .profile-header {
+        padding: 2rem 1rem; /* Reduced padding */
     }
-.album-cover:hover{
-    opacity: .8;
-}
 
-.evelyn-8-1-2023 {
-    transition:transform 0.25s ease; 
-    border: seashell 3px solid; 
-    border-radius: 2%; 
-    margin-top: 2%;
-    
-}
-.evelyn-8-1-2023:hover {
--webkit-transform:scale(1.5); /* or some other value */
-    transform:scale(1.5);
-}
-
-
-
-
-
-@media screen and (max-width: 500px){
-    .photo-section{
-        width: 80%;
-        margin-left: 0px;
-        padding-left: 14%;
-        padding-right: 0px;
-    
+    .pfp {
+        width: 120px; /* Smaller profile picture */
+        height: 120px;
     }
-    .evelyn-8-1-2023 {
-        height: 300px;
-        width: 350px;
+
+    .name {
+        font-size: 1.5rem; /* Smaller name text */
     }
-    .evelyn-8-1-2023:hover {
-        transform: none;
-        }
-    
+
+    .navbar-inner {
+        flex-direction: column; /* Stack nav items vertically */
+    }
+
+    .profile-links li {
+        display: block; /* Each link on its own line */
+        margin: 5px 0; /* Reduced margin */
+    }
+
+    .album-cover {
+        border-radius: 4px; /* Slightly less rounded corners */
+    }
+
+    .photo-section {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller min width for albums */
+    }
+
+    .lightbox-content {
+        width: 90%; /* Larger lightbox content for smaller screens */
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .divider {
+        width: 80%; /* Larger width percentage for the divider on very small screens */
+    }
+
+    .album-info h3, .album-info p {
+        font-size: 0.8rem; /* Smaller font size for album info */
+    }
+
+    .close {
+        font-size: 30px; /* Smaller close button */
+        top: 15px;
+        right: 15px;
+    }
 }

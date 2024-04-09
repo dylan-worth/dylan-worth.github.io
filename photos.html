@@ -4,48 +4,84 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/home.css">
-    <link rel="stylesheet" href="./css/photos.css">
     <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
+    <link rel="stylesheet" href="css/photos.css">
     <title>Photos</title>
 </head>
 <body>
-    <div>
-         <div class="profile">
-             <img class="background-pfp" src="images/profile/video-background.gif" height="400" width="1000">
-             <br>
-             <img src="images/profile/pfp.jpg" class="pfp" height="200" width="200" style=" border-radius: 50%; border: solid 3px black;">
-                <br>
-             <b class="name">Dylan Worth</b>
-             <br>
-             <br>
-             <hr style="width:70%;">
-             <br>
-             <br>
-            <ul class="profile-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="dreams.html">Dreams</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a style="color: darkcyan; text-decoration: underline;" href="photos.html">Photos</a></li>
-                <li><a href="videos.html">Videos</a></li>
-            </ul>
-         
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="./index.html" class="navbar-brand">Home</a>
+            <div class="navbar-links">
+                <a href="blog.html">Blogs</a>
+                <a href="about.html">About</a>
+                <a href="photos.html">Photos</a>
+                <a href="videos.html">Videos</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        window.onscroll = function() {makeNavbarSolid()};
+        
+        function makeNavbarSolid() {
+            const navbar = document.querySelector('.navbar');
+            if (window.pageYOffset > 50) { // Adjust the 50px to when you want the navbar to change style
+                navbar.classList.add('solid');
+            } else {
+                navbar.classList.remove('solid');
+            }
+        }
+        </script>
+        
+
+    <header class="profile-header">
+        <img class="background-pfp" src="images/profile/video-background.gif" alt="Profile Background">
+        <img src="images/profile/pfp.jpg" class="pfp" alt="Profile Picture">
+        <h1 class="name">Dylan Worth</h1>
+    </header>
+
+    <div class="photo-section">
+        <div class="album">
+            <a href="photo-pages/2021/ezras-birthday.html">
+                <img src="images/photos/december-2021/ezra-birthday-1.jpg" alt="Ezra's Birthday" class="album-cover">
+                <div class="album-info">
+                    <h3>Ezra's Birthday 2021</h3>
+                    <p>24 Photos</p>
+                </div>
+            </a>
+        </div>
+        <div class="album">
+            <a href="photo-pages/2023/2023-busch-gardens-bday-bash.html">
+                <img src="images/photos/ezra-bushgardens-2023/Ezra-bushgarden-7.jpg" alt="2023 Busch Gardens Bday Bash" class="album-cover">
+                <div class="album-info">
+                    <h3>2023 Busch Gardens Bday Bash</h3>
+                    <p>18 Photos</p>
+                </div>
+            </a>
+        </div>
+        <!-- Add more albums as needed -->
     </div>
-      <div class="photo-section">
-            <a href="photo-pages/2021/ezras-birthday.html"><img class="album-cover" src="images/photos/december-2021/ezra-birthday-1.jpg"></a>
-            <a href="photo-pages/2023/2023-busch-gardens-bday-bash.html"><img class="album-cover" src="images/photos/ezra-bushgardens-2023/Ezra-bushgarden-7.jpg"></a>
-            <br>
+    
+    <!-- Lightbox container -->
+<div id="lightbox" class="lightbox">
+    <span class="close" onclick="closeLightbox()">&times;</span>
+    <img class="lightbox-content" id="lightbox-img">
+</div>
+<script>
+    // Open the lightbox
+document.querySelectorAll('.album-cover').forEach(item => {
+    item.onclick = function() {
+        document.getElementById('lightbox').style.display = "block";
+        document.getElementById('lightbox-img').src = this.src; // Set src to clicked image
+    }
+});
 
-            <br>
-            <br>
-            
-            <br>
-            
-      </div>
+// Close the lightbox
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = "none";
+}
 
-      
+</script>
 </body>
 </html>
-
