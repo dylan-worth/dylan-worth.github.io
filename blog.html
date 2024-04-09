@@ -23,6 +23,20 @@
         </div>
     </nav>
 
+    <script>
+        window.onscroll = function() {makeNavbarSolid()};
+        
+        function makeNavbarSolid() {
+            const navbar = document.querySelector('.navbar');
+            if (window.pageYOffset > 50) { // Adjust the 50px to when you want the navbar to change style
+                navbar.classList.add('solid');
+            } else {
+                navbar.classList.remove('solid');
+            }
+        }
+        </script>
+        
+
     <header class="profile-header">
         <img class="background-pfp" src="images/profile/video-background.gif" alt="Profile Background">
         <img src="images/profile/pfp.jpg" class="pfp" alt="Profile Picture">
@@ -79,6 +93,8 @@
                     We use apps to store our data and share memories with friends. However, these large companies take advantage and sell your personal data. It may not seem like a big deal but we should choose who we share our data with. If you are looking for a drive alternative to Google, Microsoft, or other big companies, learn more about Nextcloud <a style="color:darkcyan" href="./forum_posts/nextcloud.html">here</a>.
                 </p>
             </div>
+
+            
         </section>
     </main>
 
