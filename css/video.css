@@ -1,168 +1,136 @@
-*{
-    margin: 0px;
-    padding: 0px;
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #181818; /* Dark background for the entire page */
+    color: #FFFFFF; /* Light text color */
 }
-body{
-    background-color: #121212;
-    color: seashell;
-}
-.video-section {
 
-
-    width: 100%;
-    background-color: rgb(43, 40, 40);
-    border-radius: 25px;
-    margin-top: 4%;
-}
-.video-flex-1 {
-    
-    display: inline-flex;
-    margin-bottom: 2%;
-}
-.video-flex-2 {
-    
-    display: inline-flex;
-    margin-bottom: 2%;
-    
-}
-.video-flex-3 {
-    
-    display: inline-flex;
-    margin-bottom: 2%;
-    
-}
-.videos-first {
-    margin-left: 1%;
-    margin-right: 1%;
-    font-size: 12px;
-}
-.videos1{
-
-    margin-left: 1%;
-    margin-right: 1%;
-    font-size: 12px;;
-}
-.videos2{
-
-    margin-right: 1%;
-    margin-left: 1%;
-    font-size: 12px;;
-}
-.videos3{
-
-    margin-right: 1%;
-    margin-left: 1%;
-    font-size: 12px;;
-}
-.video-post-section {
-    margin-left: 20%;
-    width: 57%;
-    background-color: rgb(43, 40, 40);
-    border-radius: 25px;
-    padding: 0px;
-    margin-top: 4%;
-
-}
-.video-cats{
-    transition:transform 0.25s ease; 
-    height: 100px;
-    width: 170px;
-    border: 2px solid seashell;
-    border-radius: 25px;
-}
-.featured{
-    transition:transform 0.25s ease; 
-    height: 200px;
-    width: 400px;
-    border: 2px solid seashell;
-    border-radius: 25px;
-    margin-left: 2%;
-    margin-bottom: 2%;
-}
-.featured-description{
+.top-header {
+    background-color: #202020; /* Darker shade for the header */
+    color: #FFFFFF;
+    display: flex;
     justify-content: center;
-    left: 50%;
-    align-items: top;
+    align-items: center;
+    padding: 10px 0;
 }
-.video-viewmore {
-    float: right;
-    margin-top: 1%;
-    padding-right: 4%;
+
+.logo img {
+    height: 40px;
+    width: 40px;
+    margin-right: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+}
+
+.top-nav a {
+    color: #FFFFFF;
+    text-decoration: none;
+    margin: 0 10px;
+}
+    .search-container {
+        display: flex;
+        justify-content: center; /* Center the search bar */
+        align-items: center; /* Vertically align items */
+        margin-top: 20px;
+    }
+
+    /* The black back part of the input */
+
+
+/* The white actual input */
+ 
+.search-box input[type="text"] {
+    flex-grow: 2;
+    margin-left: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    padding-right: 20%;
+    border: 1px solid rgb(53, 49, 49); /* Add a border that matches the design */
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    height: 20px; /* Define a fixed height for the input */
+    background-color: transparent; /* Make the background transparent */
     color: seashell;
+}
+.search-icon {
+    margin-left: 2%;
+    height: 20px;
+    width: 20px;
+    background-image: url('../images/icons/magnifying-glass.png');
+}
+.search-box input[type="text"]:focus {
+    border-color: #aaa;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Optional: add a subtle shadow for focus */
+}
+.search-box .search-icon:hover {
+    background-color: #e8e8e8; /* Slightly darker background on hover */
+}
+
+.side-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    background: #202020; /* Dark background for side nav */
+    color: white;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.side-nav a {
+    display: block;
+    padding: 0.5rem 0;
+    color: #FFFFFF;
     text-decoration: none;
 }
-.video-viewmore:hover{
-    color: darkcyan;
-}
-.video-hr {
-    color: seashell;
-    margin-bottom: 2%;
-    opacity: 20%;
-}
-.video-cats:hover{
-    -webkit-transform:scale(1.25); /* or some other value */
-    transform:scale(1.25);
-    border: darkcyan 2px solid;
-}
-.featured:hover{
-    -webkit-transform:scale(1.25); /* or some other value */
-    transform:scale(1.25);
-}
-.videos{
-    height: 100px;
-    width: 350px;;
+
+.side-nav a:hover {
+    background-color: #333333; /* Slightly lighter for hover effect */
 }
 
-@media screen and (max-width: 500px){
-    .video-section{
-        width: 80%;
-        margin-left: 0px;
-        padding-right: 0px;
-    
-    }
 
-@media screen and (max-width: 1000px){ 
-
-    .video-cats {
-        height: 300px;
-        width: 350px;
-        margin-right: 2%;
-        margin-left: -7%;
-    }
-    .featured {
-        height: 300px;
-        width: 350px;
-        margin-right: 2%;
-        margin-left: -7%;
-        margin-top: 1%;
-       
-    }
-    .video-flex-1 {
-        display: block;
-    }
-    .video-flex-2 {
-        display: block;
-    }
-    .video-flex-3 {
-        display: block;
-    }
-    .videos1 {
-        margin-bottom: 5%;
-    }
-    .videos2 {
-        margin-bottom: 5%;
-    }
-    .videos3 {
-        margin-bottom: 5%;
-    }
-    .video-post-section {
-        width: 80%;
-        margin-left: 10px;
-        margin-right: 20px;
-        padding-left: 14%;
-        padding-right: 0px;
-        
-    }
-
+.video-gallery {
+    margin-left: 200px; /* Give space for the side navigation */
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+    color: #FFFFFF; /* Ensure text within the gallery is visible */
 }
+
+
+
+.video-item {
+    background-color: #333333; /* Each video item has a dark background */
+    border: 1px solid #444; /* Subtle borders for each item */
+    border-radius: 5px; /* Rounded corners for aesthetics */
+    overflow: hidden;
+}
+
+.video-item img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 16 / 9;
+}
+
+.video-info {
+    padding: 10px;
+    text-align: center;
+}
+
+.video-info h3 {
+    margin: 0;
+    color: #FFFFFF; /* Light color text for readability */
+}
+
+.video-info p {
+    font-size: 0.9em;
+    color: #FFFFFF; /* Light color text for readability */
 }
