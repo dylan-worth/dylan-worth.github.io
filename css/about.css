@@ -147,6 +147,51 @@ body {
         width: 90%;
         max-width: none;
     }
+    body {
+        padding: 20px; /* Less padding on smaller screens */
+    }
+    
+    .navbar-inner {
+        flex-wrap: wrap; /* Allow navbar contents to stack on smaller screens */
+    }
+    
+    /* Adjust navbar link spacing on smaller screens */
+    .navbar-brand, .navbar-links a {
+        padding: 0.5rem; /* Smaller padding for navbar items */
+    }
+    
+    /* Center the profile picture and adjust size on smaller screens */
+    .profile-pic {
+        width: 100px; /* Smaller profile picture */
+        height: 100px;
+        margin: 20px auto; /* Add automatic margins to center horizontally */
+    }
+    
+    /* Adjust card padding on smaller screens */
+    .card-header, .card-body, .card-footer {
+        padding: 15px; /* Less padding within cards */
+    }
+    
+    /* Adjust font sizes on smaller screens for readability */
+    .card-header h2, .card-body h3, .card-footer a {
+        font-size: 0.9em; /* Smaller font size */
+    }
+    
 }
 
 
+@media (max-width: 480px) {
+    /* Further adjustments for smaller smartphones */
+    .navbar-brand, .navbar-links a {
+        font-size: 0.8em; /* Even smaller text for navigation */
+    }
+
+    .card-body, .card-footer {
+        padding: 10px; /* Reduce padding even more */
+    }
+
+    /* Make the font size smaller for card contents */
+    .card-body h3, .card-footer a {
+        font-size: 0.8em; /* Reduce font size for smaller devices */
+    }
+}
