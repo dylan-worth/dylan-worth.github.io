@@ -190,6 +190,26 @@ body {
     }
     
 }
+@media only screen and (max-width: 600px) {
+    .navbar-inner {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar-links {
+        margin-top: 1rem;
+    }
+
+    .pfp {
+        width: 150px; /* Smaller profile picture for small screens */
+        height: 150px;
+    }
+
+    .profile-header {
+        padding: 3rem 1rem 2rem; /* Adjusted padding */
+    }
+
+}
 /* You might also want to consider even smaller devices */
 @media (max-width: 480px) {
     .navbar-inner {
