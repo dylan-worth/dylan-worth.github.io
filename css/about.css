@@ -143,13 +143,25 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .info-card {
-        width: 90%;
-        max-width: none;
-    }
     body {
-        padding: 20px; /* Less padding on smaller screens */
+        padding: 10px; /* Reducing body padding can give more space to the card */
     }
+
+    .info-card {
+        width: 100%; /* Take full width of the screen */
+        max-width: 100%; /* Override any max-width set outside of the media query */
+    }
+
+    .card-footer {
+        flex-direction: column; /* Stack the links vertically */
+        align-items: center; /* Center-align the stacked links */
+    }
+
+    .card-footer a {
+        display: block; /* Make each link take up the full width of the footer */
+        margin-bottom: 10px; /* Add some space between the stacked links */
+    }
+
     
     .navbar-inner {
         flex-wrap: wrap; /* Allow navbar contents to stack on smaller screens */
@@ -178,20 +190,23 @@ body {
     }
     
 }
-
-
+/* You might also want to consider even smaller devices */
 @media (max-width: 480px) {
-    /* Further adjustments for smaller smartphones */
-    .navbar-brand, .navbar-links a {
-        font-size: 0.8em; /* Even smaller text for navigation */
+    .navbar-inner {
+        flex-direction: column; /* Stack navbar items vertically on smaller devices */
     }
 
+    .navbar-brand, .navbar-links a {
+        width: 100%; /* Full width navbar items */
+        text-align: center; /* Center-align the text */
+    }
     .card-body, .card-footer {
         padding: 10px; /* Reduce padding even more */
     }
-
     /* Make the font size smaller for card contents */
     .card-body h3, .card-footer a {
         font-size: 0.8em; /* Reduce font size for smaller devices */
     }
 }
+
+
