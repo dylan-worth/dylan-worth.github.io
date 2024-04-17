@@ -77,7 +77,6 @@ def generate_html_forum_post(title, author, date, content):
             <a href="../../index.html" class="navbar-brand">Home</a>
             <div class="navbar-links">
                 <a href="../blog.html">Blogs</a>
-                <a href="../dreams.html">Dreams</a>
                 <a href="../about.html">About</a>
                 <a href="../photos.html">Photos</a>
                 <a href="../videos.html">Videos</a>
