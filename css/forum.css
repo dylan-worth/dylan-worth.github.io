@@ -99,3 +99,12 @@ ul.custom-list li::before {
     max-width: 80%;
     max-height: 80%;
 }
+#bullets {
+    list-style: none;
+    padding-left: 1em;
+  }
+ #bullets li:before {
+    content: "\25B8"; /* Unicode for small triangle */
+    margin-right: 0.5em;
+    color: #666; /* Color of the triangle */
+  }
