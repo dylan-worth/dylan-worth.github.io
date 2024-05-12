@@ -221,6 +221,20 @@ hr {
 .conclusion {
     margin-top: 20px;
 }
+.trigger-link {
+    position: relative;
+    cursor: pointer;
+}
+
+.star {
+    position: absolute;
+    top: 0;
+    color: rgb(255, 255, 132);
+    font-size: 12px;
+    opacity: 0;
+    transition: top 0.5s ease-in, opacity 0.5s ease-in;
+}
+
 
 /* Add responsive design rules as needed */
 @media (max-width: 768px) {

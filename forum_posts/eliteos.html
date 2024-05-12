@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
+    <link rel="stylesheet" href="../css/forum.css">
+    <link rel="stylesheet" href="../css/homepage.css">
+    <title>Installing EliteOS</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="../../index.html" class="navbar-brand">Home</a>
+            <div class="navbar-links">
+                <a href="../blog.html">Blogs</a>
+                <a href="../about.html">About</a>
+                <a href="../photos.html">Photos</a>
+                <a href="../videos.html">Videos</a>
+            </div>
+        </div>
+    </nav>
+    <div class="forum-topic">
+        <header class="topic-header">
+            <h1>Installing EliteOS</h1>
+            <div class="user-info">
+                <img src="../../../images/profile/pfp.jpg" alt="User Avatar" class="user-avatar">
+                <div class="user-details">
+                    <span class="username">Dylan</span>
+                    <span class="post-date">May 11, 2024</span>
+                </div>
+            </div>
+        </header>
+        <div class="topic-content">
+            <h3>Hello, Brave Soul!</h3> <br>
+            <p>So, here we are. And how did we get here? Well, you probably clicked on a link somewhere between a cat video and an argument about pineapple on pizza. Yes, that link brought you here from a social media post daring you to finally toss your old OS out the window. Whether it’s Windblows (more like WindowPain), FruitPle (more style than substance, am I right?), or another Linux flavor that just isn’t cutting the mustard, you’ve come to the right place. <img src="../images/emojis/sh_pepe_laugh.gif" height="25" width="25" alt=""></p> <br>
+            <p>If you're itching for a system that’s so cool it practically needs a leather jacket, welcome to the OS for the true elite. And no, we’re not talking about Gentoo, Haiku, or FreeBSD. Psssh, they’re cool and all, but let’s focus on the real star of the show here.</p><br>
+            <br>
+            <h3>Why Choose Arch Linux?</h3>
+                <br>
+        <ul>
+            <li><strong>Rolling Release 🌟:</strong> It's like a buffet of cutting-edge software. New versions come directly from upstream, ensuring you're always on the latest and greatest. But beware, you might encounter a spicy bug or two!</li> <br>
+            <li><strong>Simplicity 🛠️:</strong> Not “simple” as in easy, but “simple” as in no frills. You get a minimal base system and add only what you need. It's the "do-it-yourself" Linux, turning you into a system-building artist.</li> <br>
+            <li><strong>Arch Wiki 📚:</strong> The Arch Wiki is your spellbook, brimming with incantations for almost any technical wizardry. Even non-Arch users sneak peeks here to solve their problems.</li> <br>
+            <li><strong>Pacman Package Manager <img src="../images/emojis/pacman.gif" height="16" width="20" alt="" style="margin-bottom: -5px;">:</strong> It's not a classic arcade game, but it does gobble up packages like a champ. Fast, efficient, and simple.</li> <br>
+            <li><strong>AUR (Arch User Repository) <img src="../images/emojis/treasure.png" height="25" width="25" alt="">:</strong> Imagine a treasure trove of community-curated software that you can summon with a few commands.</li> <br>
+            <li><strong>Community <img src="../images/emojis/community_shield.png" height="20" width="20" alt="" style="margin-bottom: -5px;">:</strong> The Arch Linux forums and Reddit users have your back. Whether you need advice or moral support, they're ready to help you untangle the most gnarly sysadmin knots.</li> <br>
+            <li><strong>Total Control <img src="../images/emojis/damage_runescape_0.png" height="25" width="25" alt=""style="margin-bottom: -5px;">:</strong> You're the captain, the pilot, the supreme overlord of your system. Everything is tailored to your exact preferences, like crafting your own RuneScape character from scratch.</li> <br>
+        </ul>
+        <p>In summary, Arch Linux is perfect for those who want a no-compromise, deeply personal, and highly educational computing experience.</p> 
+        <br>
+               <h3>Pre-Installation Preparation</h3>  <br>
+                Check out my <a class="trigger-link" href="./flashingusb.html">other guide</a> on how to flash an OS onto a USB drive if you need assistance. In this guide, we're focusing on dispelling the myth that Arch is an arcane, runic mystery that only the super-secret few use to escape the Lizard Overlords.<br>
+                <br>
+                <script src="../js/star.js"></script>
+                <h3>Initial Setup</h3>  <br>
+                To begin, we need a working network connection. When you first boot up Arch Linux, you'll see a terminal interface. Type <code>iwctl</code> to launch the wireless command-line tool.<br>
+                <br>
+                Follow these steps to connect to WiFi:<br>
+                1. <code>station wlan0 scan</code> - Search the ethereal plane for WiFi signals.<br>
+                2. <code>station wlan0 get-networks</code> - List the mystical WiFi energies available.<br>
+                3. <code>station wlan0 connect [Your-WiFi-Network]</code> - Provide the sacred passphrase (your WiFi password) to connect.<br>
+                <br>
+                <h3>Installation Process</h3>  <br>
+                Now that you're online, let's install Arch. There's a built-in `archinstall` script, but let's use the trendier, aptly-named `archinstall`.<br>
+                <br>
+                1. Update the package database: <code>pacman -Syy</code><br>
+                2. Install `archinstall`: <code>pacman -S archinstall</code><br>
+                3. Run the installer by typing: <code>archinstall</code><br>
+                <br>
+                <h3>Configuration Overview</h3>  <br>
+                The installer will guide you through several configuration steps:<br>
+                <br>
+                1. <b>Keyboard Layout</b> - Adjust this if you aren't using an English layout.<br>
+                2. <b>Disk Partitioning</b> - Divide your drives into partitions. You can opt for automatic partitioning to wipe all drives or choose manual if dual-booting (though this guide doesn't cover that). Choose a filesystem, like `ext4`, and decide whether to use a separate folder for home.<br>
+                3. <b>Bootloader</b> - Choose `grub-install` for a reliable bootloader and consider customizing with themes like <a style="color: linear-gradient(0, saddlebrown, sienna, forestgreen, darkgreen);" href="https://github.com/Lxtharia/minegrub-theme">Minegrub</a>.<br>
+                4. <b>Hostname</b> - Set your computer's hostname (default is `archlinux`).<br>
+                5. <b>Root Password</b> - Set a password for the root account.<br>
+                6. <b>User Account</b> - Create a user account, set a username (like "Dylan"), a secure password, and grant superuser privileges if desired.<br>
+                7. <b>Profile</b> - Choose a Desktop Environment (DE) and appropriate graphics drivers (e.g., AMD).  <br>
+                8. <b>Audio</b> - Pick an audio system like `pulseaudio` or `pipewire`.<br>
+                9. <b>Kernel</b> - Leave this on the default unless you're confident about other choices.<br>
+                10. <b>Additional Packages</b> - Install extras like `htop`, `neofetch`, and `firefox`.<br>
+                11. <b>Network</b> - Use `NetworkManager` to manage your connection.<br>
+                12. <b>Repositories</b> - Enable `multilib` for additional repository support.<br>
+                <br>
+               
+                Once everything is configured, click "Install." The installation process will take some time. After it is complete, reboot your computer and login to the account you created earlier.
+                
+                <br>
+                <br>
+
+                <h3>Troubleshooting:</h3>
+                <br>
+                I'll keep beefing up this guide based on the bewildering inquiries you toss my way. So far, the crowd favorites are: 'Why am I still staring at a terminal login?' and 'Has anyone seen my network manager?' Let’s crack those mysteries!
+                <br>
+                Solving Life’s Greater Mysteries (Well, Just Login and Network Issues):
+                <br>
+                <h5>Login GUI Woes:</h5>
+                First, let's tackle the existential question: Did you remember to install a Desktop Environment during your Arch journey? I picked KDE because I like my desktop like I like my cereal—snappy and customizable. Here’s how you can summon KDE from the digital void:
+                <br>
+                <br>
+                <code>sudo pacman -S plasma</code> 
+                <br>
+                <br>
+                Once you've invited KDE over, you’ll need to make sure it knows it’s welcome every time you boot up. Enable the display manager like so:
+                <br>
+                <br>
+                <code>systemctl enable sddm.service</code>
+                <br>
+                <br>
+                <h5>The Elusive Network Manager:</h5>
+                If your Network Manager is playing hide-and-seek, coax it out with this magical incantation:
+                <br>
+                <br>
+                <code>systemctl enable NetworkManager.service</code>
+                <br>
+                <br>
+                Stay tuned, and remember: a well-configured Arch system is like a fine wine—it gets better with age (and a few terminal commands)."
+        </div>
+    </div>
+</body>
+</html>
