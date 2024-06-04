@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const albums = [
+
+  
     {
       name: 'Easter Weekend',
       photos: [
@@ -36,12 +38,44 @@ document.addEventListener('DOMContentLoaded', () => {
         'images/photos/wedding-honeymoon/honeymoon15.jpg',
         'images/photos/wedding-honeymoon/honeymoon16.jpg',
         'images/photos/wedding-honeymoon/honeymoon17.jpg',
-
-        // More photos...
+      ],
+      
+    },
+    {
+      name: 'graduation',
+      photos: [
+        'images/albums/graduation/PXL_20240531_223524369.MP.jpg',
+        'images/albums/graduation/PXL_20240531_230336626.jpg',
+        'images/albums/graduation/PXL_20240531_230917930.MP.jpg',
+        'images/albums/graduation/PXL_20240531_230443230.MP.jpg',
+        'images/albums/graduation/PXL_20240531_232352593.MP.jpg',
       ],
     },
+    {
+      name: 'wife2024bday',
+      photos: [
+        'images/albums/bday/PXL_20240601_171559628.MP.jpg',
+        'images/albums/bday/PXL_20240602_153450756.MP.jpg',
+        'images/albums/bday/PXL_20240601_134951260.MP.jpg',
+        'images/albums/bday/PXL_20240601_164244162.MP.jpg',
+        'images/albums/bday/PXL_20240601_150313004.MP.jpg',
+        'images/albums/bday/PXL_20240601_171557638.MP.jpg',
+        'images/albums/bday/PXL_20240601_165847040.MP.jpg',
+        'images/albums/bday/PXL_20240601_150157793.MP.jpg',
+        'images/albums/bday/PXL_20240601_221129327.MP.jpg',
+        'images/albums/bday/PXL_20240602_153458013.MP.jpg',
+        'images/albums/bday/PXL_20240602_160703133.MP.jpg',
+        'images/albums/bday/PXL_20240602_155441787.MP.jpg',
+        'images/albums/bday/PXL_20240602_184232104.MP.jpg',
+      ],
+    },
+   
+    
     // Add more albums as needed...
   ];
+
+  let currentAlbumIndex = 0;
+  let currentPhotoIndex = 0;
 
   function displayAlbum(albumIndex) {
     const selectedAlbum = albums[albumIndex];
@@ -81,8 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedAlbum = albums[albumIndex];
     fullPhoto.src = selectedAlbum.photos[photoIndex];
 
+    currentAlbumIndex = albumIndex;
+    currentPhotoIndex = photoIndex;
 
-      // Function to show the next photo
+    modal.classList.add('active');
+  }
+
+  // Function to show the next photo
   function showNextPhoto() {
     const selectedAlbum = albums[currentAlbumIndex];
     currentPhotoIndex = (currentPhotoIndex + 1) % selectedAlbum.photos.length;
@@ -95,32 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPhotoIndex = (currentPhotoIndex - 1 + selectedAlbum.photos.length) % selectedAlbum.photos.length;
     showFullPhoto(currentAlbumIndex, currentPhotoIndex);
   }
-    
-    // Update arrows for navigation
-    document.getElementById('prevArrow').onclick = () => {
-      const newIndex = (photoIndex - 1 + selectedAlbum.photos.length) % selectedAlbum.photos.length;
-      showFullPhoto(albumIndex, newIndex);
-    };
-    document.getElementById('nextArrow').onclick = () => {
-      const newIndex = (photoIndex + 1) % selectedAlbum.photos.length;
-      showFullPhoto(albumIndex, newIndex);
-    };
 
-      // Listen for keydown events for left and right arrow keys
-  document.addEventListener('keydown', (event) => {
-    if (event.key === "ArrowLeft") {
-      showPreviousPhoto();
-    } else if (event.key === "ArrowRight") {
-      showNextPhoto();
-    }
-  });
-
-    modal.classList.add('active');
-  }
-
-  
-
-    // Close modal when the close button is clicked
+  // Close modal when the close button is clicked
   document.getElementById('closeModal').onclick = () => {
     document.getElementById('photoModal').classList.remove('active');
   };
@@ -142,6 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Navigate photos with left and right arrow keys
+  document.addEventListener('keydown', (event) => {
+    if (event.key === "ArrowLeft") {
+      showPreviousPhoto();
+    } else if (event.key === "ArrowRight") {
+      showNextPhoto();
+    }
+  });
+
+  // Zoom controls
   document.getElementById('zoomIn').onclick = () => {
     document.getElementById('fullPhoto').classList.add('zoomed-in');
   };
@@ -150,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fullPhoto').classList.remove('zoomed-in');
   };
 
-  
   // Display all albums
   albums.forEach((_, index) => {
     displayAlbum(index);
