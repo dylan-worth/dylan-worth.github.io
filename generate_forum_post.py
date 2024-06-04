@@ -30,13 +30,13 @@ def save_forum_post():
     content = text_editor.get("1.0", tk.END)
     title = title_entry.get()
     author = author_entry.get()
-    # Fetch the current local date and time
     current_time = datetime.now()
-    # Format the date and time as you like, here it's "Month Day, Year"
     date = current_time.strftime("%B %d, %Y")
+    description = description_entry.get()
+    file_name = file_name_entry.get()
     
-    if not title or not author:
-        messagebox.showerror("Error", "Title and author are required.")
+    if not title or not author or not description or not file_name:
+        messagebox.showerror("Error", "Title, author, description, and file name are required.")
         return
     
     filename = filedialog.asksaveasfilename(defaultextension=".html",
@@ -50,8 +50,58 @@ def save_forum_post():
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(html_content)
         messagebox.showinfo("Success", "The forum post has been saved successfully!")
+        # Update the blog HTML after saving the forum post
+        update_blog_html(title, author, date, content, description, file_name)
     except Exception as e:
         messagebox.showerror("Error", "Failed to save the file.\n" + str(e))
+def update_blog_html(title, author, date, content, description, file_name):
+    # Path to your blog HTML file
+    blog_html_path = './blog.html'
+    
+    # Read the existing HTML content
+    try:
+        with open(blog_html_path, 'r', encoding='utf-8') as f:
+            blog_html = f.read()
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Blog HTML file not found.")
+        return
+    
+    # Create the new featured post HTML snippet
+    new_featured_post = f"""
+    <section class="featured-post">
+        <h2>Featured Blog</h2>
+        <div class="post-section">
+            <div class="post-header">
+                <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                <div class="post-info">
+                    <span class="post-date">{date}</span>
+                    <span class="post-type">Blog</span>
+                </div>
+            </div>
+            <h3>{title}</h3>
+            <p>{description}</p>
+            <a href="./forum_posts/{file_name}.html">Read more</a>
+        </div>
+    </section>
+    """
+
+    # Find and replace the old featured post with the new one
+    start_index = blog_html.find('<section class="featured-post">')
+    end_index = blog_html.find('</section>', start_index) + 10
+
+    old_featured_post = blog_html[start_index:end_index]
+    new_regular_post = old_featured_post.replace('Featured Blog', 'Latest Blog').replace('featured-post', 'post-section')
+    
+    blog_html = blog_html.replace(old_featured_post, new_featured_post + new_regular_post)
+
+    # Write the updated HTML back to the file
+    try:
+        with open(blog_html_path, 'w', encoding='utf-8') as f:
+            f.write(blog_html)
+    except Exception as e:
+        messagebox.showerror("Error", "Failed to update the blog HTML file.\n" + str(e))
+        return
+
 
 def generate_html_forum_post(title, author, date, content):
     """
@@ -120,6 +170,17 @@ author_label = ttk.Label(app, text="Author:")
 author_label.pack(fill='x', padx=5, pady=5)
 author_entry = ttk.Entry(app)
 author_entry.pack(fill='x', padx=5, pady=5)
+
+description_label = ttk.Label(app, text="Description:")
+description_label.pack(fill='x', padx=5, pady=5)
+description_entry = ttk.Entry(app)
+description_entry.pack(fill='x', padx=5, pady=5)
+
+file_name_label = ttk.Label(app, text="File Name:")
+file_name_label.pack(fill='x', padx=5, pady=5)
+file_name_entry = ttk.Entry(app)
+file_name_entry.pack(fill='x', padx=5, pady=5)
+
 
 
 text_editor = tk.Text(app, wrap="word", font=("Arial", 12), undo=True, bg='#404040', fg='#C7C7C7', insertbackground='white')  # Dark theme colors

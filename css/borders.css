@@ -1,0 +1,8 @@
+.sunset-border {
+    width: 90%; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+    border: 1px solid transparent;
+    border-image: linear-gradient(orange, gold, yellow, red) 1;
+    padding: 5px; /* Optional: Adjust as needed for inner padding */
+    border-radius: 10px; /* Optional: For rounded corners */
+}
