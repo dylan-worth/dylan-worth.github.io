@@ -69,6 +69,21 @@ document.addEventListener('DOMContentLoaded', () => {
         'images/albums/bday/PXL_20240602_184232104.MP.jpg',
       ],
     },
+    {
+      name: 'mold-remediation1',
+      photos: [
+        'images/mold/mold1.jpg',
+        'images/mold/mold2.jpg',
+        'images/mold/mold3.jpg',
+        'images/mold/mold4.jpg',
+        'images/mold/mold5.jpg',
+        'images/mold/mold6.jpg',
+        'images/mold/mold7.jpg',
+        'images/mold/mold8.jpg',
+        'images/mold/mold9.jpg',
+        'images/mold/mold10.jpg',
+      ],
+    },
    
     
     // Add more albums as needed...

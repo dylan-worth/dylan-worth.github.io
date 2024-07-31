@@ -7,6 +7,9 @@
     <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
     <link rel="stylesheet" href="css/homepage.css">
     <link rel="stylesheet" href="css/photo-album.css">
+    <link rel="stylesheet" href="css/tooltip.css"> <!-- This was added so I could add the bit about the Mold Assessor.-->
+    <link rel="stylesheet" href="css/slideshows.css">
+    <script src="./js/slideshow.js"></script>
     <script src="./js/photoalbum.js"></script>
     <title>Home</title>
 </head>
@@ -25,12 +28,82 @@
 
     <main class="content">
 
-
         <div class="profile-header">
             <img class="background-pfp" src="images/profile/video-background.gif" alt="Profile Background">
             <img src="images/profile/pfp.jpg" class="pfp" alt="Profile">
             <h1 class="name">Dylan Worth</h1>
         </div>
+        
+        <div class="post-section">
+            <div class="post-header">
+                <img src="images/profile/pfp.jpg" alt="Profile" class="post-avatar">
+                <div class="post-info">
+                    <span class="post-date">July 30, 2024</span>
+                    <span class="post-type">Post</span>
+                </div>
+            </div>
+            <p>As many of you may know, I am a mold technician for the company <a href="https://imold.us/">iMold</a>, working my way to becoming a <span class="tooltip">Mold Assessor<span class="tooltiptext">A Mold Assessor is a licensed and trained professional who identifies the source and severity of a mold problem in a building.</span></span>.
+                <br><br> Many people believe mold remediation is a quick cut out and just a sweep up and everything is fine, but that is far from the reality. In mold remediation, either after the demolition or if there was a humidity-driven issue that caused surface growth, we do something called a 'six-sided' cleaning.
+                Think of a dresser: we are wiping all four sides, the bottom, the top, and inside. That is six-sided. Now, the time that a six-sided clean takes can vary depending on the amount of content and debris there is. For example, content that has hardly any debris on it can be quickly vacuumed and wiped, and the item can be put away. As for something that has a profuse amount of dust, it may take much longer. 
+                In a recent job that was passed, I finished cleaning four rooms in one day, and the office had some content, but that was the keyword - some. This house I am currently working on has well over a thousand objects, which took me three days to clean in the master bedroom. I am being transparent so people understand the process it takes to be thorough. You could potentially pass by quickly wiping the outside of items, even if there was no seal, but that means that you left undisturbed growth to reaffect the air again when the customer uses it again. 
+                So let me walk you through the process of the job through a slideshow.
+                <br><br> Okay, now that we got some of the jargon out of the way, let's focus on the process. According to the IICRC, "A project might have unique circumstances that may infrequently allow for a deviation from the standard," which is especially true for this job. So let's explain: the norm is to work your way from top to bottom as dust falls, but with the amount of content, there was no way to safely achieve this as there was no place to put this content. So I worked from the back to the front, top to bottom, while moving sections. This created the need for more time. 
+                I also had obstacles such as bins that were not sealed, which had tons of small objects that needed to be cleaned thoroughly. There were these little blue caps where I needed to lay them all on a microfiber cloth and spray them down with an <a href="https://www.fiberlock.com/product/shockwave/">antimicrobial</a>, then use another cloth to dry them and put them back into the bin. Each item, from medicine to cords, papers, and more, had cat hair caked on, including caked-in dust. I am posting this because this is some of the most tedious work in the field as the homeowners are still living in the home, creating more dust and cat hair. That is fine because the game was to eliminate the past dust that could have the mycotoxin-producing mold on it, not potential outdoor growth. 
+                Before I share these photos, this is strictly for educational purposes of the job, and hopefully, my bosses see it for the reason things take time. Some people go through depression, some go through injuries, and others simply have a hard time keeping up with things, and that isn't anything to joke about. We are here to make their home safe again, and that is all that matters.
+            <br>
+            <br>
+            </p>
+
+            <div class="slideshow-container">
+                <div class="slide fade">
+                    <img src="images/mold/mold1.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold10.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold4.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold5.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold6.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold7.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold8.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold3.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold2.jpg" class="slide-image">
+                </div>
+                <div class="slide fade">
+                    <img src="images/mold/mold9.jpg" class="slide-image">
+                </div>
+                
+                <!-- Add more slides as needed -->
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                <button class="play-button" onclick="playSlides()">&#9658;</button>
+            </div>
+        </div>
+        
+        <!-- Modal for viewing full photo -->
+        <div class="modal" id="photoModal">
+            <span class="close" id="closeModal">&times;</span>
+            <span class="arrow left" id="prevArrow">&#10094;</span>
+            <span class="arrow right" id="nextArrow">&#10095;</span>
+            <img class="full-photo" id="fullPhoto" src="" alt="">
+            <button class="zoom-control" id="zoomIn">+</button>
+            <button class="zoom-control" id="zoomOut">-</button>
+        </div>
+        
+    
 
         <div class="post-section">
             <div class="post-header">
