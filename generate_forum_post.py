@@ -129,7 +129,7 @@ def generate_html_forum_post(title, author, date, content):
                 <a href="../blog.html">Blogs</a>
                 <a href="../about.html">About</a>
                 <a href="../photos.html">Photos</a>
-                <a href="../videos.html">Videos</a>
+                <a href=".https://odysee.com/@DylanDoesStuff:f">Videos</a>
             </div>
         </div>
     </nav>
