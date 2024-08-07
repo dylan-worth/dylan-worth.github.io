@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, font, colorchooser
 import emoji
 
 # Directory where images are stored
@@ -47,33 +47,64 @@ class PostApp:
         self.root = root
         self.root.title("Post Creator")
 
-        # Apply Dracula theme
+        # Create main frame first
+        self.main_frame = ttk.Frame(root)
+        self.main_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+        # Apply Dracula theme after creating UI components
         self.apply_dracula_theme()
 
-        self.date_label = ttk.Label(root, text="Date:")
-        self.date_label.grid(row=0, column=0, padx=5, pady=5)
-        self.date_entry = ttk.Entry(root)
-        self.date_entry.grid(row=0, column=1, padx=5, pady=5)
+        # Date input
+        self.date_label = ttk.Label(self.main_frame, text="Date:")
+        self.date_label.pack(anchor='w', padx=5, pady=5)
+        self.date_entry = ttk.Entry(self.main_frame)
+        self.date_entry.pack(fill=tk.X, padx=5, pady=5)
         self.date_entry.insert(0, datetime.now().strftime("%B %d, %Y"))
 
-        self.content_label = ttk.Label(root, text="Content:")
-        self.content_label.grid(row=1, column=0, padx=5, pady=5)
-        self.content_entry = tk.Text(root, height=10, width=40, bg="#44475a", fg="#f8f8f2", insertbackground="#f8f8f2", font=("Noto Emoji", 12))
-        self.content_entry.grid(row=1, column=1, padx=5, pady=5)
+        # Content input
+        self.content_label = ttk.Label(self.main_frame, text="Content:")
+        self.content_label.pack(anchor='w', padx=5, pady=5)
+        self.content_entry = tk.Text(self.main_frame, height=30, bg="#44475a", fg="#f8f8f2", insertbackground="#f8f8f2", font=("Noto Emoji", 12))
+        self.content_entry.pack(fill=tk.X, padx=5, pady=5)
 
-        self.folder_label = ttk.Label(root, text="Image Folder:")
-        self.folder_label.grid(row=2, column=0, padx=5, pady=5)
-        self.folder_entry = ttk.Entry(root)
-        self.folder_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.browse_button = ttk.Button(root, text="Browse", command=self.browse_folder)
-        self.browse_button.grid(row=2, column=2, padx=5, pady=5)
+        # Image folder input
+        self.folder_label = ttk.Label(self.main_frame, text="Image Folder:")
+        self.folder_label.pack(anchor='w', padx=5, pady=5)
+        self.folder_entry = ttk.Entry(self.main_frame)
+        self.folder_entry.pack(fill=tk.X, padx=5, pady=5)
+        self.browse_button = ttk.Button(self.main_frame, text="Browse", command=self.browse_folder)
+        self.browse_button.pack(padx=5, pady=5)
 
-        self.submit_button = ttk.Button(root, text="Create Post", command=self.create_post)
-        self.submit_button.grid(row=3, column=1, padx=5, pady=5)
+        # Font settings
+        self.font_label = ttk.Label(self.main_frame, text="Font Style:")
+        self.font_label.pack(anchor='w', padx=5, pady=5)
+        self.font_var = tk.StringVar(value="Noto Emoji")
+        self.font_menu = ttk.Combobox(self.main_frame, textvariable=self.font_var, values=font.families())
+        self.font_menu.pack(fill=tk.X, padx=5, pady=5)
+
+        self.size_label = ttk.Label(self.main_frame, text="Font Size:")
+        self.size_label.pack(anchor='w', padx=5, pady=5)
+        self.size_var = tk.IntVar(value=12)
+        self.size_spinbox = tk.Spinbox(self.main_frame, from_=8, to=72, textvariable=self.size_var)
+        self.size_spinbox.pack(fill=tk.X, padx=5, pady=5)
+
+        self.color_button = ttk.Button(self.main_frame, text="Font Color", command=self.choose_color)
+        self.color_button.pack(padx=5, pady=5)
+
+        self.bold_button = ttk.Checkbutton(self.main_frame, text="Bold", command=self.toggle_bold)
+        self.bold_button.pack(anchor='w', padx=5, pady=5)
+
+        self.italic_button = ttk.Checkbutton(self.main_frame, text="Italic", command=self.toggle_italic)
+        self.italic_button.pack(anchor='w', padx=5, pady=5)
+
+        # Submit button
+        self.submit_button = ttk.Button(self.main_frame, text="Create Post", command=self.create_post)
+        self.submit_button.pack(padx=5, pady=10)
 
     def browse_folder(self):
         folder_selected = filedialog.askdirectory(initialdir=image_dir)
         if folder_selected:
+            self.folder_entry.delete(0, tk.END)
             self.folder_entry.insert(0, os.path.relpath(folder_selected, image_dir))
 
     def create_post(self):
@@ -105,12 +136,39 @@ class PostApp:
         style = ttk.Style()
         style.theme_use('clam')
 
-        # Background colors
-        root.config(bg="#282a36")
+        # Define a new style for the frame
+        style.configure('Dracula.TFrame', background="#282a36")
+        
+        # Configure other styles
         style.configure('TLabel', background="#282a36", foreground="#f8f8f2", font=('Arial', 12))
         style.configure('TEntry', fieldbackground="#44475a", background="#44475a", foreground="#f8f8f2", font=('Arial', 12))
         style.configure('TButton', background="#6272a4", foreground="#f8f8f2", font=('Arial', 12))
         style.map('TButton', background=[('active', '#50fa7b')])
+
+        # Apply the frame style
+        self.main_frame.configure(style='Dracula.TFrame')
+
+        # Set background color for non-ttk widgets
+        self.root.config(bg="#282a36")
+
+    def choose_color(self):
+        color_code = colorchooser.askcolor(title="Choose Font Color")[1]
+        if color_code:
+            self.content_entry.configure(fg=color_code)
+
+    def toggle_bold(self):
+        current_font = font.nametofont(self.content_entry.cget("font"))
+        weight = current_font.actual()["weight"]
+        new_weight = "bold" if weight == "normal" else "normal"
+        current_font.configure(weight=new_weight)
+        self.content_entry.configure(font=current_font)
+
+    def toggle_italic(self):
+        current_font = font.nametofont(self.content_entry.cget("font"))
+        slant = current_font.actual()["slant"]
+        new_slant = "italic" if slant == "roman" else "roman"
+        current_font.configure(slant=new_slant)
+        self.content_entry.configure(font=current_font)
 
 if __name__ == "__main__":
     root = tk.Tk()
