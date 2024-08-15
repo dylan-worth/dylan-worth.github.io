@@ -1,0 +1,64 @@
+ /* Inline style to handle the quest-specific colors and strikethrough */
+ .completed {
+    color: green;
+    text-decoration: line-through;
+}
+.not-completed {
+    color: red;
+}
+/* Quest List Section */
+.quest-list {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    background-color: #f4ecd8;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+.quest-list h2 {
+    font-size: 1.8rem;
+    color: #8c5223;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #8c5223;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.quest-list p {
+    font-size: 1rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.quest-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.quest-list ul li {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.quest-list ul li:last-child {
+    border-bottom: none;
+}
+
+.quest-list ul li.completed {
+    color: green;
+    text-decoration: line-through;
+}
+
+.quest-list ul li.not-completed {
+    color: red;
+}
+
+.quest-list ul li:hover {
+    background-color: #f2d7be;
+    cursor: pointer;
+}

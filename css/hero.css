@@ -1,0 +1,23 @@
+/* Hero Video Styles */
+.hero-video-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px 0;
+    background-color: #f5e0c3; /* Or any contrasting color */
+    text-align: center;
+}
+
+.hero-video-container iframe {
+    width: 100%;
+    height: 500px; /* Adjust height as needed */
+    max-width: 1200px;
+    border-radius: 10px;
+    border: 3px solid #8c5223;
+}
+
+.hero-video-container h2 {
+    font-size: 2.5rem;
+    color: #4b2e1a;
+    margin-bottom: 20px;
+}

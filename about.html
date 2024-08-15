@@ -2,82 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="/images/icons/clown-fish.png">
-    <link rel="stylesheet" href="css/homepage.css">
-    <link rel="stylesheet" href="css/about.css">
-    <link rel="stylesheet" href="css/photo-album.css">
-    <link rel="stylesheet" href="css/word-styles.css">
-    <script src="./js/photoalbum.js"></script>
-    <title>Home</title>
+    <title>About Me - Dylan Worth</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-inner">
-            <a href="./index.html" class="navbar-brand">Home</a>
-            <div class="navbar-links">
-                <a href="blog.html">Blogs</a>
-                <a href="about.html">About</a>
-                <a href="photos.html">Photos</a>
-                <a href="https://odysee.com/@DylanDoesStuff:f">Videos</a>
-            </div>
-        </div>
+    <header>
+        <h1>About Me</h1>
+        <p class="mini-bio">Hi, I'm Dylan Worth. Welcome to my cozy corner of the internet!</p>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="story.html">Story Time</a></li>
+            <li><a href="about.html">About Me</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
     </nav>
+    <main>
+        <section class="content">
+            <article>
+                <h2>Who Am I?</h2>
+                <p>By day, I’m a mold technician, working to keep environments clean and healthy. But when the sun sets, I dive into the world of code and games. Programming is my way of creating, exploring new ideas, and bringing them to life. Gaming, especially Runescape, is where I unwind, strategize, and immerse myself in fantastical worlds.</p>
 
-    <main class="content">
-        <div class="info-card">
-            <div class="card-header">
-                <img src="./images/profile/pfp.jpg" alt="Dylan" class="profile-pic">
-                <h2>Dylan Worth</h2>
-                <p>Backend Developer & Aspiring Mold Assessor</p>
-            </div>
-            <div class="card-body">
-                <h3>About Me</h3>
-                <p>I'm a father of three, living a life aimed at self-sufficiency. Passionate about technology and sustainability, I write about my journey away from the food industry and into tech and health.</p>
-                <h3>Skills</h3>
-                <ul class="skills-list">
-                    <li>Backend Development</li>
-                    <li>Frontend Fundamentals</li>
-                    <li>Server Management</li>
-                    <!-- more skills -->
-                </ul>
-                <h3>Contact</h3>
-                <ul class="skills-list">
-                <li><a href="mailto:dylanworth@protonmail.com?Subject=Hello%20again" target="_top">Email Me!</a>
-                </li>
-                </ul>
-            </div>
-            <div class="card-footer">
-                <a href="https://www.instagram.com/arcticherohs/">Instagram</a>
-                <a href="https://pixelfed.social/i/web/profile/554471068131937192">Pixelfed</a>
-                <a href="https://mastodon.social/@Im_Dylan">Mastodon</a>
-                <a href="https://odysee.com/@DylanDoesStuff:f">Odysee</a>
-            </div>
-        </div>
-        <script>
-            document.addEventListener('mousemove', (event) => {
-    const trailDot = document.createElement('div');
-    trailDot.classList.add('trail');
-    document.body.appendChild(trailDot);
+                <h2>My Passions</h2>
+                <p>I'm a huge fan of all things cozy and artsy. Whether it's curling up with a good book, getting lost in a piece of art, or just enjoying the simple pleasures of life, I find joy in the small, warm moments. I'm also a lover of Runescape, a game that has been a constant in my life for years. It’s not just a game for me; it’s a place where I've made memories and forged friendships.</p>
 
-    // Position the dot at the cursor position
-    trailDot.style.left = `${event.pageX}px`;
-    trailDot.style.top = `${event.pageY}px`;
+                <h2>My Aspirations</h2>
+                <p>In the long run, I aspire to become a microbiologist, delving into the fascinating world of microbes and their impact on our lives. But before I reach that goal, I'm on a journey to become a certified mold assessor. It's a path that allows me to combine my passion for science with my desire to help others by ensuring their living environments are safe and healthy.</p>
 
-    // Trigger the fade-out effect
-    setTimeout(() => {
-        trailDot.classList.add('fade-out');
-    }, 100); // Starts fading out after 100ms
-
-    // Remove the dot after it has faded out
-    setTimeout(() => {
-        trailDot.remove();
-    }, 900); // Completely remove after 900ms (after the transition ends)
-});
-
-        </script>
+                <h2>Family First</h2>
+                <p>Above all, I’m a husband and father. My family is my greatest treasure, and every day, I strive to be the best for them. They are the heart of everything I do, and my greatest joy comes from the time we spend together, whether it’s a simple family dinner or an adventurous day out.</p>
+            </article>
+        </section>
     </main>
+    <footer>
+        <p>&copy; 2024 My Cozy Corner. All rights reserved. 🍁</p>
+        <div class="social-icons">
+            <a href="https://pixelfed.social/i/web/profile/629858762563454192" target="_blank">
+                <img src="./images/icons/pixelfed-icon-color.svg" height="30" width="30" alt="Pixelfed">
+            </a> &nbsp;
+            <a href="https://mastodon.social/@Im_Dylan" target="_blank">
+                <img src="./images/icons/mastodon-icon.png" height="30" width="30" alt="Mastodon">
+            </a> &nbsp;
+            <a href="https://odysee.com/@DylanDoesStuff:f" target="_blank">
+                <img src="./images/icons/118271847-5d274d80-b4b1-11eb-86e5-484c2319b43f.png" height="30" width="30" alt="Odysee">
+            </a>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
 </body>
 </html>
-

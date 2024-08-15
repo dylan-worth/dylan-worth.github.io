@@ -1,0 +1,193 @@
+/* Base Styles */
+body {
+    font-family: 'Georgia', serif;
+    background-color: #f5e0c3; /* Fall: Soft warm tone */
+    color: #4b2e1a; /* Dark brown text */
+    transition: all 0.5s ease-in-out;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background-color: #d97742; /* Fall: Burnt orange */
+    border-bottom: 5px solid #8c5223;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.mini-bio {
+    font-style: italic;
+    color: #4b2e1a;
+    margin-top: 10px;
+}
+
+nav {
+    background-color: #e8c8a0;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #8c5223; /* Themed color for links */
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #4b2e1a; /* Darker color on hover */
+}
+
+button {
+    background-color: #8c5223;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+}
+
+button:hover {
+    background-color: #4b2e1a;
+}
+
+.content {
+    padding: 40px;
+    max-width: 800px;
+    margin: auto;
+}
+
+article {
+    margin-bottom: 30px;
+}
+
+article h2 {
+    font-family: 'Caveat', cursive; /* A more playful, handwritten-style font */
+    color: #8c5223;
+    font-size: 2rem;
+}
+
+article p {
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+aside {
+    background-color: #faebd7; /* Antique white */
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.widget {
+    margin-bottom: 20px;
+}
+
+.widget h3 {
+    font-family: 'Caveat', cursive;
+    color: #8c5223;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #d97742;
+    color: #4b2e1a;
+    font-size: 0.9rem;
+    border-top: 5px solid #8c5223;
+}
+
+a {
+    color: #8c5223; /* Themed link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #4b2e1a; /* Darker color on hover */
+}
+
+/* Contact Page Styles */
+form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #8c5223;
+}
+
+input[type="text"], input[type="email"], textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #d97742;
+    border-radius: 5px;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    background-color: #f5e0c3; /* Matching the warm theme */
+}
+
+button[type="submit"] {
+    background-color: #8c5223;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 5px;
+    font-size: 1.1rem;
+}
+
+button[type="submit"]:hover {
+    background-color: #4b2e1a;
+}
+
+/* Halloween Styles */
+body.halloween {
+    background-color: #1c1c1c; /* Halloween: Dark background */
+    color: #e8e8e8; /* Light grey text */
+}
+
+header.halloween {
+    background-color: #333333; /* Halloween: Darker header */
+    border-bottom-color: #990000; /* Blood red border */
+}
+
+button.halloween {
+    background-color: #990000;
+}
+
+button.halloween:hover {
+    background-color: #660000;
+}
+
+article h2.halloween, .widget h3.halloween {
+    color: #990000;
+}
+
+nav.halloween ul li a {
+    color: #e8e8e8;
+}
