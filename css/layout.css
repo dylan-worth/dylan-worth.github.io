@@ -45,4 +45,19 @@ p {
 .quote-of-the-day h2, .currently-loving h2 {
     margin-top: 0;
 }
+/* Check marks before text */
+.checkmark::before{
+    content: "\2713"; /* Unicode for check mark */
+    color: green;
+    margin-right: 5px;
+}
+.tab{
+    padding-left: 2em;
+}
+.bullet::before {
+        content: "• "; /* Unicode bullet with a space */
+        color: black;  /* Bullet color */
+        margin-right: 5px; /* Optional: add more spacing */
+    }
+
 
