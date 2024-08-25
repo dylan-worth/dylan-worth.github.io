@@ -1,30 +1,14 @@
-/* Global Styles */
 body {
-    font-family: 'Georgia', serif;
-    background-color: #f5e0c3; /* Fall: Soft warm tone */
-    color: #4b2e1a; /* Dark brown text */
-    transition: all 0.5s ease-in-out;
+    background: linear-gradient(45deg, #87CEEB, #f5daa1c7, #87CEEB, #196583);
+    animation: gradientShift 15s ease infinite;
+    color: #ecf0f1;
+    background-size: 1000%;
+    flex: 1;
     margin: 0;
     padding: 0;
 }
-
-h1 {
-    font-size: 2.5rem;
-    margin: 0;
-}
-
-header {
-    text-align: center;
-    padding: 20px;
-    background-color: #d97742; /* Fall: Burnt orange */
-    border-bottom: 5px solid #8c5223;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #d97742;
-    color: #4b2e1a;
-    font-size: 0.9rem;
-    border-top: 5px solid #8c5223;
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }

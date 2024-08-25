@@ -1,0 +1,19 @@
+.navbar {
+    float: right;
+    margin-right: 5%;
+}
+.nav-links {
+    list-style-type: none;
+    display: inline-flex;
+    
+}
+.nav-links li {
+    margin-left: 10px;
+}
+.nav-links li a {
+    color: seashell;
+    text-decoration: none;
+}
+.nav-links li a:hover {
+    color: rgba(226, 221, 174, 0.973);
+}
