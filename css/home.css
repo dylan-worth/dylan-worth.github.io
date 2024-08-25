@@ -50,6 +50,7 @@
     .title {
         font-size: 14px; /* Further reduce font size */
         margin-bottom: 8%; /* Increase space below the title */
+        margin-left: 5%; /* Increased left margin for mobile */
     }
 
     .links a {
