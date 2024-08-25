@@ -20,3 +20,29 @@
 .links a:hover {
     box-shadow: 0 0 20px 10px rgba(0, 123, 255, 0.7);
 }
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+    .content {
+        flex-direction: row; /* Display content side by side on larger screens */
+        margin-left: 10%; /* Restore original left margin for larger screens */
+    }
+
+    .title {
+        font-size: 28px; /* Further increase title font size on larger screens */
+    }
+
+    .links a {
+        margin-left: 2%; /* Maintain spacing between links */
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .content {
+        height: 90vh; /* Adjust height to give more breathing space on large screens */
+    }
+
+    .title {
+        font-size: 32px; /* Maximize title font size for large screens */
+    }
+}
