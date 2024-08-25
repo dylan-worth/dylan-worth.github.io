@@ -46,3 +46,14 @@
         font-size: 32px; /* Maximize title font size for large screens */
     }
 }
+@media (max-width: 400px) {
+    .title {
+        font-size: 14px; /* Further reduce font size */
+        margin-bottom: 8%; /* Increase space below the title */
+    }
+
+    .links a {
+        font-size: 12px; /* Make link text smaller */
+        padding: 15px; /* Adjust padding to ensure ease of interaction */
+    }
+}
