@@ -1,0 +1,257 @@
+/* Base reset for cleaner styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root {
+    --font-size: 16px;
+}
+
+/* Body styling with a dark theme */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #d3d3d3;
+    cursor: url('./assets/img/cursor.png'), auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+}
+
+
+/* Banner styling */
+.banner {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #d3d3d3;
+}
+
+body.light-mode .blog {
+    background-color: #ffffff;
+    color: #333333;
+}
+
+.banner h1 {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.banner p {
+    font-size: 1.1em;
+    color: #ccc;
+}
+
+/* Main container for page content */
+.container {
+    display: grid;
+    grid-template-columns: 1fr 3fr; /* Left sidebar and wider main content */
+    gap: 20px;
+    width: 90%;
+    max-width: 1200px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Left Sidebar */
+.sidebar-left {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* About Me section styling */
+.about-me {
+    margin-bottom: 20px;
+}
+
+/* Calendar styling */
+.calendar {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+/* Calendar grid styling */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.calendar-day {
+    padding: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Highlight today's date */
+.calendar-day.today {
+    background-color: #555;
+}
+
+/* Gallery styling */
+.gallery {
+    margin-top: 20px;
+
+}
+#divider {
+    color:#4a4a4a;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.gallery img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.see-more {
+    margin-top: 10px;
+    text-align: center;
+    color: #d3d3d3;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+/* Main Blog area */
+.blog {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 100vh;
+    font-size: var(--font-size);
+}
+
+/* Blog post styling */
+.post {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #4a4a4a;
+}
+
+
+/* Show More / Show Less button styling */
+#toggleButton {
+    background-color: #333;
+    color: #ffeb3b;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+}
+/* Accessibility controls */
+.accessibility-controls {
+    margin-top: 10px;
+}
+
+.accessibility-controls button {
+    background-color: #555;
+    color: #ffeb3b;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+body.light-mode .accessibility-controls button {
+    background-color: #ccc;
+    color: #333;
+}
+/* Mobile-friendly styles */
+@media (max-width: 768px) {
+    /* Adjust banner font sizes for mobile */
+    .banner h1 {
+        font-size: 1.5em;
+    }
+    .banner p {
+        font-size: 1em;
+    }
+    
+    /* Stack sidebar and main content vertically on smaller screens */
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+    }
+    
+    /* Sidebar styling for mobile */
+    .sidebar-left {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    /* Main blog content styling for mobile */
+    .blog {
+        width: 100%;
+        padding: 15px;
+        max-height: 60vh;
+    }
+
+    /* Adjust calendar grid layout for better readability on mobile */
+    .calendar-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 columns for a more compact view */
+        gap: 5px;
+    }
+
+    /* Gallery grid adjustments for mobile */
+    .gallery-grid {
+        grid-template-columns: 1fr; /* One column for full-width images */
+    }
+
+    /* Accessibility controls styling for mobile */
+    .accessibility-controls {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    /* Adjust button sizes for easier tapping */
+    .accessibility-controls button, #toggleButton {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further reduce font sizes for very small screens */
+    .banner h1 {
+        font-size: 1.3em;
+    }
+    .banner p {
+        font-size: 0.9em;
+    }
+    
+    /* Further compact the calendar grid for small screens */
+    .calendar-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns for very small screens */
+        gap: 4px;
+    }
+}

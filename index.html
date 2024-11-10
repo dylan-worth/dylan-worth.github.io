@@ -3,33 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- Our CSS Files-->
-     <link rel="stylesheet" href="../css/global.css">
-     <link rel="stylesheet" href="../css/home.css">
-     <link rel="stylesheet" href="../css/nav.css">
+    <title>Dark Mode Portfolio</title>
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <div class="links">
-            <a href="https://bsky.app/profile/imdylan.bsky.social"><img src="../img/icons/blue-sky.svg" height="30" width="30" alt=""></a> &nbsp;
-            <a href="https://elk.zone/mastodon.social/@Im_Dylan"><img src="../img/icons/elk.png" alt="" height="30" width="30"></a> &nbsp;
-            <a href="https://pixelfed.social/i/web/profile/629858762563454192"><img src="../img/icons/pixelfed.svg" alt="" height="30" width="30"></a> &nbsp;
-            <a href="https://odysee.com/@DylanDoesStuff:f"><img src="../img/icons/odysee.png" alt="" height="30" width="30"></a> &nbsp;
-            </div>
-        <nav class="navbar">
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="./pages/about.html">About</a></li>
-                <li><a href="./pages/posts.html">Posts</a></li>
-            </ul>
-        </nav>
+<body class="dark-mode">
+
+    <!-- Banner at the top -->
+    <header class="banner">
+        <h1>I'm Dylan</h1>
+        <p>Welcome to my profile</p>
+        <div class="accessibility-controls">
+            <button id="toggleTheme" onclick="toggleTheme()">Light Mode</button>
+        </div>
     </header>
-        <main>
-            <section class="content">
-                 <p class="title">Hey, I'm Dylan.</p>
-                 
-            </section>
-        </main>
+
+    <!-- Main container for page content -->
+    <div class="container">
+        <!-- Left Sidebar: About Me, Calendar, and Gallery -->
+        <div class="sidebar-left">
+            <div class="about-me">
+                <h2>About Me</h2>
+                <br>
+                <p>Lua Enthusiast | FOSS Extremist | Arch User | Future Microbiologist | Husband | Father of 4 | Chompy Slayer</p>
+            </div>
+        
+            <hr id="divider">
+            <br>
+            <div class="calendar">
+                <h2>Calendar</h2>
+                <br>
+                <!-- Display current month and year -->
+                <h3 id="calendarMonth"></h3>
+                <div id="calendarGrid" class="calendar-grid">
+                    <!-- Calendar grid will be dynamically populated with JavaScript -->
+                </div>
+            </div>
+            <hr>
+
+        </div>
+
+        <!-- Main Blog Area -->
+        <div class="blog">
+            <h2>Blog Posts</h2>
+            <br>
+            <div class="post">
+                <h3>Brighter Shores</h3>
+                <br>
+                <p class="content" id="postContent">
+                    What better way to kick off my website than with a post about the new Gower game, <em>Brighter Shores</em>! <em>Brighter Shores</em> is a RuneScape-esque game that’s turn-based, set on what looks like a game board or tabletop. This design choice drives me a little insane—because the aesthetics are stunning, yet it has that old Dungeon & Dragons knockoff vibe from the early 2000s.
+                    <br><br>
+                    The gameplay progresses slowly, much like RuneScape, which I’m okay with. To me, it feels more like RuneScape 3 than RuneScape 2, though a lot of people say otherwise. I think it might be the combat style that makes some think of RuneScape 2, but elements like alchemy remind me of skills like Invention, Archaeology, or even Herblore in RuneScape 3.
+                    <br><br>
+                    The quests are genuinely funny, the dialogue is solid, and the sounds—whoever’s behind that deserves a raise! Overall, it’s just a really well-made game. But it’s only day two for me, so I don’t want to dive too deep before getting the full experience.
+                    <br><br>
+                    I’m playing as a free-to-play member; I’m not paying the $6 a month. Honestly, $6 a month for a brand new game feels steep. I know RuneScape membership started at a similar price, but when I first started RuneScape, there was no membership at all!
+                    <br><br>
+                    Anyway, that’s it for now. I’ll share more once I’ve played further!
+                </p>
+            </div>
+     
+            <div class="post">
+                    <iframe title="Pixelfed Post Embed" src="https://pixelfed.social/p/Arctic.Heroh/761043045304525815/embed?caption=true&likes=false&layout=full" class="pixelfed__embed" style="max-width: 100% 0; max-height: 60vh 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="https://pixelfed.social/embed.js"></script>
+                
+            </div>
+            
+    </div>
+
+    <!-- Link to external JavaScript file -->
+    <script src="script.js"></script>
+    <script src="settings.js"></script>
 </body>
 </html>
