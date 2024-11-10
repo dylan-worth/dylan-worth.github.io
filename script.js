@@ -15,6 +15,7 @@ const monthNames = [
 function generateCalendar() {
     const calendarGrid = document.getElementById("calendarGrid");
     const calendarMonth = document.getElementById("calendarMonth");
+    const eventDetails = document.getElementById("eventDetails");
     
     const today = new Date();
     const year = today.getFullYear();
@@ -24,24 +25,33 @@ function generateCalendar() {
     // Set the month and year at the top of the calendar
     calendarMonth.textContent = `${monthNames[month]} ${year}`;
 
+    // Clear the previous content
+    calendarGrid.innerHTML = "";
+
     for (let day = 1; day <= daysInMonth; day++) {
         const dayElement = document.createElement("div");
         dayElement.classList.add("calendar-day");
+        dayElement.textContent = day;
+
+        // Check if the current day has an event
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         
+        if (importantDays[dateKey]) {
+            dayElement.title = importantDays[dateKey]; // Tooltip for desktop
+            dayElement.style.color = "#ffeb3b"; // Highlight the day
+
+            // Add click event to show event details on mobile
+            dayElement.addEventListener("click", () => {
+                eventDetails.textContent = `Event on ${monthNames[month]} ${day}: ${importantDays[dateKey]}`;
+                eventDetails.classList.remove("hidden");
+            });
+        }
+
         // Highlight today's date
         if (day === today.getDate()) {
             dayElement.classList.add("today");
         }
 
-        dayElement.textContent = day;
-
-        // Add special event if it matches today's date
-        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        if (importantDays[dateKey]) {
-            dayElement.title = importantDays[dateKey]; // Tooltip with event name
-            dayElement.style.color = "#ffeb3b"; // Highlight important day
-        }
-        
         calendarGrid.appendChild(dayElement);
     }
 }

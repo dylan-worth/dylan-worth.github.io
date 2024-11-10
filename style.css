@@ -177,6 +177,21 @@ body.light-mode .blog {
     border-radius: 5px;
     font-size: 1rem;
 }
+/* Event details display styling */
+.event-details {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #444;
+    color: #ffeb3b;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.event-details.hidden {
+    display: none;
+}
+
 
 body.light-mode .accessibility-controls button {
     background-color: #ccc;
