@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #a4d4ae, #f3efe6);
+  color: #2c3e50;
+}
+
+.lost-city-container {
+  text-align: center;
+  padding: 20px;
+}
+
+header {
+  background: url('./assets/img/tree-background.jpg') no-repeat center center/cover;
+  padding: 50px 20px;
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+header .logo {
+  max-width: 200px;
+  margin-bottom: 20px;
+}
+
+.description {
+  margin: 30px auto;
+  max-width: 600px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+  margin-top: 30px;
+}
+
+.back-link {
+  text-decoration: none;
+  color: #16a085;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.back-link:hover {
+  color: #1abc9c;
+}
