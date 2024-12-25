@@ -9,6 +9,13 @@ body {
   text-align: center;
   padding: 20px;
 }
+.banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #a4d4ae, #f3efe6);
+    padding: 20px;
+}
 
 
 .header-logo {
