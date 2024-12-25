@@ -10,7 +10,20 @@ body {
   padding: 20px;
 }
 
+.banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #a4d4ae, #f3efe6);
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
+.header-logo {
+    max-width: 400px; /* Adjust size to match header proportions */
+    width: 90%;
+    height: auto;
+}
 
 .description {
   margin: 30px auto;
