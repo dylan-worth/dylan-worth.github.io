@@ -20,9 +20,9 @@ body {
 }
 
 .header-logo {
-    max-width: 400px; /* Adjust size to match header proportions */
+    max-width: 200px; /* Adjust size to match header proportions */
     width: 90%;
-    height: auto;
+   
 }
 
 .description {
