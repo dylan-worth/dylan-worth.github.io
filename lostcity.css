@@ -10,17 +10,7 @@ body {
   padding: 20px;
 }
 
-header {
-  background: url('./assets/img/IMG_2123.jpg') no-repeat center center/cover;
-  padding: 50px 20px;
-  color: white;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-}
 
-header .logo {
-  max-width: 200px;
-  margin-bottom: 20px;
-}
 
 .description {
   margin: 30px auto;
