@@ -46,51 +46,88 @@ footer {
   color: #1abc9c;
 }
 .repository {
-    background: #f6f8fa;
-    padding: 20px;
-    border-radius: 10px;
+    max-width: 900px;
     margin: 20px auto;
-    max-width: 800px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.repository h2 {
-    text-align: center;
-    font-size: 1.8em;
-    color: #0366d6;
-    margin-bottom: 20px;
-}
-
-.repo-files {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.file {
-    background: white;
+    font-family: Arial, sans-serif;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     padding: 15px;
-    border: 1px solid #d1d5da;
-    border-radius: 5px;
+}
+
+.repo-header {
+    background: transparent;
+    color: #2c3e50;
+    padding: 15px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    text-align: center;
+}
+
+.repo-header h2 {
+    font-size: 1.8em;
+    margin: 0;
+}
+
+.repo-header p {
+    margin: 5px 0 0;
+    font-size: 1em;
+    color: #34495e;
+}
+
+.repo-content {
+    padding: 10px 0;
+}
+
+.repo-toolbar {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.file-list {
+    border-top: 1px solid rgba(44, 62, 80, 0.2);
+}
+
+.file-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.2);
+    font-size: 14px;
+    background: transparent;
+    transition: background 0.3s;
 }
 
-.file a {
-    text-decoration: none;
-    color: #0366d6;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.file a:hover {
-    text-decoration: underline;
+.file-row:hover {
+    background: rgba(44, 62, 80, 0.1);
 }
 
 .file-icon {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    opacity: 0.8;
+}
+
+.file-name {
+    color: #0366d6;
+    text-decoration: none;
+    flex-grow: 1;
+}
+
+.file-name:hover {
+    text-decoration: underline;
+}
+
+.commit-message {
+    color: #34495e;
+    margin-right: 10px;
+    flex-shrink: 0;
+    flex-basis: 300px;
+}
+
+.last-updated {
+    color: #7f8c8d;
+    font-size: 12px;
 }
