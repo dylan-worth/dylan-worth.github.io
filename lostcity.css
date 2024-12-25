@@ -9,18 +9,26 @@ body {
   text-align: center;
   padding: 20px;
 }
+/* Header Section */
 .banner {
     display: flex;
     justify-content: center;
     align-items: center;
     background: linear-gradient(to bottom, #a4d4ae, #f3efe6);
-    padding: 20px;
+    padding: 40px 20px;
+    margin-bottom: 20px;
 }
 
+.header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 .header-logo {
-    width: 90%; /* Adjust the size as needed */
-    max-width: 700px; /* Restrict max width for responsiveness */
+    width: 100%;
+    max-width: 500px; /* Adjust for logo size alignment */
+    height: auto;
 }
 
 
