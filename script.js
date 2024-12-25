@@ -2,9 +2,8 @@
 const importantDays = {
     "2024-11-10": "Portfolio Launch",
     "2024-11-28": "Turkey Day",
-    "2024-12-24": "Ethan's Birthday",
-    "2024-12-24": "Christmas Eve",
-    "2024-12-25": "Christmas",
+    "2024-12-24": "Ethan's Birthday & Christmas Eve 🎄"
+    "2024-12-25": "Christmas 🎄",
     // Add more dates and events here
 };
 
