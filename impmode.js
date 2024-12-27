@@ -45,26 +45,82 @@ const content = {
     bank: `
         <h2>Bank</h2>
         <p>Here’s what I’ve collected so far:</p>
+        <h3>General Items</h3>
         <ul>
-            <li>Steel Axe</li>
-            <li>Hammer</li>
-            <li>Chisel</li>
-            <li>Uncut Emerald</li>
-            <li>Uncut Sapphire</li>
-            <li>Food from implings</li>
-            <li>Holiday Cakes</li>
+            <li>Steel Axe (11 from Young Implings)</li>
+            <li>Hammer (Baby Implings)</li>
+            <li>Chisel (Baby Implings)</li>
+            <li>Uncut Emerald (Random Event)</li>
+            <li>Uncut Sapphires (Random Event)</li>
+            <li>Food from Implings</li>
+            <li>Holiday Cakes (Random Event)</li>
         </ul>
+
+        <h3>Young Impling Loot</h3>
+        <ul>
+            <li>11 Steel Axes</li>
+            <li>2 Oak Planks</li>
+            <li>3 Studded Chaps</li>
+            <li>1 Steel Full Helm</li>
+            <li>10 Meat Pizzas</li>
+            <li>12 Coal</li>
+            <li>15 Pure Essence</li>
+            <li>1 Bowstring</li>
+            <li>1 Tuna</li>
+            <li>1 Snape Grass</li>
+            <li>1 Seaweed</li>
+            <li>2 Garden Pies</li>
+            <li>65 Steel Nails</li>
+            <li>1 Lockpick</li>
+            <li>1 Defense Potion (3)</li>
+            <li>1 Tooth Half of a Key</li>
+        </ul>
+
+        <h3>Baby Impling Loot</h3>
+        <ul>
+            <li>1 Chisel</li>
+            <li>1 Hammer</li>
+            <li>3 Thread</li>
+            <li>1 Cheese</li>
+            <li>1 Spices</li>
+            <li>1 Knife</li>
+            <li>1 Ball of Wool</li>
+            <li>4 Needles</li>
+        </ul>
+
+        <h3>Random Event Loot</h3>
+        <ul>
+            <li>2 Triangle Sandwiches</li>
+            <li>2 Mint Cakes</li>
+            <li>1 Cake</li>
+            <li>1 Chocolate Cake</li>
+            <li>2 Uncut Sapphires</li>
+            <li>1 Uncut Emerald</li>
+        </ul>
+
+        <h3>Minigame Loot</h3>
+        <ul>
+            <li>1 Spade</li>
+            <li>1 Impling Scroll</li>
+            <li>1 Imp Repellent</li>
+            <li>100 Acorn Seeds</li>
+            <li>10 Redberry Seeds</li>
+        </ul>
+
+        <h3>Cash</h3>
+        <p>4.2k GP</p>
     `,
     stats: `
         <h2>Stats</h2>
         <ul>
-            <li>Attack: 13</li>
-            <li>Strength: 10</li>
+            <li>Attack: 15</li>
+            <li>Strength: 15</li>
             <li>Defense: 15</li>
-            <li>Hitpoints: 16</li>
-            <li>Slayer: 10</li>
+            <li>Hitpoints: 17</li>
+            <li>Slayer: 12</li>
             <li>Farming: 37</li>
-            <li>Hunter: 24</li>
+            <li>Hunter: 26</li>
+            <li>Magic: 4</li>
         </ul>
     `
 };
