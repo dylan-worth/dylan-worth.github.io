@@ -9,43 +9,22 @@
 <body>
     <header>
         <h1>Iron Man Progress</h1>
-        <p>Tracking my journey, step by step.</p>
+        <p>Follow my journey as I take on RuneScape with custom Iron Man rules!</p>
+        <div class="dropdown">
+            <select id="menu" onchange="changeContent()">
+                <option value="rules">Rules</option>
+                <option value="progress">Progress</option>
+                <option value="bank">Bank</option>
+                <option value="stats">Stats</option>
+            </select>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Day 1: The Journey Begins</h2>
-            <p>🎂 <b>Holiday Randoms:</b> Received a White Cake and Mint Cake.</p>
-            <p>💰 <b>Giles:</b> Gave me 80 coins—not much, but it’s something.</p>
-            <p>☃️ <b>Snowman Random:</b> Had to turn it away.</p>
-            <p>🐧 <b>Penguin Points:</b> Began collecting points but had to pause due to work.</p>
-        </section>
-
-        <section>
-            <h2>Day 2: Slayer and Regrets</h2>
-            <p>⚔️ <b>Combat Progress:</b> Completed my first Slayer task: 15 Seagulls. Reached 4 Attack.</p>
-            <p>🌟 <b>Random Events:</b> Genie Lamps into Agility. Drill Sergeant Random earned me a Camo Hat.</p>
-            <p>🐧 <b>Penguin Points:</b> Used 9 points on Magic XP, regretting it as I hoped to hit Level 7 for the Mage Training Arena.</p>
-        </section>
-
-        <section>
-            <h2>Day 3: First Death and Hard Lessons</h2>
-            <p>⚔️ <b>Combat Progress:</b> Reached 8 Attack, 5 Strength, and started Defense. First death due to not paying attention.</p>
-            <p>🌟 <b>Random Events:</b> Genie Lamps into Mining XP for Shooting Stars.</p>
-            <p>🎯 <b>Goals:</b> Grinding for clue scrolls and saving GP for Ogre Roots to train Hunter.</p>
-        </section>
-
-        <section>
-            <h2>Day 4: Big Hits and New Tasks</h2>
-            <p>⚔️ <b>Combat Progress:</b> Completed Goblin tasks. Hit my first 2 damage on a goblin! Started Bats.</p>
-            <p>💎 <b>Random Events:</b> Received uncut emerald and sapphire from Giles. Ate a Chocolate Cake mid-combat.</p>
-        </section>
-
-        <section>
-            <h2>Day 5: Implings and Monkeys</h2>
-            <p>⚔️ <b>Combat Progress:</b> Attack: 13 | Strength: 10 | Defense: 15 | Hitpoints: 16. Slayer Level 10 (Monkeys).</p>
-            <p>🌱 <b>Skill Progress:</b> Farming Level 37 (Vinesweeper), Hunter Level 24 (rabbits to implings).</p>
-            <p>🎯 <b>Notable Loot:</b> Steel Axe, Hammer, Chisel, Food.</p>
+        <section id="content">
+            <!-- Default content will load here -->
+            <h2>Rules</h2>
+            <p>These are the rules that guide my unique Iron Man challenge!</p>
         </section>
     </main>
 
