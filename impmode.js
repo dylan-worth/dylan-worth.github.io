@@ -1,4 +1,4 @@
-// Content data
+// Content for each tab
 const content = {
     rules: `
         <h2>Rules</h2>
@@ -70,9 +70,12 @@ const content = {
 };
 
 // Function to change content dynamically
-function changeContent() {
-    const menu = document.getElementById('menu');
-    const selectedValue = menu.value;
+function showTab(tabName) {
     const contentSection = document.getElementById('content');
-    contentSection.innerHTML = content[selectedValue];
+    contentSection.innerHTML = content[tabName];
+
+    // Update active button styling
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => button.classList.remove('active'));
+    document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
 }
