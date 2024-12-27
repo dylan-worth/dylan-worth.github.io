@@ -45,17 +45,7 @@ const content = {
     bank: `
         <h2>Bank</h2>
         <p>Here’s what I’ve collected so far:</p>
-        <h3>General Items</h3>
-        <ul>
-            <li>Steel Axe (11 from Young Implings)</li>
-            <li>Hammer (Baby Implings)</li>
-            <li>Chisel (Baby Implings)</li>
-            <li>Uncut Emerald (Random Event)</li>
-            <li>Uncut Sapphires (Random Event)</li>
-            <li>Food from Implings</li>
-            <li>Holiday Cakes (Random Event)</li>
-        </ul>
-
+        
         <h3>Young Impling Loot</h3>
         <ul>
             <li>11 Steel Axes</li>
