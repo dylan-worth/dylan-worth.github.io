@@ -46,59 +46,161 @@ const content = {
         <h2>Bank</h2>
         <p>Here’s what I’ve collected so far:</p>
         
-        <h3>Young Impling Loot</h3>
+        <h3>Currency</h3>
         <ul>
-            <li>11 Steel Axes</li>
-            <li>2 Oak Planks</li>
-            <li>3 Studded Chaps</li>
-            <li>1 Steel Full Helm</li>
-            <li>10 Meat Pizzas</li>
-            <li>12 Coal</li>
-            <li>15 Pure Essence</li>
-            <li>1 Bowstring</li>
-            <li>1 Tuna</li>
-            <li>1 Snape Grass</li>
-            <li>1 Seaweed</li>
-            <li>2 Garden Pies</li>
-            <li>65 Steel Nails</li>
-            <li>1 Lockpick</li>
-            <li>1 Defense Potion (3)</li>
-            <li>1 Tooth Half of a Key</li>
+            <li>9,800 coins</li>
+            <li>1,400 Tokkul</li>
         </ul>
 
-        <h3>Baby Impling Loot</h3>
+        <h3>Food</h3>
         <ul>
-            <li>1 Chisel</li>
-            <li>1 Hammer</li>
-            <li>3 Thread</li>
-            <li>1 Cheese</li>
-            <li>1 Spices</li>
-            <li>1 Knife</li>
-            <li>1 Ball of Wool</li>
-            <li>4 Needles</li>
-        </ul>
-
-        <h3>Random Event Loot</h3>
-        <ul>
-            <li>2 Triangle Sandwiches</li>
             <li>2 Mint Cakes</li>
+            <li>1 Cheese</li>
+            <li>2 Spices</li>
+            <li>2 Kebabs</li>
+            <li>1 Triangle Sandwich</li>
+            <li>1 Live Pie</li>
+            <li>4 Tuna</li>
+            <li>2 Bass</li>
+            <li>15 Rainbow Fish</li>
+            <li>6 Meat Pizza</li>
             <li>1 Cake</li>
-            <li>1 Chocolate Cake</li>
-            <li>2 Uncut Sapphires</li>
-            <li>1 Uncut Emerald</li>
+            <li>4 Chocolate Cakes</li>
+            <li>7 Curry</li>
+            <li>8 Meat Pies</li>
+            <li>24 Garden Pies</li>
+            <li>1 Fish Pie</li>
+            <li>4 Lobsters</li>
+            <li>3 Sharks</li>
+            <li>3 Swordfish</li>
+            <li>6 Karambwan</li>
+            <li>1 Chef's Delight</li>
         </ul>
 
-        <h3>Minigame Loot</h3>
+        <h3>Potions</h3>
         <ul>
-            <li>1 Spade</li>
-            <li>1 Impling Scroll</li>
-            <li>1 Imp Repellent</li>
-            <li>100 Acorn Seeds</li>
-            <li>10 Redberry Seeds</li>
+            <li>2 Defense Potions</li>
         </ul>
 
-        <h3>Cash</h3>
-        <p>4.2k GP</p>
+        <h3>Tools and Crafting Items</h3>
+        <ul>
+            <li>140 Steel Nails</li>
+            <li>1 Chisel</li>
+            <li>4 Needles</li>
+            <li>1 Hammer</li>
+            <li>3 Threads</li>
+            <li>1 Knife</li>
+            <li>6 Balls of Wool</li>
+            <li>3 Oak Planks</li>
+            <li>2 Soft Clay</li>
+            <li>1 Bowstring</li>
+            <li>1 Saw (from the Sawmill)</li>
+        </ul>
+
+        <h3>Keys and Locks</h3>
+        <ul>
+            <li>1 Tooth Half-Key</li>
+            <li>1 Lockpick</li>
+        </ul>
+
+        <h3>Impling and Slayer Items</h3>
+        <ul>
+            <li>2 Impling Jars</li>
+            <li>1 Earth Impling Jar</li>
+            <li>2 Gourmet Impling Jars</li>
+            <li>1 Essence Impling Jar</li>
+            <li>1 Enchanted Gem</li>
+            <li>1 Impling Scroll</li>
+        </ul>
+
+        <h3>Clothing and Gear</h3>
+        <ul>
+            <li>1 Camo Hat</li>
+            <li>1 Steel Full Helmet</li>
+            <li>19 Steel Axes</li>
+            <li>3 Studded Chaps</li>
+            <li>1 Blue Skirt</li>
+            <li>1 Red Elegant</li>
+            <li>1 Black Elegant</li>
+            <li>1 Sheep Mask</li>
+            <li>1 Adamant Platebody (Gold-Trimmed)</li>
+            <li>1 Adamant Shield (H2)</li>
+            <li>1 Adamant Square Shield</li>
+            <li>1 Guthix Cloak</li>
+            <li>1 Saradomin Cloak</li>
+        </ul>
+
+        <h3>Weapons</h3>
+        <ul>
+            <li>1 Yew Longbow</li>
+        </ul>
+
+        <h3>Runes and Talismans</h3>
+        <ul>
+            <li>25 Mind Runes</li>
+            <li>30 Air Runes</li>
+            <li>158 Water Runes</li>
+            <li>1,952 Earth Runes</li>
+            <li>150 Fire Runes</li>
+            <li>13 Death Runes</li>
+            <li>4 Cosmic Runes</li>
+            <li>28 Body Runes</li>
+            <li>8 Chaos Runes</li>
+            <li>4 Lava Runes</li>
+            <li>1 Air Talisman</li>
+            <li>1 Mind Talisman</li>
+            <li>1 Earth Talisman</li>
+            <li>1 Fire Talisman</li>
+            <li>2 Earth Tiaras</li>
+            <li>48 Pure Essence</li>
+        </ul>
+
+        <h3>Gems and Bars</h3>
+        <ul>
+            <li>1 Uncut Emerald</li>
+            <li>2 Uncut Sapphires</li>
+            <li>1 Uncut Ruby</li>
+            <li>16 Emeralds</li>
+            <li>1 Sapphire</li>
+            <li>7 Rubies</li>
+            <li>48 Gold Bars</li>
+            <li>72 Coal</li>
+            <li>62 Mithril Ore</li>
+            <li>7 Mithril Pickaxes</li>
+            <li>1 Mithril Bar</li>
+            <li>4 Steel Bars</li>
+        </ul>
+
+        <h3>Herblore and Farming Items</h3>
+        <ul>
+            <li>50 Unicorn Horns</li>
+            <li>3 Snape Grass</li>
+            <li>1 Jangerberry</li>
+            <li>1 Seaweed</li>
+            <li>1 Flax</li>
+            <li>396 Compost</li>
+            <li>12 Super Compost</li>
+            <li>200 Buckets of Sand</li>
+        </ul>
+
+        <h3>Treasure Trail Items</h3>
+        <ul>
+            <li>Zamorak Page 1</li>
+            <li>Zamorak Page 3</li>
+            <li>Zamorak Page 4</li>
+            <li>1 Medium Clue Scroll</li>
+        </ul>
+
+        <h3>Miscellaneous</h3>
+        <ul>
+            <li>1 Imp Repellent</li>
+            <li>100 Acorns</li>
+            <li>10 Redberry Seeds</li>
+            <li>1 Frog Spawn</li>
+            <li>4 Bowls</li>
+            <li>2 Pie Dishes (from curry and pies)</li>
+            <li>1 Roll</li>
+        </ul>
     `,
     stats: `
         <h2>Stats</h2>
