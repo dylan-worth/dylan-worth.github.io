@@ -43,60 +43,7 @@ const content = {
         <p>🐧 Penguin Points funded new activities.</p>
     `,
 
-const blogPosts = [
-    {
-        title: "Progress Update – Puro Puro Grind and Lessons Learned",
-        content: `
-            <p>After spending some intense days grinding in <strong>Puro Puro</strong>, I’ve made some solid progress on my Iron Man journey!</p>
-            
-            <h4>The Puro Puro Grind</h4>
-            <p>I’ve been catching hundreds of Earth Implings, and the rewards have been rolling in. Along the way, I’ve received several medium clue scrolls. Unfortunately, like with easy clues, some were impossible to complete due to item requirements. But the ones I <em>could</em> finish? Absolutely worth it!</p>
-            <ul>
-                <li><strong>Strength Amulet (Trimmed)</strong></li>
-                <li><strong>Adamant Platebody (Gold-Trimmed)</strong></li>
-                <li><strong>Adamant Kite (H2)</strong></li>
-            </ul>
-            <p>Normally, these would be trophy items, but for me, they’re my best gear early on.</p>
-            
-            <h4>The Penguin Points Mishap</h4>
-            <p>Now, let’s talk about my <strong>Penguin Points mishap</strong>. At first, I was using my points to get GP so I could restock on impling jars. Then, I discovered something game-changing: you can trade a random impling in <strong>Puro Puro</strong> for <strong>three jars</strong>. If only I’d known that sooner! Lesson learned, though—it’s all about working smarter, not harder.</p>
-            
-            <h4>Hunter Milestone: Level 42</h4>
-            <p>After grinding non-stop, I’ve finally hit <strong>42 Hunter</strong>, unlocking <strong>Essence Implings</strong>! This is a huge milestone, and it’s exciting to catch these new implings and see what they bring.</p>
-            
-            <h4>What’s Next?</h4>
-            <p>The current focus is on magic. I’m working toward unlocking the big teleports—<strong>Varrock</strong> and <strong>Falador</strong>—to improve mobility. Plus, once I get access to <strong>low alch</strong>, I can finally start stacking cash to support future grinds.</p>
-            
-            <p>The journey is just getting started, and I’m loving the progress so far. Stay tuned for more updates as I continue to build this Iron Man adventure!</p>
-        `
-    }
-];
 
-function renderBlog() {
-    const postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML = ''; // Clear previous posts
-    blogPosts.forEach(post => {
-        const postDiv = document.createElement('div');
-        postDiv.classList.add('blog-post');
-        postDiv.innerHTML = `
-            <h3>${post.title}</h3>
-            ${post.content}
-        `;
-        postsDiv.appendChild(postDiv);
-    });
-}
-
-function showTab(tabName) {
-    const contentSection = document.getElementById('content');
-    contentSection.innerHTML = content[tabName];
-
-    document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
-    document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
-
-    if (tabName === 'rules') {
-        renderBlog();
-    }
-}
     bank: `
         <h2>Bank</h2>
         <p>Here’s what I’ve collected so far:</p>
