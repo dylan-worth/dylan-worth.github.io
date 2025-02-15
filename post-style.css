@@ -233,9 +233,33 @@ body {
         flex-direction: column;
         align-items: center;
         padding: 10px;
+        width: 100%;
     }
 
     .post-box {
-        max-width: 90%;
+        max-width: 95%; /* Make it scale properly */
+        padding: 15px;
+    }
+
+    .post-box-text {
+        height: 250px; /* Slightly larger text area */
+        font-size: 16px;
+    }
+
+    .format-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .format-buttons button {
+        font-size: 14px;
+        padding: 8px 12px;
+        min-width: 80px;
+    }
+
+    .post-btn {
+        font-size: 16px;
+        padding: 12px;
     }
 }
