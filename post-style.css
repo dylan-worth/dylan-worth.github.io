@@ -1,0 +1,241 @@
+/* Base reset for a clean layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Root variables for consistency */
+:root {
+    --font-size: 16px;
+}
+
+/* Dark mode body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #d3d3d3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Banner styling */
+.banner {
+    width: 100%;
+    background-color: #232323;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.banner h1 {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.banner p {
+    font-size: 1.1em;
+    color: #bbb;
+}
+
+/* Container for post creation */
+.container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+}
+
+/* Post box styling */
+.post-box {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 800px;
+    width: 800px;
+}
+
+/* Profile section */
+.profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.profile img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.profile-name {
+    font-weight: bold;
+    font-size: 20px;
+    color: #ffeb3b;
+}
+
+/* Larger text input area */
+/* Larger and resizable text input area */
+.post-box-text {
+    width: 100%;
+    height: 200px; /* Increased default height */
+    background-color: #1a1a1a;
+    color: #d3d3d3;
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    padding: 15px;
+    font-size: 18px;
+    resize: vertical; /* Allows resizing */
+    outline: none;
+}
+
+
+/* Formatting buttons */
+.format-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.format-buttons button {
+    background-color: #444;
+    color: #ffeb3b;
+    border: none;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.format-buttons button:hover {
+    background-color: #555;
+}
+
+/* Bigger post button */
+.post-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #1877F2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.post-btn:hover {
+    background-color: #1558b0;
+}
+
+/* Post container */
+.post-container {
+    margin-top: 20px;
+    max-width: 800px;
+    width: 100%;
+}
+
+/* Post container styling */
+.post {
+    background: #222;
+    padding: 25px;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    border: 1px solid #333;
+    line-height: 1.6; /* Improve spacing between lines */
+}
+
+/* Timestamp styling */
+.timestamp {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 12px;
+}
+
+/* Title styling for Markdown and Raw HTML sections */
+.post-section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffeb3b;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Improve readability of the post content */
+.post-content {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+
+/* Improve raw HTML block appearance */
+.raw-html {
+    background-color: #1a1a1a;
+    color: #ffeb3b;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #444;
+    font-size: 15px;
+    margin-top: 10px;
+}
+
+/* Improve Copy Button */
+.copy-btn {
+    background-color: #1877F2;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: 0.2s ease-in-out;
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.copy-btn:hover {
+    background-color: #1558b0;
+    transform: scale(1.05);
+}
+
+/* Add slight spacing between elements */
+.post div {
+    margin-bottom: 5px;
+}
+
+/* Live Preview Styling */
+#preview {
+    background-color: #222;
+    color: #d3d3d3;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 20px;
+    border: 1px solid #444;
+}
+
+
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .post-box {
+        max-width: 90%;
+    }
+}

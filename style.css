@@ -270,3 +270,24 @@ body.light-mode .accessibility-controls button {
         gap: 4px;
     }
 }
+/* Center post box and make it wider */
+/* Write Post Button Styling */
+.write-post-btn {
+    
+    transform: translateY(-50%);
+    font-size: 16px;
+    background-color: #444;
+    color: #ffeb3b;
+    border: none;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s ease-in-out;
+}
+
+.write-post-btn:hover {
+    background-color: #555;
+    color: #fff;
+    transform: translateY(-50%) scale(1.05);
+}

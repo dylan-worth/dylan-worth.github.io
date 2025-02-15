@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Post Creator</title>
+    <link rel="stylesheet" href="post-style.css">
+    <!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Code Syntax Highlighter -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    
+
+</head>
+<body>
+
+    <!-- Banner (Same as your site) -->
+    <header class="banner">
+        
+        <h1>Dylan's Brain Logger</h1>
+        <p>This was built to have a portable non backend way to make posts.</p>
+    </header>
+
+
+
+
+    <!-- Post Creation Area -->
+    <div class="container">
+        <div class="blog">
+            <!-- Profile & Post Box -->
+            <div class="post-box">
+                <div class="profile">
+                    <img src="https://pxscdn.com/public/m/_v2/554471068131937192/758e75a50-ddd61a/SD9GC9p3tMZ4/g7iq8Nr0czAERJdC2GH5cqx0LRGbHfZJMw2BVWUX.png" alt="Profile">
+                    <div class="profile-name">Dylan</div>
+                </div>
+
+                <!-- Textarea for the post -->
+                <textarea id="postContent" class="post-box-text" placeholder="What's on your mind?"></textarea>
+                <!-- Live Markdown Preview -->
+                <div id="preview"></div>
+
+                <!-- Formatting Buttons -->
+                <div class="format-buttons">
+                    <button onclick="formatText('b')">Bold</button>
+                    <button onclick="formatText('i')">Italic</button>
+                    <button onclick="formatText('u')">Underline</button>
+                    <!-- Home Icon Button -->
+                    <button><a href="../index.html" class="home-icon" title="Go Home">🏠
+                    </a></button>
+                </div>
+
+                <!-- Post Button -->
+                <button class="post-btn" onclick="addPost()">Post</button>
+            </div>
+
+            <!-- Where Posts Will Appear -->
+            <div class="post-container" id="posts"></div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("postContent").addEventListener("input", livePreview);
+    
+        function livePreview() {
+            let content = document.getElementById("postContent").value.trim();
+            let previewArea = document.getElementById("preview");
+            previewArea.innerHTML = marked.parse(content);
+            hljs.highlightAll(); // Apply syntax highlighting
+        }
+    
+        function addPost() {
+        let content = document.getElementById("postContent").value.trim();
+        if (content === "") {
+            alert("Post cannot be empty!");
+            return;
+        }
+
+        let timestamp = new Date().toLocaleString();
+        let postContainer = document.getElementById("posts");
+
+        let postDiv = document.createElement("div");
+        postDiv.classList.add("post");
+
+        // Convert Markdown to HTML
+        let formattedHTML = marked.parse(content);
+
+        // Ensure new lines are converted in raw HTML output
+        let rawHTMLContent = `<p>${content.replace(/\n/g, "<br>")}</p>`;
+
+        // Create formatted text (renders Markdown as HTML)
+        let formattedText = document.createElement("div");
+        formattedText.classList.add("post-content");
+        formattedText.innerHTML = formattedHTML;
+
+        // Create raw HTML text (displays as code)
+        let rawHTML = document.createElement("pre");
+        rawHTML.classList.add("raw-html");
+        rawHTML.textContent = rawHTMLContent;
+
+        // Create section headers
+        let markdownHeader = document.createElement("div");
+        markdownHeader.classList.add("post-section-title");
+        markdownHeader.textContent = "📝 Formatted Post (Markdown Rendered)";
+
+        let rawHTMLHeader = document.createElement("div");
+        rawHTMLHeader.classList.add("post-section-title");
+        rawHTMLHeader.textContent = "📜 Raw HTML for Blog Post";
+
+        // Create Copy Button
+        let copyButton = document.createElement("button");
+        copyButton.textContent = "Copy HTML";
+        copyButton.classList.add("copy-btn");
+        copyButton.onclick = () => copyToClipboard(rawHTMLContent);
+
+        postDiv.innerHTML = `
+            <div class="timestamp">Posted on ${timestamp}</div>
+        `;
+
+        postDiv.appendChild(markdownHeader);
+        postDiv.appendChild(formattedText);
+        postDiv.appendChild(rawHTMLHeader);
+        postDiv.appendChild(rawHTML);
+        postDiv.appendChild(copyButton);
+
+        postContainer.prepend(postDiv); // Add post to the top
+        document.getElementById("postContent").value = ""; // Clear textarea
+        document.getElementById("preview").innerHTML = ""; // Clear preview
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            let copyBtn = event.target;
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => { copyBtn.textContent = "Copy HTML"; }, 2000);
+        }).catch(err => {
+            console.error("Failed to copy: ", err);
+        });
+    }
+    </script>
+    
+    
+
+</body>
+</html>
