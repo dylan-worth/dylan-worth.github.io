@@ -263,3 +263,83 @@ body {
         padding: 12px;
     }
 }
+/* 🔥 Responsive Fixes for Specific Phones */
+
+/* 📱 Galaxy A34, Pixel 6, and Similar Phones */
+@media (max-width: 430px) {
+    .post-box {
+        max-width: 95%;
+        padding: 12px;
+    }
+
+    .post-box-text {
+        height: 220px; /* Keep text area readable */
+        font-size: 15px;
+    }
+
+    .format-buttons {
+        flex-direction: column; /* Stack buttons */
+        gap: 6px;
+    }
+
+    .format-buttons button {
+        font-size: 14px;
+        padding: 8px;
+        width: 100%; /* Full-width buttons */
+    }
+
+    .post-btn {
+        font-size: 16px;
+        padding: 10px;
+        width: 100%; /* Ensures no overflow */
+    }
+}
+
+/* 📱 iPhone 12, iPhone 13, and Similar Devices */
+@media (max-width: 390px) {
+    .post-box {
+        max-width: 96%;
+        padding: 10px;
+    }
+
+    .post-box-text {
+        height: 210px;
+        font-size: 14px;
+    }
+
+    .format-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .format-buttons button {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+}
+
+/* 📱 Small Android Phones (Moto G, Galaxy A13, etc.) */
+@media (max-width: 360px) {
+    .post-box {
+        max-width: 98%;
+    }
+
+    .post-box-text {
+        height: 200px;
+        font-size: 14px;
+    }
+
+    .format-buttons {
+        flex-direction: column;
+    }
+
+    .format-buttons button {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    .post-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
