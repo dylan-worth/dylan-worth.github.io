@@ -1,0 +1,119 @@
+
+/* ========== Global Styles ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: radial-gradient(ellipse at center, #0c0f0c 0%, #050605 100%);
+  color: #e0f2df;
+  line-height: 1.6;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+:root {
+  --accent: #76c38f;
+  --bg-dark: #0c0f0c;
+  --bg-deep: #050605;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+
+/* ========== Navigation ========== */
+.mycelium-nav {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  background: #101910;
+  border-bottom: 2px solid #213121;
+  z-index: 5;
+}
+
+.mycelium-nav a {
+  text-decoration: none;
+  color: #ccf6d1;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.mycelium-nav a:hover {
+  color: #9affb8;
+}
+
+/* ========== Moon Widget ========== */
+.moon-widget {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 60% 40%, #fff, #ddd);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 255, 200, 0.4);
+  z-index: 99;
+}
+
+/* ========== Footer ========== */
+.living-footer {
+  background: #0a0f0a;
+  color: #9de2b0;
+  padding: 32px 16px;
+  text-align: center;
+  border-top: 1px solid #214121;
+  box-shadow: inset 0 0 20px rgba(100, 255, 150, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.root-week {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.root-week div {
+  width: 4px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: 0.2;
+  animation: growRoot 3s ease forwards;
+}
+
+@keyframes growRoot {
+  from { height: 4px; opacity: 0.1; }
+  to { height: 36px; opacity: 1; }
+}
+
+/* ========== Spores ========== */
+.spores {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.spore {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #aaffaa44;
+  animation: floatSpores linear infinite;
+}
+
+@keyframes floatSpores {
+  0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0.3; }
+}

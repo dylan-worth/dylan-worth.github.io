@@ -1,0 +1,124 @@
+
+/* ========== Journal Layout ========== */
+.blog {
+    padding: 32px 20px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  
+  .post {
+    margin-bottom: 48px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #264b3a88;
+    box-shadow: 0 0 10px rgba(118, 195, 143, 0.08);
+  }
+  
+  .post h2 {
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: 1.5rem;
+  }
+  
+  .post p {
+    font-size: 1rem;
+    color: #cce7d6;
+  }
+  
+  /* ========== Mood Filter ========== */
+  .mood-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    justify-content: center;
+    background: #0e1a0e;
+    border-bottom: 1px solid #1f2e1f;
+  }
+  
+  .mood-filter button {
+    background: #1f2f1f;
+    color: #aef0c4;
+    border: 1px solid #3c5a3c;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .mood-filter button:hover {
+    background: #2e4e2e;
+  }
+  
+  /* ========== Mood Garden & Breathe Orb ========== */
+  .journal-extras {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px 48px;
+  }
+  
+  .forest-block {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  
+  .mood-garden,
+  .breathe-orb {
+    background: rgba(15, 25, 15, 0.6);
+    border: 1px solid #2a3f2a;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(80, 255, 120, 0.05);
+  }
+  
+  .mood-garden h3,
+  .breathe-orb h3 {
+    color: #b3f6c9;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+  }
+  
+  .garden-plot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .plant {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #7bf9a6;
+    animation: growPlant 2s ease-out forwards;
+  }
+  
+  [data-type="🌑"] { background: #5c5c5c; }
+  [data-type="🌕"] { background: #ffffcc; }
+  [data-type="🍄"] { background: #e7b3ff; }
+  [data-type="🌧"] { background: #5da5a4; }
+  [data-type="🔥"] { background: #ff8686; }
+  
+  @keyframes growPlant {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .orb {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    background: radial-gradient(circle at center, #aef0c4, #4caf50);
+    border-radius: 50%;
+    animation: breathe 6s ease-in-out infinite;
+    box-shadow: 0 0 16px rgba(160, 255, 200, 0.3);
+  }
+  
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }

@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lorebook</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/lorebook.css">
+
+</head>
+<body>
+
+  <nav class="mycelium-nav">
+    <a href="index.html">🏡 Home</a>
+    <a href="journal.html">📓 Journal</a>
+    <a href="lorebook.html">📜 Lorebook</a>
+    <a href="contact.html">🪵 Contact</a>
+  </nav>
+   <!-- Spores -->
+   <div class="spores" id="spores"></div>
+
+  <div class="book-container">
+    <div class="book">
+      <div class="page left" id="pageLeft"></div>
+      <div class="page right" id="pageRight"></div>
+    </div>
+    <div class="book-controls">
+      <button onclick="prevPage()">⬅ Prev</button>
+      <button onclick="nextPage()">Next ➡</button>
+    </div>
+  </div>
+
+  <script src="js/lorebook.js"></script>
+  <script src="js/spores.js"></script>
+</body>
+</html>

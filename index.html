@@ -1,106 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La casa</title>
-    <!-- Link to external CSS file -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dylan's Blog</title>
+  <link rel="stylesheet" href="css/main.css" />
+<link rel="stylesheet" href="css/journal.css" />
+
+
 </head>
-<body class="dark-mode">
-
-    <!-- Banner at the top -->
-    <header class="banner">
-        <h1>I'm Dylan</h1>
-        <p>Welcome to my profile</p>
-        <div class="accessibility-controls">
-            <button id="toggleTheme" onclick="toggleTheme()">Light Mode</button>
-        </div>
-    </header>
-
-    <!-- Main container for page content -->
-    <div class="container">
-        <!-- Left Sidebar: About Me, Calendar, and Gallery -->
-        <div class="sidebar-left">
-            <div class="about-me">
-                <h2>About Me</h2>
-                <br>
-                <p>Lua Enthusiast | FOSS Extremist | Arch User | Future Microbiologist | Husband | Father of 4 | Chompy Slayer</p>
-            </div>
-        
-            <hr id="divider">
-            <br>
-            <div class="calendar">
-                <h2>Calendar</h2>
-                <br>
-                <!-- Display current month and year -->
-                <h3 id="calendarMonth"></h3>
-                <div id="calendarGrid" class="calendar-grid">
-                    <!-- Calendar grid will be dynamically populated with JavaScript -->
-                </div>
-                <div id="eventDetails" class="event-details">Click on a date with an event to see details here.</div>
-            </div>
-            <hr>
-            <br>
-            <br>
-            <!-- Write Post Button -->
-<a href="post.html" class="write-post-btn" title="Write a New Post">
-    ✍️ Write Post
-</a>
-
-
-        </div>
-        
-
-        <!-- Main Blog Area -->
-
-        <div class="blog">
-            <h2>Blog Posts</h2>
-            <br>
-
-<div class="post">
-    <h2>A new game of seek and find</h2>
-    <p>
-    
-    </p>
+<body>
+  <nav class="mycelium-nav">
+    <a href="index.html">🏡 Home</a>
+    <a href="journal.html">📓 Journal</a>
+    <a href="lorebook.html">📜 Lorebook</a>
+    <a href="contact.html">🪵 Contact</a>
+  </nav>
   
-</div>
-            <div class="post">
-                    <iframe title="Pixelfed Post Embed" src=https://pixelfed.social/p/Arctic.Heroh/777355975000019184/embed?caption=true&likes=false&layout=full" class="pixelfed__embed" style="max-width: 100% 0; max-height: 60vh 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="https://pixelfed.social/embed.js"></script>
 
-            </div>
-<div class="post">
-    <h3>Lost City Showcase</h3>
-    <br>
-    <p class="content">
-        Curious about the open-source recreation of RuneScape’s golden days? Check out the <a href="lostcity.html">Lost City Showcase</a>! This project beautifully captures the nostalgia of RuneScape's iconic eras, complete with detailed mechanics, quests, and more. If you love retro gaming or RuneScape, this is something you won’t want to miss!
-    </p>
-</div>
-            <div class="post">
-                <h3>Brighter Shores</h3>
-                <br>
-                <p class="content" id="postContent">
-                    What better way to kick off my website than with a post about the new Gower game, <em>Brighter Shores</em>! <em>Brighter Shores</em> is a RuneScape-esque game that’s turn-based, set on what looks like a game board or tabletop. This design choice drives me a little insane—because the aesthetics are stunning, yet it has that old Dungeon & Dragons knockoff vibe from the early 2000s.
-                    <br><br>
-                    The gameplay progresses slowly, much like RuneScape, which I’m okay with. To me, it feels more like RuneScape 3 than RuneScape 2, though a lot of people say otherwise. I think it might be the combat style that makes some think of RuneScape 2, but elements like alchemy remind me of skills like Invention, Archaeology, or even Herblore in RuneScape 3.
-                    <br><br>
-                    The quests are genuinely funny, the dialogue is solid, and the sounds—whoever’s behind that deserves a raise! Overall, it’s just a really well-made game. But it’s only day two for me, so I don’t want to dive too deep before getting the full experience.
-                    <br><br>
-                    I’m playing as a free-to-play member; I’m not paying the $6 a month. Honestly, $6 a month for a brand new game feels steep. I know RuneScape membership started at a similar price, but when I first started RuneScape, there was no membership at all!
-                    <br><br>
-                    Anyway, that’s it for now. I’ll share more once I’ve played further!
-                </p>
-            </div>
-     
-            <div class="post">
-                    <iframe title="Pixelfed Post Embed" src="https://pixelfed.social/p/Arctic.Heroh/761043045304525815/embed?caption=true&likes=false&layout=full" class="pixelfed__embed" style="max-width: 100% 0; max-height: 60vh 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="https://pixelfed.social/embed.js"></script>
-                
-            </div>
-            
-    </div>
+  <!-- 🧠 Stories -->
+  <section class="stories-bar">
+    <div class="stories-container"></div>
+  </section>
 
-    <!-- Link to external JavaScript file -->
-    <script src="script.js"></script>
-    <script src="settings.js"></script>
+  <!-- 🎵 Background music -->
+  <audio id="storyMusic" autoplay loop hidden></audio>
+
+  <!-- 📝 Blog Posts -->
+  <main class="blog">
+    <article class="post">
+      <h2>Welcome to My World</h2>
+      <p>This website will be my go to place to post my thoughts. You can disagree or agree, doesn't change whether or not I post.</p>
+    </article>
+
+    <article class="post">
+      <h2>WRT class</h2>
+      <p>Last week, the company I work for - iMold - paid for us to take our WRT. We are locked into their company for a year unless we want to pay them back an 
+        overpriced amount of $500. But I get it, they wanted to invest in us to hopefully get profit back. I used gpt to create a photo in a ghibli inspired way.
+      </p>
+      <img src="assets/WRT_CLASS.png" width="98%" height="400">
+    </article>
+    
+
+  <!-- 🔮 Story Viewer -->
+  <div id="storyViewer" class="story-viewer hidden">
+    <div class="progress-bar-container" id="progressContainer"></div>
+    <div class="story-content" id="storyContent"></div>
+    <button class="close-btn" onclick="closeStory()">✖</button>
+  </div>
+  <footer class="living-footer">
+    <div class="root-week"></div>
+    <p>&copy; 2025 Dylan’s Digital Forest</p>
+  </footer>
+  <div class="spores" id="spores"></div>
+
+  <div id="moonPhase" class="moon-widget" title="Current Moon Phase"></div>
+
+  <script src="js/stories.js"></script>
+  <script src="js/moon_phase.js"></script>
+  <script src="js/generate_root.js"></script>
+  <script src="js/spores.js"></script>
 </body>
+
+
+
+
 </html>

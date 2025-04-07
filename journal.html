@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myco Journal</title>
+  <link rel="stylesheet" href="css/main.css" />
+<link rel="stylesheet" href="css/journal.css" />
+
+
+
+</head>
+<body>
+
+  <!-- Living Nav Bar -->
+  <nav class="mycelium-nav">
+    <a href="index.html">🏡 Home</a>
+    <a href="journal.html">📓 Journal</a>
+    <a href="lorebook.html">📜 Lorebook</a>
+    <a href="contact.html">🪵 Contact</a>
+  </nav>
+
+  <!-- Spores -->
+  <div class="spores" id="spores"></div>
+
+  <!-- Journal Section -->
+  <main class="blog">
+  
+
+    <section class="post">
+        <section class="post" data-mood="🌕">
+            <h2>🌑 Entry 001 – A Seed Is Planted</h2>
+            <p>I finally took the time to build the blog/site that I have always wanted. As you can see the entire things reminds you of herbalism. I am not a 
+                pot head or hippie lol. I am an aspiring Mycologist. I have an obsession with microbial growth such as Molds, Bacteria, and Viruses. I am going to use 
+                this site to blog and track my research to share with everyone else! It is pretty early in the morning so I don't feel like making this too long.
+            </p>
+          </section>
+          
+  </main>
+  
+
+  <!-- Mood Filter Bar -->
+<section class="mood-filter">
+    <button data-mood="all">🌿 Show All</button>
+    <button data-mood="🌑">🌑 Reflective</button>
+    <button data-mood="🍄">🍄 Curious</button>
+    <button data-mood="🌕">🌕 Inspired</button>
+    <button data-mood="🌧">🌧 Shadow Work</button>
+    <button data-mood="🔥">🔥 Motivated</button>
+  </section>
+
+
+  <!-- 🌿 Mood Garden & Breathe Orb Container -->
+  <div class="journal-extras">
+    <section class="forest-block">
+      <div class="mood-garden" id="moodGarden">
+        <h3>🌱 Mood Garden</h3>
+        <div class="garden-plot" id="gardenPlot"></div>
+      </div>
+  
+      <div class="breathe-orb">
+        <h3>🫁 Breathe With Me</h3>
+        <div class="orb" id="breatheOrb"></div>
+      </div>
+    </section>
+  </div>
+  
+  
+
+  <!-- Footer Roots -->
+  <footer class="living-footer">
+    <div class="root-week"></div>
+    <p>&copy; 2025 Dylan’s Digital Forest</p>
+  </footer>
+
+  <!-- Moon Phase & Spores Scripts -->
+  <div id="moonPhase" class="moon-widget" title="Current Moon Phase"></div>
+
+
+<script src="js/moon_phase.js"></script>
+<script src="js/generate_root.js"></script>
+<script src="js/spores.js"></script>
+<script src="js/mood_filter.js"></script>
+<script src="js/mood_garden.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Swamp Notes</title>
+  <style>
+    body {
+      font-family: 'Trebuchet MS', sans-serif;
+      background: radial-gradient(ellipse at center, #1b2a20 0%, #0f1a14 100%);
+      color: #e0ffe0;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: auto;
+      background: rgba(25, 40, 30, 0.95);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 20px #1a321c;
+      border: 1px solid #3f5e47;
+    }
+
+    h1 {
+      text-align: center;
+      color: #b7ffb7;
+      text-shadow: 0 0 6px #3a7b56;
+    }
+
+    textarea {
+      width: 90%;
+      height: 300px;
+      background: #2e4c3a;
+      color: #b7ffb7;
+      border: 1px solid #3f5e47;
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-size: 1rem;
+      resize: none;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 0.7rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    input[type="file"], input[type="password"] {
+      background: #243c2d;
+      color: #b7ffb7;
+    }
+
+    button {
+      background: linear-gradient(to right, #3f5e47, #7db083);
+      color: #0f1a14;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .note {
+      font-size: 0.85rem;
+      color: #a1c9a1;
+      text-align: center;
+    }
+
+    #clarity-meter {
+      margin-top: 20px;
+    }
+
+    #clarity-meter label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #clarityBar {
+      height: 20px;
+      width: 0%;
+      background: linear-gradient(to right, #91e3a3, #b7ffb7);
+      text-align: right;
+      padding-right: 10px;
+      color: #0f1a14;
+      font-weight: bold;
+    }
+
+    #moonPhase {
+      text-align: center;
+      margin-top: -10px;
+      color: #a1c9a1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container" id="login-screen">
+    <h1>🌿 Enter Swamp Notepad</h1>
+    <input type="file" id="jsonFile" accept=".json">
+    <input type="password" id="password" placeholder="Enter your passcode">
+    <button onclick="handleLogin()">Unlock Notes</button>
+    <div class="note">Protected notes. Load your JSON file to unlock.</div>
+  </div>
+
+  <div class="container hidden" id="notes-area">
+    <h1>📝 Swamp Notes</h1>
+    <p id="moonPhase" title="Moon phase affects the vibe and energy of your notes.">🌕 Calculating Moon Phase...</p>
+    <textarea id="notesBox" placeholder="Write your thoughts, plans, spells... anything!"></textarea>
+    <div id="clarity-meter">
+      <label>Mental Clarity 🌿</label>
+      <div style="width: 100%; background: #324c3a; border-radius: 12px; overflow: hidden; margin-top: 5px;">
+        <div id="clarityBar">0%</div>
+      </div>
+    </div>
+    <button onclick="saveNotes()">💾 Save Notes</button>
+    <button onclick="exportNotes()">📤 Export Notes</button>
+    <div id="save-status"></div>
+  </div>
+
+  <script>
+    let fileData, originalFileName;
+
+    async function handleLogin() {
+      const file = document.getElementById('jsonFile').files[0];
+      originalFileName = file.name;
+      const text = await file.text();
+      fileData = JSON.parse(text);
+
+      const msgUint8 = new TextEncoder().encode(document.getElementById('password').value);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      if (hashHex === fileData.auth.pass_hash) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('notes-area').classList.remove('hidden');
+        document.getElementById('notesBox').value = fileData.notes || "";
+        updateClarity();
+        getMoonPhase();
+      } else {
+        alert("Incorrect passcode.");
+      }
+    }
+
+    function saveNotes() {
+      fileData.notes = document.getElementById('notesBox').value;
+      const blob = new Blob([JSON.stringify(fileData, null, 2)], {type: "application/json"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = originalFileName;
+      link.click();
+      document.getElementById('save-status').textContent = "✅ Notes saved!";
+    }
+
+    function exportNotes() {
+      const text = document.getElementById('notesBox').value;
+      const blob = new Blob([text], {type: "text/plain"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "swamp_notes_export.txt";
+      link.click();
+    }
+
+    function updateClarity() {
+      const content = document.getElementById('notesBox').value;
+      const clarity = Math.min(Math.floor((content.length / 1000) * 100), 100);
+      const bar = document.getElementById('clarityBar');
+      bar.style.width = clarity + "%";
+      bar.textContent = clarity + "%";
+    }
+
+    document.getElementById('notesBox').addEventListener('input', () => {
+      updateClarity();
+    });
+
+    function getMoonPhase() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const day = today.getDate();
+
+      const lp = 2551443;
+      const now = new Date(year, month, day, 20, 35, 0);
+      const new_moon = new Date(1970, 0, 7, 20, 35, 0);
+      const phase = ((now.getTime() - new_moon.getTime()) / 1000) % lp;
+      const moonAge = Math.floor(phase / (24 * 3600));
+
+      const phases = ["🌑 New Moon", "🌒 Waxing Crescent", "🌓 First Quarter", "🌔 Waxing Gibbous",
+                      "🌕 Full Moon", "🌖 Waning Gibbous", "🌗 Last Quarter", "🌘 Waning Crescent"];
+      const index = Math.floor((moonAge / 29.53) * 8) % 8;
+
+      const moonText = phases[index] + " Vibes";
+      const moonElement = document.getElementById('moonPhase');
+      moonElement.textContent = moonText;
+      moonElement.title = "Today is " + moonText;
+      if (phases[index] === "🌕 Full Moon") {
+        moonElement.style.textShadow = "0 0 12px #fff";
+        moonElement.style.color = "#ffffff";
+      }
+    }
+
+    setInterval(() => {
+      if (fileData) {
+        fileData.notes = document.getElementById('notesBox').value;
+        const blob = new Blob([JSON.stringify(fileData, null, 2)], {type: "application/json"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = originalFileName;
+        link.click();
+        document.getElementById('save-status').textContent = "💾 Autosaved at " + new Date().toLocaleTimeString();
+      }
+    }, 300000); // 5-minute autosave
+  </script>
+
+</body>
+</html>

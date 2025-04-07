@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "pass_hash": "29cad729e800b5c126fb55aa7e6d063d4bf0854597706aee53bbddbe2e361030"
+  },
+  "dashboard": {
+    "credit": {
+      "card_name": "Capital One",
+      "balance": 153,
+      "on_time_streak": 2,
+      "goal_streak": 6
+    },
+    "loan_taper": {
+      "current_amount": 150,
+      "goal": 0
+    },
+    "collections": [
+      {
+        "name": "Unknown Buyer Debt",
+        "status": "Unverified",
+        "notes": "Pending validation request"
+      }
+    ],
+    "savings": {
+      "current": 0,
+      "goal": 500
+    }
+  }
+}
