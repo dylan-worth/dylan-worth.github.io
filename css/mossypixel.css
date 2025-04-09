@@ -1,0 +1,218 @@
+body {
+    margin: 0;
+    background-color: #0f0f0f;
+    font-family: 'Courier New', monospace;
+    color: #ccffcc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Navbar */
+  nav {
+    width: 100%;
+    background: linear-gradient(to right, #113311, #0f0f0f);
+    border-bottom: 2px solid #33aa33;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+  
+  nav .logo {
+    font-size: 1.5em;
+    color: #99ff99;
+    text-shadow: 0 0 4px #33ff33;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  nav ul li {
+    color: #ccffcc;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  nav ul li:hover {
+    color: #66ff66;
+    text-shadow: 0 0 2px #33ff33;
+  }
+  
+  #pet {
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+    background: radial-gradient(#66ff66, #33aa33);
+    border-radius: 50%;
+    box-shadow: 0 0 8px #33ff33;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  
+  /* Toolbar */
+  #toolbar {
+    background-color: #1a1f1a;
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #33aa33;
+  }
+  
+  .tool {
+    background-color: #222;
+    color: #ccffcc;
+    border: 1px solid #33aa33;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  
+  .tool.active, .tool:hover {
+    background-color: #33aa33;
+    color: #0f0f0f;
+  }
+  #toolbar label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    color: #ccffcc;
+  }
+  
+  #toolbar input[type="checkbox"] {
+    accent-color: #33aa33;
+  }
+  
+  
+  /* Editor Container */
+  #editor-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: radial-gradient(#112811, #0f0f0f);
+    border-radius: 16px;
+    box-shadow: 0 0 12px #33aa33;
+    margin: 40px auto;
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+  }
+  
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+    background-color: transparent;
+  }
+  
+  #pixel-canvas {
+    z-index: 1;
+    background-color: #000;
+    border: 2px solid #33aa33;
+  }
+  
+  #grid-overlay {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+  body.theme-light {
+    background-color: #fafafa;
+    color: #222;
+  }
+  body.theme-light nav, body.theme-light #toolbar {
+    background: #e0ffe0;
+    border-color: #66cc66;
+  }
+  body.theme-light .tool.active {
+    background-color: #66cc66;
+    color: #000;
+  }
+  
+  #preview-canvas {
+    z-index: 3;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    border: 1px solid #33aa33;
+    background: #000;
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+  }
+  
+  #theme-toggle {
+    background: transparent;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  body.theme-infected {
+    background-color: #110011;
+    color: #ff99ff;
+  }
+  body.theme-infected nav,
+  body.theme-infected #toolbar {
+    background: #330033;
+    border-color: #ff33ff;
+  }
+  body.theme-infected .tool.active {
+    background-color: #ff33ff;
+    color: #000;
+  }
+  body.theme-infected #pet {
+    background: radial-gradient(#ff33ff, #660066);
+    box-shadow: 0 0 12px #ff33ff;
+  }
+  
+  #pet.happy {
+    box-shadow: 0 0 10px #00ff00;
+  }
+  #pet.excited {
+    box-shadow: 0 0 15px #33ff33, 0 0 30px #66ff66;
+    transform: scale(1.2);
+  }
+  #pet-bubble {
+    position: absolute;
+    top: 50px;
+    left: 100px;
+    background: #1a1f1a;
+    color: #ccffcc;
+    border: 1px solid #33aa33;
+    padding: 6px 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 4px #33ff33;
+    font-size: 0.9em;
+    display: none;
+    z-index: 100;
+  }
+  button, input[type="button"] {
+    background-color: #222;
+    color: #ccffcc;
+    border: 1px solid #33aa33;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+  }
+  
+  button:hover, input[type="button"]:hover {
+    background-color: #33aa33;
+    color: #0f0f0f;
+  }

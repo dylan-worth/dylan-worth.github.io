@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MossyPixel Editor</title>
+  <link rel="stylesheet" href="css/mossypixel.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body class="theme-dark">
+  <nav>
+    <div style="display: flex; align-items: center;">
+      <div class="logo">MossyPixel</div>
+      <div id="pet" title="Lil Spore Buddy!"></div>
+      <div id="pet-bubble">You're on fire!</div>
+    </div>
+    <ul>
+      <li onclick="window.location.href='/'">Home</li>
+      <li onclick="window.location.href='/journal'">Journal</li>
+      <li onclick="window.location.href='/lorebook'">Lorebook</li>
+      <li onclick="window.location.href='/mossysprites'">Editor</li>
+    </ul>
+    <button id="theme-toggle">🌙</button>
+  </nav>
+
+  <div id="toolbar">
+    <button id="tool-brush" class="tool active">Brush</button>
+    <button id="tool-eraser" class="tool">Eraser</button>
+    <button id="tool-fill" class="tool">Fill</button>
+    <input type="color" id="color-picker" value="#00ff00" />
+    <label>Zoom:
+      <input type="range" id="zoom" min="1" max="20" value="10" />
+    </label>
+    <button id="toggle-grid">Grid</button>
+    <button id="undo">Undo</button>
+    <button id="redo">Redo</button>
+    <label><input type="checkbox" id="transparent-bg" /> Transparent Background</label>
+    <button id="save-image">Save</button>
+  </div>
+
+  <div id="editor-container">
+    <canvas id="pixel-canvas" width="128" height="128"></canvas>
+    <canvas id="grid-overlay" width="128" height="128"></canvas>
+    <canvas id="preview-canvas" width="32" height="32"></canvas>
+  </div>
+
+  <script type="module" src="js/mossypixel.js"></script>
+  <script type="module" src="js/mossypixel-pet.js"></script>
+  <script type="module" src="mossypixel-shortcuts.js"></script>
+</body>
+</html>
