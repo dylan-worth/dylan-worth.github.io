@@ -8,19 +8,20 @@
 <style>
   :root{
     --bg:#0b0b10;
-    --lava1:#2b0d0d;
-    --lava2:#6a1a1a;
+    --lava1:#2b0d0d; /* dark red veins */
+    --lava2:#6a1a1a; /* hot magma */
     --panel:#1a1f2a;
-    --panel-2:#101420;
+    --panel-2:#0e1320;
     --edge:#313b52;
     --text:#e6e6e6;
     --muted:#a7b0c2;
     --good:#38f57b;
     --ok:#ffd166;
-    --miss:#ff5e57;--lane0:#6bf178;
---lane1:#b16bff;
---lane2:#ff9f45;
---lane3:#6bb6ff;
+    --miss:#ff5e57;/* note colors */
+--lane0:#6bf178; /* green */
+--lane1:#b16bff; /* purple */
+--lane2:#ff9f45; /* orange */
+--lane3:#6bb6ff; /* blue */
 
 }
 
@@ -28,16 +29,38 @@ html,body{height:100%;} body{ margin:0; background: radial-gradient(1200px 600px
 
 .wrap{display:grid; grid-template-columns: 1fr 340px; gap:14px; height:100%;}
 
-.stage{position:relative; display:flex; align-items:center; justify-content:center; height:100%; border-right:2px solid #0008;} canvas{ width:100%; height:100%; display:block; background: linear-gradient(#0c0f17, #0a0c14 65%, #080a10 100%);}
+/* GAME CANVAS PANEL */ .stage{position:relative; display:flex; align-items:center; justify-content:center; height:100%; border-right:2px solid #0008;} canvas{ width:100%; height:100%; display:block; background: linear-gradient(#0c0f17, #0a0c14 65%, #080a10 100%);}
 
-/* LOGO */ .badge{ position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; aspect-ratio:1/1; display:grid; place-items:center; filter: drop-shadow(0 8px 20px #000); z-index:3; } .badge .ring{position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 0deg, #d7dbe9 0 10%, #96a3c7 10% 20%, #d7dbe9 20% 30%, #96a3c7 30% 40%, #d7dbe9 40% 50%, #96a3c7 50% 60%, #d7dbe9 60% 70%, #96a3c7 70% 80%, #d7dbe9 80% 90%, #96a3c7 90% 100%); mask: radial-gradient(circle at 50% 50%, transparent 56%, black 57%);}
+/* LOGO — top-center so it never overlaps the HUD */ .badge{ position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:3; pointer-events:none; width:140px; aspect-ratio:1/1; display:grid; place-items:center; filter: drop-shadow(0 8px 20px #000); } .badge .ring{position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 0deg, #d7dbe9 0 10%, #96a3c7 10% 20%, #d7dbe9 20% 30%, #96a3c7 30% 40%, #d7dbe9 40% 50%, #96a3c7 50% 60%, #d7dbe9 60% 70%, #96a3c7 70% 80%, #d7dbe9 80% 90%, #96a3c7 90% 100%); mask: radial-gradient(circle at 50% 50%, transparent 56%, black 57%);}
 .badge .text{font-weight:800; text-align:center; letter-spacing:.06em; line-height:1;} .badge .text span{display:block; font-size:18px; color:#e6e6f8} .badge .text strong{display:block; font-size:30px; color:#fff; text-shadow: 0 2px 0 #000, 0 0 12px #7fb1ff;}
 
-/* HUD */ .hud{ height:100%; background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border-left: 1px solid #000a; box-shadow: inset 0 0 0 2px #0006, inset 0 0 32px #000c; padding:16px; display:flex; flex-direction:column; gap:16px; } .card{background: linear-gradient(180deg, #111722, #0c121c); border:1px solid var(--edge); border-radius:14px; padding:14px; box-shadow: 0 6px 18px #0008;} .title{font-weight:800; letter-spacing:.04em;} .muted{color:var(--muted); font-size:12px;} .kv{display:grid; grid-template-columns: auto 1fr; gap:6px 12px; align-items:center;} .kv b{font-weight:700} .bars { display:grid; gap:10px; } .bar{height:14px; border-radius:999px; background:#1c2230; border:1px solid #2a3347; box-shadow: inset 0 1px 2px #000; overflow:hidden} .bar>.fill{height:100%; width:0%; background: linear-gradient(90deg, #89ff9f, #59b9ff);} .row{display:flex; gap:10px; align-items:center; justify-content:space-between} .btn{appearance:none; border:none; background:#1e2536; color:#dfe7ff; padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid #2a3550; font-weight:700} .btn:hover{background:#283148} .btn:active{transform:translateY(1px)} .chip{display:inline-flex; align-items:center; gap:8px; background:#121929; color:#c4d0f6; border:1px solid #28324a; border-radius:999px; padding:8px 12px; font-size:12px;} .dot{width:10px; height:10px; border-radius:50%} .hearts{display:flex; gap:6px} .heart{width:18px; height:18px; background: radial-gradient(circle at 30% 30%, #ff9090, #ff4545 60%, #d70024 61%); clip-path: path('M12 4 C12 2 10 0 8 0 C6 0 4 2 4 4 C4 6 6 8 8 10 C10 8 12 6 12 4 Z'); filter: drop-shadow(0 0 6px #ff1825aa)} .heart.off{opacity:.25; filter:none}
+/* HUD (right panel on desktop) */ .hud{ height:100%; background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border-left: 1px solid #000a; box-shadow: inset 0 0 0 2px #0006, inset 0 0 32px #000c; padding:16px; display:flex; flex-direction:column; gap:16px; position:relative; } .card{background: linear-gradient(180deg, #111722, #0c121c); border:1px solid var(--edge); border-radius:14px; padding:14px; box-shadow: 0 6px 18px #0008;} .title{font-weight:800; letter-spacing:.04em;} .muted{color:var(--muted); font-size:12px;} .kv{display:grid; grid-template-columns: auto 1fr; gap:6px 12px; align-items:center;} .kv b{font-weight:700} .bars { display:grid; gap:10px; } .bar{height:14px; border-radius:999px; background:#1c2230; border:1px solid #2a3347; box-shadow: inset 0 1px 2px #000; overflow:hidden} .bar>.fill{height:100%; width:0%; background: linear-gradient(90deg, #89ff9f, #59b9ff);}
+.row{display:flex; gap:10px; align-items:center; justify-content:space-between} .btn{appearance:none; border:none; background:#1e2536; color:#dfe7ff; padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid #2a3550; font-weight:700} .btn:hover{background:#283148} .btn:active{transform:translateY(1px)} .chip{display:inline-flex; align-items:center; gap:8px; background:#121929; color:#c4d0f6; border:1px solid #28324a; border-radius:999px; padding:8px 12px; font-size:12px;} .dot{width:10px; height:10px; border-radius:50%} .hearts{display:flex; gap:6px} .heart{width:18px; height:18px; background: radial-gradient(circle at 30% 30%, #ff9090, #ff4545 60%, #d70024 61%); clip-path: path('M12 4 C12 2 10 0 8 0 C6 0 4 2 4 4 C4 6 6 8 8 10 C10 8 12 6 12 4 Z'); filter: drop-shadow(0 0 6px #ff1825aa)} .heart.off{opacity:.25; filter:none}
 
-.controls{ position:absolute; left:0; right:340px; bottom:16px; display:flex; justify-content:center; gap:10px; z-index:4; } .key{width:64px; height:64px; border-radius:18px; background:#0c121c; border:2px solid #2f3b55; display:grid; place-items:center; color:#fff; font-weight:800; text-shadow:0 2px 0 #000; user-select:none} .key:active{transform:translateY(2px)} .legend{display:flex; gap:10px; flex-wrap:wrap}
+/* ON-SCREEN CONTROLS (mobile) */ .controls{ position:absolute; left:0; right:340px; bottom:16px; display:flex; justify-content:center; gap:10px; z-index:4; } .key{width:64px; height:64px; border-radius:18px; background:#0c121c; border:2px solid #2f3b55; display:grid; place-items:center; color:#fff; font-weight:800; text-shadow:0 2px 0 #000; user-select:none} .key:active{transform:translateY(2px)}
 
-@media (max-width: 980px){ .wrap{grid-template-columns: 1fr;} .hud{position:fixed; bottom:0; left:0; right:0; height:auto; max-height:50%; overflow-y:auto; width:100%; backdrop-filter: blur(6px); opacity:.98; border-left:none; border-top:1px solid #000a; box-shadow: 0 -4px 18px #000c;} .controls{ right:12px; left:12px; bottom:calc(50% + 12px); } .badge { width:90px; } } </style>
+.legend{display:flex; gap:10px; flex-wrap:wrap}
+
+/* ===== Mobile layout: HUD becomes a bottom drawer ===== */ @media (max-width: 980px){ .wrap{grid-template-columns: 1fr;} .stage{border-right:none;}
+
+.badge{ width:100px; }
+
+.hud{
+  position:absolute; left:0; right:0; bottom:0; top:auto; width:100%; max-width:none;
+  border-left:none; border-top:1px solid #000a; border-radius:16px 16px 0 0;
+  padding-top:36px; /* make room for grip */
+  transform: translateY(calc(100% - 64px));
+  transition: transform .25s ease;
+  backdrop-filter: blur(6px);
+}
+.hud.open{ transform: translateY(0%); }
+
+.drawer-grip{ display:block; position:absolute; left:0; right:0; top:6px; height:28px;}
+.drawer-grip button{ display:block; margin:0 auto; width:60px; height:6px; border-radius:999px; border:none; background:#3a4667; }
+
+.controls{ right:12px; left:12px; bottom:90px; }
+
+} </style>
 
 </head>
 <body>
@@ -54,7 +77,9 @@ html,body{height:100%;} body{ margin:0; background: radial-gradient(1200px 600px
         <div class="key" data-lane="2">▲</div>
         <div class="key" data-lane="3">▶︎</div>
       </div>
-    </div><aside class="hud">
+    </div><aside class="hud" id="hud">
+  <div class="drawer-grip"><button id="drawerToggle" aria-label="Toggle HUD"></button></div>
+
   <div class="card">
     <div class="title">Session</div>
     <div class="kv" style="margin-top:8px">
@@ -117,25 +142,386 @@ html,body{height:100%;} body{ margin:0; background: radial-gradient(1200px 600px
 </aside>
 
   </div><script>
-// Full game logic
-const canvas=document.getElementById('game');
-const ctx=canvas.getContext('2d');
-const DPR=window.devicePixelRatio||1;
-function resize(){canvas.width=canvas.clientWidth*DPR;canvas.height=canvas.clientHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);laneGeom.compute();}
-new ResizeObserver(resize).observe(canvas);
-const laneGeom={lanes:4,width:0,height:0,hitY:0,topW:140,bottomW:520,gap:16,compute(){this.width=canvas.clientWidth;this.height=canvas.clientHeight;this.hitY=this.height-110;}};
-const state={running:false,paused:false,startAt:0,pauseAt:0,duration:75000,approach:1500,hitWindow:{good:120,ok:180},notes:[],active:[],nextIdx:0,score:0,streak:0,mult:1,healthMax:5,health:5,speed:5};
-function nowMs(){if(!state.running)return 0;return performance.now()-state.startAt;}
-function generateMap(totalMs){let bpm=100;let beat=60000/bpm;let t=0;let map=[];while(t<totalMs){map.push({t:Math.floor(t),lane:Math.floor(Math.random()*4)});t+=beat;}return map;}
-function startRun(){state.notes=generateMap(state.duration);state.active=[];state.nextIdx=0;state.score=0;state.streak=0;state.mult=1;state.health=state.healthMax;state.running=true;state.startAt=performance.now();loop();}
-function hit(lane){if(!state.running)return;const t=nowMs();let target=null;for(const n of state.active){if(n.lane===lane&&!n.hit&&Math.abs(n.t-t)<=state.hitWindow.ok){target=n;break;}}if(target){target.hit=true;state.streak++;state.score+=100;state.mult=Math.min(8,1+Math.floor(state.streak/10));}else{state.streak=0;state.mult=1;state.health--;if(state.health<=0)endRun();}updateHud();}
-function updateHud(){document.getElementById('score').textContent=state.score;document.getElementById('streak').textContent=state.streak;document.getElementById('mult').textContent='x'+state.mult;let heartsEl=document.getElementById('hearts');heartsEl.innerHTML='';for(let i=0;i<state.healthMax;i++){let d=document.createElement('div');d.className='heart'+(i<state.health?'':' off');heartsEl.appendChild(d);}document.getElementById('timeFill').style.width=(100*nowMs()/state.duration)+'%';}
-function endRun(){state.running=false;alert('Run over: '+state.score);} 
-function loop(){if(!state.running)return;const t=nowMs();const A=state.approach;while(state.nextIdx<state.notes.length&&state.notes[state.nextIdx].t-t<A){state.active.push(state.notes[state.nextIdx]);state.nextIdx++;}ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);for(const n of state.active){if(n.hit)continue;const prog=1-(n.t-t)/A;const y=prog*laneGeom.hitY;const x=(n.lane+1)*(canvas.clientWidth/5);ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fillStyle=['#6bf178','#b16bff','#ff9f45','#6bb6ff'][n.lane];ctx.fill();}if(t<state.duration){requestAnimationFrame(loop);}else{endRun();}} 
-// Input
-const laneForKey=(c)=>({ArrowLeft:0,KeyA:0,ArrowDown:1,KeyS:1,ArrowUp:2,KeyW:2,ArrowRight:3,KeyD:3}[c]??-1);
-window.addEventListener('keydown',e=>{const l=laneForKey(e.code);if(l!=-1)hit(l);});
-resize();
-startRun();
+(() => {
+  // ===== Utility =====
+  const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
+  const rand = (a,b) => a + Math.random()*(b-a);
+
+  // ===== Canvas setup (HiDPI) =====
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const DPR = window.devicePixelRatio || 1;
+  function resize(){
+    const {clientWidth:w, clientHeight:h} = canvas;
+    canvas.width = Math.floor(w*DPR); canvas.height = Math.floor(h*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    laneGeom.compute();
+  }
+  new ResizeObserver(resize).observe(canvas);
+
+  // ===== Lane geometry (for light perspective look) =====
+  const laneGeom = {
+    lanes:4, width:0, height:0, hitY:0,
+    topW:140, bottomW:520, gap:16, left:0,
+    colors:['var(--lane0)','var(--lane1)','var(--lane2)','var(--lane3)'],
+    compute(){
+      this.width = canvas.clientWidth;
+      this.height = canvas.clientHeight;
+      this.hitY = this.height - 110; // hit line from bottom
+      this.left = (this.width - this.bottomW)/2;
+    },
+    laneCenter(i, y){
+      const t = clamp((y)/(this.height), 0, 1);
+      const w = this.topW*(1-t) + this.bottomW*(t);
+      const start = (this.width - w)/2;
+      const totalGap = this.gap*(this.lanes-1);
+      const laneW = (w - totalGap)/this.lanes;
+      return start + i*(laneW+this.gap) + laneW/2;
+    },
+    laneRadius(y){
+      const t = clamp((y)/(this.height), 0, 1);
+      const w = this.topW*(1-t) + this.bottomW*(t);
+      const totalGap = this.gap*(this.lanes-1);
+      const laneW = (w - totalGap)/this.lanes;
+      return laneW*0.42;
+    }
+  };
+
+  // ===== Game State =====
+  const state = {
+    running:false, paused:false,
+    startAt:0, pauseAt:0, duration:75000, // ms
+    approach:1500, // ms time for a note to travel
+    hitWindow:{good:120, ok:180},
+    notes:[], active:[], nextIdx:0,
+    score:0, streak:0, mult:1, healthMax:5, health:5,
+    speed:5,
+  };
+
+  // ===== UI refs =====
+  const $ = sel => document.querySelector(sel);
+  const scoreEl = $('#score'), streakEl = $('#streak'), multEl = $('#mult');
+  const timeFill = $('#timeFill');
+  const heartsEl = $('#hearts');
+  const playBtn = $('#play'), pauseBtn = $('#pause'), restartBtn = $('#restart');
+  const diffSel = $('#difficulty'), lenSel = $('#length'), speedSlider = $('#speed');
+  const touchControls = document.getElementById('touchControls');
+  const hud = document.getElementById('hud');
+  const drawerToggle = document.getElementById('drawerToggle');
+
+  // Drawer toggle for mobile
+  drawerToggle.addEventListener('click', ()=> hud.classList.toggle('open'));
+  // Also allow swipe-up / swipe-down
+  let touchY=null; let startY=null;
+  hud.addEventListener('touchstart', (e)=>{ if(e.touches.length!==1) return; startY = e.touches[0].clientY; touchY=startY; }, {passive:true});
+  hud.addEventListener('touchmove', (e)=>{ if(startY==null) return; touchY = e.touches[0].clientY; }, {passive:true});
+  hud.addEventListener('touchend', ()=>{
+    if(startY==null) return; const dy = (touchY||startY) - startY; if(Math.abs(dy)>30){ if(dy<0) hud.classList.add('open'); else hud.classList.remove('open'); }
+    startY=null; touchY=null;
+  });
+
+  function renderHearts(){
+    heartsEl.innerHTML = '';
+    for(let i=0;i<state.healthMax;i++){
+      const d = document.createElement('div');
+      d.className = 'heart'+(i<state.health?'':' off');
+      heartsEl.appendChild(d);
+    }
+  }
+
+  // ===== Map generation =====
+  function seconds(s){return s*1000}
+  function difficultyToParams(diff){
+    switch(diff){
+      case 'easy': return {bpm:92, density:0.55, approach:1900, windowGood:140, windowOk:200};
+      case 'medium': return {bpm:108, density:0.7, approach:1600, windowGood:120, windowOk:180};
+      case 'hard': return {bpm:128, density:0.85, approach:1350, windowGood:105, windowOk:160};
+      case 'insane': return {bpm:150, density:1.0, approach:1150, windowGood:95, windowOk:140};
+    }
+  }
+  function lengthToMs(len){
+    return len==='short'?seconds(45): len==='long'?seconds(120): seconds(75);
+  }
+
+  function generateMap({bpm, density}, totalMs){
+    const beat = 60000/bpm;
+    const map = [];
+    let t=0; let lastLane=-1; let doubleChance=0.08 + density*0.06;
+    while(t < totalMs){
+      if(Math.random() < density){
+        let lane = Math.floor(rand(0,4));
+        if(lane===lastLane) lane = (lane+1)%4; // avoid long repeats
+        lastLane = lane;
+        map.push({t:Math.floor(t), lane});
+        if(Math.random() < doubleChance){
+          const other = (lane + (Math.random()>0.5?2:1))%4;
+          map.push({t:Math.floor(t), lane:other});
+        }
+      }
+      t += (Math.random()<0.25? beat/2 : beat);
+    }
+    map.sort((a,b)=> a.t===b.t ? a.lane-b.lane : a.t-b.t);
+    return map;
+  }
+
+  // ===== Audio (tiny beeps with WebAudio) =====
+  const audio = {
+    ctx:null,
+    ensure(){ if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+    beep(lane){
+      this.ensure();
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type='triangle';
+      const base = 330; // Hz
+      o.frequency.value = base + lane*70;
+      g.gain.value = 0.12;
+      o.connect(g).connect(this.ctx.destination);
+      o.start();
+      o.stop(this.ctx.currentTime + 0.09);
+    },
+    whiff(){ // miss sound
+      this.ensure();
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type='sawtooth';
+      o.frequency.value = 140;
+      g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+0.12);
+      o.connect(g).connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime+0.14);
+    }
+  };
+
+  // ===== Input =====
+  const laneForKey = (code) => {
+    switch(code){
+      case 'ArrowLeft': case 'KeyA': return 0;
+      case 'ArrowDown': case 'KeyS': return 1;
+      case 'ArrowUp':   case 'KeyW': return 2;
+      case 'ArrowRight':case 'KeyD': return 3;
+      default: return -1;
+    }
+  };
+
+  const pressed = new Set();
+  window.addEventListener('keydown', (e)=>{
+    if(e.repeat) return;
+    const lane = laneForKey(e.code);
+    if(lane!==-1){ e.preventDefault(); hit(lane); pressed.add(lane);}    
+  });
+  window.addEventListener('keyup', (e)=>{
+    const lane = laneForKey(e.code);
+    if(lane!==-1) pressed.delete(lane);
+  });
+
+  // Touch controls visibility
+  function maybeShowTouch(){
+    const isTouch = matchMedia('(hover: none)').matches || 'ontouchstart' in window;
+    touchControls.hidden = !isTouch;
+  }
+  maybeShowTouch();
+  touchControls.addEventListener('touchstart', (e)=>{
+    const btn = e.target.closest('.key'); if(!btn) return;
+    e.preventDefault(); hit(Number(btn.dataset.lane));
+  });
+
+  // ===== Hit Logic =====
+  function nowMs(){
+    if(!state.running) return 0;
+    const t = performance.now();
+    return t - state.startAt;
+  }
+
+  function scheduleNotes(){ state.active.length = 0; state.nextIdx = 0; }
+
+  function effectiveApproach(){
+    const s = state.speed; // 3..9
+    const minA = state.approach*0.65, maxA = state.approach*1.35;
+    const t = (s-3)/(9-3);
+    return maxA*(1-t) + minA*(t);
+  }
+
+  function hit(lane){
+    if(!state.running || state.paused) return;
+    const t = nowMs();
+    let targetIdx = -1; let deltaMin = Infinity;
+    for(let i=0;i<state.notes.length;i++){
+      const n = state.notes[i];
+      if(n.hit) continue; if(n.lane!==lane) continue;
+      const d = Math.abs(n.t - t);
+      if(d < deltaMin){ deltaMin = d; targetIdx = i; }
+      if(n.t > t + state.hitWindow.ok) break;
+    }
+
+    if(targetIdx!==-1 && deltaMin <= state.hitWindow.ok){
+      const n = state.notes[targetIdx];
+      n.hit = true; n.res = (deltaMin <= state.hitWindow.good? 'good':'ok');
+      const add = n.res==='good'? 100 : 50;
+      state.streak++; if(state.streak%10===0) state.mult = Math.min(8, state.mult+1);
+      state.score += add * state.mult; audio.beep(lane);
+      flashAtLane(lane, n.res);
+    } else {
+      audio.whiff();
+      state.streak = 0; state.mult = 1; loseHp(0.2); flashAtLane(lane, 'miss');
+    }
+    updateHud();
+  }
+
+  function loseHp(qty=1){
+    state.health = clamp(state.health - qty, 0, state.healthMax);
+    renderHearts();
+    if(state.health<=0){ endRun(); }
+  }
+
+  // ===== Visual FX =====
+  const sparks = [];
+  function flashAtLane(lane, type){
+    const y = laneGeom.hitY;
+    const x = laneGeom.laneCenter(lane, y);
+    sparks.push({x,y,life:0.3, type});
+  }
+
+  // ===== Run Control =====
+  function startRun(){
+    const params = difficultyToParams(diffSel.value);
+    state.duration = lengthToMs(lenSel.value);
+    state.approach = params.approach;
+    state.hitWindow.good = params.windowGood;
+    state.hitWindow.ok = params.windowOk;
+    state.speed = Number(speedSlider.value);
+
+    state.notes = generateMap(params, state.duration);
+    state.score = 0; state.streak = 0; state.mult = 1; state.health = state.healthMax; renderHearts();
+    scheduleNotes();
+    updateHud();
+
+    // show quick confirmation so you can SEE map gen details
+    toast(`Chart built: ${state.notes.length} notes · ${params.bpm} BPM`);
+
+    state.running = true; state.paused=false;
+    state.startAt = performance.now();
+    loop();
+    if(matchMedia('(max-width: 980px)').matches){
+      hud.classList.add('open'); setTimeout(()=>hud.classList.remove('open'), 1200);
+    }
+  }
+  }
+
+  function pauseRun(){ if(!state.running || state.paused) return; state.paused = true; state.pauseAt = performance.now(); }
+  function resumeRun(){ if(!state.running || !state.paused) return; const dt = performance.now() - state.pauseAt; state.startAt += dt; state.paused=false; loop(); }
+  function endRun(){ state.running=false; state.paused=false; toast(`Run over — Score ${state.score} | Max Streak ${state.streak}`); }
+  function restart(){ startRun(); }
+
+  playBtn.addEventListener('click', ()=>{ if(!state.running) startRun(); else resumeRun(); });
+  pauseBtn.addEventListener('click', ()=> pauseRun());
+  restartBtn.addEventListener('click', ()=> restart());
+  speedSlider.addEventListener('input', ()=>{ state.speed = Number(speedSlider.value); });
+
+  // ===== Heads-up display =====
+  function updateHud(){ scoreEl.textContent = state.score|0; streakEl.textContent = state.streak|0; multEl.textContent = `x${state.mult}`; }
+  function setTimeProgress(p){ timeFill.style.width = (p*100).toFixed(1)+'%'; }
+
+  function toast(text){
+    const d = document.createElement('div');
+    d.textContent = text; d.style.position='absolute'; d.style.left='50%'; d.style.top='18px';
+    d.style.transform='translateX(-50%)'; d.style.padding='10px 14px'; d.style.border='1px solid #2a3550';
+    d.style.background='#0f1421cc'; d.style.borderRadius='10px'; d.style.zIndex=99; d.style.backdropFilter='blur(2px)';
+    d.style.boxShadow='0 10px 20px #0007';
+    document.body.appendChild(d); setTimeout(()=>d.remove(), 2600);
+  }
+
+  // ===== Main loop =====
+  function loop(){
+    if(!state.running || state.paused) return;
+
+    const t = nowMs();
+    const A = effectiveApproach();
+    while(state.nextIdx < state.notes.length && state.notes[state.nextIdx].t - t < A){ state.active.push(state.notes[state.nextIdx]); state.nextIdx++; }
+
+    for(const n of state.active){ if(!n.hit && t - n.t > state.hitWindow.ok + 60){ n.hit=true; n.res='miss'; state.streak=0; state.mult=1; loseHp(1); } }
+
+    draw(t, A);
+
+    const p = clamp(t/state.duration,0,1); setTimeProgress(p);
+    if(t >= state.duration && state.health>0){ endRun(); return; }
+
+    requestAnimationFrame(loop);
+  }
+
+  function draw(t, approach){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+
+    const grad = ctx.createRadialGradient(w/2, h*0.2, 10, w/2, h*0.2, Math.max(w,h)*0.6);
+    grad.addColorStop(0,'#2a1137'); grad.addColorStop(1,'#07080c');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+
+    ctx.save();
+    ctx.fillStyle = '#121721';
+    ctx.strokeStyle = '#313b52';
+    ctx.beginPath();
+    const topW = laneGeom.topW, bottomW = laneGeom.bottomW;
+    const topX = (w-topW)/2, bottomX = (w-bottomW)/2;
+    ctx.moveTo(topX, h*0.1); ctx.lineTo(topX+topW, h*0.1); ctx.lineTo(bottomX+bottomW, h*0.96); ctx.lineTo(bottomX, h*0.96); ctx.closePath();
+    ctx.fill(); ctx.globalAlpha=.35; ctx.stroke(); ctx.globalAlpha=1;
+
+    ctx.strokeStyle='#4461a8'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(bottomX, laneGeom.hitY); ctx.lineTo(bottomX+bottomW, laneGeom.hitY); ctx.stroke();
+
+    for(let i=1;i<4;i++){
+      const y1 = h*0.11, y2=h*0.95; 
+      const cx1 = laneGeom.laneCenter(i, y1), cx2 = laneGeom.laneCenter(i, y2);
+      ctx.strokeStyle = '#25304a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx1, y1); ctx.lineTo(cx2, y2); ctx.stroke();
+    }
+
+    for(const n of state.active){
+      if(n.hit && n.res==='miss') continue;
+      const prog = clamp(1 - (n.t - t)/approach, 0, 1);
+      const y = h*0.12 + prog*(laneGeom.hitY - h*0.12);
+      const x = laneGeom.laneCenter(n.lane, y);
+      const r = laneGeom.laneRadius(y);
+      const color = getComputedStyle(document.documentElement).getPropertyValue(['--lane0','--lane1','--lane2','--lane3'][n.lane]).trim();
+
+      ctx.save();
+      ctx.fillStyle = '#0c0f16';
+      ctx.strokeStyle = '#3a4667'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+      const rr = r*0.62; const grad2 = ctx.createRadialGradient(x-r*0.3,y-r*0.3, rr*0.2, x,y, rr);
+      grad2.addColorStop(0, color); grad2.addColorStop(1, '#000');
+      ctx.fillStyle = grad2; ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill();
+
+      if(n.hit && (n.res==='good'||n.res==='ok')){
+        const age = (t - n.t);
+        if(age < 160){ ctx.globalAlpha = 1 - age/160; ctx.strokeStyle = n.res==='good'? '#7dffa6':'#ffe18a'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(x,y, r*0.95, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; }
+      }
+      ctx.restore();
+    }
+
+    for(let i=0;i<4;i++){
+      const y = laneGeom.hitY; const x = laneGeom.laneCenter(i, y); const r = laneGeom.laneRadius(y)*0.9;
+      ctx.save(); ctx.globalAlpha = pressed.has(i)? 1 : .55; const color = getComputedStyle(document.documentElement).getPropertyValue(['--lane0','--lane1','--lane2','--lane3'][i]).trim();
+      ctx.strokeStyle = '#40507a'; ctx.lineWidth=4; ctx.fillStyle = '#0c1018'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha = pressed.has(i)? 0.45 : 0.18; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y, r*0.6, 0, Math.PI*2); ctx.fill(); ctx.restore();
+    }
+
+    for(let i=sparks.length-1;i>=0;i--){
+      const s = sparks[i]; s.life -= 1/60; if(s.life<=0){ sparks.splice(i,1); continue; }
+      const a = clamp(s.life/0.3, 0, 1);
+      ctx.globalAlpha = a; ctx.strokeStyle = s.type==='miss'? 'var(--miss)': s.type==='good'? 'var(--good)':'var(--ok)';
+      ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(s.x, s.y, 42*(1-a), 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha=1;
+    }
+
+    ctx.restore();
+  }
+
+  // ===== Boot =====
+  resize(); renderHearts(); updateHud(); setTimeProgress(0);
+  // Spacebar quick start
+  window.addEventListener('keydown', (e)=>{
+    if(e.code==='Space' && !state.running){ e.preventDefault(); startRun(); }
+  });
+  // Auto-start on load so map gen is visible immediately
+  window.addEventListener('load', ()=> startRun());
+})();
 </script></body>
 </html>
