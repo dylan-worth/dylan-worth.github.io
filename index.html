@@ -1,80 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dylan's Blog</title>
-  <link rel="stylesheet" href="css/main.css" />
-<link rel="stylesheet" href="css/journal.css" />
-
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dylan Wirth · Lumpbrain</title>
+  <meta name="description" content="The personal site of Dylan Worth, Mold Assessor, Microbiologist, and Developer." />
+  <style>
+    :root{
+      --bg:#0b1320;
+      --text:#e8eef6;
+      --muted:#93a1b2;
+      --accent:#78f09e;
+    }
+    body{
+      margin:0;
+      font:16px/1.6 system-ui, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    header{
+      text-align:center;
+      padding:4rem 1rem 2rem;
+    }
+    header h1{
+      font-size:clamp(2.5rem, 6vw, 4rem);
+      margin:0 0 1rem;
+    }
+    nav{
+      display:flex;
+      justify-content:center;
+      gap:1.5rem;
+      margin-bottom:1.5rem;
+    }
+    nav a{
+      color:var(--accent);
+      font-weight:600;
+      text-decoration:none;
+      border-bottom:2px solid transparent;
+      transition:border .2s ease;
+    }
+    nav a:hover{border-bottom:2px solid var(--accent)}
+    main{
+      flex:1;
+      max-width:720px;
+      margin:0 auto;
+      padding:0 1.5rem;
+      text-align:center;
+    }
+    main p{
+      font-size:1.125rem;
+      color:var(--muted);
+    }
+    footer{
+      text-align:center;
+      padding:1.5rem;
+      font-size:.875rem;
+      color:var(--muted);
+      border-top:1px solid rgba(255,255,255,.1);
+    }
+    footer a{color:var(--accent); text-decoration:none}
+  </style>
 </head>
 <body>
-  <nav class="mycelium-nav">
-    <a href="index.html">🏡 Home</a>
-    <a href="journal.html">📓 Journal</a>
-    <a href="lorebook.html">📜 Lorebook</a>
-    <a href="contact.html">🪵 Contact</a>
-  </nav>
-  
-
-  <!-- 🧠 Stories -->
-  <section class="stories-bar">
-    <div class="stories-container"></div>
-  </section>
-
-  <!-- 🎵 Background music -->
-  <audio id="storyMusic" autoplay loop hidden></audio>
-
-  <!-- 📝 Blog Posts -->
-  <main class="blog">
-
-    <article class="post">
-      <h2>Pixel Art Sprite Editor</h2>
-      <p>I am currently working on a spritesheet editor which you can check out here: <a href="mossysprites.html">spritesheet</a> but this currenty is for desktop only. 
-      It is to assist me in the game.</p>
-      <img src="assets/respirator.png" width="98%" height="400" alt="">
-    </article>
-
-    <article class="post">
-      <h2>WRT class</h2>
-      <p>Last week, the company I work for - iMold - paid for us to take our WRT. We are locked into their company for a year unless we want to pay them back an 
-        overpriced amount of $500. But I get it, they wanted to invest in us to hopefully get profit back. I used gpt to create a photo in a ghibli inspired way.
-      </p>
-      <img src="assets/WRT_CLASS.png" width="98%" height="400">
-    </article>
-
-    <article class="post">
-      <h2>Welcome to My World</h2>
-      <p>This website will be my go to place to post my thoughts. You can disagree or agree, doesn't change whether or not I post.</p>
-    </article>
-
-    
-
-    
-    
-
-  <!-- 🔮 Story Viewer -->
-  <div id="storyViewer" class="story-viewer hidden">
-    <div class="progress-bar-container" id="progressContainer"></div>
-    <div class="story-content" id="storyContent"></div>
-    <button class="close-btn" onclick="closeStory()">✖</button>
-  </div>
-  <footer class="living-footer">
-    <div class="root-week"></div>
-    <p>&copy; 2025 Dylan’s Digital Forest</p>
-  </footer>
-  <div class="spores" id="spores"></div>
-
-  <div id="moonPhase" class="moon-widget" title="Current Moon Phase"></div>
-
-  <script src="js/stories.js"></script>
-  <script src="js/moon_phase.js"></script>
-  <script src="js/generate_root.js"></script>
-  <script src="js/spores.js"></script>
-</body>
-
-
-
-
+  <header>
+    <h1>Dylan Worth</h1>
+    <nav>
+      <a href="big3/mold-assessment.html">Mold Assessor</a>
+      <a href="big3/microbiology.html">Microbiologist</a>
+      <a href="big3/developer.html">Developer</a>
+    </nav>
+  </header>  <main>
+    <p>
+      Hey, I’m Dylan Worth — though online I often go by <strong>Lumpbrain</strong>. This site is my little hub on the internet, a place where I bring together the different sides of who I am. From diving into mold inspections to exploring microbiology and tinkering with code, I use this space to share what I’m learning and building. Think of it as a digital notebook where I can spill my thoughts, projects, and experiments right onto the screen.
+    </p>
+  </main>  <footer>
+    <p>© <span id="year"></span> Dylan Worth · Built with curiosity, coffee, and open-source vibes. | <a href="mailto:dylanworth@protonmail.com">Contact</a></p>
+  </footer>  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script></body>
 </html>
