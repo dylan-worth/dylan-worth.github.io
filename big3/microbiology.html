@@ -1,0 +1,118 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Microbiology · Dylan Wirth</title>
+  <meta name="description" content="Dylan Wirth's microbiology hub — plans, notes, and articles on viruses, bacteria, and fungi. Environmental Microbiology degree target: 2027." />
+  <style>
+    :root{
+      --bg:#0b1320; --panel:#101a2c; --card:#0d1729; --text:#e8eef6; --muted:#9bb0c7; --accent:#78f09e; --accent-2:#8fd3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text)}header{padding:2.75rem 1rem 1rem; text-align:center}
+header h1{margin:0; font-size:clamp(2rem,5.5vw,3.5rem)}
+header p{max-width:950px; margin:.8rem auto 0; color:var(--muted)}
+
+.wrap{max-width:1100px; margin:0 auto; padding:0 1rem 3.5rem}
+.summary{margin:1.25rem 0 1.5rem; background:linear-gradient(180deg, var(--panel), #0b1526); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1.1rem 1rem}
+.summary h2{margin:.25rem 0 .4rem; font-size:1.25rem}
+.summary p{margin:.25rem 0; color:var(--muted)}
+
+/* Timeline */
+.timeline{display:grid; grid-template-columns: 1fr; gap:.75rem; margin-top:.75rem}
+.trow{display:flex; gap:.75rem; align-items:flex-start}
+.tdate{flex:0 0 120px; color:var(--accent-2); font-weight:700}
+.titem{flex:1; background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:.75rem 1rem}
+.titem p{margin:.25rem 0; color:var(--muted)}
+
+.section-title{display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin:1.75rem 0 .75rem}
+.section-title h2{margin:0; font-size:1.35rem}
+.section-title input{flex:1; min-width:200px; background:#0a1222; color:var(--text); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:.55rem .7rem}
+
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem}
+@media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:1rem; display:flex; flex-direction:column}
+.card h3{margin:.25rem 0 .5rem; font-size:1.1rem}
+.card p{margin:0; color:var(--muted)}
+.card a{margin-top:auto; align-self:flex-start; color:var(--accent); text-decoration:none; font-weight:600}
+
+.pill{display:inline-block; background:rgba(120,240,158,.12); border:1px solid rgba(120,240,158,.3); color:var(--accent); padding:.15rem .5rem; border-radius:999px; font-size:.8rem; font-weight:600}
+.pill.blue{background:rgba(143,211,255,.12); border-color:rgba(143,211,255,.35); color:var(--accent-2)}
+
+footer{margin-top:2rem; text-align:center; color:var(--muted); padding:2rem 1rem; border-top:1px solid rgba(255,255,255,.08)}
+footer a{color:var(--accent); text-decoration:none}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Microbiology</h1>
+    <p>
+      Big picture: I’m building toward an <strong>Environmental Microbiology</strong> degree in <strong>2027</strong>. 2026 is heads‑down on the business; then I’ll transfer prior software engineering credits and go full send into microbes — viruses, bacteria, and fungi — with the long‑term goal of opening my own lab. Harmful in the wild, fascinating under the lens; think of this as my real‑world Pokédex for tiny troublemakers.
+    </p>
+  </header>  <div class="wrap">
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title">Roadmap & Focus</h2>
+      <div class="timeline">
+        <div class="trow">
+          <div class="tdate">2025 → 2026</div>
+          <div class="titem">
+            <strong>Practice first.</strong>
+            <p>Grow SMB Assessments and deepen assessment protocols, QA/QC, and documentation. Build foundations for a future lab (SOPs, chain‑of‑custody, and clean data habits).</p>
+          </div>
+        </div>
+        <div class="trow">
+          <div class="tdate">2027</div>
+          <div class="titem">
+            <strong>Start Environmental Microbiology degree.</strong>
+            <p>Transfer software engineering credits; focus on environmental sampling, bioaerosols, molecular methods, and lab safety. Keep one foot in field work for applied research.</p>
+          </div>
+        </div>
+        <div class="trow">
+          <div class="tdate">Beyond</div>
+          <div class="titem">
+            <strong>Open an applied micro lab.</strong>
+            <p>Bridge field sampling and the bench: fast, reliable results; transparent methods; and reports clients actually understand.</p>
+          </div>
+        </div>
+      </div>
+    </section><div class="section-title">
+  <h2>Articles</h2>
+  <input id="search" type="search" placeholder="Search articles" aria-label="Search articles" />
+</div>
+
+<!-- Article hub: each card links out to its own page (no full articles on this page) -->
+<section class="grid" id="hub">
+  <div class="card" data-tags="overview roadmap study plan degree">
+    <span class="pill blue">Start Here</span>
+    <h3>Why Microbiology? A Field Tech’s Perspective</h3>
+    <p>From crawlspaces to cultures — how remediation, assessment, and code led me to microbes.</p>
+    <a href="../wip.html">Read</a>
+  </div>
+
+</section>
+
+<footer>
+  <p>© <span id="year"></span> Dylan Worth · <a href="/">Home</a> · <a href="mailto:dylanworth@protonmail.com">Contact</a></p>
+</footer>
+
+  </div>  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Simple client-side filter
+    const input = document.getElementById('search');
+    const cards = Array.from(document.querySelectorAll('#hub .card'));
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      cards.forEach(c => {
+        const text = c.innerText.toLowerCase() + ' ' + (c.dataset.tags || '');
+        c.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  </script></body>
+</html>
