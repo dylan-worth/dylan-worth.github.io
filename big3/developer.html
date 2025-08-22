@@ -1,0 +1,85 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Developer · Dylan Worth</title>
+  <meta name="description" content="Dylan Worth — developer notes, projects, and a peek at the SMB Assessments CRM." />
+  <style>
+    :root{
+      --bg:#0b1320; --panel:#101a2c; --card:#0d1729; --text:#e8eef6; --muted:#9bb0c7; --accent:#78f09e; --accent-2:#8fd3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text)}header{padding:2.75rem 1rem 1rem; text-align:center}
+header h1{margin:0; font-size:clamp(2rem,5.5vw,3.5rem)}
+header p{max-width:940px; margin:.8rem auto 0; color:var(--muted)}
+
+.wrap{max-width:1100px; margin:0 auto; padding:0 1rem 3.5rem}
+.summary{margin:1.25rem 0 1.5rem; background:linear-gradient(180deg, var(--panel), #0b1526); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1.1rem 1rem}
+.summary h2{margin:.25rem 0 .4rem; font-size:1.25rem}
+.summary p{margin:.25rem 0; color:var(--muted)}
+.bullets{margin:.5rem 0 .75rem 1rem}
+.bullets li{margin:.25rem 0}
+
+.section-title{display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin:1.75rem 0 .75rem}
+.section-title h2{margin:0; font-size:1.35rem}
+
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem}
+@media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:1rem; display:flex; flex-direction:column}
+.card h3{margin:.25rem 0 .5rem; font-size:1.1rem}
+.card p{margin:0; color:var(--muted)}
+.card a{margin-top:auto; align-self:flex-start; color:var(--accent); text-decoration:none; font-weight:600}
+
+.pill{display:inline-block; background:rgba(120,240,158,.12); border:1px solid rgba(120,240,158,.3); color:var(--accent); padding:.15rem .5rem; border-radius:999px; font-size:.8rem; font-weight:600}
+
+footer{margin-top:2rem; text-align:center; color:var(--muted); padding:2rem 1rem; border-top:1px solid rgba(255,255,255,.08)}
+footer a{color:var(--accent); text-decoration:none}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Developer</h1>
+    <p>
+      Hi, I’m <strong>Dylan Worth</strong> — I build practical tools for field work and small business ops. My stack is lightweight, privacy‑minded, and open‑source friendly. I like clean UIs, portable data, and apps that keep working even when Wi‑Fi doesn’t. This page collects notes on current builds and where I’m taking them next.
+    </p>
+  </header>  <div class="wrap">
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title">What I’m Building</h2>
+      <p>
+        **SMB Assessments CRM (work‑in‑progress):** a focused, offline‑capable client + jobs tracker designed for restoration and assessment workflows.
+      </p>
+      <ul class="bullets">
+        <li><strong>Offline‑first:</strong> Works in the field; sync later. Local JSON storage with export/import for portability.</li>
+        <li><strong>Clean documentation:</strong> Clients, sites, rooms, moisture logs, and photos mapped to a single job timeline.</li>
+        <li><strong>No vendor lock‑in:</strong> Your data stays yours; simple schemas and easy backups.</li>
+      </ul>
+      <p>
+        Roadmap includes permissions, printable scopes, and basic analytics. (No public repo yet; still shaping the data model.)
+      </p>
+    </section><div class="section-title">
+  <h2>Articles & Updates</h2>
+</div>
+
+<!-- Only one card, links to parent folder WIP page as requested -->
+<section class="grid" id="hub">
+  <div class="card" data-tags="crm dev roadmap">
+    <span class="pill">Update</span>
+    <h3>CRM Dev Log: From Field Notes to Product</h3>
+    <p>A brief on the goals, constraints, and why offline matters when you’re knee‑deep in a crawlspace.</p>
+    <a href="../wip.html">Read</a>
+  </div>
+</section>
+
+<footer>
+  <p>© <span id="year"></span> Dylan Worth · <a href="/">Home</a> · <a href="mailto:dylanworth@protonmail.com">Contact</a></p>
+</footer>
+
+  </div>  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script></body>
+</html>
