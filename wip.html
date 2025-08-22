@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Work in Progress · 404</title>
+  <meta name="description" content="This page is under construction or was not found." />
+  <meta name="color-scheme" content="dark light" />
+  <style>
+    :root{
+      /* Tweak these to match your brand */
+      --bg:#0b1320;          /* deep night blue */
+      --panel:#121a2b;       /* card bg */
+      --text:#e8eef6;        /* primary text */
+      --muted:#93a1b2;       /* secondary text */
+      --accent:#78f09e;      /* swampy green (moss vibes) */
+      --accent-2:#ffd166;    /* construction yellow */
+      --danger:#ff5a5f;      /* oops red */
+      --tape-stripe: repeating-linear-gradient(45deg, var(--accent-2) 0 16px, #222 16px 32px);
+    }@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f5fbff;
+    --panel:#ffffff;
+    --text:#0e1726;
+    --muted:#49546a;
+    --accent:#2bb673;
+  }
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--text);
+  background: radial-gradient(1200px 800px at 20% 10%, #18243d 0%, transparent 60%),
+              radial-gradient(1000px 700px at 80% 90%, #14233a 0%, transparent 60%),
+              var(--bg);
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+
+main{
+  width:min(880px, 92vw);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--panel), transparent 10%) 0%, var(--panel) 100%);
+  border:1px solid color-mix(in srgb, var(--text), transparent 85%);
+  border-radius:24px;
+  padding:28px clamp(20px, 4vw, 36px);
+  box-shadow:0 20px 40px color-mix(in srgb, #000, transparent 65%);
+  position:relative;
+  isolation:isolate;
+}
+
+/* Construction tape corners */
+.tape{position:absolute; inset:auto; z-index:2; filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));}
+.tape.tl{top:-18px; left:-80px; width:240px; height:36px; background:var(--tape-stripe); transform:rotate(-12deg);} 
+.tape.br{bottom:-18px; right:-80px; width:260px; height:36px; background:var(--tape-stripe); transform:rotate(12deg);} 
+
+header{display:flex; align-items:center; gap:16px; margin-bottom:8px}
+.logo{display:grid; place-items:center; width:56px; height:56px; border-radius:14px; background:radial-gradient(circle at 30% 30%, #203154, #0f1a2e 70%); position:relative}
+.logo svg{width:30px; height:30px}
+.badge{margin-left:auto; font-size:12px; color:var(--muted); background:color-mix(in srgb, var(--text), transparent 92%); padding:6px 10px; border-radius:999px; border:1px solid color-mix(in srgb, var(--text), transparent 85%)}
+
+h1{font-size:clamp(28px, 3.6vw, 42px); margin:6px 0 2px}
+.subtitle{color:var(--muted); font-size:clamp(14px, 1.8vw, 16px); margin:0 0 18px}
+
+/* Progress */
+.progress{margin:16px 0 8px; height:14px; background:color-mix(in srgb, var(--text), transparent 95%); border-radius:999px; overflow:hidden; border:1px solid color-mix(in srgb, var(--text), transparent 85%)}
+.bar{height:100%; width:12%; background:linear-gradient(90deg, color-mix(in srgb, var(--accent), white 20%), var(--accent)); box-shadow:0 0 16px color-mix(in srgb, var(--accent), transparent 60%) inset}
+.progress-label{display:flex; justify-content:space-between; color:var(--muted); font-size:13px}
+
+/* Buttons */
+.actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:18px}
+.btn{appearance:none; border:none; cursor:pointer; padding:12px 16px; border-radius:12px; font-weight:650; transition:transform .08s ease, box-shadow .2s ease; align-items:center; gap:10px; display:inline-flex}
+.btn:active{transform:translateY(1px)}
+.primary{background:var(--accent); color:#082012; box-shadow:0 10px 16px color-mix(in srgb, var(--accent), transparent 70%)}
+.ghost{background:transparent; color:var(--text); border:1px solid color-mix(in srgb, var(--text), transparent 80%)}
+.danger{background:var(--danger); color:white}
+
+/* Helpful links */
+.help{margin-top:20px; color:var(--muted); font-size:14px}
+.help a{color:inherit}
+
+/* Spore floaters (respect reduced motion) */
+.spore{position:fixed; border-radius:999px; pointer-events:none; opacity:.23; background:radial-gradient(circle at 30% 30%, #b8ffc7, #30d475 70%, transparent 72%); filter:blur(.2px)}
+@media (prefers-reduced-motion: no-preference){
+  .spore{animation:float var(--dur) linear infinite}
+  @keyframes float{to{transform:translateY(-110vh) translateX(var(--dx)) rotate(360deg); opacity:.08}}
+}
+
+/* "Terminal" card */
+.terminal{margin-top:18px; background:#0c1525; border:1px solid color-mix(in srgb, var(--text), transparent 85%); border-radius:14px; padding:14px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; color:#bfe1ff}
+.terminal .title{color:#9ac2ff; margin-bottom:6px; font-weight:600}
+.blink{animation:blink 1s steps(2,end) infinite}
+@keyframes blink{to{visibility:hidden}}
+
+footer{margin-top:18px; display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:12px}
+footer .right{display:flex; gap:14px; align-items:center}
+
+/* Responsive tweaks */
+@media (max-width:440px){
+  .tape.tl,.tape.br{display:none}
+  .actions{flex-direction:column}
+  footer{flex-direction:column; align-items:flex-start}
+}
+
+  </style>
+</head>
+<body>
+  <main>
+    <div class="tape tl" aria-hidden="true"></div>
+    <div class="tape br" aria-hidden="true"></div><header>
+  <div class="logo" aria-hidden="true" title="Hard hat">
+    <!-- Simple hard-hat / mushroom hybrid for the swamp theme -->
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 3c4.5 0 8 3.134 8 6.5 0 1.933-1.567 3.5-3.5 3.5H7.5C5.567 13 4 11.433 4 9.5 4 6.134 7.5 3 12 3Z" fill="currentColor"/>
+      <path d="M6 13h12v4.5A2.5 2.5 0 0 1 15.5 20h-7A2.5 2.5 0 0 1 6 17.5V13Z" fill="currentColor" opacity=".65"/>
+    </svg>
+  </div>
+  <div>
+    <h1 id="title">Work in Progress</h1>
+    <p class="subtitle" id="subtitle">This page is busy getting its hazmat suit on. Try again soon.</p>
+  </div>
+  <span class="badge" id="badge">Mode: WIP</span>
+</header>
+
+<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12" aria-label="Build progress">
+  <div class="bar" id="bar"></div>
+</div>
+<div class="progress-label"><span id="status">Compiling spores…</span><span id="percent">12%</span></div>
+
+<div class="actions">
+  <!-- Change href to your homepage path -->
+  <a class="btn primary" href="/" id="homeBtn">Back to Home</a>
+  <button class="btn ghost" id="retryBtn">Retry</button>
+  <a class="btn ghost" id="reportBtn" href="mailto:hello@example.com?subject=Broken%20link&body=I%20found%20a%20broken%20link%20on%20{{URL}}">Report a Broken Link</a>
+  <button class="btn danger" id="toggleModeBtn" title="Toggle between WIP and 404 for preview">Toggle WIP/404</button>
+</div>
+
+<div class="terminal" aria-live="polite">
+  <div class="title">build logs</div>
+  <pre id="log">$ npm run build
+
+> assembling assets checking duct… uh, duck tape aligning containment zipper… <span class="blink">▮</span> </pre> </div>
+
+
+
+<div class="help">
+  <p>
+    Tip: Append <code>?mode=404</code> to the URL to preview the 404 style. Use <code>?mode=wip</code> to switch back.
+  </p>
+  <p>
+    No tracking, no cookies — just vibes and virtual construction dust.
+  </p>
+</div>
+
+<footer>
+  <div>Last refreshed: <time id="now"></time></div>
+  <div class="right">
+    <span id="quote">“Good websites, like good basements, stay dry.”</span>
+  </div>
+</footer>
+
+  </main>  <noscript>
+    <p style="position:fixed; bottom:10px; left:50%; transform:translateX(-50%); background:#111; color:#fff; padding:8px 12px; border-radius:8px;">This page is prettier with JavaScript enabled, but it still loves you.</p>
+  </noscript>  <script>
+    // ——— Quick config you can tweak ———
+    const HOME_URL = "/";                       // Where the Home button should go
+    const CONTACT = "hello@example.com";         // Where reports should email
+
+    // —— Mode (WIP vs 404) from ?mode= or default WIP ——
+    const params = new URLSearchParams(location.search);
+    let mode = (params.get('mode') || 'wip').toLowerCase();
+
+    const $ = (sel)=>document.querySelector(sel);
+    const title = $('#title');
+    const subtitle = $('#subtitle');
+    const badge = $('#badge');
+    const percent = $('#percent');
+    const bar = $('#bar');
+    const status = $('#status');
+    const log = $('#log');
+    const now = $('#now');
+    const retryBtn = $('#retryBtn');
+    const homeBtn = $('#homeBtn');
+    const reportBtn = $('#reportBtn');
+    const toggleModeBtn = $('#toggleModeBtn');
+
+    function applyMode(){
+      if(mode === '404' || mode === 'notfound'){
+        title.textContent = '404: Page Not Found';
+        subtitle.textContent = "The page wandered off without a breadcrumb trail.";
+        badge.textContent = 'Mode: 404';
+        status.textContent = 'Searching the swamp…';
+        document.title = '404 Not Found';
+      }else{
+        title.textContent = 'Work in Progress';
+        subtitle.textContent = "This page is busy getting its hazmat suit on. Try again soon.";
+        badge.textContent = 'Mode: WIP';
+        status.textContent = 'Compiling spores…';
+        document.title = 'Under Construction';
+      }
+    }
+
+    applyMode();
+
+    // —— Progress bar animation ——
+    let p = Math.floor(Math.random()*25)+5;
+    let dir = 1;
+    const progEl = document.querySelector('.progress');
+    const set = (val)=>{
+      const v = Math.max(0, Math.min(100, val));
+      bar.style.width = v + '%';
+      percent.textContent = v + '%';
+      progEl.setAttribute('aria-valuenow', String(v));
+    };
+    set(p);
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!prefersReduced){
+      setInterval(()=>{
+        p += dir * (Math.random()*2+0.4);
+        if(p > 96){ dir = -1; }
+        if(p < 6){ dir = 1; }
+        set(Math.round(p));
+      }, 120);
+    }
+
+    // —— Date/time ——
+    function fmtDate(d){
+      return new Intl.DateTimeFormat(undefined, {dateStyle:'medium', timeStyle:'short'}).format(d);
+    }
+    now.textContent = fmtDate(new Date());
+
+    // —— Buttons ——
+    retryBtn.addEventListener('click', ()=>location.reload());
+    homeBtn.setAttribute('href', HOME_URL);
+    reportBtn.setAttribute('href', `mailto:${CONTACT}?subject=Broken%20link&body=I%20found%20a%20broken%20link%20on%20${encodeURIComponent(location.href)}`);
+    toggleModeBtn.addEventListener('click', ()=>{
+      mode = mode === 'wip' ? '404' : 'wip';
+      applyMode();
+      const u = new URL(location.href);
+      u.searchParams.set('mode', mode);
+      history.replaceState({}, '', u);
+    });
+
+    // —— Flavor log lines ——
+    const lines = [
+      'measuring grain depression… OK',
+      'verifying containment integrity… OK',
+      'HEPA filters: shedding 0 particles (as intended)',
+      'duct tape or duck tape? both are quacking',
+      'npc “Spora” says: stay curious!',
+      'checking routes… this one fell into a sinkhole',
+      'routing you to safety net…',
+    ];
+    let i = 0;
+    setInterval(()=>{
+      if(i < lines.length){
+        log.textContent += '\n> ' + lines[i++];
+        log.scrollTop = log.scrollHeight;
+      }
+    }, 1100);
+
+    // —— Floating spores (particles) ——
+    const MAX_SPORES = prefersReduced ? 0 : 24;
+    for(let s=0; s<MAX_SPORES; s++){
+      const d = document.createElement('div');
+      d.className = 'spore';
+      const size = Math.random()*8 + 4; // 4–12px
+      const left = Math.random()*100;
+      const top = 100 + Math.random()*40; // start below screen
+      const dx = (Math.random()-.5)*80 + 'px';
+      const dur = (Math.random()*18 + 14) + 's';
+      d.style.width = size + 'px';
+      d.style.height = size + 'px';
+      d.style.left = left + 'vw';
+      d.style.top = top + 'vh';
+      d.style.setProperty('--dx', dx);
+      d.style.setProperty('--dur', dur);
+      document.body.appendChild(d);
+    }
+
+    // —— Konami: reveals a secret tip ——
+    const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+    const keys = [];
+    window.addEventListener('keydown', (e)=>{
+      keys.push(e.key);
+      if(keys.slice(-KONAMI.length).join(',') === KONAMI.join(',')){
+        alert('Secret unlocked: A dry home is a happy home. 🫧');
+      }
+    });
+  </script></body>
+</html>
