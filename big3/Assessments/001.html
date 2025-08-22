@@ -4,19 +4,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title><!-- {{TITLE}} --></title>
-  <meta name="description" content="<!-- {{DESCRIPTION}} -->" />
+  <title>Four Years in the Field: Lessons from iMold</title>
+  <meta name="description" content="A four-year reflection on remediation, discovery, and direction at iMold." />
   <meta name="color-scheme" content="dark light" />
   <style>
-    :root{
-      --bg:#0b1320; --panel:#101a2c; --card:#0d1729; --text:#e8eef6; --muted:#9bb0c7; --accent:#78f09e; --accent-2:#8fd3ff; --ring:color-mix(in srgb, var(--text), transparent 85%);
-      --content-max: 70ch;
-    }
+    :root{ --bg:#0b1320; --panel:#101a2c; --card:#0d1729; --text:#e8eef6; --muted:#9bb0c7; --accent:#78f09e; --accent-2:#8fd3ff; --ring:color-mix(in srgb, var(--text), transparent 85%); --content-max: 70ch; }
     @media (prefers-color-scheme: light){:root{--bg:#f5fbff; --panel:#ffffff; --card:#f7fafc; --text:#0e1726; --muted:#49546a; --accent:#2bb673}}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0; font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text)}/* Layout */
-.wrap{max-width:1100px; margin:0 auto; padding:clamp(16px,3vw,24px)}
+    body{margin:0; font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text)}.wrap{max-width:1100px; margin:0 auto; padding:clamp(16px,3vw,24px)}
 header.site{display:flex; align-items:center; gap:12px; padding:8px 0 12px}
 header.site a{color:var(--accent); text-decoration:none}
 
@@ -28,55 +24,30 @@ header.site a{color:var(--accent); text-decoration:none}
 .cover{border-radius:14px; overflow:hidden; background:#0a1222; border:1px solid var(--ring); aspect-ratio: 16/9; display:grid; place-items:center}
 .cover img{width:100%; height:100%; object-fit:cover}
 
-/* Article layout */
 .grid{display:grid; grid-template-columns: 1fr min(34%, 320px); gap:clamp(16px,3vw,24px); margin-top:clamp(14px,2.5vw,20px)}
 @media (max-width:960px){.grid{grid-template-columns:1fr}}
 
 article{background:linear-gradient(180deg, var(--panel), #0e182b); border:1px solid var(--ring); border-radius:18px; padding:clamp(16px,3vw,22px)}
 .content{max-width:var(--content-max); margin:0 auto}
 
-/* Typography defaults (no content included) */
 .content h2,.content h3,.content h4{margin:1.2rem 0 .4rem}
 .content p{margin:.7rem 0; color:var(--text)}
 .content ul,.content ol{margin:.5rem 0 .8rem 1.25rem}
 .content li{margin:.25rem 0}
-.content code{background:#0b1a2d; border:1px solid var(--ring); padding:.1rem .35rem; border-radius:6px}
-pre{background:#0b1a2d; border:1px solid var(--ring); border-radius:12px; padding:12px; overflow:auto}
 blockquote{margin:1rem 0; padding:.75rem 1rem; border-left:4px solid var(--accent); background:color-mix(in srgb, var(--panel), transparent 35%); border-radius:12px}
-figure{margin:1rem 0;}
-figcaption{color:var(--muted); font-size:.9rem; margin-top:.35rem}
 
-/* Callouts */
-.callout{border:1px solid var(--ring); border-radius:12px; padding:.8rem; background:color-mix(in srgb, var(--panel), transparent 25%)}
-
-/* TOC */
 .toc{position:sticky; top:12px; background:var(--card); border:1px solid var(--ring); border-radius:12px; padding:10px}
 .toc h3{margin:.25rem 0 .4rem; font-size:1rem}
 .toc nav{display:grid; gap:6px; font-size:.95rem}
 .toc a{color:var(--muted); text-decoration:none}
 .toc a:hover{color:var(--accent)}
 
-/* Footer nav */
 .postnav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
 .postnav a{flex:1; text-decoration:none; color:var(--accent); border:1px solid var(--ring); border-radius:12px; padding:.8rem; text-align:center}
 
 footer.site{margin-top:18px; text-align:center; color:var(--muted); padding:16px 0}
 
-/* Skeleton lines for "no words" mode (preview state) */
-.skeleton{--sh: 12px; background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.12), rgba(255,255,255,.04)); background-size:200% 100%; animation:shimmer 1.8s linear infinite}
-@keyframes shimmer{to{background-position: -200% 0}}
-.sk-line{height:var(--sh); border-radius:8px}
-.sk-32{--sh:32px}
-.sk-20{--sh:20px}
-.sk-14{--sh:14px}
-.sk-gap{height:10px}
-
-/* Mobile tweaks */
-@media (max-width:520px){
-  .grid{gap:14px}
-  .toc{position:static}
-  .postnav{flex-direction:column}
-}
+@media (max-width:520px){ .grid{gap:14px} .toc{position:static} .postnav{flex-direction:column} }
 
   </style>
 </head>
@@ -86,61 +57,46 @@ footer.site{margin-top:18px; text-align:center; color:var(--muted); padding:16px
       <a href="/" aria-label="Home">Home</a>
       <span aria-hidden="true">·</span>
       <a href="wip.html" aria-label="Work in progress">WIP</a>
-    </header><!-- HERO: replace placeholders with actual content; keep structure -->
-<section class="hero">
+    </header><section class="hero">
   <div class="meta" aria-label="Post meta">
-    <span class="pill" id="meta-date"><!-- {{DATE}} --></span>
-    <span class="pill" id="meta-read"><!-- {{READING_TIME}} --></span>
-    <span class="pill" id="meta-tags"><!-- {{TAGS}} --></span>
+    <span class="pill" id="meta-date">August 22, 2025</span>
+    <span class="pill" id="meta-read"></span>
+    <span class="pill" id="meta-tags">Mold Remediation · Career Growth · Lessons</span>
   </div>
-  <h1 class="title" id="post-title"><!-- {{TITLE}} --></h1>
+  <h1 class="title" id="post-title">Four Years in the Field: Lessons from iMold</h1>
   <div class="cover" id="cover">
-    <!-- Optional cover image: <img src="/path/to/cover.jpg" alt="" /> -->
-    <div class="skeleton sk-32" style="width:60%; max-width:360px"></div>
+    <!-- Optional cover image: <img src="/images/imold-4yrs-cover.jpg" alt="Containment zipper and negative air setup" /> -->
   </div>
 </section>
 
 <div class="grid">
-  <!-- MAIN ARTICLE -->
   <article>
     <div class="content" id="content">
-      <!--
-        Write your article here using semantic HTML (h2/h3/p/ul/ol/figure/code/pre/etc.)
-        Example structure (remove comments when adding real content):
+      <p>As I’m creeping up on four years at iMold, I’ll say that throughout my time here, each year definitely carried a different title.</p>
 
-        <h2 id="intro">...</h2>
-        <p>...</p>
-        <h2 id="section-1">...</h2>
-        <h3 id="sub-1">...</h3>
-        <p>...</p>
-        <figure>
-          <img src="..." alt="" />
-          <figcaption>...</figcaption>
-        </figure>
-        <pre><code>...</code></pre>
-        <blockquote>...</blockquote>
-        <h2 id="summary">...</h2>
-      -->
+      <h2 id="year-of-confusion">The Year of Confusion</h2>
+      <p>My first year was the year of confusion. I learned the art of six-side cleaning. It wasn’t your typical clean where you dust your shelves, wipe down counters, or mop floors. It was a tedious process of cleaning every square inch of the house. This included wiping down every item inside a home — including the insides of cabinets. I used toothbrushes and Microban on window tracks, sliding doors, and even lock mechanisms. I wiped down every Lego, rinsed, drained, and dried aquarium rocks, and even cleaned seashells — because spores are microscopic and can land anywhere.</p>
 
-      <!-- Skeleton preview elements (remove when adding content) -->
-      <div class="sk-line sk-20" style="width:70%"></div>
-      <div class="sk-gap"></div>
-      <div class="sk-line" style="width:98%"></div>
-      <div class="sk-gap"></div>
-      <div class="sk-line" style="width:94%"></div>
-      <div class="sk-gap"></div>
-      <div class="sk-line" style="width:88%"></div>
-      <div class="sk-gap"></div>
-      <div class="sk-line" style="width:60%"></div>
+      <h2 id="year-of-demolition">The Year of Demolition</h2>
+      <p>My second year was the year I focused heavily on demolition. I switched crew leads and became more independent, as my new lead had more of a partner dynamic rather than a boss-and-helper structure. We figured things out through trial and error and learned the more efficient ways to take things apart and put them back together. We busted our butts restoring homes damaged by Hurricane Ian.</p>
+
+      <h2 id="year-of-discovery">The Year of Discovery</h2>
+      <p>My third year was the year of discovery. I started understanding the science behind mold. I learned that something as small as a baseboard separating could either be worn caulk — or a sign of water damage. I tore out plenty of walls only to find heavy microbial growth behind them. I started learning how air handlers worked and mastered the process of cleaning blowers. I gained confidence and stepped into a lead role.</p>
+
+      <h2 id="year-of-direction">The Year of Direction</h2>
+      <p>My fourth year became the year of direction. I found myself writing scopes in my head just based on visual observations. I started leading more, sharing knowledge with my team, and realized I don’t want to remediate forever — I want to prevent the damage before it happens. That led me down the path toward becoming a mold assessor. Spores are invisible to the human eye, so visual inspections alone won’t give you the full story. You also won’t know what type of microbial growth is present. If it’s Aspergillus, I might suggest cleaning the carpet. But if it’s Stachybotrys? I’d recommend disposing of it.</p>
+
+      <blockquote>
+        <p>This post is just a reflection. Lately, I’ve been thinking a lot about this company, the growth, and how far I’ve come.</p>
+      </blockquote>
     </div>
 
     <div class="postnav" aria-label="Post navigation">
-      <a id="prev" href="wip.html" aria-label="Previous">←<!-- {{PREV_TITLE}} --></a>
-      <a id="next" href="wip.html" aria-label="Next"><!-- {{NEXT_TITLE}} -->→</a>
+      <a id="prev" href="wip.html" aria-label="Previous">← Previous</a>
+      <a id="next" href="wip.html" aria-label="Next">Next →</a>
     </div>
   </article>
 
-  <!-- SIDEBAR: Table of contents auto-builds from h2/h3 -->
   <aside>
     <div class="toc" id="toc" aria-label="Table of contents" hidden>
       <h3>Contents</h3>
@@ -154,10 +110,8 @@ footer.site{margin-top:18px; text-align:center; color:var(--muted); padding:16px
 </footer>
 
   </div>  <script>
-    // Auto year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Compute reading time when content exists
     function readingTime(text){
       const w = (text||'').trim().split(/\s+/).filter(Boolean).length;
       if(!w){ return ''; }
@@ -184,15 +138,6 @@ footer.site{margin-top:18px; text-align:center; color:var(--muted); padding:16px
         tocNav.appendChild(a);
       });
       toc.hidden = false;
-    }
-
-    // If no cover image provided, keep skeleton; else remove it when image loads
-    const cover = document.getElementById('cover');
-    const img = cover.querySelector('img');
-    if(img){
-      img.addEventListener('load', ()=>{
-        cover.querySelector('.skeleton')?.remove();
-      }, {once:true});
     }
   </script></body>
 </html>
