@@ -1,0 +1,94 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mold Assessor · Dylan Wirth</title>
+  <meta name="description" content="Dylan Wirth's mold assessment page: field notes, articles, and the journey toward CIE certification in October 2025." />
+  <style>
+    :root{
+      --bg:#0b1320; --panel:#111a2c; --text:#e8eef6; --muted:#98a6bd; --accent:#78f09e; --card:#0e1626;
+    }
+    body{margin:0; font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text);}
+    header{padding:2.5rem 1rem 1rem; text-align:center}
+    header h1{font-size:clamp(2rem,5vw,3rem); margin:0}
+    header p{max-width:900px; margin:0.75rem auto 0; color:var(--muted)}.wrap{max-width:1100px; margin:0 auto; padding:0 1rem 3rem}
+.summary{background:linear-gradient(180deg, var(--panel), #0c1525); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1.25rem 1rem; margin:1.25rem 0}
+.summary h2{margin:.25rem 0 0.25rem; font-size:1.25rem}
+.summary p{margin:.25rem 0; color:var(--muted)}
+
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.25rem}
+@media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:1rem; display:flex; flex-direction:column}
+.card h3{margin:.25rem 0 .5rem; font-size:1.1rem}
+.card p{margin:0; color:var(--muted)}
+.card a{margin-top:auto; align-self:flex-start; color:var(--accent); text-decoration:none; font-weight:600}
+.pill{display:inline-block; background:rgba(120,240,158,.12); border:1px solid rgba(120,240,158,.3); color:var(--accent); padding:.15rem .5rem; border-radius:999px; font-size:.8rem; font-weight:600}
+
+.section-title{display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:1.75rem}
+.section-title h2{margin:0; font-size:1.35rem}
+.section-title input{flex:1; min-width:180px; background:#0a1222; color:var(--text); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:.55rem .7rem}
+
+article{margin-top:2rem; background:linear-gradient(180deg, var(--panel), #0e182b); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1.25rem}
+article h2{margin:.25rem 0 0.35rem}
+article h3{margin:1rem 0 .3rem}
+article p{margin:.5rem 0}
+article ul{margin:.25rem 0 .75rem 1rem}
+article li{margin:.25rem 0}
+
+footer{margin-top:2rem; text-align:center; color:var(--muted); padding:2rem 1rem; border-top:1px solid rgba(255,255,255,.08)}
+footer a{color:var(--accent); text-decoration:none}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mold Assessor</h1>
+    <p>
+      Field notes, experiments, and lessons learned as I level up from hands-on remediation to formal assessment. This page collects my articles and updates as I prepare for the <strong>CIE</strong> exam in <strong>October 2025</strong> and keep pushing into the science of buildings and bioaerosols.
+    </p>
+  </header>  <div class="wrap">
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title">Where I am right now</h2>
+      <p>
+        I have four years in the trenches of mold remediation and water loss work. I am shifting focus to assessment: better diagnostics, cleaner scopes, and documentation that stands up to scrutiny. My near target is the <strong>Certified Indoor Environmentalist (CIE)</strong> in October 2025. From there, I plan to deepen into microbiology and building science while keeping my reports practical for homeowners, property managers, and contractors.
+      </p>
+    </section><div class="section-title">
+  <h2>Articles</h2>
+  <input id="search" type="search" placeholder="Search articles" aria-label="Search articles" />
+</div>
+
+<section class="grid" id="hub">
+  <!-- Article cards -->
+  <div class="card" data-tags="remediation progress career">
+    <span class="pill">New</span>
+    <h3>Four Years in the Mud: My Remediation Progress</h3>
+    <p>A look back at the skills, mistakes, and milestones that shaped my approach to clean, contain, and document.</p>
+    <a href="../wip.html">Read</a>
+  </div>
+
+</section>
+
+<footer>
+  <p>© <span id="year"></span> Dylan Worth · <a href="/">Home</a> · <a href="mailto:dylanworth@protonmail.com">Contact</a></p>
+</footer>
+
+  </div>  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Simple client-side filter for the hub
+    const input = document.getElementById('search');
+    const cards = Array.from(document.querySelectorAll('#hub .card'));
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      cards.forEach(c => {
+        const text = c.innerText.toLowerCase() + ' ' + (c.dataset.tags || '');
+        c.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  </script></body>
+</html>
