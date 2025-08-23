@@ -4,59 +4,60 @@
 // #score, #streak, #mult, #timeFill, #hearts, #touchControls, aside#hud, .drawer-grip
 
 (() => {
+  (() => {
   // ===== Utility =====
   const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
   const rand = (a,b) => a + Math.random()*(b-a);
 
-// ===== Canvas setup (HiDPI) =====
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const DPR = window.devicePixelRatio || 1;
+  // ===== Canvas & context =====
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const DPR = window.devicePixelRatio || 1;
 
-function resize(){
-  const { clientWidth: w, clientHeight: h } = canvas;
-  canvas.width  = Math.floor(w * DPR);
-  canvas.height = Math.floor(h * DPR);
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  laneGeom.compute();
-}
-new ResizeObserver(resize).observe(canvas);
+  // ===== Lane geometry (define first) =====
+  const laneGeom = {
+    lanes: 4,
+    width: 0,
+    height: 0,
+    hitY: 0,
+    topW: 140,
+    bottomW: 520,
+    gap: 16,
+    left: 0,
 
-// ===== Lane geometry (paste this whole object) =====
-const laneGeom = {
-  lanes: 4,
-  width: 0,
-  height: 0,
-  hitY: 0,
-  topW: 140,
-  bottomW: 520,
-  gap: 16,
-  left: 0,
+    compute() {
+      this.width  = canvas.clientWidth;
+      this.height = canvas.clientHeight;
+      this.hitY   = this.height - 110;
+      this.left   = (this.width - this.bottomW) / 2;
+    },
+    laneCenter(i, y) {
+      const t = Math.min(Math.max(y / this.height, 0), 1);
+      const w = this.topW * (1 - t) + this.bottomW * t;
+      const start = (this.width - w) / 2;
+      const totalGap = this.gap * (this.lanes - 1);
+      const laneW = (w - totalGap) / this.lanes;
+      return start + i * (laneW + this.gap) + laneW / 2;
+    },
+    laneRadius(y) {
+      const t = Math.min(Math.max(y / this.height, 0), 1);
+      const w = this.topW * (1 - t) + this.bottomW * t;
+      const totalGap = this.gap * (this.lanes - 1);
+      const laneW = (w - totalGap) / this.lanes;
+      return laneW * 0.42;
+    }
+  };
 
-  compute() {
-    this.width  = canvas.clientWidth;
-    this.height = canvas.clientHeight;
-    this.hitY   = this.height - 110;
-    this.left   = (this.width - this.bottomW) / 2;
-  },
-
-  laneCenter(i, y) {
-    const t = Math.min(Math.max(y / this.height, 0), 1);
-    const w = this.topW * (1 - t) + this.bottomW * t;
-    const start = (this.width - w) / 2;
-    const totalGap = this.gap * (this.lanes - 1);
-    const laneW = (w - totalGap) / this.lanes;
-    return start + i * (laneW + this.gap) + laneW / 2;
-  },
-
-  laneRadius(y) {
-    const t = Math.min(Math.max(y / this.height, 0), 1);
-    const w = this.topW * (1 - t) + this.bottomW * t;
-    const totalGap = this.gap * (this.lanes - 1);
-    const laneW = (w - totalGap) / this.lanes;
-    return laneW * 0.42;
+  // ===== Resize (after laneGeom exists) =====
+  function resize(){
+    const { clientWidth: w, clientHeight: h } = canvas;
+    canvas.width  = Math.floor(w * DPR);
+    canvas.height = Math.floor(h * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    laneGeom.compute();
   }
-};
+  new ResizeObserver(() => resize()).observe(canvas);
+
   // ===== Game State =====
   const state = {
     running:false, paused:false,
