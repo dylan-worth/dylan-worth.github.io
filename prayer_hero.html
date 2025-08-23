@@ -2,33 +2,27 @@
 
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>Prayer Hero</title>
-  <link rel="stylesheet" href="prayer.css" />
+  <link rel="stylesheet" href="prayer.css">
 </head>
 <body>
   <div class="wrap">
     <div class="stage">
-      <canvas id="game" aria-label="Prayer Hero game canvas"></canvas><!-- centered logo badge -->
-  <div class="badge" aria-hidden="true">
-    <div class="ring"></div>
-    <div class="text"><span>PRAYER</span><strong>HERO</strong></div>
-  </div>
-
-  <!-- on-screen mobile controls -->
-  <div class="controls" id="touchControls" hidden>
-    <div class="key" data-lane="0">◀︎</div>
-    <div class="key" data-lane="1">▼</div>
-    <div class="key" data-lane="2">▲</div>
-    <div class="key" data-lane="3">▶︎</div>
-  </div>
-</div>
-
-<!-- Right HUD (becomes bottom drawer on mobile) -->
-<aside class="hud" id="hud">
+      <canvas id="game"></canvas>
+      <div class="badge">
+        <div class="ring"></div>
+        <div class="text"><span>PRAYER</span><strong>HERO</strong></div>
+      </div>
+      <div class="controls" id="touchControls" hidden>
+        <div class="key" data-lane="0">◀︎</div>
+        <div class="key" data-lane="1">▼</div>
+        <div class="key" data-lane="2">▲</div>
+        <div class="key" data-lane="3">▶︎</div>
+      </div>
+    </div><aside class="hud" id="hud">
   <div class="drawer-grip"><div></div></div>
-
   <div class="card">
     <div class="title">Session</div>
     <div class="kv" style="margin-top:8px">
@@ -51,7 +45,7 @@
       </div>
       <div class="muted">Speed</div>
       <div>
-        <input type="range" id="speed" min="3" max="9" value="5" />
+        <input type="range" id="speed" min="3" max="9" value="5"/>
       </div>
     </div>
     <div class="row" style="margin-top:10px">
@@ -60,32 +54,24 @@
       <button id="restart" class="btn">↻ Restart</button>
     </div>
     <div class="legend" style="margin-top:10px">
-      <span class="chip"><span class="dot" style="background:var(--lane0)"></span>Left</span>
-      <span class="chip"><span class="dot" style="background:var(--lane1)"></span>Down</span>
-      <span class="chip"><span class="dot" style="background:var(--lane2)"></span>Up</span>
-      <span class="chip"><span class="dot" style="background:var(--lane3)"></span>Right</span>
-      <span class="chip"><span class="dot" style="background:var(--shield)"></span>Shield = +HP</span>
-      <span class="chip"><span class="dot" style="background:var(--slide)"></span>Slide = Hold</span>
+      <span class="chip"><span class="dot" style="background:var(--lane0)"></span> Left / A</span>
+      <span class="chip"><span class="dot" style="background:var(--lane1)"></span> Down / S</span>
+      <span class="chip"><span class="dot" style="background:var(--lane2)"></span> Up / W</span>
+      <span class="chip"><span class="dot" style="background:var(--lane3)"></span> Right / D</span>
+      <span class="chip"><span class="dot" style="background:var(--shield)"></span> Prayer Shield (+1 HP)</span>
+      <span class="chip"><span class="dot" style="background:var(--slide)"></span> Slide (Hold)</span>
     </div>
-    <div class="muted" style="margin-top:6px">Keys: ← ↓ ↑ → (WASD). Hold for slides.</div>
   </div>
-
   <div class="card">
     <div class="title">Stats</div>
-    <div class="kv" style="margin-top:8px">
+    <div class="kv">
       <div class="muted">Score</div><b id="score">0</b>
       <div class="muted">Streak</div><b id="streak">0</b>
       <div class="muted">Multiplier</div><b id="mult">x1</b>
     </div>
-    <div class="bars" style="margin-top:10px">
-      <div class="bar"><div class="fill" id="timeFill"></div></div>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <div class="muted">Health</div>
-      <div class="hearts" id="hearts"></div>
-    </div>
+    <div class="bars"><div class="bar"><div class="fill" id="timeFill"></div></div></div>
+    <div class="row"><div class="muted">Health</div><div class="hearts" id="hearts"></div></div>
   </div>
-
   <div class="card">
     <div class="title">About</div>
     <div class="muted" style="margin-top:6px">Includes long <b>Slide</b> notes (hold to clear) and <b>Prayer Shield</b> notes (+1 HP on hit). 🛡️</div>
