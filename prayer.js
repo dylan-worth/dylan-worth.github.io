@@ -356,5 +356,5 @@
   // ===== Boot =====
   resize(); renderHearts(); updateHud(); setTimeProgress(0);
   // Quick-start on Space if you want:
-  window.addEventListener('keydown', (e)=>{ if(e.code==='Space' && !state.running){ e.preventDefault(); startRun(); } });
+  window.addEventListener('keydown', (e)=>{ if(e.code==='Space' && !state.running){ e.preventDefault(); startRun(); }
 })();
