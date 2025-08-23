@@ -8,17 +8,17 @@
   const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
   const rand = (a,b) => a + Math.random()*(b-a);
 
-  // ===== Canvas setup (HiDPI) =====
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const DPR = window.devicePixelRatio || 1;
-  function resize(){
-    const {clientWidth:w, clientHeight:h} = canvas;
-    canvas.width = Math.floor(w*DPR); canvas.height = Math.floor(h*DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    laneGeom.compute();
-  }
-  new ResizeObserver(resize).observe(canvas);
+ // ===== Canvas setup (HiDPI) =====
+ const canvas = document.getElementById('game');
+ const ctx = canvas.getContext('2d');
+ const DPR = window.devicePixelRatio || 1;
+ function resize(){
+   const {clientWidth:w, clientHeight:h} = canvas;
+   canvas.width = Math.floor(w*DPR); canvas.height = Math.floor(h*DPR);
+   ctx.setTransform(DPR,0,0,DPR,0,0);
+   laneGeom.compute();
+ }
+ new ResizeObserver(resize).observe(canvas);
 
   // ===== Lane geometry =====
   const laneGeom = {
