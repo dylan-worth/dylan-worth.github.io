@@ -1,10 +1,5 @@
 // prayer.js – core game logic for Prayer Hero
-// Expects these elements in HTML:
-// canvas#game, #difficulty, #length, #speed, #play, #pause, #restart,
-// #score, #streak, #mult, #timeFill, #hearts, #touchControls, aside#hud, .drawer-grip
-
 (() => {
-  (() => {
   // ===== Utility =====
   const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
   const rand = (a,b) => a + Math.random()*(b-a);
@@ -24,7 +19,6 @@
     bottomW: 520,
     gap: 16,
     left: 0,
-
     compute() {
       this.width  = canvas.clientWidth;
       this.height = canvas.clientHeight;
@@ -67,7 +61,7 @@
     notes:[], active:[], nextIdx:0,
     score:0, streak:0, mult:1, healthMax:5, health:5,
     speed:5,
-    holds: new Set(), // lanes currently held (keys/touch)
+    holds: new Set(),
   };
 
   // ===== UI refs =====
@@ -116,7 +110,6 @@
         const roll = Math.random();
         if(roll < params.slideRate){ type='slide'; }
         else if(roll < params.slideRate + params.shieldRate){ type='shield'; }
-
         let lane = Math.floor(rand(0,4));
         if(lane===lastLane) lane = (lane+1)%4; lastLane = lane;
         const note = {t:Math.floor(t), lane, type};
@@ -144,16 +137,21 @@
       o.start(); o.stop(this.ctx.currentTime + 0.10);
     },
     whiff(){
-      this.ensure(); const o=this.ctx.createOscillator(); const g=this.ctx.createGain();
-      o.type='sawtooth'; o.frequency.value=140; g.gain.setValueAtTime(0.12,this.ctx.currentTime);
+      this.ensure();
+      const o=this.ctx.createOscillator(); const g=this.ctx.createGain();
+      o.type='sawtooth'; o.frequency.value=140;
+      g.gain.setValueAtTime(0.12,this.ctx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.0001,this.ctx.currentTime+0.12);
-      o.connect(g).connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+0.14);
+      o.connect(g).connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime+0.14);
     }
   };
 
   // ===== Input =====
-  const laneForKey = (code) => ({ArrowLeft:0,KeyA:0,ArrowDown:1,KeyS:1,ArrowUp:2,KeyW:2,ArrowRight:3,KeyD:3}[code] ?? -1);
+  const laneForKey = (code) =>
+    ({ArrowLeft:0,KeyA:0,ArrowDown:1,KeyS:1,ArrowUp:2,KeyW:2,ArrowRight:3,KeyD:3}[code] ?? -1);
   const pressed = new Set();
+
   window.addEventListener('keydown', (e)=>{
     const lane = laneForKey(e.code); if(lane===-1) return;
     e.preventDefault();
@@ -166,7 +164,6 @@
     onLaneRelease(lane);
   });
 
-  // Touch buttons behave like holds for slides
   function maybeShowTouch(){
     const isTouch = matchMedia('(hover: none)').matches || 'ontouchstart' in window;
     touchControls.hidden = !isTouch;
@@ -174,28 +171,32 @@
   maybeShowTouch();
   touchControls.addEventListener('touchstart', (e)=>{
     const btn = e.target.closest('.key'); if(!btn) return;
-    const lane = Number(btn.dataset.lane); state.holds.add(lane); onLanePress(lane);
+    const lane = Number(btn.dataset.lane);
+    state.holds.add(lane); onLanePress(lane);
   }, {passive:true});
   touchControls.addEventListener('touchend', (e)=>{
     const btn = e.target.closest('.key'); if(!btn) return;
-    const lane = Number(btn.dataset.lane); state.holds.delete(lane); onLaneRelease(lane);
+    const lane = Number(btn.dataset.lane);
+    state.holds.delete(lane); onLaneRelease(lane);
   });
 
   function onLanePress(lane){ hit(lane); }
   function onLaneRelease(lane){ /* slide judgement happens in loop */ }
 
   // ===== Hit / Slide Logic =====
-  function nowMs(){ if(!state.running) return 0; return performance.now() - state.startAt; }
+  function nowMs(){ return state.running ? (performance.now() - state.startAt) : 0; }
   function scheduleNotes(){ state.active.length = 0; state.nextIdx = 0; }
   function effectiveApproach(){
-    const s = state.speed; const minA = state.approach*0.65, maxA = state.approach*1.35; const t = (s-3)/(9-3); return maxA*(1-t) + minA*(t);
+    const s = state.speed;
+    const minA = state.approach*0.65, maxA = state.approach*1.35;
+    const t = (s-3)/(9-3);
+    return maxA*(1-t) + minA*(t);
   }
 
   function hit(lane){
     if(!state.running || state.paused) return;
     const t = nowMs();
 
-    // Prefer earliest hittable note in this lane
     let targetIdx = -1; let deltaMin = Infinity;
     for(let i=0;i<state.notes.length;i++){
       const n = state.notes[i];
@@ -220,7 +221,6 @@
       }
     }
 
-    // ghost tap
     audio.whiff(); state.streak=0; state.mult=1; loseHp(0.2); flashAtLane(lane,'miss'); updateHud();
   }
 
@@ -235,7 +235,10 @@
 
   // ===== Visual FX =====
   const sparks = [];
-  function flashAtLane(lane, type){ const y=laneGeom.hitY; const x=laneGeom.laneCenter(lane,y); sparks.push({x,y,life:0.3,type}); }
+  function flashAtLane(lane, type){
+    const y=laneGeom.hitY; const x=laneGeom.laneCenter(lane,y);
+    sparks.push({x,y,life:0.3,type});
+  }
 
   // ===== Run Control =====
   function startRun(){
@@ -269,19 +272,37 @@
   if(drawerGrip){
     drawerGrip.addEventListener('touchstart', e=>{ startY=e.touches[0].clientY; curY=startY; }, {passive:true});
     drawerGrip.addEventListener('touchmove', e=>{ if(startY!=null) curY=e.touches[0].clientY; }, {passive:true});
-    drawerGrip.addEventListener('touchend', ()=>{ if(startY!=null && curY!=null){ const dy=curY-startY; if(Math.abs(dy)>40){ if(dy<0) hud.classList.add('open'); else hud.classList.remove('open'); } } startY=null; curY=null; });
+    drawerGrip.addEventListener('touchend', ()=>{ 
+      if(startY!=null && curY!=null){
+        const dy=curY-startY; 
+        if(Math.abs(dy)>40){ if(dy<0) hud.classList.add('open'); else hud.classList.remove('open'); }
+      }
+      startY=null; curY=null;
+    });
   }
 
-  // ===== Heads-up display =====
+  // ===== HUD =====
   function updateHud(){ scoreEl.textContent=state.score|0; streakEl.textContent=state.streak|0; multEl.textContent=`x${state.mult}`; }
   function setTimeProgress(p){ timeFill.style.width = (p*100).toFixed(1)+'%'; }
-  function toast(text){ const d=document.createElement('div'); d.textContent=text; d.style.position='absolute'; d.style.left='50%'; d.style.top='18px'; d.style.transform='translateX(-50%)'; d.style.padding='10px 14px'; d.style.border='1px solid #2a3550'; d.style.background='#0f1421cc'; d.style.borderRadius='10px'; d.style.zIndex=99; d.style.backdropFilter='blur(2px)'; d.style.boxShadow='0 10px 20px #0007'; document.body.appendChild(d); setTimeout(()=>d.remove(), 2200); }
+  function toast(text){
+    const d=document.createElement('div');
+    d.textContent=text;
+    d.style.position='absolute'; d.style.left='50%'; d.style.top='18px';
+    d.style.transform='translateX(-50%)'; d.style.padding='10px 14px';
+    d.style.border='1px solid #2a3550'; d.style.background='#0f1421cc';
+    d.style.borderRadius='10px'; d.style.zIndex=99; d.style.backdropFilter='blur(2px)';
+    d.style.boxShadow='0 10px 20px #0007';
+    document.body.appendChild(d); setTimeout(()=>d.remove(), 2200);
+  }
 
   // ===== Main loop =====
   function loop(){
     if(!state.running || state.paused) return;
     const t = nowMs(); const A = effectiveApproach();
-    while(state.nextIdx < state.notes.length && state.notes[state.nextIdx].t - t < A){ state.active.push(state.notes[state.nextIdx]); state.nextIdx++; }
+
+    while(state.nextIdx < state.notes.length && state.notes[state.nextIdx].t - t < A){
+      state.active.push(state.notes[state.nextIdx]); state.nextIdx++;
+    }
 
     // Judge slide holds & late misses
     for(const n of state.active){
@@ -290,10 +311,16 @@
         if(n.holding && t >= n.t + (n.dur - state.hitWindow.good)){
           n.hit=true; n.res='good'; scoreFor(n); audio.beep(n.lane,'slide'); flashAtLane(n.lane,'good'); updateHud(); continue;
         }
-        if(t - (n.t + n.dur) > state.hitWindow.ok){ n.hit=true; n.res='miss'; state.streak=0; state.mult=1; loseHp(1); }
-        if(n.holding && !state.holds.has(n.lane) && t < n.t + n.dur - state.hitWindow.good){ n.holding=false; }
+        if(t - (n.t + n.dur) > state.hitWindow.ok){
+          n.hit=true; n.res='miss'; state.streak=0; state.mult=1; loseHp(1);
+        }
+        if(n.holding && !state.holds.has(n.lane) && t < n.t + n.dur - state.hitWindow.good){
+          n.holding=false;
+        }
       } else {
-        if(t - n.t > state.hitWindow.ok + 60){ n.hit=true; n.res='miss'; state.streak=0; state.mult=1; loseHp(1); }
+        if(t - n.t > state.hitWindow.ok + 60){
+          n.hit=true; n.res='miss'; state.streak=0; state.mult=1; loseHp(1);
+        }
       }
     }
 
@@ -304,57 +331,124 @@
   }
 
   function draw(t, approach){
-    const w = canvas.clientWidth, h = canvas.clientHeight; ctx.clearRect(0,0,w,h);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
 
     // background glow & path deck
     const grad = ctx.createRadialGradient(w/2, h*0.2, 10, w/2, h*0.2, Math.max(w,h)*0.6);
-    grad.addColorStop(0,'#2a1137'); grad.addColorStop(1,'#07080c'); ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
-    ctx.save(); ctx.fillStyle = '#121721'; ctx.strokeStyle = '#313b52'; ctx.beginPath();
-    const topW = laneGeom.topW, bottomW = laneGeom.bottomW; const topX = (w-topW)/2, bottomX = (w-bottomW)/2;
-    ctx.moveTo(topX, h*0.1); ctx.lineTo(topX+topW, h*0.1); ctx.lineTo(bottomX+bottomW, h*0.96); ctx.lineTo(bottomX, h*0.96); ctx.closePath(); ctx.fill(); ctx.globalAlpha=.35; ctx.stroke(); ctx.globalAlpha=1;
+    grad.addColorStop(0,'#2a1137'); grad.addColorStop(1,'#07080c');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+
+    ctx.save();
+    ctx.fillStyle = '#121721';
+    ctx.strokeStyle = '#313b52';
+    ctx.beginPath();
+    const topW = laneGeom.topW, bottomW = laneGeom.bottomW;
+    const topX = (w-topW)/2, bottomX = (w-bottomW)/2;
+    ctx.moveTo(topX, h*0.1);
+    ctx.lineTo(topX+topW, h*0.1);
+    ctx.lineTo(bottomX+bottomW, h*0.96);
+    ctx.lineTo(bottomX, h*0.96);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha=.35; ctx.stroke(); ctx.globalAlpha=1;
 
     // hit line
-    ctx.strokeStyle='#4461a8'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(bottomX, laneGeom.hitY); ctx.lineTo(bottomX+bottomW, laneGeom.hitY); ctx.stroke();
+    ctx.strokeStyle='#4461a8'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(bottomX, laneGeom.hitY);
+    ctx.lineTo(bottomX+bottomW, laneGeom.hitY); ctx.stroke();
 
     // separators
-    for(let i=1;i<4;i++){ const y1=h*0.11, y2=h*0.95; const cx1=laneGeom.laneCenter(i,y1), cx2=laneGeom.laneCenter(i,y2); ctx.strokeStyle='#25304a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx1,y1); ctx.lineTo(cx2,y2); ctx.stroke(); }
+    for(let i=1;i<4;i++){
+      const y1=h*0.11, y2=h*0.95;
+      const cx1=laneGeom.laneCenter(i,y1), cx2=laneGeom.laneCenter(i,y2);
+      ctx.strokeStyle='#25304a'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx1,y1); ctx.lineTo(cx2,y2); ctx.stroke();
+    }
 
-    // draw active notes
-    for(const n of state.active){ if(n.hit && n.res==='miss') continue; const prog = clamp(1 - (n.t - t)/approach, 0, 1); const y = h*0.12 + prog*(laneGeom.hitY - h*0.12); const x = laneGeom.laneCenter(n.lane, y); const r = laneGeom.laneRadius(y);
+    // notes
+    for(const n of state.active){
+      if(n.hit && n.res==='miss') continue;
+      const prog = clamp(1 - (n.t - t)/approach, 0, 1);
+      const y = h*0.12 + prog*(laneGeom.hitY - h*0.12);
+      const x = laneGeom.laneCenter(n.lane, y);
+      const r = laneGeom.laneRadius(y);
+
       if(n.type==='slide'){
         const tailProg = clamp(1 - ((n.t + n.dur) - t)/approach, 0, 1);
         const yTail = h*0.12 + tailProg*(laneGeom.hitY - h*0.12);
         const color = getComputedStyle(document.documentElement).getPropertyValue('--slide').trim();
-        ctx.save(); ctx.strokeStyle='#3a4667'; ctx.lineWidth=3; ctx.fillStyle='#0c0f16';
+        ctx.save();
+        ctx.strokeStyle='#3a4667'; ctx.lineWidth=3; ctx.fillStyle='#0c0f16';
         ctx.beginPath();
         const y1 = Math.min(y, yTail), y2 = Math.max(y, yTail);
         ctx.rect(x-r*0.6, y1, r*1.2, Math.max(6, y2-y1));
         ctx.fill(); ctx.stroke();
-        const inner = ctx.createLinearGradient(x, y1, x, y2); inner.addColorStop(0, color); inner.addColorStop(1, '#001018');
-        ctx.globalAlpha = .8; ctx.fillStyle = inner; ctx.fillRect(x-r*0.45, y1, r*0.9, Math.max(6, y2-y1)); ctx.globalAlpha=1; ctx.restore();
+        const inner = ctx.createLinearGradient(x, y1, x, y2);
+        inner.addColorStop(0, color); inner.addColorStop(1, '#001018');
+        ctx.globalAlpha = .8; ctx.fillStyle = inner;
+        ctx.fillRect(x-r*0.45, y1, r*0.9, Math.max(6, y2-y1));
+        ctx.globalAlpha=1; ctx.restore();
       } else {
         const palette=['--lane0','--lane1','--lane2','--lane3'];
         const varName = (n.type==='shield')? '--shield' : palette[n.lane];
         const color = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-        ctx.save(); ctx.fillStyle = '#0c0f16'; ctx.strokeStyle = '#3a4667'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
-        const rr=r*0.62; const g2=ctx.createRadialGradient(x-r*0.3,y-r*0.3, rr*0.2, x,y, rr); g2.addColorStop(0, color); g2.addColorStop(1, '#000');
+        ctx.save();
+        ctx.fillStyle = '#0c0f16';
+        ctx.strokeStyle = '#3a4667'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+        const rr=r*0.62;
+        const g2=ctx.createRadialGradient(x-r*0.3,y-r*0.3, rr*0.2, x,y, rr);
+        g2.addColorStop(0, color); g2.addColorStop(1, '#000');
         ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill();
-        if(n.hit && (n.res==='good'||n.res==='ok')){ const age=(t-n.t); if(age<160){ ctx.globalAlpha=1-age/160; ctx.strokeStyle=n.res==='good'? '#7dffa6':'#ffe18a'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(x,y, r*0.95, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; } }
+
+        if(n.hit && (n.res==='good'||n.res==='ok')){
+          const age=(t-n.t);
+          if(age<160){
+            ctx.globalAlpha=1-age/160;
+            ctx.strokeStyle=n.res==='good'? '#7dffa6':'#ffe18a';
+            ctx.lineWidth=6; ctx.beginPath();
+            ctx.arc(x,y, r*0.95, 0, Math.PI*2); ctx.stroke();
+            ctx.globalAlpha=1;
+          }
+        }
         ctx.restore();
       }
     }
 
     // pressed key glows at hit line
-    for(let i=0;i<4;i++){ const y=laneGeom.hitY; const x=laneGeom.laneCenter(i,y); const r=laneGeom.laneRadius(y)*0.9; ctx.save(); ctx.globalAlpha= state.holds.has(i)? 1 : .55; const color=getComputedStyle(document.documentElement).getPropertyValue(['--lane0','--lane1','--lane2','--lane3'][i]).trim(); ctx.strokeStyle='#40507a'; ctx.lineWidth=4; ctx.fillStyle='#0c1018'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.globalAlpha= state.holds.has(i)? 0.45 : 0.18; ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y, r*0.6, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+    for(let i=0;i<4;i++){
+      const y=laneGeom.hitY;
+      const x=laneGeom.laneCenter(i,y);
+      const r=laneGeom.laneRadius(y)*0.9;
+      ctx.save();
+      ctx.globalAlpha= state.holds.has(i)? 1 : .55;
+      const color=getComputedStyle(document.documentElement).getPropertyValue(['--lane0','--lane1','--lane2','--lane3'][i]).trim();
+      ctx.strokeStyle='#40507a'; ctx.lineWidth=4; ctx.fillStyle='#0c1018';
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha= state.holds.has(i)? 0.45 : 0.18;
+      ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y, r*0.6, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
 
     // sparks
-    for(let i=sparks.length-1;i>=0;i--){ const s=sparks[i]; s.life-=1/60; if(s.life<=0){ sparks.splice(i,1); continue; } const a=clamp(s.life/0.3,0,1); ctx.globalAlpha=a; ctx.strokeStyle= s.type==='miss'? 'var(--miss)': s.type==='good'? 'var(--good)':'var(--ok)'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(s.x,s.y, 42*(1-a), 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; }
+    for(let i=sparks.length-1;i>=0;i--){
+      const s=sparks[i];
+      s.life-=1/60; if(s.life<=0){ sparks.splice(i,1); continue; }
+      const a=clamp(s.life/0.3,0,1);
+      ctx.globalAlpha=a;
+      ctx.strokeStyle= s.type==='miss'? 'var(--miss)': s.type==='good'? 'var(--good)':'var(--ok)';
+      ctx.lineWidth=6; ctx.beginPath(); ctx.arc(s.x,s.y, 42*(1-a), 0, Math.PI*2); ctx.stroke();
+      ctx.globalAlpha=1;
+    }
 
     ctx.restore();
   }
 
   // ===== Boot =====
   resize(); renderHearts(); updateHud(); setTimeProgress(0);
-  // Quick-start on Space if you want:
-  window.addEventListener('keydown', (e)=>{ if(e.code==='Space' && !state.running){ e.preventDefault(); startRun(); }
+  window.addEventListener('keydown', (e)=>{
+    if(e.code==='Space' && !state.running){ e.preventDefault(); startRun(); }
+  });
 })();
