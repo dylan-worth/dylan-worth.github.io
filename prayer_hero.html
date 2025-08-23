@@ -1,11 +1,78 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>Prayer Hero</title>
-  <link rel="stylesheet" href="prayer.css">
+  <style>
+    :root{
+      --bg:#0b0b10;
+      --lava1:#2b0d0d;
+      --lava2:#6a1a1a;
+      --panel:#1a1f2a;
+      --panel-2:#101420;
+      --edge:#313b52;
+      --text:#e6e6e6;
+      --muted:#a7b0c2;
+      --good:#38f57b;
+      --ok:#ffd166;
+      --miss:#ff5e57;
+      --lane0:#6bf178;
+      --lane1:#b16bff;
+      --lane2:#ff9f45;
+      --lane3:#6bb6ff;
+      --shield:#ffd54a;
+      --slide:#7af0ff;
+    }
+    html,body{height:100%; margin:0;}
+    body{
+      background: radial-gradient(1200px 600px at 70% 30%, #1a0f14, #0a070b 60%, #000 90%),
+        repeating-linear-gradient(120deg, var(--lava1) 0 2px, transparent 2px 6px),
+        repeating-linear-gradient(60deg,  var(--lava2) 0 1px, transparent 1px 5px);
+      background-blend-mode: overlay, screen, normal;
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, sans-serif;
+      overflow:hidden;
+    }
+    .wrap{display:grid; grid-template-columns: 1fr 340px; gap:14px; height:100%;}
+    .stage{position:relative; display:flex; align-items:center; justify-content:center; height:100%; border-right:2px solid #0008;}
+    canvas{width:100%; height:100%; display:block; background: linear-gradient(#0c0f17, #0a0c14 65%, #080a10 100%);}
+    .badge{position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; aspect-ratio:1/1; display:grid; place-items:center; filter: drop-shadow(0 8px 20px #000); z-index:3;}
+    .badge .ring{position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 0deg, #d7dbe9 0 10%, #96a3c7 10% 20%, #d7dbe9 20% 30%, #96a3c7 30% 40%, #d7dbe9 40% 50%, #96a3c7 50% 60%, #d7dbe9 60% 70%, #96a3c7 70% 80%, #d7dbe9 80% 90%, #96a3c7 90% 100%); mask: radial-gradient(circle at 50% 50%, transparent 56%, black 57%);}
+    .badge .text{font-weight:800; text-align:center; letter-spacing:.06em; line-height:1;}
+    .badge .text span{display:block; font-size:18px; color:#e6e6f8}
+    .badge .text strong{display:block; font-size:30px; color:#fff; text-shadow: 0 2px 0 #000, 0 0 12px #7fb1ff;}
+    .hud{height:100%; background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border-left: 1px solid #000a; box-shadow: inset 0 0 0 2px #0006, inset 0 0 32px #000c; padding:16px; display:flex; flex-direction:column; gap:16px;}
+    .card{background: linear-gradient(180deg, #111722, #0c121c); border:1px solid var(--edge); border-radius:14px; padding:14px; box-shadow: 0 6px 18px #0008;}
+    .title{font-weight:800; letter-spacing:.04em;}
+    .muted{color:var(--muted); font-size:12px;}
+    .kv{display:grid; grid-template-columns: auto 1fr; gap:6px 12px; align-items:center;}
+    .bars { display:grid; gap:10px; }
+    .bar{height:14px; border-radius:999px; background:#1c2230; border:1px solid #2a3347; box-shadow: inset 0 1px 2px #000; overflow:hidden}
+    .bar>.fill{height:100%; width:0%; background: linear-gradient(90deg, #89ff9f, #59b9ff);}
+    .row{display:flex; gap:10px; align-items:center; justify-content:space-between}
+    .btn{appearance:none; border:none; background:#1e2536; color:#dfe7ff; padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid #2a3550; font-weight:700}
+    .btn:hover{background:#283148}
+    .chip{display:inline-flex; align-items:center; gap:8px; background:#121929; color:#c4d0f6; border:1px solid #28324a; border-radius:999px; padding:8px 12px; font-size:12px;}
+    .dot{width:10px; height:10px; border-radius:50%}
+    .hearts{display:flex; gap:6px}
+    .heart{width:18px; height:18px; background: radial-gradient(circle at 30% 30%, #ff9090, #ff4545 60%, #d70024 61%); clip-path: path('M12 4 C12 2 10 0 8 0 C6 0 4 2 4 4 C4 6 6 8 8 10 C10 8 12 6 12 4 Z'); filter: drop-shadow(0 0 6px #ff1825aa)}
+    .heart.off{opacity:.25; filter:none}
+    .controls{ position:absolute; left:0; right:340px; bottom:16px; display:flex; justify-content:center; gap:10px; z-index:4; }
+    .key{width:64px; height:64px; border-radius:18px; background:#0c121c; border:2px solid #2f3b55; display:grid; place-items:center; color:#fff; font-weight:800; text-shadow:0 2px 0 #000; user-select:none}
+    .key:active{transform:translateY(2px)}
+    .legend{display:flex; gap:10px; flex-wrap:wrap}
+    @media (max-width: 980px){
+      .wrap{grid-template-columns: 1fr;}
+      .stage{border-right:none;}
+      .hud{position:fixed; bottom:0; left:0; right:0; height:auto; max-height:60%; overflow-y:auto; width:100%; backdrop-filter: blur(6px); border-left:none; border-top:1px solid #000a; box-shadow: 0 -4px 18px #000c; transform:translateY(calc(100% - 60px)); border-radius:16px 16px 0 0;}
+      .hud.open{transform:translateY(0);}
+      .controls{ right:12px; left:12px; bottom:80px; }
+      .badge { width:90px; }
+      .drawer-grip{display:block; position:absolute; top:6px; left:0; right:0; text-align:center;}
+      .drawer-grip div{margin:0 auto; width:60px; height:6px; background:#3a4667; border-radius:999px;}
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -21,62 +88,65 @@
         <div class="key" data-lane="2">▲</div>
         <div class="key" data-lane="3">▶︎</div>
       </div>
-    </div><aside class="hud" id="hud">
-  <div class="drawer-grip"><div></div></div>
-  <div class="card">
-    <div class="title">Session</div>
-    <div class="kv" style="margin-top:8px">
-      <div class="muted">Difficulty</div>
-      <div>
-        <select id="difficulty">
-          <option value="easy">Easy</option>
-          <option value="medium" selected>Medium</option>
-          <option value="hard">Hard</option>
-          <option value="insane">Insane</option>
-        </select>
-      </div>
-      <div class="muted">Length</div>
-      <div>
-        <select id="length">
-          <option value="short">Short (45s)</option>
-          <option value="medium" selected>Medium (75s)</option>
-          <option value="long">Long (120s)</option>
-        </select>
-      </div>
-      <div class="muted">Speed</div>
-      <div>
-        <input type="range" id="speed" min="3" max="9" value="5"/>
-      </div>
     </div>
-    <div class="row" style="margin-top:10px">
-      <button id="play" class="btn">▶ Start</button>
-      <button id="pause" class="btn">⏸ Pause</button>
-      <button id="restart" class="btn">↻ Restart</button>
-    </div>
-    <div class="legend" style="margin-top:10px">
-      <span class="chip"><span class="dot" style="background:var(--lane0)"></span> Left / A</span>
-      <span class="chip"><span class="dot" style="background:var(--lane1)"></span> Down / S</span>
-      <span class="chip"><span class="dot" style="background:var(--lane2)"></span> Up / W</span>
-      <span class="chip"><span class="dot" style="background:var(--lane3)"></span> Right / D</span>
-      <span class="chip"><span class="dot" style="background:var(--shield)"></span> Prayer Shield (+1 HP)</span>
-      <span class="chip"><span class="dot" style="background:var(--slide)"></span> Slide (Hold)</span>
-    </div>
-  </div>
-  <div class="card">
-    <div class="title">Stats</div>
-    <div class="kv">
-      <div class="muted">Score</div><b id="score">0</b>
-      <div class="muted">Streak</div><b id="streak">0</b>
-      <div class="muted">Multiplier</div><b id="mult">x1</b>
-    </div>
-    <div class="bars"><div class="bar"><div class="fill" id="timeFill"></div></div></div>
-    <div class="row"><div class="muted">Health</div><div class="hearts" id="hearts"></div></div>
-  </div>
-  <div class="card">
-    <div class="title">About</div>
-    <div class="muted" style="margin-top:6px">Includes long <b>Slide</b> notes (hold to clear) and <b>Prayer Shield</b> notes (+1 HP on hit). 🛡️</div>
-  </div>
-</aside>
 
-  </div>  <script src="prayer.js" defer></script></body>
+    <aside class="hud" id="hud">
+      <div class="drawer-grip"><div></div></div>
+      <div class="card">
+        <div class="title">Session</div>
+        <div class="kv" style="margin-top:8px">
+          <div class="muted">Difficulty</div>
+          <div>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+              <option value="insane">Insane</option>
+            </select>
+          </div>
+          <div class="muted">Length</div>
+          <div>
+            <select id="length">
+              <option value="short">Short (45s)</option>
+              <option value="medium" selected>Medium (75s)</option>
+              <option value="long">Long (120s)</option>
+            </select>
+          </div>
+          <div class="muted">Speed</div>
+          <div>
+            <input type="range" id="speed" min="3" max="9" value="5"/>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="play" class="btn">▶ Start</button>
+          <button id="pause" class="btn">⏸ Pause</button>
+          <button id="restart" class="btn">↻ Restart</button>
+        </div>
+        <div class="legend" style="margin-top:10px">
+          <span class="chip"><span class="dot" style="background:var(--lane0)"></span> Left / A</span>
+          <span class="chip"><span class="dot" style="background:var(--lane1)"></span> Down / S</span>
+          <span class="chip"><span class="dot" style="background:var(--lane2)"></span> Up / W</span>
+          <span class="chip"><span class="dot" style="background:var(--lane3)"></span> Right / D</span>
+          <span class="chip"><span class="dot" style="background:var(--shield)"></span> Prayer Shield (+1 HP)</span>
+          <span class="chip"><span class="dot" style="background:var(--slide)"></span> Slide (Hold)</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">Stats</div>
+        <div class="kv">
+          <div class="muted">Score</div><b id="score">0</b>
+          <div class="muted">Streak</div><b id="streak">0</b>
+          <div class="muted">Multiplier</div><b id="mult">x1</b>
+        </div>
+        <div class="bars"><div class="bar"><div class="fill" id="timeFill"></div></div></div>
+        <div class="row"><div class="muted">Health</div><div class="hearts" id="hearts"></div></div>
+      </div>
+      <div class="card">
+        <div class="title">About</div>
+        <div class="muted" style="margin-top:6px">Includes long <b>Slide</b> notes (hold to clear) and <b>Prayer Shield</b> notes (+1 HP on hit). 🛡️</div>
+      </div>
+    </aside>
+  </div>
+  <script src="prayer.js" defer></script>
+</body>
 </html>
