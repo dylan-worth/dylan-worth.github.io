@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SMB Assessments – Microbial Assessment Report</title>
+  <style>
+    /* =====================
+       SMB REPORT THEME
+       Green + Black, clean, print-ready
+       ===================== */
+    :root{
+      --smb-green:#1e8a4b; /* primary */
+      --smb-green-2:#38a169; /* accents */
+      --smb-ink:#111;       /* nearly black */
+      --smb-ink-2:#2a2a2a;  /* body */
+      --smb-mute:#7b8b7d;   /* muted labels */
+      --smb-bg:#f7faf7;     /* subtle paper */
+      --smb-border:#e2e8e2;
+      --good:#18a957;
+      --warn:#c9a204;
+      --bad:#c93636;
+    }
+    html,body{margin:0;background:var(--smb-bg);color:var(--smb-ink);font:16px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+    .report{max-width:900px;margin:24px auto;padding:24px 28px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.06);border-radius:14px;border:1px solid var(--smb-border)}
+    h1,h2,h3{margin:0 0 .5rem}
+    h1{font-size:2rem;letter-spacing:.2px}
+    h2{font-size:1.25rem;color:var(--smb-ink-2)}
+    h3{font-size:1.05rem;color:var(--smb-ink-2)}
+    p{margin:.25rem 0 .75rem}
+    .muted{color:var(--smb-mute)}
+    .grid{display:grid;gap:14px}
+    .cols-2{grid-template-columns:1fr 1fr}
+    .cols-3{grid-template-columns:repeat(3,1fr)}
+    .card{border:1px solid var(--smb-border);border-radius:12px;padding:16px;background:#fff}
+    .header{display:flex;align-items:center;gap:16px;border-bottom:2px solid var(--smb-green);padding-bottom:14px;margin-bottom:16px}
+    .smb-logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,var(--smb-green),var(--smb-green-2));display:grid;place-items:center;color:white;font-weight:800}
+    .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--smb-border);border-radius:999px;padding:.25rem .6rem;font-size:.8rem;background:#f9fbf9}
+    .btns{display:flex;gap:10px;flex-wrap:wrap}
+    button.btn{appearance:none;border:none;background:var(--smb-green);color:#fff;padding:.55rem .85rem;border-radius:10px;font-weight:600;cursor:pointer}
+    button.btn.outline{background:#fff;color:var(--smb-green);border:2px solid var(--smb-green)}
+    .kv{display:grid;grid-template-columns:180px 1fr;gap:8px;font-size:.95rem}
+    .kv div{padding:6px 0;border-bottom:1px dashed var(--smb-border)}
+    .status-pills{display:flex;gap:8px;flex-wrap:wrap;margin:.5rem 0}
+    .pill{padding:.35rem .6rem;border-radius:999px;font-weight:700;font-size:.78rem}
+    .good{background:rgba(24,169,87,.12);color:var(--good);border:1px solid rgba(24,169,87,.35)}
+    .warn{background:rgba(201,162,4,.12);color:var(--warn);border:1px solid rgba(201,162,4,.35)}
+    .bad{background:rgba(201,54,54,.12);color:var(--bad);border:1px solid rgba(201,54,54,.35)}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--smb-border);border-radius:12px;overflow:hidden}
+    thead th{background:rgba(30,138,75,.08);color:var(--smb-ink);text-align:left;padding:10px 12px}
+    tbody td{padding:10px 12px;border-top:1px solid var(--smb-border)}
+    tbody tr:nth-child(odd){background:#fbfdfb}
+    .photo{width:100%;aspect-ratio:4/3;object-fit:cover;border:1px solid var(--smb-border);border-radius:10px}
+    .section-title{display:flex;align-items:center;gap:10px;margin-top:10px}
+    .icon{width:26px;height:26px;display:inline-grid;place-items:center;border-radius:8px;background:rgba(30,138,75,.12);color:var(--smb-green);font-weight:900}
+    .progress{height:10px;border-radius:999px;background:#eef3ee;overflow:hidden}
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--smb-green),var(--smb-green-2));width:65%}/* Print Styles */
+@media print{
+  body{background:white}
+  .report{box-shadow:none;border:none;margin:0;page-break-after:always;border-radius:0}
+  .btns{display:none !important}
+  a[href]::after{content:" (" attr(href) ")";font-size:.8em;color:#555}
+}
+
+  </style>
+</head>
+<body>
+  <main class="report" id="report">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="smb-logo" aria-hidden="true">SMB</div>
+      <div>
+        <h1>Microbial Assessment Report</h1>
+        <div class="muted">Super Microbial Bros. • Honest Environmental Reports</div>
+      </div>
+    </div><!-- ACTIONS & META -->
+<div class="grid cols-3">
+  <div class="card">
+    <h2>Property</h2>
+    <div class="kv">
+      <div class="muted">Client</div><div id="client">Jane Doe</div>
+      <div class="muted">Address</div><div id="address">123 Palm Ave, Fort Myers, FL</div>
+      <div class="muted">Date</div><div id="date">Aug 26, 2025</div>
+      <div class="muted">Assessor</div><div id="assessor">Dylan Worth, MRSA ####</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Status</h2>
+    <div class="status-pills">
+      <span class="pill bad">Mold: Present</span>
+      <span class="pill warn">Moisture: Elevated</span>
+      <span class="pill good">Containment Needed: Yes</span>
+    </div>
+    <div>
+      <div class="section-title"><span class="icon">🏁</span><h3>Job Progress</h3></div>
+      <div class="progress" aria-label="progress bar"><span style="width:68%"></span></div>
+      <div class="muted" style="margin-top:6px">Inspection ✓ → Sampling ✓ → <strong>Lab</strong> → Recommendations</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Actions</h2>
+    <div class="btns">
+      <button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button class="btn outline" onclick="toggleAll()">▾ Expand/Collapse</button>
+      <button class="btn outline" onclick="jump('findings')">🔎 Jump to Findings</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXEC SUMMARY -->
+<section class="card" id="summary">
+  <div class="section-title"><span class="icon">📝</span><h2>Executive Summary</h2></div>
+  <p>
+    Visual inspection identified <strong>suspected microbial growth</strong> beneath the kitchen sink cabinet and 
+    <strong>elevated moisture</strong> in adjacent materials. Air and surface samples were collected for laboratory analysis.
+    Source control, containment, and targeted removal are recommended, followed by <em>post-remediation verification</em> (PRV).
+  </p>
+</section>
+
+<!-- FINDINGS -->
+<section class="card" id="findings">
+  <div class="section-title"><span class="icon">🔍</span><h2>Findings — Kitchen</h2></div>
+  <div class="grid cols-3" style="margin-top:8px">
+    <figure>
+      <img class="photo" src="https://images.unsplash.com/photo-1523419409543-1518f5d0f5a0?q=80&w=800&auto=format&fit=crop" alt="Under-sink cabinet"/>
+      <figcaption class="muted">Under-sink cabinet — visible growth ~1 sq ft</figcaption>
+    </figure>
+    <figure>
+      <img class="photo" src="https://images.unsplash.com/photo-1523779917675-b6ed3a42d0ee?q=80&w=800&auto=format&fit=crop" alt="Drywall corner"/>
+      <figcaption class="muted">Drywall corner — moisture staining, no visible growth</figcaption>
+    </figure>
+    <figure>
+      <img class="photo" src="https://images.unsplash.com/photo-1523419168196-0062c195bb4a?q=80&w=800&auto=format&fit=crop" alt="Floor grout"/>
+      <figcaption class="muted">Floor grout — dry</figcaption>
+    </figure>
+  </div>
+
+  <h3 style="margin-top:10px">Moisture Readings</h3>
+  <table aria-label="Moisture Table">
+    <thead><tr><th>Point</th><th>Reading</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Cabinet – Left</td><td>22%</td><td><span class="pill warn">Elevated</span></td></tr>
+      <tr><td>Cabinet – Right</td><td>19%</td><td><span class="pill warn">Elevated</span></td></tr>
+      <tr><td>Adjacent Drywall</td><td>10%</td><td><span class="pill good">Normal</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:14px">Samples Collected</h3>
+  <table aria-label="Samples Table">
+    <thead><tr><th>Sample ID</th><th>Type</th><th>Location</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>SW-01</td><td>Surface</td><td>Under-sink Base</td><td>Visible growth</td></tr>
+      <tr><td>AI-01</td><td>Air</td><td>Kitchen</td><td>5 minutes @ 15 LPM</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- RECOMMENDATIONS -->
+<section class="card" id="recs">
+  <div class="section-title"><span class="icon">🎯</span><h2>Recommendations (Level Objectives)</h2></div>
+  <ol>
+    <li><strong>Source Removal:</strong> Repair plumbing supply line and any active leaks.</li>
+    <li><strong>Containment:</strong> Establish negative air containment for kitchen work zone.</li>
+    <li><strong>Selective Removal:</strong> Remove/replace affected cabinet base; HEPA vacuum + damp wipe structure.</li>
+    <li><strong>Drying Plan:</strong> Dehumidification and airflow to acceptable moisture content.</li>
+    <li><strong>PRV:</strong> Post-remediation verification sampling and visual clearance.</li>
+  </ol>
+</section>
+
+<!-- APPENDIX / LAB SUMMARY PLACEHOLDER -->
+<section class="card" id="appendix">
+  <div class="section-title"><span class="icon">🧪</span><h2>Lab Summary (Appendix)</h2></div>
+  <table>
+    <thead><tr><th>Sample</th><th>Dominant Genera</th><th>Result</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>AI-01</td><td>Aspergillus/Penicillium</td><td>Elevated vs. Outdoor</td><td><span class="pill bad">Above Baseline</span></td></tr>
+      <tr><td>SW-01</td><td>Stachybotrys</td><td>Present</td><td><span class="pill bad">Source-Linked</span></td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="margin-top:.6rem">Detailed lab reports attached separately or appended as PDF pages.</p>
+</section>
+
+<!-- FOOTER -->
+<section class="muted" style="text-align:center;margin-top:18px">
+  <small>© <span id="yr"></span> SMB Assessments (Super Microbial Bros.) • smbassessments.com • (555) 555‑5555</small>
+</section>
+
+  </main>  <script>
+    // Tiny helpers for UX — no external libs
+    const yrEl=document.getElementById('yr'); yrEl.textContent=new Date().getFullYear();
+    function jump(id){ document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}); }
+    function toggleAll(){
+      const cards=[...document.querySelectorAll('.card')].slice(1); // skip first header grid
+      const collapsed = cards.every(c=>c.dataset.collapsed==='1');
+      cards.forEach(c=>{
+        if(collapsed){ c.style.maxHeight=''; c.style.overflow=''; c.dataset.collapsed='0'; }
+        else { c.style.maxHeight='60px'; c.style.overflow='hidden'; c.dataset.collapsed='1'; }
+      });
+    }
+    // Example: pre-collapse long appendix for cleaner first impression
+    document.getElementById('appendix').dataset.collapsed='1';
+    document.getElementById('appendix').style.maxHeight='60px';
+    document.getElementById('appendix').style.overflow='hidden';
+  </script></body>
+</html>
