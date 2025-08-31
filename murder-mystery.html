@@ -3,179 +3,204 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Forum Post • Murder Mystery Update</title>
+<title>Sheikah Slate Patch Notes</title>
 <style>
   :root{
-    --bg: #06070b;             /* near-black */
-    --bg-elev: #0b0f18;        /* card background */
-    --ink: #d9e6ff;            /* primary text */
-    --ink-dim:#a3b1d4;         /* secondary text */
-    --blue:#3ea6ff;            /* aura blue */
-    --blue-2:#80c7ff;          /* lighter blue */
-    --accent:#7dd3fc;          /* link-ish */
-    --success:#70f0a5;
-    --card-radius:20px;
-    --shadow: 0 0 0px rgba(62,166,255,0), 0 0 30px rgba(62,166,255,.08);
+    /* Breath of the Wild vibes */
+    --slate:#0a0f13;             /* deep slate */
+    --slate-2:#0f151b;           /* elevated slate */
+    --ink:#e8f6ff;               /* soft parchment-white */
+    --ink-dim:#a8c4d8;
+    --sheikah:#11c5ff;           /* ancient tech blue */
+    --sheikah-2:#7fe2ff;         /* lighter blue */
+    --gold:#c7b26a;              /* UI gold accent */
+    --card-r:22px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
     color:var(--ink);
-    background: radial-gradient(1200px 800px at 20% -10%, rgba(62,166,255,.12), transparent 55%),
-                radial-gradient(1000px 600px at 80% 110%, rgba(0,132,255,.10), transparent 60%),
-                var(--bg);
+    font-family: "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", system-ui, -apple-system, Arial, sans-serif;
     letter-spacing:.2px;
-  }
-
-  .wrap{
-    max-width: 980px;
-    margin: clamp(16px, 3vw, 32px) auto 96px;
-    padding: 0 16px;
-  }
-
-  /* Top actions like a forum toolbar */
-  .toolbar{
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    display:flex;
-    gap:10px;
-    padding:12px 16px;
-    margin:0 auto 12px;
-    backdrop-filter: blur(6px);
-    background: linear-gradient(to bottom, rgba(6,7,11,.85), rgba(6,7,11,.55));
-    border: 1px solid rgba(62,166,255,.18);
-    border-left: none; border-right: none;
-  }
-  .toolbar .btn{
-    padding:10px 14px;
-    font-weight:600;
-    border-radius:12px;
-    border:1px solid rgba(62,166,255,.25);
-    background: linear-gradient(180deg, #0b121e, #0a0f1a);
-    color:var(--ink);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 12px rgba(62,166,255,.12);
-    cursor:pointer;
-    transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
-  }
-  .btn:hover{ border-color: rgba(128,199,255,.6); box-shadow: 0 0 24px rgba(62,166,255,.18) }
-  .btn:active{ transform: translateY(1px) scale(.99) }
-
-  /* Post card */
-  .post{
-    background: linear-gradient(180deg, rgba(13,18,30,.88), rgba(9,12,20,.88));
-    border: 1px solid rgba(62,166,255,.25);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow);
-    overflow: clip;
-  }
-  .post__header{
-    padding: 18px 20px;
-    display:flex; align-items:center; gap:14px;
-    border-bottom:1px solid rgba(62,166,255,.2);
+    /* BotW-style background: stone + Sheikah glow */
     background:
-      radial-gradient(600px 120px at 20% 0%, rgba(62,166,255,.12), transparent 60%),
-      linear-gradient(180deg, rgba(9,14,24,.7), rgba(8,11,18,.4));
-  }
-  .avatar{
-    width:44px; height:44px; border-radius:12px;
-    background: radial-gradient(circle at 30% 30%, #10243a, #081019 70%);
-    border:1px solid rgba(128,199,255,.35);
-    box-shadow: inset 0 0 24px rgba(62,166,255,.2), 0 0 12px rgba(62,166,255,.2);
-  }
-  .title{ margin:0; font-size:1.2rem; line-height:1.2 }
-  .meta{ color:var(--ink-dim); font-size:.9rem }
-
-  .post__body{
-    padding: 18px 20px 8px;
+      radial-gradient(1200px 900px at 85% -10%, rgba(17,197,255,.12), transparent 55%),
+      radial-gradient(900px 700px at -10% 110%, rgba(17,197,255,.10), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 8px),
+      linear-gradient(180deg, #070b0f, #0a0f13 40%, #0b1016);
   }
 
-  /* Section blocks */
-  details{
-    background: linear-gradient(180deg, rgba(12,16,26,.7), rgba(10,13,21,.6));
-    border:1px solid rgba(128,199,255,.22);
-    border-radius: 14px;
-    margin: 14px 0;
-    padding: 10px 12px;
-    transition: border-color .2s ease, box-shadow .2s ease;
-  }
-  details[open]{ border-color: rgba(128,199,255,.5); box-shadow: 0 0 20px rgba(62,166,255,.14) }
-  summary{
-    cursor: pointer;
-    font-weight:700;
-    color: var(--blue-2);
-    list-style:none;
-  }
-  summary::-webkit-details-marker{ display:none }
-  summary::before{
-    content:"▸";
-    margin-right:8px;
-    color:var(--blue-2);
-    transition: transform .2s ease;
-    display:inline-block;
-  }
-  details[open] summary::before{ transform: rotate(90deg) }
+  .wrap{ max-width: 980px; margin: clamp(14px,3vw,28px) auto 96px; padding: 0 16px; }
 
-  /* Lists */
-  ul{ padding-left: 1.2em; margin: 10px 0 6px }
-  li{ margin: .35em 0; color: var(--ink); }
-  li::marker{ color: var(--blue-2) }
-
-  .greeting{ font-size:1.05rem; margin-bottom:8px }
-  .notice{
-    display:inline-block; padding:4px 8px; border-radius:10px;
-    border:1px solid rgba(62,166,255,.35); color: var(--accent);
-    background: linear-gradient(180deg, rgba(6,12,22,.7), rgba(6,10,18,.3));
-    box-shadow: inset 0 0 12px rgba(62,166,255,.08);
-    font-size:.9rem; margin-bottom:10px;
+  /* Top slate toolbar */
+  .toolbar{
+    position: sticky; top: 0; z-index: 40;
+    display:flex; gap:10px; align-items:center;
+    padding:10px 16px; margin:0 auto 12px;
+    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(10,15,19,.85), rgba(10,15,19,.55));
+    border-top:1px solid rgba(17,197,255,.18);
+    border-bottom:1px solid rgba(17,197,255,.18);
   }
-
-  /* Footer */
-  .post__footer{
-    display:flex; justify-content:space-between; align-items:center;
-    gap:10px; padding:14px 20px;
-    border-top:1px solid rgba(62,166,255,.22);
-    color:var(--ink-dim); font-size:.9rem;
-    background: linear-gradient(180deg, rgba(9,12,20,.7), rgba(8,10,16,.6));
+  .btn{
+    padding:10px 14px; font-weight:700; letter-spacing:.3px;
+    border-radius:14px;
+    color:var(--ink);
+    border:1px solid rgba(17,197,255,.35);
+    background:
+      radial-gradient(120% 200% at 50% -60%, rgba(17,197,255,.18), transparent 60%),
+      linear-gradient(180deg, #0f1720, #0b1117);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 0 18px rgba(17,197,255,.14);
+    cursor:pointer; transition: .15s ease;
   }
-
-  /* Small niceties */
-  a{ color:var(--accent); text-decoration:none }
-  a:hover{ text-decoration:underline }
+  .btn:hover{ border-color: rgba(127,226,255,.7); box-shadow: 0 0 26px rgba(17,197,255,.22) }
+  .btn:active{ transform: translateY(1px) scale(.99) }
   .right{ margin-left:auto }
 
-  /* Responsive */
+  /* Post card with rune edges */
+  .post{
+    position: relative;
+    background: linear-gradient(180deg, rgba(16,23,30,.9), rgba(11,16,22,.9));
+    border:1px solid rgba(17,197,255,.33);
+    border-radius: var(--card-r);
+    box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 34px rgba(17,197,255,.10);
+    overflow: clip;
+  }
+  /* Corner runes (SVG masks for vibe) */
+  .post::before, .post::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(20px 20px at 18px 18px, rgba(17,197,255,.4), transparent 60%) top left,
+      radial-gradient(20px 20px at calc(100% - 18px) 18px, rgba(17,197,255,.4), transparent 60%) top right,
+      radial-gradient(20px 20px at 18px calc(100% - 18px), rgba(17,197,255,.35), transparent 60%) bottom left,
+      radial-gradient(20px 20px at calc(100% - 18px) calc(100% - 18px), rgba(17,197,255,.35), transparent 60%) bottom right;
+    background-repeat:no-repeat;
+    mix-blend-mode: screen;
+  }
+
+  .post__header{
+    display:flex; gap:14px; align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid rgba(17,197,255,.28);
+    background:
+      radial-gradient(700px 160px at 18% 0%, rgba(17,197,255,.14), transparent 60%),
+      linear-gradient(180deg, rgba(9,14,19,.8), rgba(9,12,17,.55));
+  }
+
+  /* Sheikah Eye emblem */
+  .emblem{
+    width:52px; height:52px; border-radius:14px; display:grid; place-items:center;
+    background:
+      radial-gradient(85% 130% at 50% -20%, rgba(17,197,255,.22), transparent 60%),
+      linear-gradient(180deg,#0b1219,#0b1016);
+    border:1px solid rgba(127,226,255,.55);
+    box-shadow: inset 0 0 32px rgba(17,197,255,.26), 0 0 18px rgba(17,197,255,.18);
+  }
+  .emblem svg{ width:30px; height:30px; filter: drop-shadow(0 0 6px rgba(17,197,255,.6)); }
+
+  .title{ margin:0; font-size:1.15rem; line-height:1.2; letter-spacing:.5px; text-transform:uppercase }
+  .title span{ color: var(--gold); font-weight:800 }
+  .meta{ color:var(--ink-dim); font-size:.9rem }
+
+  .post__body{ padding:18px 20px 10px }
+
+  .notice{
+    display:inline-block; padding:5px 10px; margin-bottom:10px;
+    border-radius:999px; font-weight:700; letter-spacing:.4px;
+    color:var(--sheikah-2);
+    border:1px solid rgba(17,197,255,.45);
+    background: linear-gradient(180deg, rgba(9,14,20,.7), rgba(8,12,18,.35));
+    box-shadow: inset 0 0 14px rgba(17,197,255,.10);
+  }
+
+  /* Triangle section dividers */
+  .divider{
+    --h: 14px;
+    height: var(--h);
+    background:
+      linear-gradient(90deg, transparent 0 12px, rgba(199,178,106,.35) 12px 13px, transparent 13px 26px),
+      linear-gradient(90deg, transparent 0 12px, rgba(17,197,255,.35) 12px 13px, transparent 13px 26px);
+    background-size: 26px 2px, 26px 2px;
+    background-repeat: repeat-x;
+    background-position: center 4px, center 10px;
+    opacity:.9;
+  }
+
+  /* Collapsible sections styled as slates */
+  details{
+    background: linear-gradient(180deg, rgba(14,20,27,.72), rgba(12,18,24,.62));
+    border:1px solid rgba(127,226,255,.26);
+    border-radius:16px;
+    margin:14px 0; padding:10px 12px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  details[open]{ border-color: rgba(127,226,255,.6); box-shadow: 0 0 22px rgba(17,197,255,.14) }
+  summary{
+    cursor:pointer; list-style:none; font-weight:800; letter-spacing:.4px;
+    color:var(--sheikah-2); text-transform:uppercase; font-size:.95rem;
+    display:flex; align-items:center; gap:9px;
+  }
+  summary::-webkit-details-marker{ display:none }
+  .chev{
+    width:10px; height:10px; border:2px solid var(--sheikah-2);
+    border-left:0; border-top:0; transform: rotate(-45deg); transition:.2s ease;
+    box-shadow: 0 0 8px rgba(17,197,255,.7);
+  }
+  details[open] .chev{ transform: rotate(45deg) }
+
+  ul{ padding-left: 1.2em; margin: 8px 0 4px }
+  li{ margin: .33em 0; }
+  li::marker{ color: var(--sheikah-2) }
+
+  .post__footer{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:14px 20px; color:var(--ink-dim); font-size:.9rem;
+    border-top:1px solid rgba(17,197,255,.26);
+    background: linear-gradient(180deg, rgba(9,12,17,.75), rgba(9,12,17,.55));
+  }
+
+  a{ color:var(--sheikah-2); text-decoration:none }
+  a:hover{ text-decoration:underline }
+
   @media (max-width:560px){
-    .title{ font-size:1.05rem }
+    .title{ font-size:1.02rem }
     .post__body{ padding:14px }
-    .toolbar{ gap:8px }
   }
 </style>
 </head>
 <body>
-  <div class="toolbar wrap" role="navigation" aria-label="Forum toolbar">
-    <button class="btn" onclick="scrollToTop()">Back to Updates</button>
-    <button class="btn right" id="refreshBtn">Refresh</button>
+  <div class="toolbar wrap" role="navigation" aria-label="Slate toolbar">
+    <button class="btn" onclick="scrollToTop()">Return to Tablet</button>
+    <button class="btn right" id="refreshBtn">Scan for Updates</button>
   </div>
 
   <main class="wrap">
     <article class="post" aria-labelledby="post-title">
       <header class="post__header">
-        <div class="avatar" aria-hidden="true"></div>
+        <div class="emblem" aria-hidden="true">
+          <!-- Sheikah Eye -->
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <circle cx="32" cy="32" r="7.5" stroke="currentColor" stroke-width="3" color="var(--sheikah)"/>
+            <path d="M7 32c9-11 20-17 25-17s16 6 25 17c-9 11-20 17-25 17S16 43 7 32Z"
+                  stroke="currentColor" stroke-width="3" color="var(--sheikah)" fill="none"/>
+            <circle cx="32" cy="32" r="3.5" fill="var(--sheikah)"/>
+          </svg>
+        </div>
         <div>
-          <h1 id="post-title" class="title">Murder Mystery • Patch Notes</h1>
-          <div class="meta">Posted by <strong>Update Bot</strong> • 31-August-2025</div>
+          <h1 id="post-title" class="title"><span>Sheikah Slate</span> • Murder Mystery Patch Notes</h1>
+          <div class="meta">Inscribed by <strong>Update Bot</strong> • 31-August-2025</div>
         </div>
       </header>
 
-      <section class="post__body">
-        <p class="greeting"><span class="notice">Greetings Explorers</span><br/>There have been some more changes in Gielinor:</p>
+      <div class="divider" aria-hidden="true"></div>
 
-        <!-- SECTION 1 -->
+      <section class="post__body">
+        <p class="notice">Greetings Explorers</p>
+        <p>There have been some more changes in Gielinor:</p>
+
         <details open>
-          <summary>Core Fixes & Improvements</summary>
+          <summary><span class="chev"></span> Core Fixes & Improvements</summary>
           <ul>
             <li>Fixed dagon’hai robe top and bottom missing prayer bonus</li>
             <li>Fixed saradomin bracers requiring 70 defense</li>
@@ -199,9 +224,8 @@
           </ul>
         </details>
 
-        <!-- SECTION 2 -->
         <details>
-          <summary>Systems & Events</summary>
+          <summary><span class="chev"></span> Systems & Events</summary>
           <ul>
             <li>Essence miner bot will now sell the acquired pure essence on the GE after it reaches at least 500</li>
             <li>Fixed PK news announcement breaking due to incorrect time processing</li>
@@ -228,27 +252,26 @@
             <li>Willow branches now properly regrow every 5 minutes</li>
             <li>Implemented semi-authentic Pious Pete random event</li>
             <li>Cats will no longer eat buckets</li>
-            <li>Created a new command, ::petrate, for testing pet growth. ::petrate 0 is for pausing growth, 1 for 1x rate, and 2 uses the dev rate of growth (100x normal)</li>
+            <li>Created a new command, ::petrate, for testing pet growth. ::petrate 0 pauses, 1 is 1x, 2 is dev 100x</li>
             <li>Adult and overgrown cats will not grow hungry</li>
             <li>Removed several pets inauthentic to 2009</li>
             <li>Dogs no longer can turn into minotaurs</li>
             <li>Wolpertingers now double yield and experience from bushes</li>
-            <li>Relicym’s Balm is now created as a 3-dose rather than 4-dose potion</li>
+            <li>Relicym’s Balm now created as a 3-dose potion</li>
             <li>All Barbarian Mixes can now be consumed with appropriate effects</li>
             <li>Corrected healing for caviar Barbarian Mixes</li>
             <li>Implemented farming spirit trees</li>
             <li>Fixed exception running ::completediaries</li>
             <li>Rewrote or refactored many interfaces, fixing many small bugs</li>
             <li>Corrected wizard projectiles and cast height</li>
-            <li>Mithril dragons now only use their range attack when outside melee range</li>
-            <li>Shooting stars now authentically award the discovery bonus XP in a single chunk (players with unclaimed XP prior to this change will still be able to claim it by mining the star)</li>
+            <li>Mithril dragons now only use range attack when outside melee range</li>
+            <li>Shooting stars now award discovery bonus XP in a single chunk</li>
             <li>Farming improvements</li>
           </ul>
         </details>
 
-        <!-- SECTION 3 -->
         <details>
-          <summary>Farming & World Interactions</summary>
+          <summary><span class="chev"></span> Farming & World Interactions</summary>
           <ul>
             <li>White Berry Bushes can now be protected</li>
             <li>Giant Ent properly increases Belladonna yield</li>
@@ -256,61 +279,75 @@
             <li>Fixed various bush bugs</li>
             <li>Fruit Trees can now be chopped</li>
             <li>Fixed Scarecrow needing to grow to work</li>
-            <li>Mushrooms should now visually update as each mushroom is picked from the patch</li>
+            <li>Mushrooms visually update as each mushroom is picked</li>
             <li>Poison Ivy Bushes are now disease immune</li>
-            <li>Poison Ivy Berries picked in the Champion’s Guild Patch now finishes a Varrock Diary task</li>
-            <li>The Ancient Cavern Canoe can now be used without the screen permanently fading to black until logging out</li>
+            <li>Poison Ivy Berries from Champion’s Guild Patch finish a Varrock Diary task</li>
+            <li>Ancient Cavern Canoe no longer fades screen to black until logout</li>
             <li>Corrected Sumona’s red dragon assignment</li>
             <li>Removed inauthentic aviansie assignments</li>
             <li>Fixed GWD beacon not being repairable</li>
             <li>Surprise exam is no longer optional</li>
             <li>Fixed level checks for All Fired Up beacon repair</li>
-            <li>Fixed bug where the front door to Lord Handlemort’s mansion in Ardougne remains locked even after obtaining totem</li>
+            <li>Fixed Lord Handlemort’s mansion door staying locked after totem</li>
             <li>Fixed dark beast dropping big bones</li>
             <li>Fixed too high health for leech</li>
             <li>Implemented Lletya Fruit Tree Patch</li>
-            <li>Implemented Harmony Island Allotment Patch. Patch is still unreachable without The Great Brain Robbery</li>
+            <li>Implemented Harmony Island Allotment Patch (still unreachable without The Great Brain Robbery)</li>
             <li>Fixed Goblin Diplomacy quest log text</li>
-            <li>Fixed charging orbs to check magic level instead of crafting</li>
+            <li>Charging orbs now checks magic level instead of crafting</li>
             <li>Corrected Gunslik’s shop items</li>
-            <li>Corrected spider HP to 2 points</li>
+            <li>Corrected spider HP to 2</li>
             <li>Fixed maze reward chest amount</li>
             <li>Fixed ToG quest point requirements</li>
-            <li>Crumble undead now more effective against zogres and skogres</li>
+            <li>Crumble undead more effective against zogres and skogres</li>
             <li>Fixed bots not picking up loot</li>
-            <li>Fixed the bug where an NPC would show up on an item dialogue</li>
-            <li>Refactored both item and double item dialogues</li>
-            <li>Huge refactor improving the handling of players being given items, or situations where items are exchanged</li>
-            <li>Reverted Lumbridge random event teleport fix due to trapping players in random event</li>
+            <li>Fixed NPC showing up on item dialogue bug</li>
+            <li>Refactored item and double-item dialogues</li>
+            <li>Huge refactor for handling item grants/exchanges</li>
+            <li>Reverted Lumbridge random event teleport fix (trapping players)</li>
             <li>Spam clicking maze shrine now handled</li>
           </ul>
         </details>
       </section>
 
+      <div class="divider" aria-hidden="true"></div>
+
       <footer class="post__footer">
-        <span>Blue glow supplied by the Arcane Graphics Department.</span>
-        <span class="right">End of notes • Stay curious, adventurer.</span>
+        <span>“The slate hums softly.”</span>
+        <span class="right">May the winds guide your steps.</span>
       </footer>
     </article>
   </main>
 
 <script>
-  // Tiny flourish for the "Refresh" button
+  // Little Sheikah sparkle for the refresh
   const btn = document.getElementById('refreshBtn');
   btn.addEventListener('click', () => {
-    btn.textContent = 'Refreshing...';
+    btn.textContent = 'Scanning…';
     btn.disabled = true;
+
+    // Randomly open/close sections like rune tiles clicking
     setTimeout(() => {
-      // Simulate a soft refresh by toggling details open states randomly
       document.querySelectorAll('details').forEach(d => {
         if (Math.random() > .5) d.open = true; else d.open = false;
       });
-      btn.textContent = 'Refresh';
+      btn.textContent = 'Scan for Updates';
       btn.disabled = false;
-    }, 500);
+      pulseHeader();
+    }, 600);
   });
 
   function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
+
+  // Sheikah pulse effect on emblem
+  function pulseHeader(){
+    const emblem = document.querySelector('.emblem');
+    emblem.animate([
+      { boxShadow: 'inset 0 0 32px rgba(17,197,255,.26), 0 0 18px rgba(17,197,255,.18)' },
+      { boxShadow: 'inset 0 0 48px rgba(17,197,255,.55), 0 0 36px rgba(17,197,255,.35)' },
+      { boxShadow: 'inset 0 0 32px rgba(17,197,255,.26), 0 0 18px rgba(17,197,255,.18)' }
+    ], { duration: 700, easing: 'ease-in-out' });
+  }
 </script>
 </body>
 </html>
