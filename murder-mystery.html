@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Forum Post • Murder Mystery Update</title>
+<style>
+  :root{
+    --bg: #06070b;             /* near-black */
+    --bg-elev: #0b0f18;        /* card background */
+    --ink: #d9e6ff;            /* primary text */
+    --ink-dim:#a3b1d4;         /* secondary text */
+    --blue:#3ea6ff;            /* aura blue */
+    --blue-2:#80c7ff;          /* lighter blue */
+    --accent:#7dd3fc;          /* link-ish */
+    --success:#70f0a5;
+    --card-radius:20px;
+    --shadow: 0 0 0px rgba(62,166,255,0), 0 0 30px rgba(62,166,255,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    color:var(--ink);
+    background: radial-gradient(1200px 800px at 20% -10%, rgba(62,166,255,.12), transparent 55%),
+                radial-gradient(1000px 600px at 80% 110%, rgba(0,132,255,.10), transparent 60%),
+                var(--bg);
+    letter-spacing:.2px;
+  }
+
+  .wrap{
+    max-width: 980px;
+    margin: clamp(16px, 3vw, 32px) auto 96px;
+    padding: 0 16px;
+  }
+
+  /* Top actions like a forum toolbar */
+  .toolbar{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display:flex;
+    gap:10px;
+    padding:12px 16px;
+    margin:0 auto 12px;
+    backdrop-filter: blur(6px);
+    background: linear-gradient(to bottom, rgba(6,7,11,.85), rgba(6,7,11,.55));
+    border: 1px solid rgba(62,166,255,.18);
+    border-left: none; border-right: none;
+  }
+  .toolbar .btn{
+    padding:10px 14px;
+    font-weight:600;
+    border-radius:12px;
+    border:1px solid rgba(62,166,255,.25);
+    background: linear-gradient(180deg, #0b121e, #0a0f1a);
+    color:var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 12px rgba(62,166,255,.12);
+    cursor:pointer;
+    transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .btn:hover{ border-color: rgba(128,199,255,.6); box-shadow: 0 0 24px rgba(62,166,255,.18) }
+  .btn:active{ transform: translateY(1px) scale(.99) }
+
+  /* Post card */
+  .post{
+    background: linear-gradient(180deg, rgba(13,18,30,.88), rgba(9,12,20,.88));
+    border: 1px solid rgba(62,166,255,.25);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    overflow: clip;
+  }
+  .post__header{
+    padding: 18px 20px;
+    display:flex; align-items:center; gap:14px;
+    border-bottom:1px solid rgba(62,166,255,.2);
+    background:
+      radial-gradient(600px 120px at 20% 0%, rgba(62,166,255,.12), transparent 60%),
+      linear-gradient(180deg, rgba(9,14,24,.7), rgba(8,11,18,.4));
+  }
+  .avatar{
+    width:44px; height:44px; border-radius:12px;
+    background: radial-gradient(circle at 30% 30%, #10243a, #081019 70%);
+    border:1px solid rgba(128,199,255,.35);
+    box-shadow: inset 0 0 24px rgba(62,166,255,.2), 0 0 12px rgba(62,166,255,.2);
+  }
+  .title{ margin:0; font-size:1.2rem; line-height:1.2 }
+  .meta{ color:var(--ink-dim); font-size:.9rem }
+
+  .post__body{
+    padding: 18px 20px 8px;
+  }
+
+  /* Section blocks */
+  details{
+    background: linear-gradient(180deg, rgba(12,16,26,.7), rgba(10,13,21,.6));
+    border:1px solid rgba(128,199,255,.22);
+    border-radius: 14px;
+    margin: 14px 0;
+    padding: 10px 12px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  details[open]{ border-color: rgba(128,199,255,.5); box-shadow: 0 0 20px rgba(62,166,255,.14) }
+  summary{
+    cursor: pointer;
+    font-weight:700;
+    color: var(--blue-2);
+    list-style:none;
+  }
+  summary::-webkit-details-marker{ display:none }
+  summary::before{
+    content:"▸";
+    margin-right:8px;
+    color:var(--blue-2);
+    transition: transform .2s ease;
+    display:inline-block;
+  }
+  details[open] summary::before{ transform: rotate(90deg) }
+
+  /* Lists */
+  ul{ padding-left: 1.2em; margin: 10px 0 6px }
+  li{ margin: .35em 0; color: var(--ink); }
+  li::marker{ color: var(--blue-2) }
+
+  .greeting{ font-size:1.05rem; margin-bottom:8px }
+  .notice{
+    display:inline-block; padding:4px 8px; border-radius:10px;
+    border:1px solid rgba(62,166,255,.35); color: var(--accent);
+    background: linear-gradient(180deg, rgba(6,12,22,.7), rgba(6,10,18,.3));
+    box-shadow: inset 0 0 12px rgba(62,166,255,.08);
+    font-size:.9rem; margin-bottom:10px;
+  }
+
+  /* Footer */
+  .post__footer{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px; padding:14px 20px;
+    border-top:1px solid rgba(62,166,255,.22);
+    color:var(--ink-dim); font-size:.9rem;
+    background: linear-gradient(180deg, rgba(9,12,20,.7), rgba(8,10,16,.6));
+  }
+
+  /* Small niceties */
+  a{ color:var(--accent); text-decoration:none }
+  a:hover{ text-decoration:underline }
+  .right{ margin-left:auto }
+
+  /* Responsive */
+  @media (max-width:560px){
+    .title{ font-size:1.05rem }
+    .post__body{ padding:14px }
+    .toolbar{ gap:8px }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar wrap" role="navigation" aria-label="Forum toolbar">
+    <button class="btn" onclick="scrollToTop()">Back to Updates</button>
+    <button class="btn right" id="refreshBtn">Refresh</button>
+  </div>
+
+  <main class="wrap">
+    <article class="post" aria-labelledby="post-title">
+      <header class="post__header">
+        <div class="avatar" aria-hidden="true"></div>
+        <div>
+          <h1 id="post-title" class="title">Murder Mystery • Patch Notes</h1>
+          <div class="meta">Posted by <strong>Update Bot</strong> • 31-August-2025</div>
+        </div>
+      </header>
+
+      <section class="post__body">
+        <p class="greeting"><span class="notice">Greetings Explorers</span><br/>There have been some more changes in Gielinor:</p>
+
+        <!-- SECTION 1 -->
+        <details open>
+          <summary>Core Fixes & Improvements</summary>
+          <ul>
+            <li>Fixed dagon’hai robe top and bottom missing prayer bonus</li>
+            <li>Fixed saradomin bracers requiring 70 defense</li>
+            <li>Added missing animations and sounds to blessed axe</li>
+            <li>Fixed multihit spells incorrectly targeting familiars</li>
+            <li>Fixed multihit spells incorrectly being limited to exclusively players or exclusively NPCs per cast</li>
+            <li>Improved docker support</li>
+            <li>Updated README for docker</li>
+            <li>Cleaned up run and build bash scripts</li>
+            <li>Fixed Digsite quest items that damage player on drop potentially dealing more damage than intended</li>
+            <li>Removed inauthentic pets</li>
+            <li>Removed option to obtain inauthentic TzRek-Jad pet</li>
+            <li>Corrected attack, defence and death animations used by Waterfiends (idle attack animation is an authentic bug)</li>
+            <li>Corrected list of god items</li>
+            <li>Fixed the wall beasts in the lumbridge swamp dungeon</li>
+            <li>Corrected all four DT bosses’ despawn behaviors</li>
+            <li>Added the missing music definition for the eastern half of Damis’s cave</li>
+            <li>Buffed Kamil’s ice barrage attack to always hit two 5s</li>
+            <li>Fixed a bug where Fareed’s weapon unequip message would fire even if you did not have a weapon equipped</li>
+            <li>Fixed Varrock essence miner bot</li>
+          </ul>
+        </details>
+
+        <!-- SECTION 2 -->
+        <details>
+          <summary>Systems & Events</summary>
+          <ul>
+            <li>Essence miner bot will now sell the acquired pure essence on the GE after it reaches at least 500</li>
+            <li>Fixed PK news announcement breaking due to incorrect time processing</li>
+            <li>Removed Grand Exchange privacy</li>
+            <li>Implemented Gnome Barman dialogue</li>
+            <li>Implemented Murder Mystery</li>
+            <li>Fixed seers diary inferno adze bonus</li>
+            <li>Fixed Thormac staff enchantment</li>
+            <li>Changed most of the doors in Draynor Manor to not autowalk</li>
+            <li>Implemented Draynor Manor chair NPCs (The ones that follow you around the house)</li>
+            <li>Refactored Peer the Seer to better handle edge cases</li>
+            <li>Fixed skull visually persisting on death</li>
+            <li>Fixed first stage of Kalphite Queen not counting as a Kalphite slayer task</li>
+            <li>Fixed spam casting Humidify consuming additional runes upon next cast</li>
+            <li>Poison immune enemies are now immune to poison</li>
+            <li>Removed usage of predetermined GE prices</li>
+            <li>Improved battlestaff crafting</li>
+            <li>Restricted random events inside KBD lair</li>
+            <li>Changed Rogue’s Purse herblore level requirement for cleaning from 8 to 3 and corrected XP awarded</li>
+            <li>Added dialogue for gnome woman NPCs</li>
+            <li>Seers’ flax claim migrated to daily-seers-flax.json file</li>
+            <li>Geoffrey in Seers’ Village should give the correct amount of noted flax every day</li>
+            <li>Added the “You do not have an axe to use.” message for trying to chop a fruit tree without an axe</li>
+            <li>Willow branches now properly regrow every 5 minutes</li>
+            <li>Implemented semi-authentic Pious Pete random event</li>
+            <li>Cats will no longer eat buckets</li>
+            <li>Created a new command, ::petrate, for testing pet growth. ::petrate 0 is for pausing growth, 1 for 1x rate, and 2 uses the dev rate of growth (100x normal)</li>
+            <li>Adult and overgrown cats will not grow hungry</li>
+            <li>Removed several pets inauthentic to 2009</li>
+            <li>Dogs no longer can turn into minotaurs</li>
+            <li>Wolpertingers now double yield and experience from bushes</li>
+            <li>Relicym’s Balm is now created as a 3-dose rather than 4-dose potion</li>
+            <li>All Barbarian Mixes can now be consumed with appropriate effects</li>
+            <li>Corrected healing for caviar Barbarian Mixes</li>
+            <li>Implemented farming spirit trees</li>
+            <li>Fixed exception running ::completediaries</li>
+            <li>Rewrote or refactored many interfaces, fixing many small bugs</li>
+            <li>Corrected wizard projectiles and cast height</li>
+            <li>Mithril dragons now only use their range attack when outside melee range</li>
+            <li>Shooting stars now authentically award the discovery bonus XP in a single chunk (players with unclaimed XP prior to this change will still be able to claim it by mining the star)</li>
+            <li>Farming improvements</li>
+          </ul>
+        </details>
+
+        <!-- SECTION 3 -->
+        <details>
+          <summary>Farming & World Interactions</summary>
+          <ul>
+            <li>White Berry Bushes can now be protected</li>
+            <li>Giant Ent properly increases Belladonna yield</li>
+            <li>Mushrooms now disease properly</li>
+            <li>Fixed various bush bugs</li>
+            <li>Fruit Trees can now be chopped</li>
+            <li>Fixed Scarecrow needing to grow to work</li>
+            <li>Mushrooms should now visually update as each mushroom is picked from the patch</li>
+            <li>Poison Ivy Bushes are now disease immune</li>
+            <li>Poison Ivy Berries picked in the Champion’s Guild Patch now finishes a Varrock Diary task</li>
+            <li>The Ancient Cavern Canoe can now be used without the screen permanently fading to black until logging out</li>
+            <li>Corrected Sumona’s red dragon assignment</li>
+            <li>Removed inauthentic aviansie assignments</li>
+            <li>Fixed GWD beacon not being repairable</li>
+            <li>Surprise exam is no longer optional</li>
+            <li>Fixed level checks for All Fired Up beacon repair</li>
+            <li>Fixed bug where the front door to Lord Handlemort’s mansion in Ardougne remains locked even after obtaining totem</li>
+            <li>Fixed dark beast dropping big bones</li>
+            <li>Fixed too high health for leech</li>
+            <li>Implemented Lletya Fruit Tree Patch</li>
+            <li>Implemented Harmony Island Allotment Patch. Patch is still unreachable without The Great Brain Robbery</li>
+            <li>Fixed Goblin Diplomacy quest log text</li>
+            <li>Fixed charging orbs to check magic level instead of crafting</li>
+            <li>Corrected Gunslik’s shop items</li>
+            <li>Corrected spider HP to 2 points</li>
+            <li>Fixed maze reward chest amount</li>
+            <li>Fixed ToG quest point requirements</li>
+            <li>Crumble undead now more effective against zogres and skogres</li>
+            <li>Fixed bots not picking up loot</li>
+            <li>Fixed the bug where an NPC would show up on an item dialogue</li>
+            <li>Refactored both item and double item dialogues</li>
+            <li>Huge refactor improving the handling of players being given items, or situations where items are exchanged</li>
+            <li>Reverted Lumbridge random event teleport fix due to trapping players in random event</li>
+            <li>Spam clicking maze shrine now handled</li>
+          </ul>
+        </details>
+      </section>
+
+      <footer class="post__footer">
+        <span>Blue glow supplied by the Arcane Graphics Department.</span>
+        <span class="right">End of notes • Stay curious, adventurer.</span>
+      </footer>
+    </article>
+  </main>
+
+<script>
+  // Tiny flourish for the "Refresh" button
+  const btn = document.getElementById('refreshBtn');
+  btn.addEventListener('click', () => {
+    btn.textContent = 'Refreshing...';
+    btn.disabled = true;
+    setTimeout(() => {
+      // Simulate a soft refresh by toggling details open states randomly
+      document.querySelectorAll('details').forEach(d => {
+        if (Math.random() > .5) d.open = true; else d.open = false;
+      });
+      btn.textContent = 'Refresh';
+      btn.disabled = false;
+    }, 500);
+  });
+
+  function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
+</script>
+</body>
+</html>
