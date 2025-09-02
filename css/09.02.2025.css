@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", sans-serif;
+  background: linear-gradient(180deg, #fceabb, #f8b500);
+  color: #222;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+.banner {
+  background: #ff6f61;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.content {
+  max-width: 700px;
+  margin: 40px auto;
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.content h1 {
+  color: #ff6f61;
+  margin-bottom: 20px;
+}
+
+.content .highlight {
+  margin-top: 30px;
+  color: #ff6f61;
+  font-size: 1.5rem;
+}
+
+/* 🎉 Confetti animation */
+.confetti::before, .confetti::after {
+  content: "🎈🎉✨🎊🎂";
+  font-size: 2rem;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  animation: fall 8s linear infinite;
+  white-space: nowrap;
+}
+
+.confetti::after {
+  animation-delay: 4s;
+}
+
+@keyframes fall {
+  from { top: -10%; }
+  to { top: 110%; }
+}
