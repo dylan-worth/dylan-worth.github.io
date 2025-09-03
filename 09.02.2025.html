@@ -1,32 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Happy 7th Birthday!</title>
-  <link rel="stylesheet" href="./css/09.02.2025.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SMB Blog Voyage · Starter</title>
+  <meta name="description" content="A clean, uniform starter for Dylan's blog posts with a cozy digital‑forest vibe." />
+  <style>
+    /* ===============
+       THEME VARIABLES
+       =============== */
+    :root {
+      --bg: #0b0f0e;           /* deep forest */
+      --panel: #121816;        /* card bg */
+      --ink: #e9f3ef;          /* text */
+      --muted: #b9c8c2;        /* secondary text */
+      --brand: #6ee7b7;        /* mint moss */
+      --brand-2: #34d399;      /* brighter moss */
+      --accent: #86efac;       /* highlight */
+      --link: #a7f3d0;         /* links */
+      --chip: #1b2522;         /* tag pill */
+      --border: #1c2925;       /* subtle borders */
+      --shadow: 0 10px 30px rgba(0,0,0,.4);
+      --radius: 18px;
+      --rhythm: 1.2rem;        /* base spacing unit */
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    }/* Light theme toggle */
+:root[data-theme="light"] {
+  --bg: #f6faf8;
+  --panel: #ffffff;
+  --ink: #0f1714;
+  --muted: #40534a;
+  --brand: #10b981;
+  --brand-2: #059669;
+  --accent: #16a34a;
+  --link: #047857;
+  --chip: #eff7f3;
+  --border: #e6f1ec;
+  --shadow: 0 10px 30px rgba(5, 18, 12, .06);
+}
+
+/* =========
+   BASE
+   ========= */
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: radial-gradient(1200px 800px at 10% 0%, rgba(52,211,153,.10), transparent 60%),
+              radial-gradient(1200px 800px at 90% 10%, rgba(110,231,183,.08), transparent 50%),
+              linear-gradient(180deg, var(--bg), #0a0d0c);
+}
+
+/* Improve text rendering */
+* { box-sizing: border-box; }
+p { line-height: 1.7; }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ========
+   LAYOUT
+   ======== */
+.wrap { max-width: 1100px; margin: 0 auto; padding: calc(var(--rhythm) * 1.2); }
+
+.skip { position: absolute; left: -9999px; top: auto; }
+.skip:focus { left: 12px; top: 12px; background: var(--brand); color: #0b110f; padding: 8px 12px; border-radius: 10px; }
+
+header.site {
+  display: flex; align-items: center; gap: 16px; justify-content: space-between;
+  padding: calc(var(--rhythm) * 1.2) 0;
+}
+.logo {
+  display: flex; gap: 12px; align-items: center;
+}
+.logo .mark {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 12px; background: linear-gradient(145deg, var(--brand-2), var(--brand));
+  color: #05251a; font-weight: 800; box-shadow: var(--shadow);
+}
+.logo h1 { font-size: 1.15rem; margin: 0; letter-spacing: 0.3px; }
+.sub { font-size: .92rem; color: var(--muted); margin: 2px 0 0 0; }
+
+.actions { display: flex; gap: 10px; align-items: center; }
+.btn {
+  appearance: none; border: 1px solid var(--border); background: var(--chip); color: var(--ink);
+  padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: transform .06s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+
+.hero {
+  display: grid; gap: 16px; grid-template-columns: 1.2fr .8fr;
+  background: linear-gradient(180deg, rgba(52,211,153,.10), rgba(52,211,153,.03));
+  border: 1px solid var(--border); border-radius: var(--radius); padding: calc(var(--rhythm) * 1.1);
+  box-shadow: var(--shadow);
+}
+.hero h2 { margin: 0 0 6px 0; font-size: 1.6rem; }
+.hero p { margin: 0; color: var(--muted); }
+
+.hero .art { display: grid; place-items: center; }
+.hero .badge {
+  display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--ink);
+  background: var(--chip); border: 1px solid var(--border); border-radius: 999px; padding: 8px 12px; margin-bottom: 8px;
+}
+
+/* Post grid */
+.grid { display: grid; gap: 18px; grid-template-columns: repeat(12, 1fr); margin-top: 22px; }
+.card {
+  grid-column: span 4;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+}
+.card h3 { margin: 0; font-size: 1.2rem; }
+.meta { color: var(--muted); font-size: .9rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { background: var(--chip); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 999px; font-size: .85rem; }
+.read { margin-top: 6px; align-self: flex-start; }
+
+/* Featured full width on small screens */
+.card.featured { grid-column: span 8; }
+
+/* Article page styles */
+article.post { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: min(5vw, 42px); box-shadow: var(--shadow); }
+article.post h1 { margin-top: 0; font-size: clamp(1.6rem, 2.5vw, 2.4rem); }
+.byline { display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: .95rem; margin-bottom: 16px; }
+.byline img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); }
+.prose h2 { margin-top: 2rem; }
+.prose blockquote { border-left: 3px solid var(--brand); margin: 1.2rem 0; padding: .8rem 1rem; color: var(--muted); background: rgba(110,231,183,.06); border-radius: 10px; }
+
+/* Footer */
+footer.site { color: var(--muted); text-align: center; padding: 36px 0; }
+
+/* Pagination */
+.pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+
+/* Responsive */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: repeat(6, 1fr); }
+  .card, .card.featured { grid-column: span 6; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 16px; }
+  header.site { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+/* Motion respect */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+  </style>
 </head>
 <body>
-  <div class="banner">
-    🎂 Happy 7th Birthday 🎂
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="wrap">
+    <header class="site" role="banner">
+      <div class="logo">
+        <div class="mark" aria-hidden="true">SMB</div>
+        <div>
+          <h1>SMB Assessments · Blog</h1>
+          <p class="sub">Field notes, family moments, and the science behind clean air.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="themeBtn" aria-pressed="false" aria-label="Toggle theme">Toggle theme</button>
+        <a class="btn" href="#article-example">Open example post</a>
+      </div>
+    </header><!-- HERO -->
+<section class="hero" aria-label="Intro">
+  <div>
+    <span class="badge">New · September 2, 2025</span>
+    <h2>Starting our blog voyage</h2>
+    <p>Clean, uniform posts with a cozy digital forest vibe. No em dashes. Easy to copy and reuse for every story you publish.</p>
   </div>
-
-  <div class="content">
-    <h1>My Daughter Turns 7 Today!</h1>
-    <p>
-      Seven years ago I became a dad for the very first time. My oldest daughter, the one who made me a father, is celebrating her 7th birthday today.
-    </p>
-    <p>
-      She is the leader of the pack, oldest of four kids, and she has a personality that fills the whole room. She loves <strong>Stitch</strong> (yes, she has watched <em>Lilo & Stitch</em> more times than I can count and can quote him perfectly). She enjoys playing <strong>Roblox</strong> (supervised of course) and she is already turning into quite the <strong>artist</strong>. For her age I think she has real talent, her sketches and doodles surprise me all the time.
-    </p>
-    <p>
-      She is also completely in love with <strong>music</strong>. Whether she is singing, dancing, or just filling the house with her favorite songs, there is always a rhythm following her around.
-    </p>
-    <p>
-      I am proud of her not only because she is creative, fun, and bright, but because she was the one who started this whole adventure for me as a dad.
-    </p>
-    <h2 class="highlight">Happy 7th Birthday to my amazing daughter. You light up our family. 💙</h2>
+  <div class="art">
+    <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop" alt="Soft green forest with light rays" />
   </div>
+</section>
 
-  <div class="confetti"></div>
-</body>
+<!-- POST GRID / LIST -->
+<section class="grid" id="grid" aria-label="Recent posts">
+  <!-- Example cards. Duplicate these for new posts. -->
+  <article class="card featured">
+    <h3><a href="#article-example">When "Perfect" Still Fails: A Lesson in Advocacy</a></h3>
+    <p class="meta">September 2, 2025 · 4 min read · <span class="tags"><span class="tag">Assessment</span><span class="tag">IAQ</span></span></p>
+    <p>We delivered a spotless visual, then failed IAQ. The lesson was not about cleaning. It was about speaking up when the floor should come out.</p>
+    <a class="read" href="#article-example">Read the post →</a>
+  </article>
+
+  <article class="card">
+    <h3><a href="#birthday-7">My Daughter Turns 7 Today</a></h3>
+    <p class="meta">September 2, 2025 · Family · <span class="tags"><span class="tag">Music</span><span class="tag">Art</span></span></p>
+    <p>Oldest of four. Loves Stitch, supervised Roblox, and music. A bright artist who made me a dad.</p>
+    <a class="read" href="#birthday-7">Read the post →</a>
+  </article>
+
+  <article class="card">
+    <h3><a href="#zombie-spider">Zombie Spider in a Crawl Space</a></h3>
+    <p class="meta">September 1, 2025 · Field Notes · <span class="tags"><span class="tag">Fungi</span><span class="tag">Crawl Space</span></span></p>
+    <p>A spider colonized by an entomopathogenic fungus. Not a live contaminated spider. A signal of humidity and environment.</p>
+    <a class="read" href="#zombie-spider">Read the post →</a>
+  </article>
+
+  <article class="card">
+    <h3><a href="#cooler-biofilm">Walk‑In Cooler Biofilm</a></h3>
+    <p class="meta">August 30, 2025 · Field Notes · <span class="tags"><span class="tag">Bacteria</span><span class="tag">Biofilm</span></span></p>
+    <p>Gram‑negative bacteria forming a resilient biofilm. Why scrubbing plus the right disinfectant matters.</p>
+    <a class="read" href="#cooler-biofilm">Read the post →</a>
+  </article>
+</section>
+
+<!-- PAGINATION EXAMPLE -->
+<nav class="pager" aria-label="Pagination">
+  <a class="btn" href="#">← Newer</a>
+  <a class="btn" href="#">Older →</a>
+</nav>
+
+<!-- EXAMPLE ARTICLE TEMPLATE -->
+<main id="main" class="wrap" style="padding-left:0;padding-right:0;">
+  <article id="article-example" class="post" aria-labelledby="title-example">
+    <header>
+      <h1 id="title-example">When "Perfect" Still Fails: A Lesson in Advocacy</h1>
+      <div class="byline">
+        <img src="https://i.pravatar.cc/100?img=13" alt="Author avatar" />
+        <div>
+          <div>By Dylan Worth</div>
+          <div class="meta">September 2, 2025 · 4 min read</div>
+        </div>
+      </div>
+    </header>
+    <div class="prose">
+      <p>In this field we live by the details. Sometimes the job looks perfect. Then the lab says otherwise. This story is about the moment I should have pushed for full removal instead of sanding.</p>
+      <h2>The crossroads</h2>
+      <p>Two water losses. Several floor layers. The question was simple. Remove the stubborn layer or sand and clean. My gut said remove. I stayed quiet. The consensus leaned toward sanding.</p>
+      <h2>The result</h2>
+      <p>The space looked flawless. The IAQ failed. Not due to poor cleaning. The failure came from a decision I did not argue against.</p>
+      <h2>The lesson</h2>
+      <p>My job is not only to scrub and seal. It is to be a voice for the science in the room. When removal is the right call, no amount of sanding will replace it. I will speak up next time. That protects the client and the standard of care.</p>
+      <blockquote>Perfection is not enough. Advocacy is.</blockquote>
+    </div>
+  </article>
+
+  <article id="birthday-7" class="post" aria-labelledby="title-b7" style="margin-top:28px;">
+    <header>
+      <h1 id="title-b7">My Daughter Turns 7 Today</h1>
+      <div class="byline">
+        <img src="https://i.pravatar.cc/100?img=32" alt="Author avatar" />
+        <div>
+          <div>By Dad</div>
+          <div class="meta">September 2, 2025 · Family</div>
+        </div>
+      </div>
+    </header>
+    <div class="prose">
+      <p>Seven years ago I became a dad for the first time. My oldest daughter is seven today. She is the leader of the pack, oldest of four kids, and she has a personality that fills the room. She loves Stitch. She enjoys supervised Roblox. She creates art and has real talent for her age. She is in love with music. I am proud of her and grateful for the joy she brings to our family.</p>
+      <blockquote>Happy 7th Birthday to my amazing daughter. You light up our family.</blockquote>
+    </div>
+  </article>
+
+  <article id="zombie-spider" class="post" aria-labelledby="title-zs" style="margin-top:28px;">
+    <header>
+      <h1 id="title-zs">Zombie Spider in a Crawl Space</h1>
+      <div class="byline">
+        <img src="https://i.pravatar.cc/100?img=57" alt="Author avatar" />
+        <div>
+          <div>By Dylan Worth</div>
+          <div class="meta">September 1, 2025 · Field Notes</div>
+        </div>
+      </div>
+    </header>
+    <div class="prose">
+      <p>The white tendrils and bulbs on the spider are the fruiting bodies of a fungus. These fungi target arthropods. The spider is not alive. The fungus is using the carcass as a base to spread spores. It is a sign of humidity and poor ventilation in the crawl space.</p>
+    </div>
+  </article>
+
+  <article id="cooler-biofilm" class="post" aria-labelledby="title-cb" style="margin-top:28px;">
+    <header>
+      <h1 id="title-cb">Walk‑In Cooler Biofilm</h1>
+      <div class="byline">
+        <img src="https://i.pravatar.cc/100?img=41" alt="Author avatar" />
+        <div>
+          <div>By Dylan Worth</div>
+          <div class="meta">August 30, 2025 · Field Notes</div>
+        </div>
+      </div>
+    </header>
+    <div class="prose">
+      <p>Cold damp surfaces with food residue support biofilm. Gram negative bacteria can produce a slime layer that resists light cleaning. Disrupt the film with scrubbing. Use an EPA registered disinfectant that is safe for food areas. Clean drains and keep a routine.</p>
+    </div>
+  </article>
+</main>
+
+<footer class="site">
+  <p>© <span id="year"></span> SMB Assessments. All rights reserved.</p>
+</footer>
+
+  </div>  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Theme toggle with localStorage
+    const root = document.documentElement;
+    const btn = document.getElementById('themeBtn');
+    const saved = localStorage.getItem('theme');
+    if (saved) root.setAttribute('data-theme', saved);
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'light' ? '' : 'light';
+      if (next) root.setAttribute('data-theme', next); else root.removeAttribute('data-theme');
+      localStorage.setItem('theme', next);
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+    });
+
+    // Smooth scroll for in‑page links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script></body>
 </html>
