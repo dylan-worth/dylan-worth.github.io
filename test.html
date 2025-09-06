@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Radon Testing – Notifications & Tracker</title>
+  <style>
+    :root{
+      --bg:#0c0f14; --panel:#121723; --muted:#9fb3c8; --text:#e6eef6; --accent:#60ffa8; --accent2:#66ccff; --warn:#ffcc66; --danger:#ff6b6b; --ok:#8be28b;
+      --chip:#1b2233; --chip2:#15202b; --card:#0f1420; --border:#233148;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:linear-gradient(180deg,#0b1018,#0b121a 40%,#0b0f16);color:var(--text)}
+    header{position:sticky;top:0;z-index:40;background:rgba(11,16,24,.75);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--border)}
+    .wrap{max-width:1100px;margin:auto;padding:16px}
+    h1{margin:0;font-weight:800;letter-spacing:.4px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:linear-gradient(180deg,#0d1421,#0d1726);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h2{margin:0 0 6px 0}
+    .pad{padding:16px}
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+    input,select,textarea{width:100%;background:#0b1320;color:var(--text);border:1px solid #223149;border-radius:10px;padding:10px 12px}
+    input[type="datetime-local"]{padding:.55rem .6rem}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{background:var(--accent);color:#062313;border:0;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+    button.sec{background:#1a2536;color:var(--text);border:1px solid var(--border)}
+    button.warn{background:var(--warn);color:#3a2b02}
+    button.danger{background:var(--danger);color:white}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+    th{font-size:12px;color:var(--muted);text-align:left}
+    tr:hover td{background:#0e1523}
+    .status{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--border);font-size:12px}
+    .status span{width:8px;height:8px;border-radius:50%}
+    .SCHEDULED span{background:var(--accent2)}
+    .ACTIVE span{background:var(--warn)}
+    .COMPLETE span{background:var(--ok)}
+    .OVERDUE span{background:var(--danger)}
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .badge{background:#122237;border:1px solid #254060;border-radius:9px;padding:6px 8px;font-size:12px}
+    .empty{padding:24px;color:var(--muted);text-align:center}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .kpi .tile{background:var(--card);border:1px solid var(--border);padding:12px 14px;border-radius:14px}
+    .tile .big{font-size:28px;font-weight:800}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#0e1a2a;border:1px solid var(--border);color:var(--muted);font-size:12px}
+    .right{margin-left:auto}
+    .toolbar{display:flex;gap:10px;align-items:center}
+    .dangerText{color:var(--danger)}
+    .muted{color:var(--muted)}
+    .flex{display:flex;gap:10px;align-items:center}
+    .hidden{display:none}
+    .note{font-size:12px;color:var(--muted)}
+    .footer{margin-top:24px;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap toolbar">
+      <h1>SMB • Radon Testing Tracker</h1>
+      <span class="pill" id="notifStatus">Notifications: not granted</span>
+      <div class="right toolbar">
+        <button class="sec" id="exportJSON">Export JSON</button>
+        <button class="sec" id="exportCSV">Export CSV</button>
+        <button class="sec" id="importBtn">Import</button>
+        <input id="importFile" type="file" accept="application/json" class="hidden" />
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap grid" id="app">
+    <!-- LEFT: FORM -->
+    <section class="card pad" aria-label="Create / edit test">
+      <h2 id="formTitle">New Radon Test</h2>
+      <form id="radonForm">
+        <div class="row">
+          <div>
+            <label>Client Name</label>
+            <input id="client" placeholder="Jane Smith" required />
+          </div>
+          <div>
+            <label>Contact (phone/email)</label>
+            <input id="contact" placeholder="555‑123‑4567 / jane@site.com" />
+          </div>
+        </div>
+        <label>Site Address</label>
+        <input id="address" placeholder="123 Marsh Trail, Naples, FL" required />
+
+        <div class="row">
+          <div>
+            <label>Room / Placement Location</label>
+            <input id="room" placeholder="Master Bedroom, 1st floor" required />
+          </div>
+          <div>
+            <label>Device Type</label>
+            <select id="deviceType">
+              <option>CRM (continuous)</option>
+              <option>Charcoal Canister</option>
+              <option>Alpha Track</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Device ID / Serial</label>
+            <input id="deviceId" placeholder="CRM‑A42‑0198" />
+          </div>
+          <div>
+            <label>Calibration Due (optional)</label>
+            <input id="calDue" type="date" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Test Start</label>
+            <input id="start" type="datetime-local" required />
+          </div>
+          <div>
+            <label>Duration (hours)</label>
+            <input id="duration" type="number" min="12" step="1" value="48" required />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Pre‑conditions</label>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" id="closedHouse"/> Closed‑house 12h before</label>
+              <label class="chip"><input type="checkbox" id="power"/> Power on</label>
+              <label class="chip"><input type="checkbox" id="height"/> 20–28" height</label>
+              <label class="chip"><input type="checkbox" id="placement"/> Not in kitchen/bath/laundry</label>
+            </div>
+          </div>
+          <div>
+            <label>Tamper Seals Applied?</label>
+            <select id="tamper"><option>No</option><option>Yes</option></select>
+          </div>
+        </div>
+
+        <label>Notes</label>
+        <textarea id="notes" rows="3" placeholder="Occupant advised to keep windows closed; thermostat at 72°F."></textarea>
+
+        <div class="actions">
+          <button type="submit" id="saveBtn">Save Test</button>
+          <button type="button" class="sec" id="resetBtn">Reset</button>
+          <button type="button" class="sec" id="notifyBtn">Enable Notifications</button>
+        </div>
+        <p class="note">Heads‑up: browser notifications only fire while this page is open. For guaranteed reminders, use the calendar (.ics) buttons in the table.</p>
+      </form>
+    </section>
+
+    <!-- RIGHT: DASHBOARD -->
+    <section class="card pad" aria-label="Dashboard">
+      <h2>Dashboard</h2>
+      <div class="kpi" id="kpiRow">
+        <div class="tile"><div class="muted">Scheduled</div><div class="big" id="kpiScheduled">0</div></div>
+        <div class="tile"><div class="muted">Active</div><div class="big" id="kpiActive">0</div></div>
+        <div class="tile"><div class="muted">Complete</div><div class="big" id="kpiComplete">0</div></div>
+        <div class="tile"><div class="muted">Overdue</div><div class="big" id="kpiOverdue">0</div></div>
+      </div>
+
+      <div class="toolbar" style="margin-top:12px">
+        <input id="search" placeholder="Search client, address, device, notes…" />
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <option value="SCHEDULED">Scheduled</option>
+          <option value="ACTIVE">Active</option>
+          <option value="COMPLETE">Complete</option>
+          <option value="OVERDUE">Overdue</option>
+        </select>
+        <button class="sec" id="clearFilters">Clear</button>
+      </div>
+
+      <div class="card" style="margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Client / Site</th>
+              <th>Device</th>
+              <th>Start → End</th>
+              <th>Countdown</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="empty" class="empty">No tests yet. Add one on the left ➜</div>
+      </div>
+    </section>
+
+    <!-- FULL‑WIDTH UTILITIES -->
+    <section class="card pad" style="grid-column:1/-1">
+      <h2>Chain of Custody / QA</h2>
+      <div class="toolbar">
+        <button class="sec" id="printCOC">Print Chain‑of‑Custody for selected</button>
+        <span class="note">Tip: select rows using the "+" button, then print.</span>
+      </div>
+      <div class="footer">QA helpers: mark duplicates / blanks in Notes; track calibration due; verify tamper seals on retrieval.</div>
+    </section>
+  </main>
+
+  <template id="rowTpl">
+    <tr>
+      <td><button class="sec mini addToBatch" title="Add to batch">＋</button></td>
+      <td class="col-client"></td>
+      <td class="col-device"></td>
+      <td class="col-time"></td>
+      <td class="col-countdown"></td>
+      <td class="col-status"></td>
+      <td class="col-actions"></td>
+    </tr>
+  </template>
+
+  <script>
+    // --- Storage helpers ----------------------------------------------------
+    const DB_KEY = 'smb_radon_tests_v1';
+    const sel = (q, el=document) => el.querySelector(q);
+    const create = (tag, cls) => Object.assign(document.createElement(tag), cls?{className:cls}:{})
+
+    const now = () => new Date();
+    const toISO = d => new Date(d).toISOString();
+    const fmtShort = d => new Date(d).toLocaleString([], {year:'2-digit',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+
+    function load(){
+      try{ return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }catch(e){ return [] }
+    }
+    function save(list){ localStorage.setItem(DB_KEY, JSON.stringify(list)); }
+
+    // --- State --------------------------------------------------------------
+    let tests = load();
+    let selectedIds = new Set();
+    let notifGranted = false;
+
+    // --- Notifications (in‑app while open) ---------------------------------
+    function requestNotifs(){
+      if(!('Notification' in window)) return updateNotifStatus('unsupported');
+      Notification.requestPermission().then(p=>{
+        notifGranted = (p==='granted');
+        updateNotifStatus(p);
+      });
+    }
+    function updateNotifStatus(p){
+      const el = sel('#notifStatus');
+      const map = {granted:'Notifications: on', denied:'Notifications: denied', default:'Notifications: not granted', unsupported:'Notifications: unsupported'};
+      el.textContent = map[p] || map.default;
+    }
+    function notify(title, body){
+      if(!notifGranted || !('Notification' in window)) return;
+      try{ new Notification(title, { body }); }catch(e){}
+    }
+
+    // Schedule timeouts for milestones while the tab is open
+    let timers = [];
+    function clearTimers(){ timers.forEach(t=>clearTimeout(t)); timers = []; }
+    function scheduleTimers(){
+      clearTimers();
+      const n = now().getTime();
+      tests.forEach(t=>{
+        const start = new Date(t.start).getTime();
+        const end = new Date(t.end).getTime();
+        const mid = start + Math.max(0, Math.floor((end-start)/2));
+        const items = [
+          {at:start, title:`Start test for ${t.client}`, body:`${t.address} • ${t.room} • Device ${t.deviceId||t.deviceType}`},
+          {at:mid, title:`Mid‑test check: ${t.client}`, body:`Confirm closed‑house; verify device isn\'t disturbed.`},
+          {at:end, title:`Retrieve radon device: ${t.client}`, body:`Ends now • ${t.address} • ${t.room}`}
+        ];
+        items.forEach(it=>{
+          const delay = it.at - n; if(delay>0 && delay < 2147483647){ // cap ~24 days
+            timers.push(setTimeout(()=>notify(it.title, it.body), delay));
+          }
+        });
+      });
+    }
+
+    // --- ICS (calendar) -----------------------------------------------------
+    function icsEvent({title, start, end, description, location}){
+      const uid = `${Math.random().toString(36).slice(2)}@smbassessments`;
+      function dt(d){
+        const x = new Date(d);
+        const pad = n=>String(n).padStart(2,'0');
+        const YYYY=x.getUTCFullYear();
+        const MM=pad(x.getUTCMonth()+1); const DD=pad(x.getUTCDate());
+        const hh=pad(x.getUTCHours()); const mm=pad(x.getUTCMinutes()); const ss=pad(x.getUTCSeconds());
+        return `${YYYY}${MM}${DD}T${hh}${mm}${ss}Z`;
+      }
+      const lines = [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//SMB Assessments//Radon//EN','BEGIN:VEVENT',
+        `UID:${uid}`,`DTSTAMP:${dt(new Date())}`,`DTSTART:${dt(start)}`,`DTEND:${dt(end)}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${(description||'').replace(/\n/g,'\\n')}`,
+        `LOCATION:${(location||'').replace(/\n/g,' ')}`,
+        'END:VEVENT','END:VCALENDAR'
+      ].join('\r\n');
+      const blob = new Blob([lines], {type:'text/calendar'});
+      return URL.createObjectURL(blob);
+    }
+
+    // --- Status + countdown -------------------------------------------------
+    function statusFor(t){
+      const n = now();
+      if(n < new Date(t.start)) return 'SCHEDULED';
+      if(n >= new Date(t.start) && n <= new Date(t.end)) return 'ACTIVE';
+      if(n > new Date(t.end) && !t.completed) return 'OVERDUE';
+      return 'COMPLETE';
+    }
+    function countdown(to){
+      const ms = new Date(to) - now();
+      if(ms<=0) return '—';
+      const s = Math.floor(ms/1000);
+      const d = Math.floor(s/86400);
+      const h = Math.floor((s%86400)/3600);
+      const m = Math.floor((s%3600)/60);
+      return (d?d+'d ':'') + (h?h+'h ':'') + (m+'m');
+    }
+
+    // --- Render table -------------------------------------------------------
+    function render(){
+      const rows = sel('#rows'); rows.innerHTML='';
+      const q = sel('#search').value.trim().toLowerCase();
+      const want = sel('#statusFilter').value;
+
+      const view = tests
+        .map(t=>({...t, _status:statusFor(t)}))
+        .filter(t => !want || t._status===want)
+        .filter(t => !q || (t.client+" "+t.address+" "+t.deviceId+" "+t.notes).toLowerCase().includes(q))
+        .sort((a,b)=>new Date(a.end)-new Date(b.end));
+
+      sel('#empty').style.display = view.length? 'none':'block';
+
+      // KPIs
+      const counts = {SCHEDULED:0, ACTIVE:0, COMPLETE:0, OVERDUE:0};
+      view.forEach(v=>counts[v._status]++);
+      sel('#kpiScheduled').textContent = counts.SCHEDULED;
+      sel('#kpiActive').textContent = counts.ACTIVE;
+      sel('#kpiComplete').textContent = counts.COMPLETE;
+      sel('#kpiOverdue').textContent = counts.OVERDUE;
+
+      view.forEach((t,i)=>{
+        const tr = sel('#rowTpl').content.firstElementChild.cloneNode(true);
+        tr.dataset.id = t.id;
+        tr.querySelector('.col-client').innerHTML = `<div style="font-weight:700">${t.client}</div><div class="muted">${t.address}</div><div class="chips"><span class="chip">${t.room}</span>${t.tamper==='Yes'?'<span class="chip">Tamper sealed</span>':''}</div>`;
+        tr.querySelector('.col-device').innerHTML = `<div>${t.deviceType}</div><div class="muted">${t.deviceId||''}</div>${t.calDue?`<div class="badge">Cal due ${t.calDue}</div>`:''}`;
+        tr.querySelector('.col-time').innerHTML = `${fmtShort(t.start)} → <b>${fmtShort(t.end)}</b>`;
+        tr.querySelector('.col-countdown').textContent = countdown(t.end);
+        const status = statusFor(t);
+        const st = create('span','status '+status); st.innerHTML = `<span></span>${status}`;
+        tr.querySelector('.col-status').appendChild(st);
+
+        const act = tr.querySelector('.col-actions');
+        const edit = create('button','sec'); edit.textContent='Edit'; edit.onclick=()=>loadIntoForm(t.id);
+        const done = create('button'); done.textContent = 'Mark Complete'; done.onclick=()=>markComplete(t.id);
+        const del = create('button','danger'); del.textContent='Delete'; del.onclick=()=>remove(t.id);
+        const icsStart = create('button','sec'); icsStart.textContent='Calendar: Start→End'; icsStart.onclick=()=>downloadICS(t);
+        const icsRetrieve = create('button','sec'); icsRetrieve.textContent='Calendar: Retrieval'; icsRetrieve.onclick=()=>downloadRetrieveICS(t);
+        act.append(edit, done, del, icsStart, icsRetrieve);
+
+        // batch select
+        tr.querySelector('.addToBatch').onclick=()=>{
+          if(selectedIds.has(t.id)) selectedIds.delete(t.id); else selectedIds.add(t.id);
+          tr.style.outline = selectedIds.has(t.id)? '2px solid var(--accent)':'none';
+        }
+
+        rows.appendChild(tr);
+      });
+    }
+
+    function tick(){
+      // update countdowns + statuses quickly
+      document.querySelectorAll('#rows tr').forEach(tr=>{
+        const id = tr.dataset.id; const t = tests.find(x=>x.id===id); if(!t) return;
+        tr.querySelector('.col-countdown').textContent = countdown(t.end);
+        const stEl = tr.querySelector('.col-status .status');
+        const newStatus = statusFor(t);
+        if(!stEl.classList.contains(newStatus)){
+          stEl.className = 'status '+newStatus; stEl.innerHTML = `<span></span>${newStatus}`;
+        }
+      })
+    }
+
+    // --- CRUD ---------------------------------------------------------------
+    function uid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36) }
+
+    function getForm(){
+      const start = new Date(sel('#start').value);
+      const duration = parseInt(sel('#duration').value || '48',10);
+      const end = new Date(start.getTime()+duration*3600_000);
+      return {
+        id: sel('#radonForm').dataset.editing || uid(),
+        client: sel('#client').value.trim(),
+        contact: sel('#contact').value.trim(),
+        address: sel('#address').value.trim(),
+        room: sel('#room').value.trim(),
+        deviceType: sel('#deviceType').value,
+        deviceId: sel('#deviceId').value.trim(),
+        calDue: sel('#calDue').value || '',
+        start: start.toISOString(),
+        duration,
+        end: end.toISOString(),
+        closedHouse: sel('#closedHouse').checked,
+        power: sel('#power').checked,
+        height: sel('#height').checked,
+        placementOk: sel('#placement').checked,
+        tamper: sel('#tamper').value,
+        notes: sel('#notes').value.trim(),
+        completed: false,
+        createdAt: new Date().toISOString()
+      }
+    }
+
+    function resetForm(){
+      sel('#radonForm').reset();
+      sel('#formTitle').textContent = 'New Radon Test';
+      sel('#radonForm').dataset.editing = '';
+    }
+
+    function saveTest(evt){
+      evt && evt.preventDefault();
+      const t = getForm();
+      if(!t.client || !t.address || !t.room || !t.start){ alert('Please complete required fields.'); return; }
+      const i = tests.findIndex(x=>x.id===t.id);
+      if(i>=0) tests[i]=t; else tests.push(t);
+      save(tests); render(); scheduleTimers(); resetForm();
+    }
+
+    function loadIntoForm(id){
+      const t = tests.find(x=>x.id===id); if(!t) return;
+      sel('#formTitle').textContent = 'Edit Radon Test';
+      sel('#radonForm').dataset.editing = t.id;
+      sel('#client').value = t.client;
+      sel('#contact').value = t.contact||'';
+      sel('#address').value = t.address;
+      sel('#room').value = t.room;
+      sel('#deviceType').value = t.deviceType;
+      sel('#deviceId').value = t.deviceId||'';
+      sel('#calDue').value = t.calDue||'';
+      sel('#start').value = t.start.slice(0,16);
+      sel('#duration').value = t.duration;
+      sel('#closedHouse').checked = !!t.closedHouse;
+      sel('#power').checked = !!t.power;
+      sel('#height').checked = !!t.height;
+      sel('#placement').checked = !!t.placementOk;
+      sel('#tamper').value = t.tamper||'No';
+      sel('#notes').value = t.notes||'';
+      window.scrollTo({top:0,behavior:'smooth'})
+    }
+
+    function markComplete(id){
+      const t = tests.find(x=>x.id===id); if(!t) return;
+      t.completed = true; save(tests); render();
+    }
+    function remove(id){
+      if(!confirm('Delete this test?')) return;
+      tests = tests.filter(x=>x.id!==id); save(tests); render();
+    }
+
+    // --- Export / Import ----------------------------------------------------
+    function download(name, mime, text){
+      const url = URL.createObjectURL(new Blob([text],{type:mime}));
+      const a = create('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+    function exportJSON(){ download('radon-tests.json','application/json', JSON.stringify(tests,null,2)); }
+    function exportCSV(){
+      const cols = ['id','client','contact','address','room','deviceType','deviceId','calDue','start','duration','end','tamper','closedHouse','power','height','placementOk','completed','notes'];
+      const csv = [cols.join(',')].concat(tests.map(t=>cols.map(c=>JSON.stringify(t[c]??'')).join(','))).join('\n');
+      download('radon-tests.csv','text/csv',csv);
+    }
+    function importJSON(file){
+      const r = new FileReader();
+      r.onload = () => { try{ tests = JSON.parse(r.result); save(tests); render(); scheduleTimers(); }catch(e){ alert('Import failed.'); } };
+      r.readAsText(file);
+    }
+
+    // --- Calendar helpers per row ------------------------------------------
+    function downloadICS(t){
+      const url = icsEvent({
+        title: `Radon Test – ${t.client}`,
+        start: t.start,
+        end: t.end,
+        description: `Address: ${t.address}\nRoom: ${t.room}\nDevice: ${t.deviceType} ${t.deviceId||''}\nNotes: ${t.notes||''}`,
+        location: `${t.address}`
+      });
+      const a = create('a'); a.href=url; a.download=`Radon_${t.client.replace(/\W+/g,'_')}_StartEnd.ics`; document.body.appendChild(a); a.click(); a.remove();
+    }
+    function downloadRetrieveICS(t){
+      const end = new Date(t.end); const end2 = new Date(end.getTime()+30*60_000); // 30 min window
+      const url = icsEvent({
+        title: `Retrieve Radon – ${t.client}`,
+        start: end.toISOString(),
+        end: end2.toISOString(),
+        description: `Pickup at ${fmtShort(t.end)}\nRoom: ${t.room}\nDevice: ${t.deviceType} ${t.deviceId||''}`,
+        location: `${t.address}`
+      });
+      const a = create('a'); a.href=url; a.download=`Radon_${t.client.replace(/\W+/g,'_')}_Retrieval.ics`; document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    // --- Chain of custody (print) ------------------------------------------
+    function printCOC(){
+      const list = tests.filter(t=>selectedIds.has(t.id));
+      if(!list.length){ alert('Select rows with the ＋ button first.'); return; }
+      const html = `<!doctype html><html><head><meta charset=utf-8><title>Chain of Custody</title>
+        <style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:24px;color:#111}h1{margin:0 0 8px}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border:1px solid #999;padding:8px;text-align:left}small{color:#333}</style>
+      </head><body>
+        <h1>SMB Assessments – Radon Chain of Custody</h1>
+        <small>Date: ${new Date().toLocaleString()}</small>
+        ${list.map(t=>`
+          <h2 style="margin-top:16px">${t.client} – ${t.address}</h2>
+          <table>
+            <tr><th>Room</th><td>${t.room}</td><th>Device</th><td>${t.deviceType} ${t.deviceId||''}</td></tr>
+            <tr><th>Start</th><td>${fmtShort(t.start)}</td><th>End</th><td>${fmtShort(t.end)}</td></tr>
+            <tr><th>Tamper</th><td>${t.tamper}</td><th>Calibration Due</th><td>${t.calDue||'—'}</td></tr>
+            <tr><th>Pre‑conditions</th><td colspan=3>
+              Closed‑house: ${t.closedHouse?'Yes':'No'} • Power: ${t.power?'Yes':'No'} • Height: ${t.height?'Yes':'No'} • Placement ok: ${t.placementOk?'Yes':'No'}
+            </td></tr>
+            <tr><th>Notes</th><td colspan=3>${(t.notes||'').replace(/</g,'&lt;')}</td></tr>
+            <tr><th>Signatures</th><td colspan=3 style="height:60px"></td></tr>
+          </table>
+        `).join('')}
+      </body></html>`;
+      const w = window.open('about:blank'); w.document.write(html); w.document.close(); w.focus(); w.print();
+    }
+
+    // --- Init ---------------------------------------------------------------
+    function init(){
+      // demo seed once
+      if(!tests.length){
+        const start = new Date(); start.setHours(start.getHours()+1); // one hour from now
+        const t = {
+          id: uid(), client:'Demo Client', contact:'demo@example.com', address:'100 Mycelium Way, Fort Myers, FL', room:'Basement Family Room',
+          deviceType:'CRM (continuous)', deviceId:'CRM‑DEMO‑0001', calDue:'2025-12-15',
+          start: start.toISOString(), duration:48, end:new Date(start.getTime()+48*3600_000).toISOString(),
+          closedHouse:true, power:true, height:true, placementOk:true, tamper:'Yes', notes:'First‑time test. Educated occupant on closed‑house conditions.', completed:false,
+          createdAt: new Date().toISOString()
+        };
+        tests = [t]; save(tests);
+      }
+
+      render(); scheduleTimers();
+
+      // events
+      sel('#radonForm').addEventListener('submit', saveTest);
+      sel('#resetBtn').addEventListener('click', resetForm);
+      sel('#notifyBtn').addEventListener('click', requestNotifs);
+      sel('#search').addEventListener('input', render);
+      sel('#statusFilter').addEventListener('change', render);
+      sel('#clearFilters').addEventListener('click',()=>{ sel('#search').value=''; sel('#statusFilter').value=''; render(); });
+      sel('#exportJSON').addEventListener('click', exportJSON);
+      sel('#exportCSV').addEventListener('click', exportCSV);
+      sel('#importBtn').addEventListener('click', ()=> sel('#importFile').click());
+      sel('#importFile').addEventListener('change', e=>{ const f = e.target.files[0]; if(f) importJSON(f); e.target.value=''; });
+      sel('#printCOC').addEventListener('click', printCOC);
+
+      setInterval(()=>{ tick(); }, 15_000);
+
+      // notification status
+      if('Notification' in window){ updateNotifStatus(Notification.permission); }
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
+
+Heck yes, Dylan — I spun up a full front-end radon testing notification + tracking system for your CRM. It’s living on the canvas so you can copy-paste it straight in.
+
+Quick tour (no fluff, just power-ups):
+
+Add tests with: client, address, room, device type/ID, start time, duration (hrs) → auto-calculates end time.
+
+Status engine: Scheduled → Active → Complete (or Overdue). Live countdowns update every 15s.
+
+In-app notifications (Start / Mid-test / Retrieval). Click “Enable Notifications.”
+Note: browser notifications fire while the page is open; for guaranteed reminders use the calendar files below.
+
+Calendar buttons (.ics) per test:
+• Start→End event • Retrieval slot (30-min window). One click, drops into your calendar.
+
+QA / Chain-of-Custody: pre-conditions (closed-house, power, height, placement), tamper seal, calibration due; batch-select rows and Print CoC sheets.
+
+Search & Filter across client/address/device/notes, status filter, KPIs.
+
+LocalStorage persistence. Export JSON/CSV, Import JSON.
+
+Clean UI, dark, fast — no frameworks, pure HTML/CSS/JS.
+
+
+What you’ll likely love (field-ready touches):
+
+Pre-conditions chips to document closed-house 12h, 20–28" height, no kitchens/baths, power on.
+
+Calibration due field (keeps you honest if a lab or state audit asks).
+
+Notes for occupant instructions or anomalies (windows found cracked, pets, storms, etc.).
+
+
+If you want me to wire this into your existing CRM layout (nav, theming, or move logic into separate radon.js), say the word and I’ll refactor it into modular files.
+
