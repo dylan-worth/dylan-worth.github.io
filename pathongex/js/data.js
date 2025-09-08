@@ -99,19 +99,5 @@ const PATHONGEX = [
     "PPE + engineering controls; clean to remove soils first, then disinfect per label directions.",
     "Validate with appropriate sampling protocols when required by scope/regulation/insurer."
   ]
-},
-  {
-    slug: "sars-cov-2",
-    name: "SARS-CoV-2",
-    type: "virus",
-    blurb: "Respiratory virus behind COVID-19; spreads via aerosols and droplets—ventilation and filtration matter.",
-    aka: ["Coronavirus (COVID-19)"],
-    size_um: "~0.08–0.12 µm (virion)",
-    habitats: ["Air in occupied spaces", "High-touch surfaces (fomites)"],
-    notes: [
-      "Mitigation leans on ventilation, filtration (MERV/HEPA), hygiene, and policies.",
-      "Surface survival varies—routine cleaning still helpful as part of a layered approach.",
-      "Follow current public health guidance for workplaces and homes."
-    ]
-  }
+}
 ];
