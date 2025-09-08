@@ -1,0 +1,99 @@
+/* Core reset */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+:root {
+  --bg: #0b0f0d;            /* deep forest */
+  --panel: #111614;         /* card bg */
+  --ink: #e8f1ec;           /* text */
+  --muted: #a9b7b0;
+  --accent: #46c66b;        /* mossy green */
+  --accent-2: #1e7d45;      /* darker green */
+  --ring: rgba(70,198,107,.25);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+body {
+  background: radial-gradient(1200px 800px at 20% -10%, #13211b 0%, var(--bg) 60%);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, Segoe UI, Roboto, Inter, sans-serif;
+}
+
+/* Header */
+.site-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .9rem 1.1rem;
+  background: rgba(11,15,13,.75); backdrop-filter: blur(6px);
+  border-bottom: 1px solid #1a231f;
+}
+.brand { font-weight: 800; letter-spacing: .2px; }
+nav a { color: var(--muted); text-decoration: none; margin-left: 1rem; }
+nav a[aria-current="page"] { color: var(--ink); }
+
+/* Layout */
+.container { max-width: 1100px; margin: 1.2rem auto 3rem; padding: 0 1rem; }
+
+.searchbar { display: flex; justify-content: center; margin: 1rem 0 1.5rem; }
+.searchbar input {
+  width: 100%; max-width: 680px;
+  padding: .9rem 1rem; border-radius: 14px;
+  border: 1px solid #233229; background: #0e1512; color: var(--ink);
+  outline: none; box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow .2s, border-color .2s;
+}
+.searchbar input:focus { border-color: var(--accent); box-shadow: 0 0 0 6px var(--ring); }
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.card {
+  background: linear-gradient(180deg, #111614, #0c120f);
+  border: 1px solid #1a231f; border-radius: 16px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: clip;
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1rem .3rem; }
+.card-title { font-size: 1.05rem; font-weight: 700; }
+.badge {
+  font-size: .72rem; padding: .18rem .5rem; border-radius: 999px;
+  border: 1px solid #284233; color: #c7f7d8; background: #0d1b14;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.card-body { padding: 0 1rem 1rem; color: var(--muted); min-height: 75px; }
+.card a.btn {
+  margin: .5rem 1rem 1rem; align-self: flex-start;
+  text-decoration: none; color: #072;
+  background: linear-gradient(180deg, var(--accent), #39ad5c);
+  border: 1px solid var(--accent-2);
+  padding: .5rem .75rem; border-radius: 10px;
+  font-weight: 700; box-shadow: 0 6px 18px rgba(70,198,107,.25);
+}
+.card a.btn:hover { filter: brightness(1.06); }
+
+.site-footer { text-align: center; padding: 2rem 1rem; color: var(--muted); opacity: .85; }
+
+/* Detail page */
+.detail { max-width: 900px; margin: 1.4rem auto 4rem; padding: 0 1rem; }
+.breadcrumbs { margin: .5rem 0 1rem; font-size: .9rem; }
+.breadcrumbs a { color: var(--accent); text-decoration: none; }
+.entry-hero {
+  background: linear-gradient(180deg, #101915, #0c120f);
+  border: 1px solid #1a231f; border-radius: 18px;
+  padding: 1.1rem; box-shadow: var(--shadow);
+}
+.entry-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem; }
+.entry-title h1 { font-size: 1.6rem; margin: 0; }
+.entry-meta { display: flex; gap: .6rem; align-items: center; }
+.kv { display: grid; grid-template-columns: 1fr; gap: .75rem; margin: 1rem 0; }
+.kv div { background: #0e1512; border: 1px solid #1a231f; border-radius: 12px; padding: .8rem; }
+.section { margin: 1.2rem 0; }
+.section h2 { font-size: 1.1rem; margin: 0 0 .5rem; }
+.note { color: #c7f7d8; background: #0d1b14; border: 1px solid #1e382b; padding: .75rem .9rem; border-radius: 12px; }
+@media (min-width: 700px) { .kv { grid-template-columns: repeat(3, 1fr); } }
+
+/* Type badges */
+.badge--mold { border-color:#264; background:#0e1a14; color:#c7f7d8; }
+.badge--bacteria { border-color:#2c3a44; background:#0d141a; color:#cfe9fb; }
+.badge--virus { border-color:#3d2c44; background:#140d1a; color:#f0cdfb; }
+
+.empty { grid-column: 1 / -1; opacity:.8; padding:1rem; text-align:center; }
