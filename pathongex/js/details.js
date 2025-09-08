@@ -73,7 +73,7 @@
     `;
 
     placeholder.innerHTML = `
-      <nav class="breadcrumbs"><a href="../index.html">← Back to search</a></nav>
+      <nav class="breadcrumbs"><a href="../pathongex.html">← Back to search</a></nav>
       <article class="entry-hero">
         ${meta}
         ${kv}
