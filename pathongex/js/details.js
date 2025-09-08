@@ -1,58 +1,84 @@
 // js/detail.js
-// Renders a single entry page based on the data-slug attribute on this script tag.
+// Robust single-entry renderer for PathonGex
 
-document.addEventListener("DOMContentLoaded", () => {
-  const placeholder = document.getElementById("entry");
-  const selfScript = document.currentScript;
-  if (!placeholder || !selfScript) return;
-
-  const slug = selfScript.getAttribute("data-slug");
-  const entry = (window.PATHONGEX || []).find((e) => e.slug === slug);
-
-  if (!entry) {
-    placeholder.innerHTML = "<p>Entry not found.</p>";
-    return;
+(function () {
+  function getSlug() {
+    // Prefer an explicitly-tagged script
+    const tagged = document.querySelector('script[data-slug]');
+    if (tagged && tagged.getAttribute('data-slug')) {
+      return tagged.getAttribute('data-slug');
+    }
+    // Fallback: derive from URL /entries/<slug>.html
+    const m = (location.pathname.match(/\/entries\/([^/]+)\.html$/) || []);
+    return m[1] || null;
   }
 
-  const typeClass =
-    entry.type === "mold"
-      ? "badge--mold"
-      : entry.type === "bacteria"
-      ? "badge--bacteria"
-      : "badge--virus";
+  function ready(fn) {
+    if (document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
 
-  const meta = `
-    <div class="entry-title">
-      <h1>${entry.name}</h1>
-      <span class="badge ${typeClass}">${entry.type}</span>
-    </div>
-    <div class="entry-meta">
-      ${entry.aka?.length ? `Also known as: <em>${entry.aka.join(", ")}</em>` : ""}
-    </div>
-  `;
+  const slug = getSlug();
 
-  const kv = `
-    <div class="kv">
-      <div><strong>Typical size:</strong><br>${entry.size_um || "—"}</div>
-      <div><strong>Common habitats:</strong><br>${(entry.habitats || []).join(", ") || "—"}</div>
-      <div><strong>Category:</strong><br>${entry.type}</div>
-    </div>
-  `;
+  ready(() => {
+    const placeholder = document.getElementById("entry");
+    if (!placeholder) {
+      console.error("PathonGex: Missing #entry container on page.");
+      return;
+    }
 
-  const notes = `
-    <div class="section">
-      <h2>Field Notes</h2>
-      <ul>${(entry.notes || []).map((n) => `<li>${n}</li>`).join("")}</ul>
-      <p class="note">Educational building-science reference. For health concerns or regulatory work, follow applicable standards and guidance.</p>
-    </div>
-  `;
+    // dataset: prefer window.PATHONGEX, fallback to global if present
+    const dataset =
+      (typeof window !== "undefined" && window.PATHONGEX) ||
+      (typeof PATHONGEX !== "undefined" ? PATHONGEX : []);
 
-  placeholder.innerHTML = `
-    <nav class="breadcrumbs"><a href="../index.html">← Back to search</a></nav>
-    <article class="entry-hero">
-      ${meta}
-      ${kv}
-      ${notes}
-    </article>
-  `;
-});
+    const entry = dataset.find((e) => e.slug === slug);
+
+    if (!entry) {
+      placeholder.innerHTML = `<p>Entry not found${slug ? ` for slug “${slug}”` : ""}.</p>`;
+      return;
+    }
+
+    const typeClass =
+      entry.type === "mold"
+        ? "badge--mold"
+        : entry.type === "bacteria"
+        ? "badge--bacteria"
+        : "badge--virus";
+
+    const meta = `
+      <div class="entry-title">
+        <h1>${entry.name}</h1>
+        <span class="badge ${typeClass}">${entry.type}</span>
+      </div>
+      <div class="entry-meta">
+        ${entry.aka?.length ? `Also known as: <em>${entry.aka.join(", ")}</em>` : ""}
+      </div>
+    `;
+
+    const kv = `
+      <div class="kv">
+        <div><strong>Typical size:</strong><br>${entry.size_um || "—"}</div>
+        <div><strong>Common habitats:</strong><br>${(entry.habitats || []).join(", ") || "—"}</div>
+        <div><strong>Category:</strong><br>${entry.type}</div>
+      </div>
+    `;
+
+    const notes = `
+      <div class="section">
+        <h2>Field Notes</h2>
+        <ul>${(entry.notes || []).map((n) => `<li>${n}</li>`).join("")}</ul>
+        <p class="note">Educational building-science reference. For health concerns or regulatory work, follow applicable standards and guidance.</p>
+      </div>
+    `;
+
+    placeholder.innerHTML = `
+      <nav class="breadcrumbs"><a href="../index.html">← Back to search</a></nav>
+      <article class="entry-hero">
+        ${meta}
+        ${kv}
+        ${notes}
+      </article>
+    `;
+  });
+})();
