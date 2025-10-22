@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mycelium Chronicles | SMB Assessments</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #e0ffe0;
+    background: radial-gradient(ellipse at bottom, #041308 0%, #010603 100%);
+    overflow-x: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 5rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header h1 {
+    font-size: 2.8rem;
+    color: #b9ffb9;
+    text-shadow: 0 0 15px #45ff9a;
+  }
+
+  header p {
+    font-size: 1.2rem;
+    color: #9fffb2;
+  }
+
+  .spores {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+
+  .spore {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(180,255,180,0.8);
+    border-radius: 50%;
+    animation: floatUp 10s linear infinite;
+  }
+
+  @keyframes floatUp {
+    from { transform: translateY(100vh) scale(0.5); opacity: 1; }
+    to { transform: translateY(-10vh) scale(1); opacity: 0; }
+  }
+
+  .cta {
+    margin-top: 2rem;
+    background: #44d37e;
+    color: #001f0f;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 1;
+    position: relative;
+  }
+
+  .cta:hover {
+    background: #71ffb2;
+    transform: scale(1.05);
+  }
+
+  section {
+    padding: 3rem 1rem;
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  .chronicle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .chronicle-card {
+    background: rgba(10,30,15,0.9);
+    border: 1px solid #184a2b;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 0 15px rgba(60,255,120,0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+
+  .chronicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(100,255,150,0.3);
+  }
+
+  .chronicle-card h2 {
+    color: #98ffad;
+    margin-bottom: 0.5rem;
+  }
+
+  .chronicle-card p {
+    color: #c9ffd2;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: #031007;
+    font-size: 0.9rem;
+    color: #6cff9a;
+    border-top: 1px solid #094b29;
+  }
+
+  @media (max-width: 768px) {
+    header h1 { font-size: 2rem; }
+    header p { font-size: 1rem; }
+    .cta { padding: 0.7rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="spores" id="sporeField"></div>
+  <h1>The Mycelium Chronicles</h1>
+  <p>Field Wisdom from the Underground</p>
+  <button class="cta" onclick="scrollToChronicles()">Start Reading the Chronicles</button>
+</header>
+
+<section id="chronicles">
+  <div class="chronicle-grid">
+    <div class="chronicle-card" onclick="openChronicle('containment')">
+      <h2>Containment: The Barrier Between Chaos & Clean</h2>
+      <p>Learn how proper containment keeps cross-contamination at bay and why negative pressure is your invisible guardian.</p>
+    </div>
+
+    <div class="chronicle-card" onclick="openChronicle('pressure')">
+      <h2>Negative Pressure: The Invisible Shield</h2>
+      <p>Dive into the science of airflow and discover how to maintain clean zones that protect both structure and technician.</p>
+    </div>
+
+    <div class="chronicle-card" onclick="openChronicle('cleaning')">
+      <h2>Six-Sided Cleaning: Purity from Every Angle</h2>
+      <p>Explore how thorough cleaning techniques remove both visible and microscopic contaminants from every surface.</p>
+    </div>
+
+    <div class="chronicle-card" onclick="openChronicle('biocide')">
+      <h2>Biocide Myths: The False Prophets of “Kill”</h2>
+      <p>Understand why “killing” mold isn’t the same as removing it and what truly breaks the microbial cycle.</p>
+    </div>
+
+    <div class="chronicle-card" onclick="openChronicle('prv')">
+      <h2>Post-Remediation Verification: The Final Judgment</h2>
+      <p>Step into the assessor’s role — learn what makes a PRV pass or fail and how to interpret air and surface data ethically.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>SMB Assessments — Doing it Right the First Time</p>
+  <p>Written and observed by Dylan Worth, Mold Assessor in Training</p>
+</footer>
+
+<script>
+  // floating spores
+  const field = document.getElementById('sporeField');
+  for (let i = 0; i < 40; i++) {
+    const spore = document.createElement('div');
+    spore.classList.add('spore');
+    spore.style.left = Math.random() * 100 + '%';
+    spore.style.animationDuration = 8 + Math.random() * 8 + 's';
+    spore.style.animationDelay = Math.random() * 10 + 's';
+    spore.style.width = spore.style.height = 3 + Math.random() * 5 + 'px';
+    field.appendChild(spore);
+  }
+
+  // scroll to chronicles
+  function scrollToChronicles() {
+    document.getElementById('chronicles').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // open chronicle alert placeholder
+  function openChronicle(topic) {
+    const titles = {
+      containment: "Containment: The Barrier Between Chaos & Clean",
+      pressure: "Negative Pressure: The Invisible Shield",
+      cleaning: "Six-Sided Cleaning: Purity from Every Angle",
+      biocide: "Biocide Myths: The False Prophets of “Kill”",
+      prv: "Post-Remediation Verification: The Final Judgment"
+    };
+    alert(`🌿 ${titles[topic]} coming soon!`);
+  }
+</script>
+</body>
+</html>
