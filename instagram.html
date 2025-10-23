@@ -3,126 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instagram to MP4 Converter</title>
+<title>TikTok Scrolling Feed</title>
 <style>
-body {
-  background: #111;
-  color: #eee;
-  font-family: 'Poppins', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  margin: 0;
-}
+  body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow-y: scroll;
+    height: 100vh;
+  }
 
-.container {
-  background: #1c1c1c;
-  border-radius: 12px;
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(0, 255, 150, 0.3);
-  width: 90%;
-  max-width: 500px;
-}
+  .video-container {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+  }
 
-h1 {
-  color: #00ff99;
-}
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 6px;
-  outline: none;
-}
+  .overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-family: sans-serif;
+    text-shadow: 0 0 5px black;
+  }
 
-button {
-  background: #00ff99;
-  border: none;
-  color: #000;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 6px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  background: #00cc7a;
-}
-
-#result {
-  margin-top: 20px;
-}
-
-video, img {
-  width: 100%;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-a.btn {
-  display: inline-block;
-  background: #00ff99;
-  color: #000;
-  text-decoration: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  font-weight: bold;
-  margin-top: 10px;
-  transition: 0.3s;
-}
-
-a.btn:hover {
-  background: #00cc7a;
-}
+  #feed {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📸 Instagram to MP4 Converter</h1>
-    <p>Paste an Instagram post URL below to extract the video.</p>
-
-    <input id="urlInput" type="text" placeholder="https://www.instagram.com/p/..." />
-    <button id="convertBtn">Convert</button>
-
-    <div id="result"></div>
-  </div>
+<div id="feed"></div>
 
 <script>
-document.getElementById('convertBtn').addEventListener('click', async () => {
-  const input = document.getElementById('urlInput').value.trim();
-  const result = document.getElementById('result');
-  result.innerHTML = "Fetching...";
+// ▼ Add your MP4 links here ▼
+const videoList = [
+  "videos/video1.mp4",
+  "videos/video2.mp4",
+  "videos/video3.mp4"
+];
 
-  if (!input) {
-    result.innerHTML = "<p>Please enter a valid Instagram URL.</p>";
-    return;
-  }
+const feed = document.getElementById("feed");
 
-  try {
-    const apiURL = `https://www.instagram.com/oembed/?url=${encodeURIComponent(input)}`;
-    const response = await fetch(apiURL);
-    const data = await response.json();
+videoList.forEach((url, index) => {
+  const container = document.createElement("div");
+  container.className = "video-container";
+  
+  const video = document.createElement("video");
+  video.src = url;
+  video.controls = false;
+  video.loop = true;
+  video.muted = true; // TikTok style (auto-play only works muted)
+  
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.innerText = `Video ${index + 1}`;
+  
+  container.appendChild(video);
+  container.appendChild(overlay);
+  feed.appendChild(container);
+});
 
-    if (data.thumbnail_url) {
-      result.innerHTML = `
-        <p><strong>Preview:</strong></p>
-        <img src="${data.thumbnail_url}" alt="Instagram thumbnail">
-        <p>⚠️ Instagram blocks direct MP4 download for public security reasons.<br>
-        You can download the thumbnail or use a backend proxy for full MP4 extraction.</p>
-        <a href="${data.thumbnail_url}" download class="btn">Download Thumbnail</a>
-      `;
+// Intersection Observer for auto play/pause
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const video = entry.target.querySelector("video");
+    if (entry.isIntersecting) {
+      video.play();
     } else {
-      result.innerHTML = "<p>Video not accessible. Try a public post.</p>";
+      video.pause();
     }
-  } catch (err) {
-    result.innerHTML = "<p>⚠️ Unable to fetch data. Ensure the post is public or use a proxy server.</p>";
-  }
+  });
+}, { threshold: 0.75 });
+
+document.querySelectorAll(".video-container").forEach(container => {
+  observer.observe(container);
 });
 </script>
 </body>
