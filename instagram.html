@@ -3,51 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok Scrolling Feed</title>
+<title>TikTok Clone</title>
 <style>
+  * { box-sizing: border-box; }
   body {
     margin: 0;
     padding: 0;
     background: #000;
-    overflow-y: scroll;
+    overflow: hidden;
     height: 100vh;
   }
-
+  #feed {
+    height: 100vh;
+    width: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+  }
   .video-container {
     position: relative;
     height: 100vh;
     width: 100%;
     scroll-snap-align: start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
   }
-
   video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
   }
-
   .overlay {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    color: white;
-    font-family: sans-serif;
+    bottom: 80px;
+    left: 15px;
+    color: #fff;
+    font-family: Arial, sans-serif;
     text-shadow: 0 0 5px black;
   }
-
-  #feed {
-    scroll-snap-type: y mandatory;
-    overflow-y: scroll;
-    height: 100vh;
+  .sidebar {
+    position: absolute;
+    right: 10px;
+    bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    color: white;
+    font-size: 26px;
+    text-shadow: 0 0 5px black;
+  }
+  .sidebar div { cursor: pointer; }
+  .mute-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .mute-btn.active {
+    background: rgba(255,255,255,0.8);
+    color: black;
   }
 </style>
 </head>
 <body>
+
 <div id="feed"></div>
 
 <script>
-// ▼ Add your MP4 links here ▼
+// ▼ Add your MP4 video list here ▼
 const videoList = [
   "videos/video1.mp4",
   "videos/video2.mp4",
@@ -57,26 +88,49 @@ const videoList = [
 
 const feed = document.getElementById("feed");
 
+// Build the video cards
 videoList.forEach((url, index) => {
   const container = document.createElement("div");
   container.className = "video-container";
   
   const video = document.createElement("video");
   video.src = url;
-  video.controls = false;
   video.loop = true;
-  video.muted = true; // TikTok style (auto-play only works muted)
+  video.muted = true;
+  video.playsInline = true; // important for iPhone
+  video.setAttribute("playsinline", "true");
   
   const overlay = document.createElement("div");
   overlay.className = "overlay";
-  overlay.innerText = `Video ${index + 1}`;
+  overlay.innerHTML = `<strong>@user${index+1}</strong><br>Cool video #${index+1}`;
+  
+  const sidebar = document.createElement("div");
+  sidebar.className = "sidebar";
+  sidebar.innerHTML = `
+    <div class="like">❤️<br><small>12k</small></div>
+    <div class="comment">💬<br><small>523</small></div>
+    <div class="share">↗️<br><small>64</small></div>
+  `;
+  
+  const muteBtn = document.createElement("div");
+  muteBtn.className = "mute-btn";
+  muteBtn.innerText = "Tap for Sound";
+  
+  muteBtn.addEventListener("click", () => {
+    const isMuted = video.muted;
+    video.muted = !isMuted;
+    muteBtn.innerText = video.muted ? "Tap for Sound" : "Sound On 🔊";
+    muteBtn.classList.toggle("active", !video.muted);
+  });
   
   container.appendChild(video);
   container.appendChild(overlay);
+  container.appendChild(sidebar);
+  container.appendChild(muteBtn);
   feed.appendChild(container);
 });
 
-// Intersection Observer for auto play/pause
+// Auto play the visible one
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     const video = entry.target.querySelector("video");
@@ -88,20 +142,17 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.75 });
 
-document.querySelectorAll(".video-container").forEach(container => {
-  observer.observe(container);
-});
+document.querySelectorAll(".video-container").forEach(c => observer.observe(c));
 
-let soundEnabled = false;
-
-document.body.addEventListener("click", () => {
-  if (!soundEnabled) {
-    document.querySelectorAll("video").forEach(v => v.muted = false);
-    soundEnabled = true;
-    alert("🔊 Sound enabled!");
+// Swipe gesture for mobile
+let startY = 0;
+feed.addEventListener("touchstart", e => { startY = e.touches[0].clientY; });
+feed.addEventListener("touchend", e => {
+  const deltaY = e.changedTouches[0].clientY - startY;
+  if (Math.abs(deltaY) > 50) {
+    feed.scrollBy({ top: deltaY > 0 ? -window.innerHeight : window.innerHeight, behavior: "smooth" });
   }
 });
-
 </script>
 </body>
 </html>
