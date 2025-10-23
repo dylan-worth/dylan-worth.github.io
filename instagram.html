@@ -91,6 +91,17 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll(".video-container").forEach(container => {
   observer.observe(container);
 });
+
+let soundEnabled = false;
+
+document.body.addEventListener("click", () => {
+  if (!soundEnabled) {
+    document.querySelectorAll("video").forEach(v => v.muted = false);
+    soundEnabled = true;
+    alert("🔊 Sound enabled!");
+  }
+});
+
 </script>
 </body>
 </html>
