@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok Clone</title>
+<title>Reels Clone</title>
 <style>
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    padding: 0;
     background: #000;
+    font-family: 'Poppins', sans-serif;
     overflow: hidden;
-    height: 100vh;
   }
+
   #feed {
     height: 100vh;
-    width: 100%;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
   }
+
   .video-container {
     position: relative;
     height: 100vh;
@@ -27,49 +27,85 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #000;
   }
+
   video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s ease;
   }
-  .overlay {
+
+  .video-container:hover video {
+    transform: scale(1.01);
+  }
+
+  .gradient-overlay {
     position: absolute;
-    bottom: 80px;
-    left: 15px;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    text-shadow: 0 0 5px black;
+    bottom: 0;
+    height: 200px;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
   }
+
+  .info {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    color: #fff;
+  }
+
+  .info .username {
+    font-weight: 600;
+  }
+
   .sidebar {
     position: absolute;
-    right: 10px;
-    bottom: 120px;
+    right: 15px;
+    bottom: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    color: white;
-    font-size: 26px;
-    text-shadow: 0 0 5px black;
+    gap: 25px;
   }
-  .sidebar div { cursor: pointer; }
-  .mute-btn {
+
+  .icon-btn {
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    transition: transform 0.2s ease;
+  }
+
+  .icon-btn:hover {
+    transform: scale(1.2);
+  }
+
+  .mute-icon {
     position: absolute;
     top: 20px;
     right: 20px;
     background: rgba(0,0,0,0.6);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 20px;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 50px;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: 0.3s;
   }
-  .mute-btn.active {
-    background: rgba(255,255,255,0.8);
-    color: black;
+
+  .mute-icon.active {
+    background: #fff;
+    color: #000;
+  }
+
+  small {
+    display: block;
+    font-size: 13px;
+    margin-top: 4px;
+    color: #ccc;
   }
 </style>
 </head>
@@ -78,7 +114,6 @@
 <div id="feed"></div>
 
 <script>
-// ▼ Add your MP4 video list here ▼
 const videoList = [
   "videos/video1.mp4",
   "videos/video2.mp4",
@@ -88,69 +123,70 @@ const videoList = [
 
 const feed = document.getElementById("feed");
 
-// Build the video cards
-videoList.forEach((url, index) => {
+videoList.forEach((url, i) => {
   const container = document.createElement("div");
   container.className = "video-container";
-  
+
   const video = document.createElement("video");
   video.src = url;
   video.loop = true;
   video.muted = true;
-  video.playsInline = true; // important for iPhone
-  video.setAttribute("playsinline", "true");
-  
-  const overlay = document.createElement("div");
-  overlay.className = "overlay";
-  overlay.innerHTML = `<strong>@user${index+1}</strong><br>Cool video #${index+1}`;
-  
+  video.playsInline = true;
+
+  const gradient = document.createElement("div");
+  gradient.className = "gradient-overlay";
+
+  const info = document.createElement("div");
+  info.className = "info";
+  info.innerHTML = `<div class="username">@reel${i+1}</div><div>🔥 Epic moment #${i+1}</div>`;
+
   const sidebar = document.createElement("div");
   sidebar.className = "sidebar";
   sidebar.innerHTML = `
-    <div class="like">❤️<br><small>12k</small></div>
-    <div class="comment">💬<br><small>523</small></div>
-    <div class="share">↗️<br><small>64</small></div>
+    <div class="icon-btn">❤️<small>1.2k</small></div>
+    <div class="icon-btn">💬<small>89</small></div>
+    <div class="icon-btn share">📤<small>Share</small></div>
   `;
-  
+
   const muteBtn = document.createElement("div");
-  muteBtn.className = "mute-btn";
+  muteBtn.className = "mute-icon";
   muteBtn.innerText = "Tap for Sound";
-  
+
   muteBtn.addEventListener("click", () => {
-    const isMuted = video.muted;
-    video.muted = !isMuted;
+    video.muted = !video.muted;
+    muteBtn.classList.toggle("active");
     muteBtn.innerText = video.muted ? "Tap for Sound" : "Sound On 🔊";
-    muteBtn.classList.toggle("active", !video.muted);
   });
-  
-  container.appendChild(video);
-  container.appendChild(overlay);
-  container.appendChild(sidebar);
-  container.appendChild(muteBtn);
+
+  container.append(video, gradient, info, sidebar, muteBtn);
   feed.appendChild(container);
 });
 
-// Auto play the visible one
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    const video = entry.target.querySelector("video");
-    if (entry.isIntersecting) {
-      video.play();
-    } else {
-      video.pause();
-    }
+    const vid = entry.target.querySelector("video");
+    if (entry.isIntersecting) vid.play();
+    else vid.pause();
   });
 }, { threshold: 0.75 });
 
 document.querySelectorAll(".video-container").forEach(c => observer.observe(c));
 
-// Swipe gesture for mobile
 let startY = 0;
-feed.addEventListener("touchstart", e => { startY = e.touches[0].clientY; });
+feed.addEventListener("touchstart", e => startY = e.touches[0].clientY);
 feed.addEventListener("touchend", e => {
   const deltaY = e.changedTouches[0].clientY - startY;
   if (Math.abs(deltaY) > 50) {
     feed.scrollBy({ top: deltaY > 0 ? -window.innerHeight : window.innerHeight, behavior: "smooth" });
+  }
+});
+
+// Simple Share simulation
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("share")) {
+    navigator.share 
+      ? navigator.share({ title: "Check out this reel!", url: window.location.href })
+      : alert("Sharing not supported here 🦋");
   }
 });
 </script>
