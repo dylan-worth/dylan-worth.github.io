@@ -6,112 +6,119 @@
   <title>Dylan Worth · Lumpbrain</title>
   <meta name="description" content="The personal site of Dylan Worth, Mold Assessor, Microbiologist, and Developer." />
   <style>
-    :root {
-      --bg: #0b1320;
-      --bg-alt: #111a2b;
-      --text: #e8eef6;
-      --muted: #93a1b2;
-      --accent: #78f09e;
-      --card: #101a29;
-      --border: rgba(255,255,255,.1);
-    }
-    * { box-sizing: border-box; }
+    /* 🌙 Base Theme (matches profile.css) */
     body {
       margin: 0;
-      font: 16px/1.6 system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background-color: #18191a;
+      color: #e4e6eb;
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-    /* Header */
+    /* 🏷️ Header */
     header {
+      background-color: #242526;
       text-align: center;
-      padding: 5rem 1rem 2rem;
-      background: linear-gradient(180deg, #0b1320 0%, #101a29 100%);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    header h1 {
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      margin: 0 0 1rem;
-      color: var(--accent);
-      letter-spacing: 1px;
+      padding: 3rem 1rem 2rem;
+      border-bottom: 1px solid #3a3b3c;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    /* Navigation */
+    header h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      color: #e4e6eb;
+    }
+
     nav {
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
       flex-wrap: wrap;
-      margin-bottom: 1.5rem;
+      gap: 1.5rem;
     }
+
     nav a {
-      color: var(--accent);
+      color: #2e89ff;
       font-weight: 600;
       text-decoration: none;
       border-bottom: 2px solid transparent;
-      transition: border 0.2s ease, color 0.2s ease;
-    }
-    nav a:hover {
-      border-bottom: 2px solid var(--accent);
-      color: #9cffb7;
+      transition: all 0.2s ease;
     }
 
-    /* Main content */
+    nav a:hover {
+      border-bottom: 2px solid #2e89ff;
+      color: #62a4ff;
+    }
+
+    /* 🧱 Intro Card */
     main {
       flex: 1;
-      max-width: 760px;
-      margin: 2rem auto 0;
+      max-width: 720px;
+      margin: 2.5rem auto;
       padding: 0 1.5rem;
-      text-align: center;
-    }
-    main p {
-      font-size: 1.125rem;
-      color: var(--muted);
-      background: var(--card);
-      padding: 1.5rem;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(120,240,158,0.1);
-      border: 1px solid var(--border);
-      line-height: 1.75;
     }
 
-    /* Subtle glowing accent link */
+    .intro-card {
+      background-color: #242526;
+      border-radius: 8px;
+      padding: 24px;
+      border: 1px solid #3a3b3c;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      line-height: 1.75;
+      text-align: center;
+    }
+
+    .intro-card strong {
+      color: #2e89ff;
+    }
+
+    /* 🔗 Profile Button */
     .profile-link {
       display: inline-block;
-      margin-top: 1.75rem;
-      background: var(--accent);
-      color: #0b1320;
-      font-weight: 700;
+      margin-top: 1.5rem;
+      padding: 10px 18px;
+      background-color: #2e89ff;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
       text-decoration: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .profile-link:hover {
-      background: #9cffb7;
-      transform: scale(1.03);
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
-    /* Footer */
+    .profile-link:hover {
+      background-color: #5399ff;
+      transform: translateY(-1px);
+    }
+
+    /* 🌑 Footer */
     footer {
       text-align: center;
-      padding: 1.5rem;
-      font-size: 0.875rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      background: var(--bg-alt);
+      padding: 20px;
+      font-size: 0.85em;
+      color: #b0b3b8;
+      border-top: 1px solid #3a3b3c;
+      background-color: #242526;
     }
+
     footer a {
-      color: var(--accent);
+      color: #2e89ff;
       text-decoration: none;
     }
+
     footer a:hover {
       text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 0 1rem;
+      }
+      .intro-card {
+        padding: 18px;
+      }
     }
   </style>
 </head>
@@ -127,10 +134,16 @@
   </header>
 
   <main>
-    <p>
-      Hey, I’m Dylan Worth — though online I often go by <strong>Lumpbrain</strong>. This site is my little hub on the internet, a place where I bring together the different sides of who I am. From diving into mold inspections to exploring microbiology and tinkering with code, I use this space to share what I’m learning and building. Think of it as a digital notebook where I can spill my thoughts, projects, and experiments right onto the screen.
-    </p>
-    <a href="profile.html" class="profile-link">Visit My Posts</a>
+    <div class="intro-card">
+      <p>
+        Hey, I’m Dylan Worth — though online I often go by <strong>Lumpbrain</strong>.  
+        This site is my little hub on the internet, a place where I bring together the different sides of who I am.  
+        From diving into mold inspections to exploring microbiology and tinkering with code,  
+        I use this space to share what I’m learning and building.  
+        Think of it as a digital notebook where I can spill my thoughts, projects, and experiments right onto the screen.
+      </p>
+      <a href="profile.html" class="profile-link">Visit My Posts</a>
+    </div>
   </main>
 
   <footer>
