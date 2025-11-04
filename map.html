@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Zoom Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/SVRUde2yhh+moWV1Q="
+       crossorigin=""/>
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent body scrollbars */
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+       integrity="sha256-20n6H5g9B/S94lWJj1f9D/27uG61W3tGfF7fQ4pG5C8="
+       crossorigin=""></script>
+    
+    <script>
+        // Define the URL of your map image
+        // NOTE: For this to work in a real file, you need to save the map image 
+        // in the same folder as this HTML file, or change the path below.
+        const imageUrl = '1000018254.png'; 
+
+        // --- Configuration Variables ---
+        const maxZoomLevel = 5; // How far you can zoom in (higher number = closer)
+        const minZoomLevel = 1;  // How far you can zoom out (default full view)
+        const initialZoom = 1;   // Starting zoom level
+        const centerLatitude = 0;
+        const centerLongitude = 0;
+        // -------------------------------
+        
+        // 1. Initialize the Leaflet map in the 'map' div
+        const map = L.map('map', {
+            crs: L.CRS.Simple, // Use a simple coordinate system (non-geographical)
+            minZoom: minZoomLevel,
+            maxZoom: maxZoomLevel,
+            attributionControl: false // Remove the default Leaflet attribution
+        });
+
+        // 2. Get the dimensions of the image
+        const img = new Image();
+        img.onload = function() {
+            const width = img.naturalWidth;
+            const height = img.naturalHeight;
+            
+            // Calculate the bounds for the image overlay
+            // [0, 0] is the top-left corner. [width, -height] is the bottom-right corner 
+            // when using Leaflet's Simple CRS, which flips the Y-axis.
+            const bounds = [[-height, 0], [0, width]];
+
+            // 3. Add the image overlay to the map
+            L.imageOverlay(imageUrl, bounds).addTo(map);
+
+            // 4. Set the view to fit the bounds and the initial zoom level
+            map.fitBounds(bounds);
+            map.setZoom(initialZoom);
+            
+            // Optional: Set a maximum boundary so users can't pan too far away
+            map.setMaxBounds(bounds); 
+        };
+        img.src = imageUrl;
+
+    </script>
+
+</body>
+</html>
