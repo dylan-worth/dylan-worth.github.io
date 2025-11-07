@@ -248,6 +248,32 @@ footer a:hover {
 .platform-icon:hover {
   opacity: 1;
 }
+.reply-embed {
+  background-color: #111;
+  border: 1px solid #333;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.reply-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 0.6rem;
+}
+
+.reply-text {
+  color: #ccc;
+  line-height: 1.4;
+}
 
 /* 📱 Responsive Adjustments */
 @media (max-width: 600px) {
