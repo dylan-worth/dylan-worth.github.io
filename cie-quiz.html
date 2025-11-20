@@ -3,93 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIE Bioaerosols Quiz – @smbassessments</title>
+<title>CIE Bioaerosols Quiz - Works on Phone</title>
 <style>
-  body {font-family: Arial, sans-serif; background:#1e1e1e; color:#eee; padding:20px; max-width:800px; margin:40px auto; line-height:1.6;}
-  h1 {text-align:center; color:#ff4444;}
-  .quiz-container {background:#2d2d2d; padding:30px; border-radius:15px; box-shadow:0 0 20px rgba(255,68,68,0.3);}
-  .question {margin-bottom:30px; font-size:1.1em;}
-  label {display:block; margin:12px 0; padding:10px; background:#333; border-radius:8px; cursor:pointer;}
-  label:hover {background:#444;}
-  input[type="radio"] {margin-right:10px;}
-  button {background:#ff4444; color:white; border:none; padding:15px 30px; font-size:1.2em; border-radius:8px; cursor:pointer; display:block; margin:30px auto;}
-  button:hover {background:#ff6666;}
-  #result {margin-top:30px; font-size:1.6em; text-align:center; font-weight:bold;}
-  .explanation {font-size:0.9em; color:#aaa; margin-top:8px; font-style:italic; display:none;}
-  .correct {color:#41fff1;}
-  .wrong {color:#ff4444;}
+  body {font-family: Arial, sans-serif; background:#111; color:#eee; padding:15px; margin:0;}
+  h1 {text-align:center; color:#ff4444; font-size:1.4em;}
+  .quiz {background:#222; padding:20px; border-radius:12px;}
+  .question {margin:25px 0; font-size:1.1em;}
+  label {display:block; background:#333; margin:10px 0; padding:12px; border-radius:8px;}
+  input[type="radio"] {margin-right:12px;}
+  button {background:#ff4444; color:white; border:none; padding:15px; width:100%; font-size:1.2em; border-radius:8px; margin-top:20px;}
+  #result {margin-top:30px; text-align:center; font-size:1.5em; font-weight:bold;}
+  .exp {font-size:0.9em; color:#aaa; margin-top:5px; display:none;}
 </style>
 </head>
 <body>
 
-<div class="quiz-container">
-  <h1>CIE Bioaerosols Prep Quiz<br><small>@smbassessments – 25 real exam-style questions</small></h1>
-  <form id="quizForm"></form>
-  <button type="submit" form="quizForm">Submit Answers & See Score</button>
+<div class="quiz">
+  <h1>CIE Bioaerosols Quiz<br><small>25 questions – works offline & on phone</small></h1>
+  <form id="quiz"></form>
+  <button type="submit" form="quiz">Show Score</button>
   <div id="result"></div>
 </div>
 
 <script>
-// 25 questions straight from the red ACGIH book
-const allQuestions = [
-  {q:"According to ACGIH, which genus is considered an indicator of significant water damage even when found in small amounts?", a:"Stachybotrys", options:["Aspergillus","Penicillium","Cladosporium","Stachybotrys"], exp:"Ch 9 & 23"},
-  {q:"What is the primary purpose of negative air pressure during remediation?", a:"Prevent cross-contamination to clean areas", options:["Cool the work area","Prevent cross-contamination to clean areas","Speed up drying","Reduce worker exposure only"], exp:"Ch 16"},
-  {q:"Which sampling method is non-viable but gives morphology and total spore counts?", a:"Spore trap (Air-O-Cell, etc.)", options:["Andersen impaction","RCS sampler","Spore trap (Air-O-Cell, etc.)","Swab culture"], exp:"Ch 5"},
-  {q:"NYC DOH guidelines: indoor Stachybotrys levels should be:", a:"Zero or match outdoor background exactly", options:["< 500 spores/m³","Zero or match outdoor background exactly","< 1,000 total spores","Any level is acceptable"], exp:"Ch 23"},
-  {q:"Most common source of fungal amplification in buildings?", a:"Water intrusion or elevated humidity >60% RH", options:["Poor ventilation alone","Water intrusion or elevated humidity >60% RH","Dirty HVAC filters","Carpeting"], exp:"Ch 15"},
-  {q:"What does MVOC stand for?", a:"Microbial Volatile Organic Compound", options:["Mold Volatile Oxygen Compound","Microbial Volatile Organic Compound","Mycotoxin Volatile Organic Compound","Moisture Vapor Organic Compound"], exp:"Ch 2"},
-  {q:"Post-remediation clearance air sampling should show total spore counts:", a:"Similar to or lower than outdoor background", options:["< 500 spores/m³ absolute","Similar to or lower than outdoor background","Zero spores","< 200 spores/m³"], exp:"Ch 10 & 16"},
-  {q:"Recommended tape for surface sampling?", a:"Clear cellulose tape (not frosted)", options:["Duct tape","Clear cellulose tape (not frosted)","Masking tape","Double-sided tape"], exp:"Ch 6"},
-  {q:"Cooling coils/drain pans are common amplification sites because:", a:"They stay wet and are hard to clean", options:["They stay wet and are hard to clean","They have high airflow","UV light hits them","They are cold"], exp:"Ch 14"},
-  {q:"IICRC S520 is the standard for:", a:"Mold remediation in structures", options:["Water damage restoration","Mold remediation in structures","Asbestos abatement","General IAQ"], exp:"Ch 23"},
-  {q:"Which genus requires aw >0.90 (hydrophilic)?", a:"Stachybotrys", options:["Aspergillus","Penicillium","Cladosporium","Stachybotrys"], exp:"Ch 9"},
-  {q:"Minimum efficiency for true HEPA?", a:"99.97% at 0.3 microns", options:["99.97% at 0.3 microns","95% at 1 micron","99% at 1 micron","100% at all sizes"], exp:"Ch 14 & 16"},
-  {q:"Aggressive air sampling uses what to disturb settled dust?", a:"Leaf blower or forced air", options:["Leaf blower or forced air","Running HVAC at max","Opening windows","Turning off HVAC"], exp:"Ch 15"},
-  {q:"Endotoxins are primarily from:", a:"Gram-negative bacteria", options:["Fungi","Gram-negative bacteria","Mycotoxins","Dust mites"], exp:"Ch 2 & 7"},
-  {q:"ACGIH clearance criteria are based on:", a:"Comparison to outdoor background + visual inspection", options:["Absolute spore counts only","Comparison to outdoor background + visual inspection","Lab report only","ERMI score"], exp:"Ch 10 & 16"},
-  {q:"Organism most linked to humidifier fever?", a:"Gram-negative bacteria / endotoxins", options:["Aspergillus fumigatus","Stachybotrys","Gram-negative bacteria / endotoxins","Legionella"], exp:"Ch 2"},
-  {q:"Critical barriers are made of:", a:"6-mil polyethylene sheeting", options:["4-mil poly","6-mil polyethylene sheeting","Plastic drop cloth","Tyvek"], exp:"Ch 16"},
-  {q:"Recommended containment pressure differential?", a:"-0.02 inches water column", options:["-0.02 inches water column","-0.05 inches","Positive pressure","+0.01 inches"], exp:"Ch 16"},
-  {q:"Visible mold growth is:", a:"Always a reason for remediation regardless of species", options:["Only if Stachybotrys","Always a reason for remediation regardless of species","Only if >10 sq ft","Never a problem"], exp:"Ch 15 & 23"},
-  {q:"Which is NOT a recognized guideline in the book?", a:"ERMI score", options:["Rank order comparison","Species presence","ERMI score","Outdoor vs indoor comparison"], exp:"Ch 10"},
-  {q:"Mycotoxins are produced mainly during:", a:"Active growth on substrate", options:["Spore release","Active growth on substrate","Dormancy","Death"], exp:"Ch 2"},
-  {q:"Chain of custody is required for:", a:"All samples sent to laboratory", options:["Only culture samples","All samples sent to laboratory","Only air samples","Only if legal action expected"], exp:"Ch 25"},
-  {q:"Most common cause of false negatives in air sampling?", a:"Sampling during low activity periods", options:["Lab error","Sampling during low activity periods","Using viable methods only","High outdoor counts"], exp:"Ch 4 & 10"},
-  {q:"Minimum respirator for limited mold remediation?", a:"N95 respirator", options:["Half-face with P100","N95 respirator","Full-face APR","PAPR"], exp:"Ch 16"},
-  {q:"Final visual clearance must confirm:", a:"No visible dust or debris and materials are dry", options:["No visible dust or debris and materials are dry","Zero spores on tape","Surfaces smell clean","Lab results received"], exp:"Ch 16"}
+// Questions – 100% straight from the red book
+const questions = [
+  {q:"Which genus is a key indicator of significant water damage even in small amounts?", a:"Stachybotrys", o:["Aspergillus","Penicillium","Cladosporium","Stachybotrys"], e:"Ch 9 & 23"},
+  {q:"Primary purpose of negative air pressure during remediation?", a:"Prevent cross-contamination to clean areas", o:["Cool the work area","Prevent cross-contamination to clean areas","Speed up drying","Reduce worker exposure only"], e:"Ch 16"},
+  {q:"Non-viable method that gives total spore counts & morphology?", a:"Spore trap (Air-O-Cell, etc.)", o:["Andersen impaction","RCS sampler","Spore trap (Air-O-Cell, etc.)","Swab culture"], e:"Ch 5"},
+  {q:"NYC DOH: indoor Stachybotrys should be:", a:"Zero or match outdoor background exactly", o:["< 500 spores/m³","Zero or match outdoor background exactly","< 1,000 total spores","Any level is acceptable"], e:"Ch 23"},
+  {q:"Most common cause of fungal amplification in buildings?", a:"Water intrusion or elevated humidity >60% RH", o:["Poor ventilation alone","Water intrusion or elevated humidity >60% RH","Dirty HVAC filters","Carpeting"], e:"Ch 15"},
+  {q:"MVOC stands for?", a:"Microbial Volatile Organic Compound", o:["Mold Volatile Oxygen Compound","Microbial Volatile Organic Compound","Mycotoxin Volatile Organic Compound","Moisture Vapor Organic Compound"], e:"Ch 2"},
+  {q:"Post-remediation clearance total spore counts should be:", a:"Similar to or lower than outdoor background", o:["< 500 absolute","Similar to or lower than outdoor background","Zero spores","< 200 spores/m³"], e:"Ch 10 & 16"},
+  {q:"Recommended tape for surface sampling?", a:"Clear cellulose tape (not frosted)", o:["Duct tape","Clear cellulose tape (not frosted)","Masking tape","Double-sided tape"], e:"Ch 6"},
+  {q:"Cooling coils/drain pans amplify because:", a:"They stay wet and are hard to clean", o:["They stay wet and are hard to clean","High airflow","UV light","They are cold"], e:"Ch 14"},
+  {q:"IICRC S520 standard is for:", a:"Mold remediation in structures", o:["Water damage restoration","Mold remediation in structures","Asbestos abatement","General IAQ"], e:"Ch 23"},
+  {q:"Which genus needs aw >0.90 (hydrophilic)?", a:"Stachybotrys", o:["Aspergillus","Penicillium","Cladosporus","Stachybotrys"], e:"Ch 9"},
+  {q:"True HEPA minimum efficiency?", a:"99.97% at 0.3 microns", o:["99.97% at 0.3 microns","95% at 1 micron","99% at 1 micron","100%"], e:"Ch 14 & 16"},
+  {q:"Aggressive air sampling disturbs dust with:", a:"Leaf blower or forced air", o:["Leaf blower or forced air","Running HVAC max","Opening windows","Turning off HVAC"], e:"Ch 15"},
+  {q:"Endotoxins come primarily from:", a:"Gram-negative bacteria", o:["Fungi","Gram-negative bacteria","Mycotoxins","Dust mites"], e:"Ch 2 & 7"},
+  {q:"ACGIH clearance is based on:", a:"Comparison to outdoor + visual inspection", o:["Absolute counts only","Comparison to outdoor + visual inspection","Lab report only","ERMI score"], e:"Ch 10 & 16"},
+  {q:"Critical barriers are made of:", a:"6-mil polyethylene sheeting", o:["4-mil poly","6-mil polyethylene sheeting","Plastic drop cloth","Tyvek"], e:"Ch 16"},
+  {q:"Recommended containment pressure differential?", a:"-0.02 inches water column", o:["-0.02 inches water column","-0.05 inches","Positive pressure","+0.01 inches"], e:"Ch 16"},
+  {q:"Visible mold growth is:", a:"Always a reason for remediation", o:["Only if Stachybotrys","Always a reason for remediation","Only if >10 sq ft","Never a problem"], e:"Ch 15 & 23"},
+  {q:"Which is NOT a recognized guideline in the book?", a:"ERMI score", o:["Rank order","Species presence","ERMI score","Outdoor comparison"], e:"Ch 10"},
+  {q:"Mycotoxins produced mainly during:", a:"Active growth on substrate", o:["Spore release","Active growth on substrate","Dormancy","Death"], e:"Ch 2"},
+  {q:"Chain of custody required for:", a:"All samples sent to lab", o:["Only culture samples","All samples sent to lab","Only air samples","Only if legal"], e:"Ch 25"},
+  {q:"Most common cause of false negatives in air sampling?", a:"Sampling during low activity periods", o:["Lab error","Sampling during low activity periods","Viable methods only","High outdoor"], e:"Ch 4 & 10"},
+  {q:"Minimum respirator for limited remediation?", a:"N95 respirator", o:["Half-face P100","N95 respirator","Full-face APR","PAPR"], e:"Ch 16"},
+  {q:"Final visual clearance confirms:", a:"No visible dust/debris and materials dry", o:["No visible dust/debris and materials dry","Zero spores on tape","Smells clean","Lab results"], e:"Ch 16"},
+  {q:"Humidifier fever is usually caused by:", a:"Gram-negative bacteria / endotoxins", o:["Aspergillus fumigatus","Stachybotrys","Gram-negative bacteria / endotoxins","Legionella"], e:"Ch 2"}
 ];
 
-// Build the quiz
-let quizHTML = "";
-allQuestions.forEach((item, i) => {
-  quizHTML += `<div class="question"><strong>\( {i+1}. \){item.q}</strong><div class="explanation" id="exp${i}"></div>`;
-  const shuffled = [...item.options].sort(() => Math.random() - 0.5);
+// Build quiz
+let html = "";
+questions.forEach((q, i) => {
+  html += `<div class="question"><strong>\( {i+1}. \){q.q}</strong><div class="exp" id="e${i}"></div>`;
+  const shuffled = [...q.o].sort(() => Math.random() - 0.5);
   shuffled.forEach(opt => {
-    quizHTML += `<label><input type="radio" name="q\( {i}" value=" \){opt}"> ${opt}</label>`;
+    html += `<label><input type="radio" name="q\( {i}" value=" \){opt}"> ${opt}</label>`;
   });
-  quizHTML += `</div>`;
+  html += `</div>`;
 });
-document.getElementById("quizForm").innerHTML = quizHTML;
+document.getElementById("quiz").innerHTML = html;
 
-// Submit & score
-document.getElementById("quizForm").addEventListener("submit", function(e) {
+// Scoring
+document.getElementById("quiz").addEventListener("submit", function(e) {
   e.preventDefault();
-  let score = 0;
-  allQuestions.forEach((item, i) => {
-    const selected = document.querySelector(`input[name="q${i}"]:checked`);
-    const expDiv = document.getElementById(`exp${i}`);
-    if (selected && selected.value === item.a) {
-      score++;
-      expDiv.style.color = "#41fff1";
-      expDiv.innerHTML = "Correct! – " + item.exp;
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const chosen = document.querySelector(`input[name="q${i}"]:checked`);
+    const exp = document.getElementById(`e${i}`);
+    if (chosen && chosen.value === q.a) {
+      correct++;
+      exp.style.color = "#0f8";
+      exp.innerHTML = "Correct – " + q.e;
     } else {
-      expDiv.style.color = "#ff4444";
-      expDiv.innerHTML = `Wrong. Correct answer: <strong>\( {item.a}</strong> – \){item.exp}`;
+      exp.style.color = "#f44";
+      exp.innerHTML = "Wrong → <strong>" + q.a + "</strong> – " + q.e;
     }
-    expDiv.style.display = "block";
+    exp.style.display = "block";
   });
-  document.getElementById("result").innerHTML = `Score: <span class="correct">\( {score}/ \){allQuestions.length}</span> (${Math.round(score/allQuestions.length*100)}%)<br><br><button type="button" onclick="location.reload()">Retake Quiz</button>`;
-  window.scrollTo(0,0);
+  document.getElementById("result").innerHTML = `Score: \( {correct}/ \){questions.length} (${Math.round(correct/questions.length*100)}%)<br><br><button type="button" onclick="location.reload()" style="padding:10px 20px">Retake</button>`;
 });
 </script>
 </body>
