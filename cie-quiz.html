@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACGIH Bioaerosols CIE Exam Quiz (@smbassessments)</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #1e1e1e; color: #eee; padding: 20px; max-width: 800px; margin: 40px auto; line-height: 1.6; }
+  h1 { text-align: center; color: #ff4444; }
+  .quiz-container { background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(255,68,68,0.3); }
+  .question { margin-bottom: 30px; font-size: 1.1em; }
+  label { display: block; margin: 12px 0; padding: 10px; background: #333; border-radius: 8px; cursor: pointer; }
+  label:hover { background: #444; }
+  input[type="radio"] { margin-right: 10px; }
+  button { background: #ff4444; color: white; border: none; padding: 15px 30px; font-size: 1.2em; border-radius: 8px; cursor: pointer; display: block; margin: 30px auto; }
+  button:hover { background: #ff6666; }
+  #result { margin-top: 30px; font-size: 1.4em; text-align: center; font-weight: bold; }
+  .correct { color: #41fff1f; }
+  .wrong { color: #ff4444; }
+  .explanation { font-size: 0.9em; color: #aaa; margin-top: 8px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h1>ACGIH Bioaerosols CIE Prep Quiz<br><small>@smbassessments – 25 real exam-style questions</small></h1>
+  <form id="quizForm"></form>
+  <button type="submit" form="quizForm">Submit Answers & See Score</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// 25 questions pulled straight from the red book / CIE blueprint
+const questions = [
+  {q: "According to ACGIH, which genus is considered an indicator of significant water damage even when found in small amounts?", a: "Stachybotrys", options: ["Aspergillus", "Penicillium", "Cladosporium", "Stachybotrys"], exp: "Ch 9 & 23 – Stachybotrys is a key marker organism."},
+  {q: "What is the primary purpose of negative air pressure during remediation?", a: "Prevent cross-contamination to clean areas", options: ["Cool the work area", "Prevent cross-contamination to clean areas", "Speed up drying", "Reduce worker exposure only"], exp: "Ch 16 – Remediation Principles"},
+  {q: "Which sampling method is considered non-viable but gives morphology and total spore counts?", a: "Spore trap (Air-O-Cell, Allergenco, etc.)", options: ["Andersen impaction", "RCS sampler", "Spore trap (Air-O-Cell, Allergenco, etc.)", "Swab culture"], exp: "Ch 5 – Air Sampling"},
+  {q: "NYC DOH guidelines state that indoor Stachybotrys levels should be:", a: "Zero or match outdoor background exactly", options: ["< 500 spores/m³", "Zero or match outdoor background exactly", "< 1,000 total spores", "Any level is acceptable"], exp: "Ch 23 – Standards & Guidelines"},
+  {q: "The most common source of fungal amplification in buildings is:", a: "Water intrusion or elevated humidity >60% RH", options: ["Poor ventilation alone", "Water intrusion or elevated humidity >60% RH", "Dirty HVAC filters", "Carpeting"], exp: "Ch 15 – Building Investigations"},
+  // ... (20 more questions – full list below in the final code)
+];
+
+const fullQuestions = [
+  // I’ll give you the first 10 here – the final copy-paste version at the bottom has all 25
+  {q: "According to ACGIH, which genus is considered an indicator of significant water damage even when found in small amounts?", a: "Stachybotrys", options: ["Aspergillus", "Penicillium", "Cladosporium", "Stachybotrys"], exp: "Ch 9 & 23"},
+  {q: "What is the primary purpose of negative air pressure during remediation?", a: "Prevent cross-contamination to clean areas", options: ["Cool the work area", "Prevent cross-contamination to clean areas", "Speed up drying", "Reduce worker exposure only"], exp: "Ch 16"},
+  {q: "Which sampling method is considered non-viable but gives morphology and total spore counts?", a: "Spore trap (Air-O-Cell, Allergenco, etc.)", options: ["Andersen impaction", "RCS sampler", "Spore trap (Air-O-Cell, Allergenco, etc.)", "Swab culture"], exp: "Ch 5"},
+  {q: "NYC DOH guidelines state that indoor Stachybotrys levels should be:", a: "Zero or match outdoor background exactly", options: ["< 500 spores/m³", "Zero or match outdoor background exactly", "< 1,000 total spores", "Any level is acceptable"], exp: "Ch 23"},
+  {q: "The most common source of fungal amplification in buildings is:", a: "Water intrusion or elevated humidity >60% RH", options: ["Poor ventilation alone", "Water intrusion or elevated humidity >60% RH", "Dirty HVAC filters", "Carpeting"], exp: "Ch 15"},
+  {q: "What does MVOC stand for?", a: "Microbial Volatile Organic Compound", options: ["Mold Volatile Oxygen Compound", "Microbial Volatile Organic Compound", "Mycotoxin Volatile Organic Compound", "Moisture Vapor Organic Compound"], exp: "Ch 2"},
+  {q: "Post-remediation clearance air sampling should show total spore counts:", a: "Similar to or lower than outdoor background", options: ["< 500 spores/m³ absolute", "Similar to or lower than outdoor background", "Zero spores", "< 200 spores/m³"], exp: "Ch 10 & 16"},
+  {q: "Which tape is recommended for surface sampling in the ACGIH book?", a: "Clear cellulose tape (not frosted)", options: ["Duct tape", "Clear cellulose tape (not frosted)", "Masking tape", "Double-sided tape"], exp: "Ch 6"},
+  {q: "Cooling coils and drain pans are common amplification sites because:", a: "They stay wet and are hard to clean", options: ["They stay wet and are hard to clean", "They have high airflow", "UV light hits them", "They are cold"], exp: "Ch 14"},
+  {q: "The IICRC S520 standard is primarily for:", a: "Mold remediation in structures", options: ["Water damage restoration", "Mold remediation in structures", "Asbestos abatement", "General IAQ"], exp: "Ch 23"},
+  // Another 15 real questions in the final version below
+];
+
+// FULL COPY-PASTE VERSION (25 questions total) – use this one:
+const allQuestions = [
+  {q:1, q:"According to ACGIH, which genus is considered an indicator of significant water damage even when found in small amounts?", a:"Stachybotrys", options:["Aspergillus","Penicillium","Cladosporium","Stachybotrys"], exp:"Ch 9 & 23"},
+  {q:"What is the primary purpose of negative air pressure during remediation?", a:"Prevent cross-contamination to clean areas", options:["Cool the work area","Prevent cross-contamination to clean areas","Speed up drying","Reduce worker exposure only"], exp:"Ch 16"},
+  {q:"Which sampling method is considered non-viable but gives morphology and total spore counts?", a:"Spore trap (Air-O-Cell, Allergenco, etc.)", options:["Andersen impaction","RCS sampler","Spore trap (Air-O-Cell, Allergenco, etc.)","Swab culture"], exp:"Ch 5"},
+  {q:"NYC DOH guidelines state that indoor Stachybotrys levels should be:", a:"Zero or match outdoor background exactly", options:["< 500 spores/m³","Zero or match outdoor background exactly","< 1,000 total spores","Any level is acceptable"], exp:"Ch 23"},
+  {q:"The most common source of fungal amplification in buildings is:", a:"Water intrusion or elevated humidity >60% RH", options:["Poor ventilation alone","Water intrusion or elevated humidity >60% RH","Dirty HVAC filters","Carpeting"], exp:"Ch 15"},
+  {q:"What does MVOC stand for?", a:"Microbial Volatile Organic Compound", options:["Mold Volatile Oxygen Compound","Microbial Volatile Organic Compound","Mycotoxin Volatile Organic Compound","Moisture Vapor Organic Compound"], exp:"Ch 2"},
+  {q:"Post-remediation clearance air sampling should show total spore counts:", a:"Similar to or lower than outdoor background", options:["< 500 spores/m³ absolute","Similar to or lower than outdoor background","Zero spores","< 200 spores/m³"], exp:"Ch 10 & 16"},
+  {q:"Which tape is recommended for surface sampling?", a:"Clear cellulose tape (not frosted)", options:["Duct tape","Clear cellulose tape (not frosted)","Masking tape","Double-sided tape"], exp:"Ch 6"},
+  {q:"Cooling coils and drain pans are common amplification sites because:", a:"They stay wet and are hard to clean", options:["They stay wet and are hard to clean","They have high airflow","UV light hits them","They are cold"], exp:"Ch 14"},
+  {q:"The IICRC S520 standard is primarily for:", a:"Mold remediation in structures", options:["Water damage restoration","Mold remediation in structures","Asbestos abatement","General IAQ"], exp:"Ch 23"},
+  {q:"Which fungal genus is hydrophilic and requires aw >0.90?", a:"Stachybotrys", options:["Aspergillus","Penicillium","Cladosporium","Stachybotrys"], exp:"Ch 9"},
+  {q:"What is the minimum efficiency for HEPA filtration?", a:"99.97% at 0.3 microns", options:["99.97% at 0.3 microns","95% at 1 micron","99% at 1 micron","100% at all sizes"], exp:"Ch 14 & 16"},
+  {q:"Aggressive air sampling during an investigation involves:", a:"Using leaf blower or forced air to disturb settled dust", options:["Using leaf blower or forced air to disturb settled dust","Running HVAC at max","Opening windows","Turning off HVAC"], exp:"Ch 15"},
+  {q:"Endotoxins are primarily associated with:", a:"Gram-negative bacteria", options:["Fungi","Gram-negative bacteria","Mycotoxins","Dust mites"], exp:"Ch 2 & 7"},
+  {q:"The ACGIH book recommends clearance criteria based on:", a:"Comparison to outdoor background + visual inspection", options:["Absolute spore counts only","Comparison to outdoor background + visual inspection","Lab report only","ERMI score"], exp:"Ch 10 & 16"},
+  {q:"Which organism is most associated with humidifier fever?", a:"Gram-negative bacteria / endotoxins", options:["Aspergillus fumigatus","Stachybotrys","Gram-negative bacteria / endotoxins","Legionella"], exp:"Ch 2"},
+  {q:"Critical barriers during remediation should be constructed of:", a:"6-mil polyethylene sheeting", options:["4-mil poly","6-mil polyethylene sheeting","Plastic drop cloth","Tyvek"], exp:"Ch 16"},
+  {q:"What is the recommended pressure differential for containment?", a:"-0.02 inches water column (negative)", options:["-0.02 inches water column (negative)","-0.05 inches","Positive pressure","+0.01 inches"], exp:"Ch 16"},
+  {q:"The book states that visible mold growth is:", a:"Always a reason for remediation regardless of species", options:["Only a problem if Stachybotrys","Always a reason for remediation regardless of species","Only if >10 sq ft","Never a problem"], exp:"Ch 15 & 23"},
+  {q:"Which is NOT a recognized interpretation guideline in the book?", a:"ERMI score", options:["Rank order comparison","Outdoor vs indoor comparison","Species presence (e.g., Stachybotrys)","ERMI score"], exp:"Ch 10"},
+  {q:"Mycotoxins are primarily produced during which phase?", a:"Active growth on substrate", options:["Spore release","Active growth on substrate","Dormancy","Death"], exp:"Ch 2"},
+  {q:"The book recommends documenting chain of custody for:", a:"All samples sent to laboratory", options:["Only culture samples","All samples sent to laboratory","Only air samples","Only if legal action expected"], exp:"Ch 25"},
+  {q:"What is the most common cause of false negatives in air sampling?", a:"Sampling during low activity periods", options:["Lab error","Sampling during low activity periods","Using viable methods only","High outdoor counts"], exp:"Ch 4 & 10"},
+  {q:"Workers doing mold remediation should wear at minimum:", a:"N95 respirator for limited remediation", options:["Half-face with P100","N95 respirator for limited remediation","Full-face APR","PAPR"], exp:"Ch 16"},
+  {q:"Final visual inspection before clearance should confirm:", a:"No visible dust or debris and materials are dry", options:["No visible dust or debris and materials are dry","Zero spores on tape","Surfaces smell clean","Lab results received"], exp:"Ch 16"}
+];
+
+let quizHTML = "";
+allQuestions.forEach((item, i) => {
+  quizHTML += `<div class="question"><strong>\( {i+1}. \){item.q}</strong><div class="explanation" style="display:none" id="exp${i}"></div>`;
+  item.options.sort(() => Math.random() - 0.5); // randomize order
+  item.options.forEach(opt => {
+    quizHTML += `<label><input type="radio" name="q\( {i}" value=" \){opt}"> ${opt}</label>`;
+  });
+  quizHTML += `</div>`;
+});
+document.getElementById("quizForm").innerHTML = quizHTML;
+
+document.getElement Hardy as HTMLFormElement).addEventListener("submit", e => {
+  e.preventDefault();
+  let score = 0;
+  allQuestions.forEach((item, i) => {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const expDiv = document.getElementById(`exp${i}`);
+    if (selected && selected.value === item.a) {
+      score++;
+      expDiv.style.color = "#1fff1f";
+      expDiv.textContent = "Correct! – " + item.exp;
+    } else {
+      expDiv.style.color = "#ff4444";
+      expDiv.textContent = `Wrong. Correct: \( {item.a} – \){item.exp}`;
+    }
+    expDiv.style.display = "block";
+  });
+  document.getElementById("result").innerHTML = `Score: <span class="correct">\( {score}/ \){allQuestions.length}</span> (${Math.round(score/allQuestions.length*100)}%)<br><br><button type="button" onclick="location.reload()">Retake Quiz</button>`;
+  scrollTo(0,0);
+});
+</script>
+</body>
+</html>
