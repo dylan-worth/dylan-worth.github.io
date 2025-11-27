@@ -11,6 +11,9 @@ body {
   position: relative;
 }
 
+a { 
+ color: seashell
+}
 .cover-wrapper {
   position: relative;
   width: 100%;
