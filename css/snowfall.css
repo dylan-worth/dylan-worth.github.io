@@ -11,13 +11,13 @@
 
 #page-footer {
     height: 100px;
-    background-color: #3f51b5;
+    background-color: 
     color: white;
     text-align: center;
     line-height: 100px;
     position: relative; /* Make sure the footer is visible */
     z-index: 999; 
-    margin-top: 50vh; /* Push the footer down for demo */
+   
 }
 
 .snowflake {
