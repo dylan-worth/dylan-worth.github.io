@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dylan Worth - Posts</title>
+  <link rel="stylesheet" href="./css/profile.css" />
+<link rel="stylesheet" href="./css/snowfall.css" />
+</head>
+<body>
+  <!-- ▪︎ Cover + Profile Header -->
+  <header class="cover-section">
+    <div class="cover-wrapper">
+      <img src="./assets/cover.jpg" alt="Cover Photo" class="cover-photo" />
+      <div class="cover-overlay"></div>
+    </div>
+
+    <div class="profile-header">
+      <img src="./assets/pfp.jpg" alt="Profile Picture" class="profile-pic" />
+      <div class="profile-info">
+        <h1>Dylan Worth</h1>
+        <p class="tagline">A father of four and happily taken to my beautiful wife ❤️</p>
+        <p class="stats">SMB Assessments · Mold Assessor</p>
+
+        <nav class="tabs">
+          <button>Posts</button>
+          <button>About</button>
+          <button class="active">Badges</button>
+          <button>Photos</button>
+          <button>Reels</button>
+          <button>More</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+<div id="snow-container"></div>
+
+  <!-- ▪︎ Posts Feed -->
+  <main class="posts">
+
+
+  </main>
+
+  <!-- ▪︎ Footer -->
+  <footer id="page-footer">
+    <p>© 2025 Dylan Worth · <a href="./index.html">sporavision</a></p>
+  </footer>
+
+  <script>
+    
+
+    // 🔗 Copy link to clipboard
+    const buttons = document.querySelectorAll(".copy-link");
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const slug = btn.getAttribute("data-target");
+        const fullLink = `${window.location.origin}${window.location.pathname}#${slug}`;
+        navigator.clipboard.writeText(fullLink)
+          .then(() => {
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = "Copy Link"), 2000);
+          })
+          .catch(err => console.error("Failed to copy:", err));
+      });
+    });
+  </script>
+
+  <script src="./js/profile.js"></script>
+  <script src="./js/snowfall.js"></script>
+</body>
+</html>
