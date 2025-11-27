@@ -81,30 +81,7 @@ a {
   color: #b0b3b8;
 }
 
-/* 🧭 Tabs */
-.tabs {
-  margin-top: 10px;
-}
 
-.tabs button {
-  background: none;
-  border: none;
-  color: #b0b3b8;
-  font-size: 1em;
-  margin-right: 12px;
-  cursor: pointer;
-  padding-bottom: 4px;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.tabs button:hover {
-  color: #e4e6eb;
-}
-
-.tabs button.active {
-  color: #e4e6eb;
-  border-bottom: 2px solid #2e89ff;
 }
 
 /* 📱 Posts Feed */
