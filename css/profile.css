@@ -10,7 +10,7 @@ body {
 .cover-section {
   position: relative;
 }
-/*
+
 
 /* 🧭 Tabs */
 .tabs {
@@ -36,7 +36,7 @@ body {
 .tabs button.active {
   color: #e4e6eb;
   border-bottom: 2px solid #2e89ff;
-*/
+
 a { 
  color: seashell
 }
