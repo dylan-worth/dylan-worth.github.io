@@ -5,13 +5,6 @@ body {
   color: #e4e6eb;
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
-
-/* 🖼️ Cover + Profile Layout */
-.cover-section {
-  position: relative;
-}
-
-
 /* 🧭 Tabs */
 .tabs {
   margin-top: 10px;
@@ -40,6 +33,12 @@ body {
 a { 
  color: seashell
 }
+
+/* 🖼️ Cover + Profile Layout */
+.cover-section {
+  position: relative;
+}
+
 .cover-wrapper {
   position: relative;
   width: 100%;
