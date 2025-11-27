@@ -278,6 +278,81 @@ footer a:hover {
   line-height: 1.4;
 }
 
+/* General Layout (as previously suggested) */
+.badge-gallery {
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 1000px; 
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px; 
+}
+
+.badge-gallery h2 {
+    grid-column: 1 / -1; 
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Badge Item Container Style */
+.badge-item {
+    display: flex; 
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Lighter border for a clean card */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Stronger shadow for depth */
+    padding: 15px;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.badge-item:hover {
+    transform: translateY(-3px); 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* More pronounced lift on hover */
+}
+
+.badge-visual {
+    flex-shrink: 0; 
+    margin-right: 15px;
+}
+
+/* 🏆 The Badge Styling (Focus on the Icon) 🏆 */
+.badge-icon {
+    width: 75px; /* Slightly larger for prominence */
+    height: 75px;
+    /* Since the image itself has the unique shape and metallic border,
+       we emphasize the border and shadow here to give it depth on the page. */
+    border: 3px solid #ffd700; /* Gold-like primary frame border */
+    border-radius: 50%; /* Make the overall card circular *if* the badge is circular */
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); /* Gold glowing effect */
+    object-fit: contain; /* Ensure the image fits within the frame */
+}
+
+/* Detail Text Styling */
+.badge-details h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em; /* Make the title a bit bigger */
+    color: #1a202c;
+}
+
+.badge-details p {
+    margin: 2px 0;
+    font-size: 0.9em;
+    color: #5a6777;
+}
+
+.verify-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.95em;
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 /* 📱 Responsive Adjustments */
 @media (max-width: 600px) {
   .profile-pic {
