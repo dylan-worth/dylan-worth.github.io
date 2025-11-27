@@ -1,0 +1,31 @@
+/* Container for the tabs */
+.tabs {
+    display: flex; /* Makes the buttons align horizontally */
+    margin-top: 15px;
+    border-top: 1px solid #333; /* Separator line */
+    /* If you want the tabs to scroll horizontally on small screens: */
+    overflow-x: auto; 
+    white-space: nowrap;
+}
+
+.tabs .tab-link {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: #a0a0a0; /* Default text color */
+    border-bottom: 3px solid transparent; /* Placeholder for active line */
+    transition: all 0.3s ease;
+}
+
+.tabs .tab-link:hover {
+    color: white; /* Highlight on hover */
+}
+
+/* Active Tab Style */
+.tabs .tab-link.active {
+    color: white;
+    font-weight: bold;
+    border-bottom: 3px solid #1877f2; /* Blue underline for active tab */
+}
