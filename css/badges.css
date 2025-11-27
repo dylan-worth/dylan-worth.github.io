@@ -4,7 +4,7 @@
     margin-top: 15px;
     border-top: 1px solid #333; /* Separator line */
     /* If you want the tabs to scroll horizontally on small screens: */
-    overflow-x: auto; 
+    text-wrap: auto;
     white-space: nowrap;
 }
 
