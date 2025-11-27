@@ -5,9 +5,18 @@ body {
   color: #e4e6eb;
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
+a { 
+ color: seashell; /* Moved inside base theme for clarity */
+}
+
 /* 🧭 Tabs */
 .tabs {
   margin-top: 10px;
+  /* ADDED: Essential for horizontal display and wrapping */
+  display: flex;
+  flex-wrap: wrap; 
+  border-top: 1px solid #333; /* Separator line */
+  padding-left: 20px; /* Aligns tabs with content below header */
 }
 
 .tabs button {
@@ -15,9 +24,12 @@ body {
   border: none;
   color: #b0b3b8;
   font-size: 1em;
-  margin-right: 12px;
+  
+  /* Use padding for spacing and ensure padding-bottom leaves room for the border */
+  padding: 10px 12px 8px 0; 
+  margin-right: 12px; /* Restored simple margin for spacing */
+  
   cursor: pointer;
-  padding-bottom: 4px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
 }
@@ -29,9 +41,6 @@ body {
 .tabs button.active {
   color: #e4e6eb;
   border-bottom: 2px solid #2e89ff;
-
-a { 
- color: seashell
 }
 
 /* 🖼️ Cover + Profile Layout */
@@ -59,17 +68,21 @@ a {
   left: 0;
   width: 100%;
   height: 230px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(24, 25, 26, 1));
+  /* Updated gradient to pull down to the page background color */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), #18191a); 
 }
 
 /* 👤 Profile Header */
 .profile-header {
   position: relative;
-  display: flex;
-  align-items: center;
+  /* Removed display: flex and align-items: center for this container 
+     as it causes conflicts when the PFP is absolutely positioned. */
   background-color: #242526;
   padding: 16px;
   border-bottom: 1px solid #3a3b3c;
+  
+  /* Adjust padding-top to account for the PFP sitting over the top */
+  padding-top: 60px; 
 }
 
 .profile-pic {
@@ -77,16 +90,20 @@ a {
   height: 120px;
   border-radius: 50%;
   border: 4px solid #18191a;
+  
+  /* Repositioning the PFP correctly over the cover and header section */
   position: absolute;
-  top: -60px;
+  top: 170px; /* Positioned just below the cover photo's height (230 - (120/2)) */
   left: 20px;
+  
   object-fit: cover;
   background-color: #242526;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
 }
 
 .profile-info {
-  margin-left: 160px;
+  /* Aligns text content next to the PFP area */
+  margin-left: 160px; 
 }
 
 .profile-info h1 {
@@ -107,20 +124,18 @@ a {
 }
 
 
-}
-
 /* 📱 Posts Feed */
 .posts {
-  padding: 16px;
-  max-width: 700px;
+  padding: 24px 16px; /* Optimized padding from the bottom section */
+  max-width: 720px; /* Optimized width */
   margin: 0 auto;
 }
 
 .post {
   background-color: #242526;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 18px; /* Optimized padding */
+  margin-bottom: 22px; /* Optimized margin */
   border: 1px solid #3a3b3c;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -160,11 +175,12 @@ a {
 
 /* ✍️ Post Text */
 .post-text {
-  line-height: 1.6;
+  line-height: 1.7; /* Optimized line-height */
   font-size: 1em;
   color: #e4e6eb;
   overflow: hidden;
   transition: max-height 0.3s ease;
+  word-break: break-word; /* Added for long words/links */
 }
 
 /* 🔽 Read More Button */
@@ -175,7 +191,8 @@ a {
   cursor: pointer;
   font-size: 0.9em;
   padding: 4px 0;
-  margin-top: 6px;
+  margin-top: 8px; /* Optimized margin */
+  display: inline-block; /* Optimized display */
   transition: color 0.2s ease;
 }
 
@@ -183,42 +200,7 @@ a {
   color: #5399ff;
 }
 
-/* 🌙 Footer */
-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 0.85em;
-  color: #b0b3b8;
-  border-top: 1px solid #3a3b3c;
-  margin-top: 30px;
-}
-
-footer a {
-  color: #2e89ff;
-  text-decoration: none;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-/* ✨ Post spacing + link fixes */
-.posts {
-  padding: 24px 16px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.post {
-  margin-bottom: 22px;
-  padding: 18px;
-}
-
-.post-text {
-  line-height: 1.7;
-  word-break: break-word;
-}
-
+/* ✨ Link fixes */
 .post-text a {
   color: #2e89ff;
   text-decoration: none;
@@ -229,11 +211,6 @@ footer a:hover {
 .post-text a:hover {
   color: #62a4ff;
   text-decoration: underline;
-}
-
-.read-more {
-  margin-top: 8px;
-  display: inline-block;
 }
 
 /* 🕳️ Break spacing for link groups */
@@ -253,6 +230,8 @@ footer a:hover {
 .platform-icon:hover {
   opacity: 1;
 }
+
+/* Reply Embed (e.g., for X posts) */
 .reply-embed {
   background-color: #111;
   border: 1px solid #333;
@@ -280,7 +259,7 @@ footer a:hover {
   line-height: 1.4;
 }
 
-/* General Layout (as previously suggested) */
+/* Badge Gallery */
 .badge-gallery {
     padding: 20px;
     margin: 0 auto;
@@ -288,24 +267,26 @@ footer a:hover {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px; 
+    /* Badge gallery text correction */
+    color: #e4e6eb; 
 }
 
 .badge-gallery h2 {
     grid-column: 1 / -1; 
     margin-bottom: 20px;
-    color: #333;
+    color: #e4e6eb; /* Match text color to theme */
     font-size: 1.5em;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid #3a3b3c; /* Match border color to theme */
     padding-bottom: 10px;
 }
 
 /* Badge Item Container Style */
 .badge-item {
     display: flex; 
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0; /* Lighter border for a clean card */
+    background-color: #242526; /* Match dark theme container color */
+    border: 1px solid #3a3b3c; 
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Stronger shadow for depth */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
     padding: 15px;
     align-items: center;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -313,7 +294,7 @@ footer a:hover {
 
 .badge-item:hover {
     transform: translateY(-3px); 
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* More pronounced lift on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
 }
 
 .badge-visual {
@@ -323,44 +304,63 @@ footer a:hover {
 
 /* 🏆 The Badge Styling (Focus on the Icon) 🏆 */
 .badge-icon {
-    width: 75px; /* Slightly larger for prominence */
+    width: 75px; 
     height: 75px;
-    /* Since the image itself has the unique shape and metallic border,
-       we emphasize the border and shadow here to give it depth on the page. */
-    border: 3px solid #ffd700; /* Gold-like primary frame border */
-    border-radius: 50%; /* Make the overall card circular *if* the badge is circular */
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); /* Gold glowing effect */
-    object-fit: contain; /* Ensure the image fits within the frame */
+    border: 3px solid #ffd700; 
+    border-radius: 50%; 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); 
+    object-fit: contain; 
 }
 
 /* Detail Text Styling */
 .badge-details h3 {
     margin: 0 0 5px 0;
-    font-size: 1.2em; /* Make the title a bit bigger */
-    color: #1a202c;
+    font-size: 1.2em; 
+    color: #e4e6eb; /* Match dark theme text color */
 }
 
 .badge-details p {
     margin: 2px 0;
     font-size: 0.9em;
-    color: #5a6777;
+    color: #b0b3b8; /* Match dark theme secondary text color */
 }
 
 .verify-link {
     display: inline-block;
     margin-top: 8px;
     font-size: 0.95em;
-    color: #1877f2;
+    color: #2e89ff; /* Match primary link color */
     text-decoration: none;
     font-weight: bold;
 }
 
+/* 🌙 Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85em;
+  color: #b0b3b8;
+  border-top: 1px solid #3a3b3c;
+  margin-top: 30px;
+}
+
+footer a {
+  color: #2e89ff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+
 /* 📱 Responsive Adjustments */
 @media (max-width: 600px) {
+  /* Adjusted PFP position for smaller screens */
   .profile-pic {
     width: 90px;
     height: 90px;
-    top: -45px;
+    top: 170px; /* Recalculated top position for consistent overlap */
     left: 16px;
   }
 
