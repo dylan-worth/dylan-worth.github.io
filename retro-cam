@@ -1,0 +1,203 @@
+import React, { useState, useEffect } from 'react';
+
+// Custom CSS for specific animations that are tricky with just utility classes
+const customStyles = `
+  @keyframes handheld-shake {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-1px, -1px); }
+    20% { transform: translate(1px, 0px); }
+    30% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    50% { transform: translate(-1px, 2px); }
+    60% { transform: translate(1px, 1px); }
+    70% { transform: translate(0px, -1px); }
+    80% { transform: translate(-1px, -1px); }
+    90% { transform: translate(1px, 2px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .animate-shake {
+    animation: handheld-shake 2s infinite linear;
+  }
+
+  .pixelate {
+    image-rendering: pixelated;
+  }
+`;
+
+const RetroCamera = () => {
+  const [filterMode, setFilterMode] = useState('neon'); // neon, sepia, noir
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [photos, setPhotos] = useState([]);
+
+  // The city image source
+  const cityImage = "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80";
+
+  const takePhoto = () => {
+    // 1. Trigger Flash
+    setIsFlashing(true);
+    setTimeout(() => setIsFlashing(false), 150);
+
+    // 2. Add new photo to the list (Printing animation)
+    const newPhoto = {
+      id: Date.now(),
+      filter: filterMode,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    // Add to front of array
+    setPhotos((prev) => [newPhoto, ...prev]);
+  };
+
+  // Helper to get filter styles
+  const getFilterStyle = (mode) => {
+    switch (mode) {
+      case 'sepia': return 'sepia(1) contrast(1.2) brightness(0.9)';
+      case 'noir': return 'grayscale(1) contrast(1.5) brightness(0.8)';
+      case 'neon': return 'saturate(2.5) hue-rotate(15deg) contrast(1.1)';
+      default: return 'none';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-8 font-mono text-gray-200">
+      <style>{customStyles}</style>
+
+      {/* --- CAMERA BODY --- */}
+      <div className="relative z-20 bg-gray-800 rounded-3xl p-6 shadow-2xl border-t border-gray-700 w-full max-w-md flex flex-col items-center">
+        
+        {/* Branding */}
+        <div className="w-full flex justify-between items-center mb-4 px-2">
+          <span className="text-xs font-bold tracking-widest text-gray-500 uppercase">Insta-Retro 9000</span>
+          <div className="flex gap-1">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+            <span className="text-xs text-red-500">REC</span>
+          </div>
+        </div>
+
+        {/* Viewfinder Frame */}
+        <div className="relative w-full aspect-video bg-black rounded-lg border-4 border-gray-900 shadow-inner overflow-hidden mb-6">
+          
+          {/* Live Shake Image */}
+          <div 
+            className="absolute inset-[-10%] w-[120%] h-[120%] bg-cover bg-center animate-shake pixelate opacity-90"
+            style={{ 
+              backgroundImage: `url(${cityImage})`,
+              filter: getFilterStyle(filterMode)
+            }}
+          />
+
+          {/* CRT Scanline Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_4px,6px_100%] pointer-events-none"></div>
+
+          {/* UI Overlay on Screen */}
+          <div className="absolute inset-0 z-20 p-4 flex flex-col justify-between pointer-events-none">
+             <div className="flex justify-between text-xs text-green-400 font-bold opacity-80">
+                <span>ISO 400</span>
+                <span>[ {filterMode.toUpperCase()} ]</span>
+             </div>
+             <div className="self-center w-8 h-8 border border-green-400 opacity-50 rounded-full flex items-center justify-center">+</div>
+          </div>
+
+          {/* Flash Effect Layer */}
+          <div className={`absolute inset-0 bg-white z-30 transition-opacity duration-100 ${isFlashing ? 'opacity-100' : 'opacity-0'}`}></div>
+        </div>
+
+        {/* Controls */}
+        <div className="w-full grid grid-cols-3 gap-4 mb-6">
+           {['sepia', 'neon', 'noir'].map((mode) => (
+             <button
+               key={mode}
+               onClick={() => setFilterMode(mode)}
+               className={`py-2 text-xs uppercase font-bold rounded shadow-sm border-b-4 transition-all active:border-b-0 active:translate-y-1 ${
+                 filterMode === mode 
+                 ? 'bg-blue-600 border-blue-800 text-white' 
+                 : 'bg-gray-700 border-gray-900 text-gray-400 hover:bg-gray-600'
+               }`}
+             >
+               {mode}
+               <div className="text-[10px] opacity-60 font-normal">
+                  {mode === 'sepia' ? '1980' : mode === 'neon' ? '1990' : '1950'}
+               </div>
+             </button>
+           ))}
+        </div>
+
+        {/* Shutter Button */}
+        <div className="relative mb-2">
+          <div className="absolute -inset-1 bg-red-900 rounded-full blur opacity-50"></div>
+          <button 
+            onClick={takePhoto}
+            className="relative w-16 h-16 rounded-full bg-red-600 border-4 border-red-800 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3)] active:scale-95 active:bg-red-700 active:shadow-inner transition-transform flex items-center justify-center group"
+          >
+            <span className="block w-12 h-12 rounded-full border border-red-900 opacity-50"></span>
+          </button>
+        </div>
+        <div className="text-[10px] text-gray-500 mt-2 uppercase tracking-wide">Shutter</div>
+
+        {/* Printer Slot (Visual only) */}
+        <div className="absolute -bottom-3 w-3/4 h-4 bg-gray-900 rounded-b-lg border-t border-black"></div>
+      </div>
+
+      {/* --- PHOTO OUTPUT AREA --- */}
+      <div className="relative w-full max-w-md h-64 mt-4 flex justify-center perspective-[1000px]">
+        {photos.map((photo) => (
+          <InstantPhoto 
+            key={photo.id} 
+            filterStyle={getFilterStyle(photo.filter)} 
+            imgSrc={cityImage}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Sub-component for the Photo to handle its own developing animation logic
+const InstantPhoto = ({ filterStyle, imgSrc }) => {
+  const [developed, setDeveloped] = useState(false);
+
+  useEffect(() => {
+    // Trigger the developing transition after a slight delay
+    const timer = setTimeout(() => setDeveloped(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="absolute top-0 animate-[slideDown_0.6s_ease-out_forwards] z-0">
+      <style>{`
+        @keyframes slideDown {
+          0% { transform: translateY(-100px) scale(0.9); opacity: 0; }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+      `}</style>
+
+      {/* Instant Film Frame */}
+      <div className="bg-white p-3 pb-8 w-48 shadow-lg transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300">
+        <div className="relative w-full aspect-square bg-gray-900 overflow-hidden">
+          
+          {/* The Image */}
+          <div 
+            className="w-full h-full bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url(${imgSrc})`,
+              filter: filterStyle,
+            }}
+          />
+
+          {/* Developing Overlay (Black -> Transparent) */}
+          <div 
+            className={`absolute inset-0 bg-black transition-opacity duration-[3000ms] ease-in-out ${developed ? 'opacity-0' : 'opacity-100'}`}
+          ></div>
+        </div>
+        
+        {/* Handwritten text */}
+        <div className="mt-2 font-handwriting text-gray-400 text-xs text-center font-cursive" style={{ fontFamily: 'cursive' }}>
+           City Vibes
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RetroCamera;
