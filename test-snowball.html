@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Snowball Fight</title>
+    <style>
+        :root {
+            --bg-sky: #87CEEB;
+            --snow-white: #f0f8ff;
+            --snow-shadow: #daeaf6;
+            --p1-color: #ff6b6b; /* Red Player */
+            --p2-color: #4ecdc4; /* Teal Player */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: var(--bg-sky);
+            overflow: hidden;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Scenery --- */
+        .scene {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            background: linear-gradient(to bottom, #87CEEB 60%, #fff 60%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Falling Snow Animation */
+        .snow-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(4px 4px at 20px 30px, white 50%, transparent),
+                              radial-gradient(4px 4px at 200px 90px, white 50%, transparent),
+                              radial-gradient(3px 3px at 500px 40px, white 50%, transparent);
+            background-size: 600px 600px;
+            animation: snowfall 5s linear infinite;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        /* --- Forts --- */
+        .fort {
+            position: absolute;
+            bottom: 30%;
+            width: 120px;
+            height: 60px;
+            background: var(--snow-white);
+            border-radius: 50% 50% 0 0;
+            box-shadow: inset -10px -5px var(--snow-shadow);
+            z-index: 10;
+        }
+        .fort-left { left: 50px; }
+        .fort-right { right: 50px; }
+
+        /* --- Players --- */
+        .player {
+            position: absolute;
+            bottom: 155px; /* Behind the fort */
+            width: 40px;
+            height: 60px;
+            z-index: 5;
+        }
+
+        .head {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        /* Player Hats */
+        .head::after {
+            content: '';
+            position: absolute;
+            top: -10px; left: 0;
+            width: 100%; height: 20px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .player-left {
+            left: 90px;
+            animation: duck-left 4s infinite;
+        }
+        .player-left .head { background: #ffe0bd; }
+        .player-left .head::after { background: var(--p1-color); }
+
+        .player-right {
+            right: 90px;
+            animation: duck-right 4s infinite;
+        }
+        .player-right .head { background: #ffe0bd; }
+        .player-right .head::after { background: var(--p2-color); }
+
+        /* --- Snowballs --- */
+        /* To create an arc, we animate X and Y independently */
+        .ball-wrapper {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            z-index: 20;
+            opacity: 0; /* Hidden by default */
+        }
+
+        .ball {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Left Player's Ball */
+        .ball-p1-wrapper {
+            left: 110px;
+            bottom: 200px;
+            animation: throw-x-p1 4s infinite linear;
+        }
+        .ball-p1-wrapper .ball {
+            animation: throw-y-p1 4s infinite cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        /* Right Player's Ball (Delayed by 2s) */
+        .ball-p2-wrapper {
+            right: 110px;
+            bottom: 200px;
+            animation: throw-x-p2 4s infinite linear;
+            animation-delay: 2s;
+        }
+        .ball-p2-wrapper .ball {
+            animation: throw-y-p2 4s infinite cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            animation-delay: 2s;
+        }
+
+        /* --- Keyframes --- */
+
+        /* Falling Snow */
+        @keyframes snowfall {
+            from { background-position: 0 0; }
+            to { background-position: 0 600px; }
+        }
+
+        /* Player 1 Actions */
+        @keyframes duck-left {
+            0%, 10% { transform: translateY(0); } /* Up to throw */
+            15% { transform: translateY(0); }
+            20%, 60% { transform: translateY(40px); } /* Ducking */
+            70%, 100% { transform: translateY(0); } /* Back up */
+        }
+
+        /* Player 2 Actions (Offset timing) */
+        @keyframes duck-right {
+            0%, 40% { transform: translateY(40px); } /* Ducking first */
+            50%, 60% { transform: translateY(0); } /* Up to throw */
+            70%, 100% { transform: translateY(40px); } /* Back down */
+        }
+
+        /* Ball 1 Trajectory (Left to Right) */
+        @keyframes throw-x-p1 {
+            0%, 5% { opacity: 0; left: 110px; }
+            10% { opacity: 1; }
+            30% { opacity: 1; left: 680px; } /* Hit point */
+            35% { opacity: 0; }
+            100% { opacity: 0; left: 680px; }
+        }
+        @keyframes throw-y-p1 {
+            0%, 5% { transform: translateY(0); }
+            15% { transform: translateY(-150px); } /* Apex of arc */
+            30% { transform: translateY(20px); scale: 1; } /* Hit */
+            32% { transform: translateY(20px); scale: 2; opacity: 0; } /* Splat effect */
+            100% { transform: translateY(0); }
+        }
+
+        /* Ball 2 Trajectory (Right to Left) */
+        @keyframes throw-x-p2 {
+            0%, 5% { opacity: 0; right: 110px; }
+            10% { opacity: 1; }
+            30% { opacity: 1; right: 680px; } /* Hit point */
+            35% { opacity: 0; }
+            100% { opacity: 0; right: 680px; }
+        }
+        @keyframes throw-y-p2 {
+            0%, 5% { transform: translateY(0); }
+            15% { transform: translateY(-150px); }
+            30% { transform: translateY(20px); scale: 1; }
+            32% { transform: translateY(20px); scale: 2; opacity: 0; }
+            100% { transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="snow-overlay"></div>
+        
+        <div class="fort fort-left"></div>
+        <div class="fort fort-right"></div>
+
+        <div class="player player-left">
+            <div class="head"></div>
+        </div>
+
+        <div class="player player-right">
+            <div class="head"></div>
+        </div>
+
+        <div class="ball-wrapper ball-p1-wrapper">
+            <div class="ball"></div>
+        </div>
+
+        <div class="ball-wrapper ball-p2-wrapper">
+            <div class="ball"></div>
+        </div>
+    </div>
+
+</body>
+</html>
