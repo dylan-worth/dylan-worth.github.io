@@ -3,389 +3,502 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99 Nights in the Forest</title>
+    <title>99 Nights 3D</title>
     <style>
-        :root {
-            --pixel-size: 4px; /* Adjust for "chunky" pixel look */
-            --bg-color: #2d3c26;
-            --ui-color: #1a1a1a;
-            --accent-color: #e6c86e;
-        }
-
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            font-family: 'Courier New', Courier, monospace;
-            color: white;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        /* --- GAME WORLD --- */
-        #game-area {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            transition: filter 1s ease;
-        }
-
-        /* Night Filter */
-        .night-mode {
-            filter: brightness(0.3) contrast(1.2) hue-rotate(20deg);
-        }
-
-        /* --- ENTITIES (Replace Background-Color with Background-Image for OGA Assets) --- */
+        body { margin: 0; overflow: hidden; background: #000; font-family: monospace; user-select: none; }
+        canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
         
-        /* The Player */
-        .entity {
+        /* UI OVERLAY */
+        #ui {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            transform: translate(-50%, -50%);
-            transition: top 0.3s, left 0.3s; /* Smooth movement */
-            z-index: 10;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        #hud-top {
+            padding: 20px;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 0 #000;
         }
 
-        #player {
-            /* REPLACE THIS WITH: background-image: url('hero.png'); */
-            background-color: #3498db; 
-            border-radius: 5px;
-            border: 2px solid white;
-            box-shadow: 0 4px 0 #1f5f8b;
+        #log {
+            background: rgba(0,0,0,0.5);
+            color: #ffeb3b;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
-        /* Trees/Resources */
-        .tree {
-            /* REPLACE THIS WITH: background-image: url('tree.png'); */
-            background-color: #27ae60;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
-            width: 60px;
-            height: 80px;
-            z-index: 5;
-            cursor: pointer;
-        }
-
-        /* Enemies */
-        .enemy {
-            /* REPLACE THIS WITH: background-image: url('slime.png'); */
-            background-color: #e74c3c;
-            border-radius: 50%;
-            z-index: 9;
-            animation: bounce 0.5s infinite alternate;
-        }
-
-        /* Structures */
-        .fire {
-            background-color: orange;
-            border-radius: 50%;
-            box-shadow: 0 0 20px orange;
-            animation: flicker 0.2s infinite;
-        }
-
-        /* --- UI & HUD --- */
-        #hud {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            background: var(--ui-color);
-            padding: 10px;
-            border-radius: 10px;
-            border: 2px solid var(--accent-color);
+        #hud-bottom {
+            padding: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            align-items: flex-end;
+            pointer-events: auto; /* Enable clicks on buttons */
         }
 
-        .stat-box {
-            text-align: center;
+        .btn {
+            background: #e6c86e;
+            border: 4px solid #5d4037;
+            padding: 15px 30px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 16px;
+            color: #3e2723;
+            border-radius: 8px;
+            box-shadow: 0 4px 0 #3e2723;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
+        .stat {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #555;
             font-size: 14px;
         }
-
-        #log-container {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .log-msg {
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            animation: fadeOut 3s forwards;
-        }
-
-        #action-btn {
-            background: var(--accent-color);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            border-radius: 5px;
-            font-family: inherit;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes bounce { from { transform: translate(-50%, -50%) scale(0.9); } to { transform: translate(-50%, -50%) scale(1.1); } }
-        @keyframes flicker { 0% { opacity: 0.8; } 100% { opacity: 1; } }
-        @keyframes fadeOut { 0% { opacity: 1; transform: translateY(0); } 90% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
-        .shake { animation: shake 0.3s; }
-        @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-50%, -50%) rotate(5deg); } 75% { transform: translate(-50%, -50%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
-
     </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 <body>
 
-    <div id="game-area">
-        <div id="player" class="entity" style="top: 50%; left: 50%;"></div>
+    <div id="ui">
+        <div id="hud-top">
+            <h2 style="margin:0">NIGHT <span id="night-display">1</span></h2>
+            <div id="log">Welcome to the forest. Stay near the fire.</div>
+        </div>
+        <div id="hud-bottom">
+            <div class="stat">WOOD: <span id="wood-display">0</span></div>
+            <button class="btn" id="action-btn">WAIT FOR NIGHT</button>
+        </div>
     </div>
 
-    <div id="log-container"></div>
+    <script type="module">
+        import * as THREE from 'three';
 
-    <div id="hud">
-        <div class="stat-box">
-            <div>NIGHT</div>
-            <div id="night-count" style="color:var(--accent-color); font-size:18px;">1</div>
-        </div>
-        <div class="stat-box">
-            <div>WOOD</div>
-            <div id="wood-count">0</div>
-        </div>
-        <button id="action-btn" onclick="togglePhase()">WAIT FOR NIGHT</button>
-    </div>
+        // --- CONFIG ---
+        const CONFIG = {
+            safeRadius: 12, // Distance from fire where you are safe
+            moveSpeed: 0.2,
+            colors: {
+                daySky: 0x87CEEB,
+                nightSky: 0x050510,
+                grassDay: 0x4caf50,
+                grassNight: 0x1b3b22
+            }
+        };
 
-    <script>
-        // --- GAME CONFIGURATION ---
-        const GAME = {
+        const STATE = {
+            wood: 0,
             night: 1,
             phase: 'DAY', // DAY or NIGHT
-            wood: 0,
-            hp: 100,
-            width: window.innerWidth,
-            height: window.innerHeight
+            isMoving: false,
+            targetPos: new THREE.Vector3()
         };
 
-        // --- THE FOREST'S PERSONALITY (The "Data") ---
-        const QUIPS = {
-            chop: [
-                "Ouch.", 
-                "That tree had a family.", 
-                "Deforestation? Really?", 
-                "You hit like a goblin.",
-                "Leave the leaves alone."
-            ],
-            nightStart: [
-                "The sun hates you. It's leaving.",
-                "Hope you aren't afraid of pixelated ghosts.",
-                "Good luck finding the bathroom in the dark.",
-                "The moon is judging your outfit."
-            ],
-            dayStart: [
-                "You survived? Disappointing.",
-                "The sun returns. My eyes burn.",
-                "Another day, another struggle."
-            ],
-            hit: [
-                "Stop hugging the monsters.",
-                "Your health bar looks sad.",
-                "Reflexes of a potato."
-            ]
-        };
+        const QUIPS = [
+            "The fire judges your fear.",
+            "Stay in the light, coward.",
+            "Something is watching from the dark.",
+            "You hear a twig snap. It wasn't you.",
+            "Trees: 'Get off my lawn.'"
+        ];
 
-        // --- CORE FUNCTIONS ---
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(CONFIG.colors.daySky);
+        scene.fog = new THREE.Fog(CONFIG.colors.daySky, 10, 50);
 
-        function init() {
-            // Spawn initial forest
-            for(let i=0; i<15; i++) spawnTree();
-            log("Welcome to the petty forest.");
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 30, 30); // Isometric-ish view
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // Enable shadows
+        document.body.appendChild(renderer.domElement);
+
+        // --- LIGHTING ---
+        // Sun/Moon Light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 50, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        // Campfire Light (Point Light)
+        const fireLight = new THREE.PointLight(0xff6600, 0, 20); // Initially off/dim during day
+        fireLight.position.set(0, 2, 0);
+        fireLight.castShadow = true;
+        scene.add(fireLight);
+
+        // --- OBJECTS ---
+        
+        // Ground
+        const planeGeometry = new THREE.PlaneGeometry(100, 100);
+        const planeMaterial = new THREE.MeshStandardMaterial({ color: CONFIG.colors.grassDay });
+        const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Player (Simple Capsule/Cube)
+        const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
+        const playerMat = new THREE.MeshStandardMaterial({ color: 0x3498db });
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        player.position.set(3, 1, 3);
+        player.castShadow = true;
+        scene.add(player);
+
+        // Campfire Mesh
+        const fireGeo = new THREE.ConeGeometry(0.5, 1.5, 6);
+        const fireMat = new THREE.MeshStandardMaterial({ color: 0x444, emissive: 0xff4400, emissiveIntensity: 0.5 });
+        const campfire = new THREE.Mesh(fireGeo, fireMat);
+        campfire.position.y = 0.75;
+        scene.add(campfire);
+        
+        // Stones around fire
+        for(let i=0; i<6; i++) {
+            const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3), new THREE.MeshStandardMaterial({color:0x888}));
+            const angle = (i/6) * Math.PI * 2;
+            stone.position.set(Math.cos(angle)*1.2, 0.3, Math.sin(angle)*1.2);
+            scene.add(stone);
         }
 
-        // Tap to Move Logic
-        document.getElementById('game-area').addEventListener('click', (e) => {
-            // If we clicked a tree or button, ignore movement
-            if(e.target.classList.contains('tree') || e.target.closest('#hud')) return;
+        // Safe Zone Indicator (Subtle ring)
+        const ringGeo = new THREE.RingGeometry(CONFIG.safeRadius - 0.5, CONFIG.safeRadius, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
+        const safeZoneRing = new THREE.Mesh(ringGeo, ringMat);
+        safeZoneRing.rotation.x = -Math.PI / 2;
+        safeZoneRing.position.y = 0.05;
+        scene.add(safeZoneRing);
 
-            movePlayer(e.clientX, e.clientY);
-        });
+        // Trees & Enemies Arrays
+        let trees = [];
+        let enemies = [];
 
-        function movePlayer(x, y) {
-            const player = document.getElementById('player');
-            player.style.left = x + 'px';
-            player.style.top = y + 'px';
+        // --- GENERATION FUNCTIONS ---
+
+        function createLowPolyTree(x, z) {
+            const group = new THREE.Group();
             
-            // Check for items nearby (simple collision check)
-            checkProximity(x, y);
-        }
+            // Trunk
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.4, 1.5, 5);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 0.75;
+            trunk.castShadow = true;
+            group.add(trunk);
 
-        function checkProximity(px, py) {
-            // If near a campfire, heal? If near enemy, take damage?
-            // Simple visual feedback only for this prototype
-        }
-
-        // --- ENTITY MANAGEMENT ---
-
-        function spawnTree() {
-            const tree = document.createElement('div');
-            tree.classList.add('entity', 'tree');
+            // Leaves (Cone layers)
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
             
-            // Random position (keeping padding from edges)
-            const x = Math.random() * (GAME.width - 60) + 30;
-            const y = Math.random() * (GAME.height - 150) + 30; // Keep away from HUD
+            const l1 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.5, 5), leafMat);
+            l1.position.y = 2;
+            l1.castShadow = true;
+            group.add(l1);
+
+            const l2 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.2, 5), leafMat);
+            l2.position.y = 2.8;
+            l2.castShadow = true;
+            group.add(l2);
+
+            group.position.set(x, 0, z);
             
-            tree.style.left = x + 'px';
-            tree.style.top = y + 'px';
-
-            // Interaction
-            tree.onclick = function(e) {
-                e.stopPropagation(); // Don't move player
-                harvestTree(tree);
-            };
-
-            document.getElementById('game-area').appendChild(tree);
+            // Add custom data for gameplay
+            group.userData = { type: 'tree', hp: 3 };
+            
+            scene.add(group);
+            trees.push(group);
         }
 
         function spawnEnemy() {
-            const enemy = document.createElement('div');
-            enemy.classList.add('entity', 'enemy');
+            const geo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+            const mat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x550000 });
+            const enemy = new THREE.Mesh(geo, mat);
             
-            const x = Math.random() * GAME.width;
-            const y = Math.random() * GAME.height;
+            // Spawn far away randomly
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 30 + Math.random() * 10;
+            enemy.position.set(Math.cos(angle)*dist, 0.4, Math.sin(angle)*dist);
             
-            enemy.style.left = x + 'px';
-            enemy.style.top = y + 'px';
+            scene.add(enemy);
+            enemies.push(enemy);
+        }
 
-            // Basic AI: Move toward player occasionally
-            setInterval(() => {
-                if(GAME.phase === 'NIGHT') {
-                    const p = document.getElementById('player');
-                    const pRect = p.getBoundingClientRect();
-                    const eRect = enemy.getBoundingClientRect();
-                    
-                    // Move 10% towards player
-                    const newX = eRect.left + (pRect.left - eRect.left) * 0.1;
-                    const newY = eRect.top + (pRect.top - eRect.top) * 0.1;
-                    
-                    enemy.style.left = (newX + 25) + 'px'; // +25 for center offset
-                    enemy.style.top = (newY + 25) + 'px';
+        function generateForest() {
+            // Clear old trees if any
+            trees.forEach(t => scene.remove(t));
+            trees = [];
 
-                    // Collision (Hit)
-                    if(Math.abs(pRect.left - eRect.left) < 30 && Math.abs(pRect.top - eRect.top) < 30) {
-                        log(rand(QUIPS.hit));
-                        // Flash red
-                        document.body.style.backgroundColor = '#500';
-                        setTimeout(() => document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-color'), 100);
-                    }
+            for (let i = 0; i < 30; i++) {
+                // Don't spawn in safe zone
+                let x = (Math.random() - 0.5) * 80;
+                let z = (Math.random() - 0.5) * 80;
+                if (Math.sqrt(x*x + z*z) > CONFIG.safeRadius + 2) {
+                    createLowPolyTree(x, z);
                 }
-            }, 1000);
-
-            document.getElementById('game-area').appendChild(enemy);
+            }
         }
 
-        function harvestTree(el) {
-            // Move player to tree visually
-            const rect = el.getBoundingClientRect();
-            movePlayer(rect.left + 25, rect.top + 75);
+        // Initial Gen
+        generateForest();
 
+        // --- INPUT (RAYCASTING) ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('pointerdown', onPointerDown);
+
+        function onPointerDown(event) {
+            // Don't move if clicking UI
+            if(event.target.closest('#hud-bottom')) return;
+
+            // Normalize mouse coords (-1 to +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            // Check intersections
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const obj = hit.object.parent || hit.object; // Handle groups (trees)
+
+                // Interaction: Tree
+                if (obj.userData && obj.userData.type === 'tree') {
+                    chopTree(obj);
+                    STATE.targetPos.copy(hit.point); // Move to tree
+                    STATE.targetPos.y = 1; 
+                    STATE.isMoving = true;
+                } 
+                // Interaction: Ground Movement
+                else if (hit.object === ground) {
+                    STATE.targetPos.copy(hit.point);
+                    STATE.targetPos.y = 1; // Keep player height
+                    STATE.isMoving = true;
+                    
+                    // FX: Little cursor feedback
+                    spawnClickFX(hit.point);
+                }
+            }
+        }
+
+        function chopTree(treeGroup) {
             // Shake animation
-            el.classList.add('shake');
-            
-            setTimeout(() => {
-                el.remove();
-                GAME.wood++;
+            treeGroup.rotation.z = 0.2;
+            setTimeout(() => treeGroup.rotation.z = -0.2, 50);
+            setTimeout(() => treeGroup.rotation.z = 0, 100);
+
+            // Logic
+            treeGroup.userData.hp--;
+            if (treeGroup.userData.hp <= 0) {
+                scene.remove(treeGroup);
+                trees = trees.filter(t => t !== treeGroup);
+                STATE.wood++;
                 updateUI();
-                
-                // 30% chance of the forest insulting you
-                if(Math.random() > 0.7) log(rand(QUIPS.chop));
-            }, 300);
+                showLog("Got Wood. Trees are judging you.");
+            }
         }
 
-        // --- GAME LOOP & PHASE ---
+        function spawnClickFX(pos) {
+            const geo = new THREE.RingGeometry(0.2, 0.3, 16);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(geo, mat);
+            ring.position.set(pos.x, 0.1, pos.z);
+            ring.rotation.x = -Math.PI / 2;
+            scene.add(ring);
+            
+            // Simple animation loop would handle removal, but for proto just setTimeout
+            let scale = 1;
+            const anim = setInterval(() => {
+                scale -= 0.1;
+                ring.scale.set(scale, scale, scale);
+                if(scale <= 0) {
+                    clearInterval(anim);
+                    scene.remove(ring);
+                }
+            }, 30);
+        }
+
+
+        // --- GAME LOOP LOGIC ---
+
+        function updatePlayer() {
+            if (STATE.isMoving) {
+                const dir = new THREE.Vector3().subVectors(STATE.targetPos, player.position);
+                const dist = dir.length();
+                
+                if (dist < 0.2) {
+                    STATE.isMoving = false;
+                } else {
+                    dir.normalize();
+                    player.position.add(dir.multiplyScalar(CONFIG.moveSpeed));
+                    player.lookAt(STATE.targetPos);
+                }
+            }
+        }
+
+        function updateEnemies() {
+            if (STATE.phase !== 'NIGHT') return;
+
+            const playerPos = player.position;
+            const distToFire = playerPos.length(); // Fire is at 0,0,0
+            const isSafe = distToFire < CONFIG.safeRadius;
+
+            enemies.forEach(enemy => {
+                // Determine target
+                let target = player.position.clone();
+                let speed = 0.08;
+
+                if (isSafe) {
+                    // Safety mechanic: Enemies flee or hold position
+                    // Vector away from fire
+                    target = enemy.position.clone().normalize().multiplyScalar(40); 
+                    speed = 0.05; // Run away slower
+                }
+
+                const dir = new THREE.Vector3().subVectors(target, enemy.position);
+                dir.y = 0; // Keep on ground
+                dir.normalize();
+                
+                enemy.position.add(dir.multiplyScalar(speed));
+                enemy.lookAt(target);
+
+                // Attack check
+                if (!isSafe && enemy.position.distanceTo(player.position) < 1) {
+                    // Hit player
+                    player.material.color.setHex(0xff0000);
+                    setTimeout(() => player.material.color.setHex(0x3498db), 100);
+                }
+            });
+        }
 
         function togglePhase() {
             const btn = document.getElementById('action-btn');
-            const area = document.getElementById('game-area');
-
-            if (GAME.phase === 'DAY') {
-                // Switch to NIGHT
-                GAME.phase = 'NIGHT';
-                area.classList.add('night-mode');
-                btn.innerText = "SURVIVE...";
-                btn.style.background = "#555";
-                log(rand(QUIPS.nightStart));
+            
+            if (STATE.phase === 'DAY') {
+                // GO NIGHT
+                STATE.phase = 'NIGHT';
+                btn.innerText = "SURVIVE UNTIL DAWN";
+                btn.style.background = "#5d4037";
+                btn.style.color = "#fff";
                 
-                // Spawn Night Terrors
-                startNightEvent();
+                // Visuals
+                scene.background.setHex(CONFIG.colors.nightSky);
+                scene.fog.color.setHex(CONFIG.colors.nightSky);
+                scene.fog.near = 2; // Thick fog
+                ambientLight.intensity = 0.1;
+                dirLight.intensity = 0.0; // Moonlight only
+                fireLight.intensity = 2; // Fire lights up
+                ground.material.color.setHex(CONFIG.colors.grassNight);
+                safeZoneRing.material.opacity = 0.3; // Show safe zone boundary
+
+                showLog(QUIPS[Math.floor(Math.random() * QUIPS.length)]);
+                
+                // Spawn Enemies
+                const count = STATE.night + 2;
+                for(let i=0; i<count; i++) spawnEnemy();
 
             } else {
-                // Switch to DAY
-                GAME.phase = 'DAY';
-                GAME.night++;
-                area.classList.remove('night-mode');
+                // GO DAY
+                STATE.phase = 'DAY';
+                STATE.night++;
                 btn.innerText = "WAIT FOR NIGHT";
                 btn.style.background = "#e6c86e";
-                log(rand(QUIPS.dayStart));
+                btn.style.color = "#3e2723";
+
+                // Visuals
+                scene.background.setHex(CONFIG.colors.daySky);
+                scene.fog.color.setHex(CONFIG.colors.daySky);
+                scene.fog.near = 10;
+                ambientLight.intensity = 0.6;
+                dirLight.intensity = 0.8;
+                fireLight.intensity = 0;
+                ground.material.color.setHex(CONFIG.colors.grassDay);
+                safeZoneRing.material.opacity = 0.0;
+
+                // Cleanup
+                enemies.forEach(e => scene.remove(e));
+                enemies = [];
                 
-                // Cleanup Enemies
-                document.querySelectorAll('.enemy').forEach(e => e.remove());
-                
-                // Respawn Trees
-                for(let i=0; i<3; i++) spawnTree();
+                // Regrow some trees
+                for(let i=0; i<5; i++) {
+                     let x = (Math.random() - 0.5) * 80;
+                     let z = (Math.random() - 0.5) * 80;
+                     if (Math.sqrt(x*x + z*z) > CONFIG.safeRadius + 2) createLowPolyTree(x, z);
+                }
+
                 updateUI();
+                showLog("The sun returns. You lived.");
             }
         }
 
-        function startNightEvent() {
-            // Difficulty scaling
-            let enemyCount = Math.floor(GAME.night / 2) + 1;
-            
-            // Special events based on night number
-            if(GAME.night % 5 === 0) {
-                log("⚠️ BOSS NIGHT: The forest is extra grumpy.");
-                enemyCount += 2;
-            }
-
-            for(let i=0; i<enemyCount; i++) {
-                setTimeout(spawnEnemy, i * 1000);
-            }
-        }
-
-        // --- UTILS ---
+        // --- UI FUNCS ---
+        document.getElementById('action-btn').addEventListener('click', togglePhase);
 
         function updateUI() {
-            document.getElementById('wood-count').innerText = GAME.wood;
-            document.getElementById('night-count').innerText = GAME.night;
+            document.getElementById('wood-display').innerText = STATE.wood;
+            document.getElementById('night-display').innerText = STATE.night;
         }
 
-        function log(msg) {
-            const container = document.getElementById('log-container');
-            const div = document.createElement('div');
-            div.innerText = msg;
-            div.classList.add('log-msg');
-            container.appendChild(div);
+        function showLog(msg) {
+            const el = document.getElementById('log');
+            el.innerText = msg;
+            el.style.opacity = 1;
+            setTimeout(() => el.style.opacity = 0, 3000);
+        }
+
+        // --- MAIN LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Flicker fire
+            if (STATE.phase === 'NIGHT') {
+                fireLight.intensity = 1.5 + Math.random() * 1.0;
+            }
+
+            // Camera follow player (smoothly)
+            const idealOffset = new THREE.Vector3(0, 25, 25);
+            const idealPos = player.position.clone().add(idealOffset);
+            camera.position.lerp(idealPos, 0.05);
+            camera.lookAt(player.position);
+
+            updatePlayer();
+            updateEnemies();
             
-            // Remove after animation
-            setTimeout(() => div.remove(), 3500);
+            renderer.render(scene, camera);
         }
 
-        function rand(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-        // Start game
-        init();
+        animate();
 
     </script>
 </body>
