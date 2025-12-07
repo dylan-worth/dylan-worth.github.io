@@ -3,36 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Forest Navigation</title>
+    <title>Forest Explorer</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', sans-serif; user-select: none; }
         canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
 
-        /* --- UI OVERLAY --- */
+        /* --- UI LAYER --- */
         #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
 
-        /* Top Header */
+        /* HEADER */
         #header {
-            padding: 20px;
+            position: absolute;
+            top: 20px; width: 100%;
             text-align: center;
             color: white;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+            z-index: 10;
         }
-        h1 { margin: 0; font-size: 24px; letter-spacing: 2px; }
-        p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.8; }
+        h1 { margin: 0; font-size: 20px; letter-spacing: 2px; }
 
-        /* Interaction Popup (Hidden by default) */
+        /* INVENTORY BAR (Top Left) */
+        #inventory {
+            position: absolute;
+            top: 20px; left: 20px;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .inv-slot {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #5d4037;
+            color: #e6c86e;
+            width: 50px; height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .inv-slot.active { border-color: #e6c86e; background: rgba(230, 200, 110, 0.2); }
+        .inv-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* ZOOM CONTROLS (Right Side) */
+        #zoom-controls {
+            position: absolute;
+            top: 50%; right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .hud-btn {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .hud-btn:active { background: rgba(255,255,255,0.3); }
+
+        /* ACTION BUTTON (Bottom Right) */
+        #action-btn {
+            position: absolute;
+            bottom: 50px; right: 40px;
+            width: 80px; height: 80px;
+            background: #e6c86e;
+            border: 4px solid #5d4037;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #3e2723;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            transition: all 0.2s;
+            opacity: 0.5; /* Dimmed when inactive */
+        }
+        #action-btn.ready { opacity: 1; transform: scale(1.1); cursor: pointer; }
+        #action-btn:active { transform: scale(0.95); }
+
+        /* JOYSTICK (Bottom Left) */
+        #joystick-zone {
+            position: absolute;
+            bottom: 40px; left: 40px;
+            width: 120px; height: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            pointer-events: auto;
+        }
+        #stick {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background: rgba(230, 200, 110, 0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* MODAL */
         #interaction-modal {
             position: absolute;
-            top: 30%; left: 50%;
+            top: 20%; left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             background: rgba(20, 20, 20, 0.95);
             border: 2px solid #e6c86e;
@@ -41,61 +127,11 @@
             text-align: center;
             color: #e6c86e;
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none; /* Click-through when hidden */
+            transition: all 0.3s;
+            pointer-events: none;
         }
-        #interaction-modal.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-        .btn-visit {
-            display: block;
-            margin-top: 15px;
-            background: #e6c86e;
-            color: #000;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-
-        /* --- ANALOG STICK --- */
-        #joystick-zone {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: auto;
-            touch-action: none; /* Prevent scroll on mobile */
-        }
-
-        #stick {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 50px;
-            height: 50px;
-            background: rgba(230, 200, 110, 0.8);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: transform 0.1s; /* Smooth return to center */
-        }
-
-        /* Instructions */
-        #hint {
-            position: absolute;
-            bottom: 40px;
-            right: 40px;
-            color: rgba(255,255,255,0.6);
-            font-size: 12px;
-            max-width: 150px;
-            text-align: right;
-        }
+        #interaction-modal.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        .btn-visit { margin-top:10px; display:inline-block; padding:8px 16px; background:#e6c86e; color:black; text-decoration:none; border-radius:4px; }
 
     </style>
     <script type="importmap">
@@ -110,40 +146,62 @@
 
     <div id="ui-layer">
         <div id="header">
-            <h1>The WOODS</h1>
-            <p>Use the stick to explore sections</p>
+            <h1>FOREST NAVIGATOR</h1>
+        </div>
+
+        <div id="inventory">
+            <div class="inv-slot active" id="btn-flashlight" onclick="toggleFlashlight()">
+                <div class="inv-icon">🔦</div>
+                <div id="flash-status">ON</div>
+            </div>
+            <div class="inv-slot">
+                <div class="inv-icon">🪵</div>
+                <div id="wood-count">0</div>
+            </div>
+        </div>
+
+        <div id="zoom-controls">
+            <div class="hud-btn" onclick="adjustZoom(-5)">+</div>
+            <div class="hud-btn" onclick="adjustZoom(5)">-</div>
+        </div>
+
+        <div id="action-btn" onclick="performAction()">
+            <span id="action-text">...</span>
         </div>
 
         <div id="interaction-modal">
-            <h2 id="modal-title">SECTION NAME</h2>
-            <p id="modal-desc">Description goes here.</p>
-            <a href="#" id="modal-link" class="btn-visit">ENTER</a>
+            <h2 id="modal-title">TITLE</h2>
+            <p id="modal-desc">Desc</p>
+            <a href="#" id="modal-link" class="btn-visit">VISIT</a>
         </div>
 
         <div id="joystick-zone">
             <div id="stick"></div>
-        </div>
-
-        <div id="hint">
-            Explore the forest.<br>Find the campfires.
         </div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
 
-        // --- CONFIGURATION ---
-        // Define your website sections here
+        // --- GAME STATE ---
+        const STATE = {
+            wood: 0,
+            flashlight: true,
+            zoom: 15, // Camera distance
+            nearbyTree: null, // Object reference
+            nearbyPOI: null // Object reference
+        };
+
         const POIS = [
-            { label: "PROFILE", desc: "The posts I have made on social medias.", color: 0x3498db, x: 0, z: -15, link: "./profile.html" },
-            { label: "PROJECTS", desc: "A showcase of the three big topics in my life.", color: 0xe74c3c, x: -15, z: 8, link: "./index" },
-            { label: "CONTACT", desc: "Let's build something.", color: 0x9b59b6, x: 15, z: 8, link: "/contact" }
+            { label: "ABOUT", desc: "Who am I?", color: 0x3498db, x: 0, z: -15, link: "/about" },
+            { label: "WORK", desc: "My projects.", color: 0xe74c3c, x: -15, z: 8, link: "/projects" },
+            { label: "CONTACT", desc: "Get in touch.", color: 0x9b59b6, x: 15, z: 8, link: "/contact" }
         ];
 
-        // --- SETUP SCENE ---
+        // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e); // Deep night blue
-        scene.fog = new THREE.Fog(0x1a1a2e, 10, 40);
+        scene.background = new THREE.Color(0x111122);
+        scene.fog = new THREE.Fog(0x111122, 10, 50);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -152,25 +210,30 @@
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Very dark ambient
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); 
         scene.add(ambientLight);
 
-        // Moonlight
-        const moonLight = new THREE.DirectionalLight(0xaaccff, 0.5);
+        const moonLight = new THREE.DirectionalLight(0xaaccff, 0.3);
         moonLight.position.set(20, 50, -20);
         moonLight.castShadow = true;
         scene.add(moonLight);
 
-        // Player Light (Lantern)
-        const playerLight = new THREE.PointLight(0xffaa00, 2, 15);
+        // Player Flashlight
+        const playerLight = new THREE.SpotLight(0xffaa00, 5);
+        playerLight.angle = Math.PI / 4;
+        playerLight.penumbra = 0.5;
+        playerLight.decay = 2;
+        playerLight.distance = 30;
+        playerLight.castShadow = true;
         scene.add(playerLight);
+        scene.add(playerLight.target); // Essential for spotlight targeting
 
         // --- OBJECTS ---
         
         // Ground
         const ground = new THREE.Mesh(
             new THREE.PlaneGeometry(100, 100),
-            new THREE.MeshStandardMaterial({ color: 0x1b3b22, roughness: 0.8 })
+            new THREE.MeshStandardMaterial({ color: 0x1b3b22 })
         );
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
@@ -181,194 +244,260 @@
             new THREE.CapsuleGeometry(0.4, 0.8, 4, 8),
             new THREE.MeshStandardMaterial({ color: 0xffaa00 })
         );
-        player.position.set(0, 0.6, 5); // Start away from center
+        player.position.set(0, 0.6, 5);
         player.castShadow = true;
         scene.add(player);
 
-        // Generate Forest
-        const trees = [];
-        function createTree(x, z) {
+        // Arrays to track interactive objects
+        let treeObjects = [];
+        let poiObjects = [];
+
+        function createTree(x, z, scale = 1) {
             const group = new THREE.Group();
             
             // Trunk
             const trunk = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.1, 0.3, 1.5, 5),
+                new THREE.CylinderGeometry(0.15 * scale, 0.3 * scale, 1.5 * scale, 6),
                 new THREE.MeshStandardMaterial({ color: 0x3e2723 })
             );
-            trunk.position.y = 0.75;
+            trunk.position.y = (0.75 * scale);
             trunk.castShadow = true;
             group.add(trunk);
 
-            // Leaves (Darker for night vibe)
+            // Leaves
             const leaves = new THREE.Mesh(
-                new THREE.ConeGeometry(1, 2, 5),
+                new THREE.ConeGeometry(1 * scale, 2 * scale, 6),
                 new THREE.MeshStandardMaterial({ color: 0x145a32 })
             );
-            leaves.position.y = 2;
+            leaves.position.y = (2 * scale);
             leaves.castShadow = true;
             group.add(leaves);
 
             group.position.set(x, 0, z);
+            
+            // Animation data (for growing trees)
+            group.userData = { targetScale: scale, currentScale: 0.1, isGrowing: scale === 0.1 };
+            if(group.userData.isGrowing) group.scale.set(0.1, 0.1, 0.1);
+
             scene.add(group);
-            trees.push(group);
+            treeObjects.push(group);
         }
 
-        // Fill forest (randomly, avoiding paths roughly)
-        for(let i=0; i<60; i++) {
+        // Initial Forest Generation
+        for(let i=0; i<50; i++) {
             let x = (Math.random() - 0.5) * 80;
             let z = (Math.random() - 0.5) * 80;
-            // Simple distance check to keep center clear
-            if(Math.sqrt(x*x + z*z) > 5) createTree(x, z);
+            if(Math.sqrt(x*x + z*z) > 6) createTree(x, z);
         }
 
-        // --- SIGNPOSTS / POIS ---
-        const poiObjects = [];
-        
+        // Create Signposts (POIs)
         POIS.forEach(data => {
             const group = new THREE.Group();
             group.position.set(data.x, 0, data.z);
 
-            // Post
-            const post = new THREE.Mesh(
-                new THREE.BoxGeometry(0.2, 2, 0.2),
-                new THREE.MeshStandardMaterial({ color: 0x5d4037 })
-            );
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 0.2), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
             post.position.y = 1;
             group.add(post);
 
-            // Signboard
-            const board = new THREE.Mesh(
-                new THREE.BoxGeometry(1.5, 0.8, 0.1),
-                new THREE.MeshStandardMaterial({ color: data.color }) // Section color
-            );
+            const board = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.1), new THREE.MeshStandardMaterial({ color: data.color }));
             board.position.set(0, 1.8, 0.1);
             group.add(board);
-
-            // Light Beacon (so you can see it from far away)
-            const beacon = new THREE.PointLight(data.color, 1, 8);
+            
+            // Light to make it pop
+            const beacon = new THREE.PointLight(data.color, 1, 6);
             beacon.position.y = 2;
             group.add(beacon);
 
-            group.userData = data; // Store info
+            group.userData = data; // Store data for the modal
             scene.add(group);
             poiObjects.push(group);
         });
 
+        // --- CONTROLS & LOGIC ---
 
-        // --- ANALOG STICK LOGIC ---
-        const stick = { x: 0, y: 0, active: false };
-        const zone = document.getElementById('joystick-zone');
+        // Expose functions to window for HTML buttons
+        window.adjustZoom = (amount) => {
+            STATE.zoom += amount;
+            // Clamp zoom
+            if(STATE.zoom < 8) STATE.zoom = 8;
+            if(STATE.zoom > 30) STATE.zoom = 30;
+        };
+
+        window.toggleFlashlight = () => {
+            STATE.flashlight = !STATE.flashlight;
+            playerLight.intensity = STATE.flashlight ? 5 : 0;
+            
+            const btn = document.getElementById('btn-flashlight');
+            const txt = document.getElementById('flash-status');
+            
+            if(STATE.flashlight) {
+                btn.classList.add('active');
+                txt.innerText = "ON";
+            } else {
+                btn.classList.remove('active');
+                txt.innerText = "OFF";
+            }
+        };
+
+        window.performAction = () => {
+            const btn = document.getElementById('action-btn');
+            
+            // If nearby tree -> CHOP
+            if (STATE.nearbyTree) {
+                // Remove tree
+                scene.remove(STATE.nearbyTree);
+                treeObjects = treeObjects.filter(t => t !== STATE.nearbyTree);
+                STATE.nearbyTree = null;
+                
+                // Add Wood
+                STATE.wood++;
+                document.getElementById('wood-count').innerText = STATE.wood;
+                
+                // Feedback
+                btn.style.transform = "scale(0.8)";
+                setTimeout(() => btn.style.transform = "scale(1)", 100);
+            } 
+            // If NO tree and have Wood -> PLANT
+            else if (STATE.wood > 0) {
+                // Plant slightly in front of player
+                const plantPos = player.position.clone();
+                const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
+                plantPos.add(dir.multiplyScalar(2));
+                
+                // Check if too close to another tree
+                let tooClose = false;
+                treeObjects.forEach(t => { if(t.position.distanceTo(plantPos) < 2) tooClose = true; });
+                
+                if(!tooClose) {
+                    createTree(plantPos.x, plantPos.z, 1);
+                    // Tree starts small via animation logic in createTree
+                    treeObjects[treeObjects.length-1].userData.isGrowing = true;
+                    
+                    STATE.wood--;
+                    document.getElementById('wood-count').innerText = STATE.wood;
+                }
+            }
+        };
+
+        // Joystick Logic
+        const stick = { x: 0, y: 0 };
         const stickEl = document.getElementById('stick');
-        const maxDist = 35; // Max drag distance in pixels
+        const zone = document.getElementById('joystick-zone');
 
-        function handleInput(clientX, clientY, isEnd = false) {
-            if (isEnd) {
-                stick.x = 0; 
-                stick.y = 0; 
-                stick.active = false;
+        function handleInput(cx, cy, end) {
+            if (end) {
+                stick.x = 0; stick.y = 0;
                 stickEl.style.transform = `translate(-50%, -50%)`;
-                stickEl.style.transition = 'transform 0.1s';
                 return;
             }
-
-            stick.active = true;
-            stickEl.style.transition = 'none';
-
             const rect = zone.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            let dx = clientX - centerX;
-            let dy = clientY - centerY;
-
-            // Clamp distance
+            const center = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            let dx = cx - center.x; 
+            let dy = cy - center.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > maxDist) {
-                const angle = Math.atan2(dy, dx);
-                dx = Math.cos(angle) * maxDist;
-                dy = Math.sin(angle) * maxDist;
-            }
-
-            // Move stick visual
+            const max = 40;
+            if (dist > max) { dx *= max/dist; dy *= max/dist; }
             stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-
-            // Normalize output (-1 to 1)
-            stick.x = dx / maxDist;
-            stick.y = dy / maxDist;
+            stick.x = dx / max; stick.y = dy / max;
         }
 
-        // Touch Events
-        zone.addEventListener('touchstart', e => handleInput(e.touches[0].clientX, e.touches[0].clientY));
         zone.addEventListener('touchmove', e => { e.preventDefault(); handleInput(e.touches[0].clientX, e.touches[0].clientY); });
-        zone.addEventListener('touchend', () => handleInput(0, 0, true));
+        zone.addEventListener('touchend', () => handleInput(0,0,true));
+        // Mouse support for testing
+        let dragging = false;
+        zone.addEventListener('mousedown', e => { dragging=true; handleInput(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', e => { if(dragging) handleInput(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', () => { dragging=false; handleInput(0,0,true); });
 
-        // Mouse Events (for desktop testing)
-        let isDragging = false;
-        zone.addEventListener('mousedown', e => { isDragging = true; handleInput(e.clientX, e.clientY); });
-        window.addEventListener('mousemove', e => { if(isDragging) handleInput(e.clientX, e.clientY); });
-        window.addEventListener('mouseup', () => { isDragging = false; handleInput(0, 0, true); });
-
-
-        // --- GAME LOOP ---
+        // --- MAIN LOOP ---
+        const actionBtn = document.getElementById('action-btn');
+        const actionText = document.getElementById('action-text');
         const modal = document.getElementById('interaction-modal');
-        const titleEl = document.getElementById('modal-title');
-        const descEl = document.getElementById('modal-desc');
-        const linkEl = document.getElementById('modal-link');
-        let activePoi = null;
 
         function animate() {
             requestAnimationFrame(animate);
 
-            // Movement Logic
-            if (stick.active || stick.x !== 0 || stick.y !== 0) {
-                // Move relative to camera not implemented for simplicity, absolute X/Z movement
-                // Use small deadzone
-                if(Math.abs(stick.x) > 0.1 || Math.abs(stick.y) > 0.1) {
-                    player.position.x += stick.x * 0.15;
-                    player.position.z += stick.y * 0.15;
-                    player.lookAt(player.position.x + stick.x, player.position.y, player.position.z + stick.y);
-                }
+            // 1. Player Movement
+            if (Math.abs(stick.x) > 0.1 || Math.abs(stick.y) > 0.1) {
+                const speed = 0.15;
+                player.position.x += stick.x * speed;
+                player.position.z += stick.y * speed;
+                player.rotation.y = Math.atan2(-stick.x, -stick.y); // Face direction
             }
 
-            // Update Lantern Position
-            playerLight.position.copy(player.position);
-            playerLight.position.y += 1;
+            // 2. Light Follow
+            playerLight.position.set(player.position.x, player.position.y + 2, player.position.z);
+            // Spotlight target follows slightly ahead of player
+            const targetPos = new THREE.Vector3(player.position.x + (stick.x * 5), 0, player.position.z + (stick.y * 5));
+            playerLight.target.position.lerp(targetPos, 0.1);
 
-            // Camera Follow
-            const camOffset = new THREE.Vector3(0, 15, 12); // High angle
-            camera.position.lerp(player.position.clone().add(camOffset), 0.1);
+            // 3. Camera Follow (With Zoom)
+            const camOffset = new THREE.Vector3(0, STATE.zoom, STATE.zoom - 5); // Angle changes slightly with zoom
+            camera.position.lerp(player.position.clone().add(camOffset), 0.05);
             camera.lookAt(player.position);
 
-            // Check POI Distance
-            let nearAny = false;
+            // 4. Tree Growth Animation
+            treeObjects.forEach(t => {
+                if(t.userData.isGrowing) {
+                    t.userData.currentScale += 0.02;
+                    t.scale.setScalar(t.userData.currentScale);
+                    if(t.userData.currentScale >= 1) t.userData.isGrowing = false;
+                }
+            });
+
+            // 5. Interaction Check (Trees)
+            let closestTree = null;
+            let minDist = 2.0;
+
+            treeObjects.forEach(t => {
+                const dist = player.position.distanceTo(t.position);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closestTree = t;
+                }
+            });
+
+            STATE.nearbyTree = closestTree;
+
+            // UI Update for Action Button
+            if (STATE.nearbyTree) {
+                actionBtn.classList.add('ready');
+                actionBtn.style.backgroundColor = '#e74c3c'; // Red for chop
+                actionText.innerText = "CHOP";
+            } else if (STATE.wood > 0) {
+                actionBtn.classList.add('ready');
+                actionBtn.style.backgroundColor = '#27ae60'; // Green for plant
+                actionText.innerText = "PLANT";
+            } else {
+                actionBtn.classList.remove('ready');
+                actionBtn.style.backgroundColor = '#e6c86e';
+                actionText.innerText = "...";
+            }
+
+            // 6. Interaction Check (POIs)
+            let nearPoi = false;
             poiObjects.forEach(poi => {
                 const dist = player.position.distanceTo(poi.position);
-                
-                // Rotate sign to face player
-                poi.lookAt(player.position.x, poi.position.y, player.position.z);
-
                 if (dist < 3) {
-                    nearAny = true;
-                    if (activePoi !== poi) {
-                        // Open Modal
-                        activePoi = poi;
-                        titleEl.innerText = poi.userData.label;
-                        descEl.innerText = poi.userData.desc;
-                        linkEl.href = poi.userData.link;
+                    nearPoi = true;
+                    if (STATE.nearbyPOI !== poi) {
+                        STATE.nearbyPOI = poi;
+                        document.getElementById('modal-title').innerText = poi.userData.label;
+                        document.getElementById('modal-desc').innerText = poi.userData.desc;
+                        document.getElementById('modal-link').href = poi.userData.link;
                         modal.classList.add('active');
                     }
                 }
             });
-
-            if (!nearAny && activePoi) {
+            if (!nearPoi) {
                 modal.classList.remove('active');
-                activePoi = null;
+                STATE.nearbyPOI = null;
             }
 
             renderer.render(scene, camera);
         }
 
-        // Resize handler
+        // Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
