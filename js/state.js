@@ -1,4 +1,3 @@
-// Global Game State
 export const STATE = {
     // Stats
     level: 1,
@@ -9,18 +8,22 @@ export const STATE = {
     // Inventory
     wood: 0,
     berries: 0,
+    rawMeat: 0,
+    cookedMeat: 0,
+    
     axeBroken: false,
     flashlight: true,
     
     // Config
     zoom: 20,
-    time: 0.5, // 0.5 = Noon
+    time: 0.5,
     location: 'OUTSIDE',
     
-    // Interaction Targets (References to 3D objects)
+    // Interaction Targets
     nearbyTree: null,
     nearbyBush: null,
-    nearbyPOI: null
+    nearbyPOI: null,
+    nearbyBunny: null // New target
 };
 
 export const CONFIG = {
