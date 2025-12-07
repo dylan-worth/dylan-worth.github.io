@@ -10,6 +10,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
+// Clock for stable timing (Fixes the random dying issue)
+const clock = new THREE.Clock();
+let hungerTimer = 0;
+
 const sunLight = new THREE.DirectionalLight(0xffaa00, 1);
 sunLight.position.set(50, 50, 0);
 sunLight.castShadow = true;
@@ -22,7 +26,7 @@ player.position.set(5, 0.6, 5);
 player.castShadow = true;
 WORLD.scene.add(player);
 
-// Campfire (Visual + Logic Point)
+// Campfire
 const fireGroup = new THREE.Group();
 for(let i=0; i<4; i++) {
     const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), new THREE.MeshStandardMaterial({color:0x5d4037}));
@@ -42,12 +46,12 @@ function updateStatsUI() {
     const nextLvl = Math.floor(Math.pow((STATE.level + 1) / CONFIG.maxLevel, 3) * CONFIG.maxXP);
     const currLvl = Math.floor(Math.pow(STATE.level / CONFIG.maxLevel, 3) * CONFIG.maxXP);
     const pct = ((STATE.xp - currLvl) / (nextLvl - currLvl)) * 100;
+    
     document.getElementById('xp-fill').style.width = `${Math.max(0, Math.min(100, pct))}%`;
     document.getElementById('level-text').innerText = `LEVEL ${STATE.level}`;
     document.getElementById('health-fill').style.width = `${STATE.health}%`;
     document.getElementById('hunger-fill').style.width = `${STATE.hunger}%`;
     
-    // Inventory
     document.getElementById('wood-count').innerText = STATE.wood;
     document.getElementById('berry-count').innerText = STATE.berries;
     document.getElementById('raw-count').innerText = STATE.rawMeat;
@@ -65,47 +69,75 @@ function spawnAxeHead(pos) {
     }, 16);
 }
 
+function flashDamage() {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0'; overlay.style.left = '0';
+    overlay.style.width = '100%'; overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.transition = 'opacity 0.5s';
+    document.body.appendChild(overlay);
+    setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }, 100);
+}
+
 // --- GAME LOOP ---
-let hungerTicker = 0;
 
 function animate() {
-    if(STATE.health <= 0) return; 
+    if(STATE.health <= 0) return;
     requestAnimationFrame(animate);
+
+    const delta = clock.getDelta(); // Time in seconds since last frame
 
     // 1. Time & Environment
     STATE.time += 0.0001; if(STATE.time > 1) STATE.time = 0;
     const sunInt = Math.max(0, Math.sin(STATE.time * Math.PI));
     const isNight = sunInt < 0.2;
     WORLD.scene.background = new THREE.Color(0x87CEEB).lerp(new THREE.Color(0x050510), 1-sunInt);
-    sunLight.intensity = sunInt; sunLight.position.set(Math.cos(STATE.time*Math.PI)*50, Math.sin(STATE.time*Math.PI)*100, 0);
-    fireLight.intensity = isNight ? 10+Math.random()*5 : 2; // Fire always lit but brighter at night
+    sunLight.intensity = sunInt; 
+    sunLight.position.set(Math.cos(STATE.time*Math.PI)*50, Math.sin(STATE.time*Math.PI)*100, 0);
+    fireLight.intensity = isNight ? 10+Math.random()*5 : 2;
     fireMesh.visible = true;
 
     document.getElementById('time-display').innerText = `${Math.floor(STATE.time * 24)}:00`;
 
-    // 2. Hunger & Healing Logic
-    hungerTicker++;
-    if(hungerTicker > 600) { 
+    // 2. Hunger & Healing (TIME BASED NOW)
+    hungerTimer += delta;
+    if(hungerTimer > 10.0) { // Every 10 seconds exactly
         STATE.hunger -= 1;
-        if(STATE.hunger <= 0) { STATE.hunger=0; STATE.health-=5; if(STATE.health<=0) document.getElementById('death-screen').style.display='flex'; }
         
-        // CAMPFIRE HEALING
-        const distToFire = player.position.distanceTo(new THREE.Vector3(0,0,0));
-        if (distToFire < 4 && STATE.health < 100) {
-            STATE.health += 2;
-            if(STATE.health > 100) STATE.health = 100;
-            document.getElementById('status-msg').style.opacity = 1; // Show Healing msg
+        // Starvation Damage
+        if(STATE.hunger <= 0) { 
+            STATE.hunger = 0; 
+            STATE.health -= 5; 
+            flashDamage(); // Visual cue
+            document.getElementById('status-msg').innerText = "STARVING!";
+            document.getElementById('status-msg').style.color = "#e74c3c";
+            document.getElementById('status-msg').style.opacity = 1;
+            
+            if(STATE.health <= 0) document.getElementById('death-screen').style.display='flex'; 
         } else {
             document.getElementById('status-msg').style.opacity = 0;
         }
-        
-        hungerTicker = 0;
+
+        // Campfire Healing
+        const distToFire = player.position.distanceTo(new THREE.Vector3(0,0,0));
+        if (distToFire < 4 && STATE.health < 100 && STATE.hunger > 0) {
+            STATE.health += 5;
+            if(STATE.health > 100) STATE.health = 100;
+            document.getElementById('status-msg').innerText = "HEALING...";
+            document.getElementById('status-msg').style.color = "#2ecc71";
+            document.getElementById('status-msg').style.opacity = 1;
+        }
+
+        hungerTimer = 0;
         updateStatsUI();
     }
 
     // 3. Movement
     if(Math.abs(stick.x)>0.1 || Math.abs(stick.y)>0.1) {
-        player.position.x += stick.x * 0.15; player.position.z += stick.y * 0.15;
+        player.position.x += stick.x * 0.15; 
+        player.position.z += stick.y * 0.15;
         player.rotation.y = Math.atan2(-stick.x, -stick.y);
     }
     camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, STATE.zoom, STATE.zoom-5)), 0.1);
@@ -115,16 +147,14 @@ function animate() {
     WORLD.rabbitObjects.forEach(r => {
         r.userData.hopTimer++;
         if(r.userData.hopTimer > 100 + Math.random()*200) {
-            // Pick new direction
             const ang = Math.random() * Math.PI*2;
             r.userData.direction.set(Math.cos(ang), 0, Math.sin(ang));
             r.lookAt(r.position.clone().add(r.userData.direction));
             r.userData.hopTimer = 0;
         }
-        // Move (hop)
         if(r.userData.hopTimer < 20) {
             r.position.add(r.userData.direction.clone().multiplyScalar(0.05));
-            r.position.y = 0.15 + Math.sin((r.userData.hopTimer/20)*Math.PI) * 0.2; // Hop arc
+            r.position.y = 0.15 + Math.sin((r.userData.hopTimer/20)*Math.PI) * 0.2; 
         } else {
             r.position.y = 0.15;
         }
@@ -136,7 +166,14 @@ function animate() {
     WORLD.treeObjects.forEach(t => { if(player.position.distanceTo(t.position)<2) nearT=t; });
     WORLD.bushObjects.forEach(b => { 
         if(b.userData.hasBerries && player.position.distanceTo(b.position)<2) nearB=b;
-        if(!b.userData.hasBerries) { b.userData.regenTimer++; if(b.userData.regenTimer>3000){ b.userData.hasBerries=true; b.userData.regenTimer=0; b.getObjectByName('berries').visible=true; }}
+        if(!b.userData.hasBerries) { 
+            b.userData.regenTimer++; 
+            if(b.userData.regenTimer > 3000) { // Approx 50 seconds at 60fps
+                b.userData.hasBerries = true; 
+                b.userData.regenTimer = 0; 
+                b.getObjectByName('berries').visible=true; 
+            }
+        }
     });
     WORLD.rabbitObjects.forEach(r => { if(player.position.distanceTo(r.position)<2.5) nearR=r; });
     WORLD.poiObjects.forEach(p => { if(player.position.distanceTo(p.position)<3) nearP=p; });
@@ -156,8 +193,7 @@ function animate() {
         btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='ATTACK';
     } else if(nearB) {
         btn.classList.add('ready'); btn.style.background='#e67e22'; txt.innerText='EAT';
-    } else if(STATE.cookedMeat > 0 && STATE.hunger < 100 && !nearT && !nearP) {
-        // Eat Meat context (if holding meat and hungry)
+    } else if(STATE.cookedMeat > 0 && STATE.hunger < 100 && !nearT && !nearP && !nearB) {
         btn.classList.add('ready'); btn.style.background='#e67e22'; txt.innerText='EAT\nMEAT';
     } else if(nearT) {
         btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP';
@@ -183,7 +219,7 @@ function animate() {
     renderer.render(WORLD.scene, camera);
 }
 
-// --- CONTROLS ---
+// --- INPUTS ---
 const stick = { x: 0, y: 0 };
 const stickEl = document.getElementById('stick');
 const zone = document.getElementById('joystick-zone');
@@ -228,14 +264,15 @@ document.getElementById('action-btn').addEventListener('click', () => {
     else if(txt === 'EAT' && STATE.nearbyBush) {
         STATE.nearbyBush.userData.hasBerries = false;
         STATE.nearbyBush.getObjectByName('berries').visible = false;
-        STATE.hunger = Math.min(100, STATE.hunger + 10);
+        STATE.hunger = Math.min(100, STATE.hunger + 15);
+        STATE.health = Math.min(100, STATE.health + 5);
         STATE.berries++;
         updateStatsUI();
     }
     else if(txt.includes('EAT MEAT')) {
         STATE.cookedMeat--;
-        STATE.hunger = Math.min(100, STATE.hunger + 30);
-        STATE.health = Math.min(100, STATE.health + 10);
+        STATE.hunger = Math.min(100, STATE.hunger + 40);
+        STATE.health = Math.min(100, STATE.health + 15);
         updateStatsUI();
     }
     else if(txt === 'CHOP' && STATE.nearbyTree) {
