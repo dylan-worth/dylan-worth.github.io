@@ -11,7 +11,7 @@
         /* UI LAYER */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-        /* INVENTORY (Top Left) */
+        /* INVENTORY */
         #inventory {
             position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; pointer-events: auto;
         }
@@ -21,15 +21,15 @@
             align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; cursor: pointer;
         }
         .inv-slot.active { border-color: #e6c86e; background: rgba(230, 200, 110, 0.2); }
-        .inv-icon { font-size: 20px; }
+        .inv-icon { font-size: 18px; }
 
-        /* TIME DISPLAY (Top Center) */
+        /* TIME DISPLAY */
         #time-display {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            color: white; text-shadow: 0 2px 2px black; font-weight: bold;
+            color: white; text-shadow: 0 2px 2px black; font-weight: bold; font-size: 18px;
         }
 
-        /* ZOOM (Right) */
+        /* ZOOM */
         #zoom-controls {
             position: absolute; top: 50%; right: 20px; transform: translateY(-50%);
             display: flex; flex-direction: column; gap: 10px; pointer-events: auto;
@@ -66,7 +66,7 @@
             border-radius: 10px; text-align: center; color: #e6c86e; opacity: 0; pointer-events: none; transition: 0.3s;
         }
         #interaction-modal.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .btn-visit { margin-top:10px; display:inline-block; padding:8px 16px; background:#e6c86e; color:black; text-decoration:none; border-radius:4px; }
+        .btn-visit { margin-top:10px; display:inline-block; padding:8px 16px; background:#e6c86e; color:black; text-decoration:none; border-radius:4px; font-weight: bold; }
     </style>
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -85,6 +85,10 @@
                 <div class="inv-icon">🪵</div>
                 <div id="wood-count">0</div>
             </div>
+            <div class="inv-slot">
+                <div class="inv-icon">🪺</div>
+                <div id="nest-count">0</div>
+            </div>
         </div>
 
         <div id="zoom-controls">
@@ -99,7 +103,7 @@
         <div id="interaction-modal">
             <h2 id="modal-title">TITLE</h2>
             <p id="modal-desc">Desc</p>
-            <a href="#" id="modal-link" class="btn-visit">VIEW</a>
+            <a href="#" id="modal-link" class="btn-visit">GO</a>
         </div>
 
         <div id="joystick-zone">
@@ -113,24 +117,26 @@
         // --- STATE ---
         const STATE = {
             wood: 0,
+            nests: 0,
             flashlight: true,
             zoom: 20,
             nearbyTree: null,
+            nearbyNest: null,
             nearbyPOI: null,
-            time: 0.5, // 0 to 1 (0.5 = Noon)
-            location: 'OUTSIDE' // OUTSIDE or INSIDE
+            time: 0.5, // 0.5 = Noon
+            location: 'OUTSIDE'
         };
 
         const CONFIG = {
-            mapRadius: 45,
+            mapRadius: 50,
             dayColor: new THREE.Color(0x87CEEB),
             nightColor: new THREE.Color(0x050510),
-            cabinPos: new THREE.Vector3(-10, 0, -10)
+            cabinPos: new THREE.Vector3(-10, 0, -15)
         };
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(CONFIG.dayColor, 10, 50);
+        scene.fog = new THREE.Fog(CONFIG.dayColor, 10, 60);
         scene.background = CONFIG.dayColor;
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -139,7 +145,7 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // --- LIGHTING (Dynamic) ---
+        // --- LIGHTING ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
@@ -148,13 +154,12 @@
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.top = 50;
-        sunLight.shadow.camera.bottom = -50;
-        sunLight.shadow.camera.left = -50;
-        sunLight.shadow.camera.right = 50;
+        sunLight.shadow.camera.top = 60;
+        sunLight.shadow.camera.bottom = -60;
+        sunLight.shadow.camera.left = -60;
+        sunLight.shadow.camera.right = 60;
         scene.add(sunLight);
 
-        // Player Light
         const playerLight = new THREE.SpotLight(0xffffff, 0);
         playerLight.angle = Math.PI / 4;
         playerLight.penumbra = 0.5;
@@ -163,148 +168,169 @@
         scene.add(playerLight);
         scene.add(playerLight.target);
 
-        // Campfire Light
         const fireLight = new THREE.PointLight(0xff4400, 0, 15);
         fireLight.position.set(0, 2, 0);
         scene.add(fireLight);
 
-        // --- WORLD OBJECTS ---
-
+        // --- ASSETS ---
+        
         // 1. Ground
-        const ground = new THREE.Mesh(
-            new THREE.CircleGeometry(50, 64),
-            new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 })
-        );
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(60, 64), new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 }));
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         scene.add(ground);
 
         // 2. Player
-        const player = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.4, 0.8, 4, 8),
-            new THREE.MeshStandardMaterial({ color: 0xffaa00 })
-        );
+        const player = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 4, 8), new THREE.MeshStandardMaterial({ color: 0xffaa00 }));
         player.position.set(5, 0.6, 5);
         player.castShadow = true;
         scene.add(player);
 
-        // 3. Campfire (Center)
+        // 3. Campfire
         const fireGroup = new THREE.Group();
-        for(let i=0; i<3; i++) {
+        for(let i=0; i<4; i++) {
             const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), new THREE.MeshStandardMaterial({color:0x5d4037}));
             log.rotation.z = Math.PI/2;
-            log.rotation.y = (i/3) * Math.PI*2;
+            log.rotation.y = (i/4) * Math.PI*2;
             log.position.y = 0.1;
             fireGroup.add(log);
         }
-        // Fire particles (visual only simple mesh)
         const fireMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.8, 5), new THREE.MeshBasicMaterial({color: 0xff4400}));
         fireMesh.position.y = 0.5;
         fireGroup.add(fireMesh);
         scene.add(fireGroup);
 
-
-        // 4. Cabin (Exterior)
+        // 4. Cabin
         const cabinGroup = new THREE.Group();
         cabinGroup.position.copy(CONFIG.cabinPos);
-        
-        // Walls
-        const walls = new THREE.Mesh(
-            new THREE.BoxGeometry(6, 4, 6),
-            new THREE.MeshStandardMaterial({ color: 0x4e342e })
-        );
-        walls.position.y = 2;
-        walls.castShadow = true;
-        cabinGroup.add(walls);
-        
-        // Roof
-        const roof = new THREE.Mesh(
-            new THREE.ConeGeometry(5.5, 3, 4),
-            new THREE.MeshStandardMaterial({ color: 0x3e2723 })
-        );
-        roof.position.y = 5.5;
-        roof.rotation.y = Math.PI/4;
-        cabinGroup.add(roof);
-
-        // Door (Black hole)
+        const walls = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 6), new THREE.MeshStandardMaterial({ color: 0x4e342e }));
+        walls.position.y = 2; walls.castShadow = true; cabinGroup.add(walls);
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(5.5, 3, 4), new THREE.MeshStandardMaterial({ color: 0x3e2723 }));
+        roof.position.y = 5.5; roof.rotation.y = Math.PI/4; cabinGroup.add(roof);
         const door = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-        door.position.set(0, 1.5, 3.1);
-        cabinGroup.add(door);
-
+        door.position.set(0, 1.5, 3.1); cabinGroup.add(door);
         scene.add(cabinGroup);
 
-        // 5. INTERIOR (Located far away)
+        // 5. Interior (Hidden)
         const interiorGroup = new THREE.Group();
-        interiorGroup.position.set(0, -100, 0); // Far below map
+        interiorGroup.position.set(0, -100, 0);
         scene.add(interiorGroup);
-
-        // Floor
         const intFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
-        intFloor.rotation.x = -Math.PI/2;
-        interiorGroup.add(intFloor);
-
-        // Back Wall (For Badges)
-        const intWall = new THREE.Mesh(new THREE.BoxGeometry(20, 10, 1), new THREE.MeshStandardMaterial({color: 0xe0e0e0}));
-        intWall.position.set(0, 5, -10);
-        interiorGroup.add(intWall);
-
-        // Badges (Certs)
-        const badges = [
-            { name: "CERT: CIE", color: 0xff0000, x: -5 },
-            { name: "CERT: MRSA", color: 0x00ff00, x: 0 },
-            { name: "CERT: MICRO", color: 0x0000ff, x: 5 }
-        ];
-
+        intFloor.rotation.x = -Math.PI/2; interiorGroup.add(intFloor);
+        const intLight = new THREE.PointLight(0xffaa00, 1, 20); intLight.position.set(0, 8, 0); interiorGroup.add(intLight);
+        // Badges
+        const badges = [ {n:"CIE", c:0xff0000, x:-5}, {n:"MRSA", c:0x00ff00, x:0}, {n:"MICRO", c:0x0000ff, x:5} ];
         badges.forEach(b => {
-            const badge = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.5), new THREE.MeshStandardMaterial({color: b.color}));
-            badge.position.set(b.x, 5, -9);
-            interiorGroup.add(badge);
-            
-            // Text Label simulation (White box)
-            const label = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.5), new THREE.MeshBasicMaterial({color: 0xffffff}));
-            label.position.set(b.x, 3.5, -8.7);
-            interiorGroup.add(label);
+            const badge = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.5), new THREE.MeshStandardMaterial({color: b.c}));
+            badge.position.set(b.x, 5, -9); interiorGroup.add(badge);
         });
 
-        // Interior Light
-        const intLight = new THREE.PointLight(0xffaa00, 1, 20);
-        intLight.position.set(0, 8, 0);
-        interiorGroup.add(intLight);
+        // 6. Signposts (Teleporters)
+        const POI_DATA = [
+            { label: "PROFILE", link: "./profile", desc: "View my Bio", x: 10, z: 10, color: 0x3498db },
+            { label: "SOCIALS", link: "./socials", desc: "My Posts", x: -10, z: 10, color: 0xe74c3c }
+        ];
+        let poiObjects = [];
+        POI_DATA.forEach(p => {
+            const g = new THREE.Group();
+            g.position.set(p.x, 0, p.z);
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 0.2), new THREE.MeshStandardMaterial({color: 0x5d4037}));
+            post.position.y = 1; g.add(post);
+            const board = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.1), new THREE.MeshStandardMaterial({color: p.color}));
+            board.position.set(0, 1.8, 0.1); g.add(board);
+            const light = new THREE.PointLight(p.color, 1, 5);
+            light.position.y = 2; g.add(light); // Make signs glow
+            g.userData = p;
+            scene.add(g);
+            poiObjects.push(g);
+        });
 
-
-        // --- UTILITIES (Trees & Logic) ---
-        let treeObjects = [];
+        // --- ANIMALS & NATURE ---
         
+        let trees = [];
+        let wolves = [];
+        let birds = [];
+        let nests = [];
+
+        // Trees
         function createTree(x, z, scale=1) {
             const g = new THREE.Group();
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2*scale, 0.4*scale, 2*scale), new THREE.MeshStandardMaterial({color: 0x3e2723}));
-            trunk.position.y = scale;
-            trunk.castShadow = true;
-            g.add(trunk);
-            
+            trunk.position.y = scale; trunk.castShadow = true; g.add(trunk);
             const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5*scale, 3*scale), new THREE.MeshStandardMaterial({color: 0x145a32}));
-            leaves.position.y = 2.5*scale;
-            leaves.castShadow = true;
-            g.add(leaves);
-            
+            leaves.position.y = 2.5*scale; leaves.castShadow = true; g.add(leaves);
             g.position.set(x, 0, z);
-            g.userData = { isTree: true, growing: scale===0.1, scale: scale };
+            g.userData = { growing: scale===0.1, scale: scale };
             if(scale===0.1) g.scale.set(0.1,0.1,0.1);
-            
             scene.add(g);
-            treeObjects.push(g);
+            trees.push(g);
+        }
+        
+        // Initial Forest
+        for(let i=0; i<50; i++) {
+            let x=(Math.random()-0.5)*90, z=(Math.random()-0.5)*90;
+            if(Math.sqrt(x*x+z*z)>5 && Math.abs(x-CONFIG.cabinPos.x)>6) createTree(x, z);
         }
 
-        // Generate Forest (Avoid center and cabin)
-        for(let i=0; i<60; i++) {
-            let x = (Math.random()-0.5)*80;
-            let z = (Math.random()-0.5)*80;
-            const dist = Math.sqrt(x*x + z*z);
-            const distCabin = Math.sqrt((x-CONFIG.cabinPos.x)**2 + (z-CONFIG.cabinPos.z)**2);
+        // Wolves
+        function createWolf() {
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 1.2), new THREE.MeshStandardMaterial({color:0x7f8c8d}));
+            body.position.y = 0.5; g.add(body);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.6), new THREE.MeshStandardMaterial({color:0x7f8c8d}));
+            head.position.set(0, 0.8, 0.5); g.add(head);
+            const nose = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({color:0x000000}));
+            nose.position.set(0, 0.8, 0.85); g.add(nose);
             
-            if(dist > 5 && distCabin > 6 && dist < CONFIG.mapRadius - 2) {
-                createTree(x, z);
-            }
+            // Random start
+            const angle = Math.random() * Math.PI * 2;
+            g.position.set(Math.cos(angle)*30, 0, Math.sin(angle)*30);
+            
+            g.userData = { target: new THREE.Vector3(), state: 'idle', timer: 0 };
+            scene.add(g);
+            wolves.push(g);
+        }
+        for(let i=0; i<3; i++) createWolf();
+
+        // Birds
+        function spawnBird(treePos) {
+            if(birds.length > 5) return; // Limit
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.5, 4), new THREE.MeshStandardMaterial({color: 0xe74c3c}));
+            body.rotation.x = Math.PI/2;
+            g.add(body);
+            g.position.set(treePos.x, 4, treePos.z);
+            
+            // Fly to random spot
+            const target = new THREE.Vector3((Math.random()-0.5)*60, 6, (Math.random()-0.5)*60);
+            g.userData = { target: target, dropping: true };
+            g.lookAt(target);
+            
+            scene.add(g);
+            birds.push(g);
+        }
+
+        function dropNest(pos) {
+            const g = new THREE.Group();
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.1, 4, 8), new THREE.MeshStandardMaterial({color: 0xd35400}));
+            ring.rotation.x = Math.PI/2;
+            g.add(ring);
+            const egg = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            egg.position.y = 0.1;
+            g.add(egg);
+            g.position.copy(pos);
+            g.position.y = 0.2;
+            
+            scene.add(g);
+            nests.push(g);
+            
+            // Despawn nest after 20s
+            setTimeout(() => {
+                if(nests.includes(g)) {
+                    scene.remove(g);
+                    nests = nests.filter(n => n!==g);
+                }
+            }, 20000);
         }
 
         // --- CONTROLS ---
@@ -315,25 +341,29 @@
         };
 
         window.performAction = () => {
-            if(STATE.nearbyTree) {
-                // Chop
+            // Priority: Collect Nest > Chop Tree > Plant Tree
+            if(STATE.nearbyNest) {
+                scene.remove(STATE.nearbyNest);
+                nests = nests.filter(n => n !== STATE.nearbyNest);
+                STATE.nests++;
+                document.getElementById('nest-count').innerText = STATE.nests;
+                STATE.nearbyNest = null;
+            } else if(STATE.nearbyTree) {
                 scene.remove(STATE.nearbyTree);
-                treeObjects = treeObjects.filter(t => t !== STATE.nearbyTree);
+                trees = trees.filter(t => t !== STATE.nearbyTree);
                 STATE.wood++;
                 document.getElementById('wood-count').innerText = STATE.wood;
                 STATE.nearbyTree = null;
             } else if (STATE.wood > 0 && STATE.location === 'OUTSIDE') {
-                // Plant
                 const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
                 const pos = player.position.clone().add(dir.multiplyScalar(2));
-                createTree(pos.x, pos.z, 1); // Plant new tree
-                treeObjects[treeObjects.length-1].userData.growing = true;
+                createTree(pos.x, pos.z, 1);
+                trees[trees.length-1].userData.growing = true;
                 STATE.wood--;
                 document.getElementById('wood-count').innerText = STATE.wood;
             }
         };
 
-        // Joystick
         const stick = { x: 0, y: 0 };
         const stickEl = document.getElementById('stick');
         const zone = document.getElementById('joystick-zone');
@@ -341,156 +371,155 @@
         function handleInput(cx, cy, end) {
             if(end) { stick.x=0; stick.y=0; stickEl.style.transform=`translate(-50%,-50%)`; return; }
             const rect = zone.getBoundingClientRect();
-            let dx = cx - (rect.left+rect.width/2);
-            let dy = cy - (rect.top+rect.height/2);
+            let dx = cx - (rect.left+rect.width/2), dy = cy - (rect.top+rect.height/2);
             const dist = Math.sqrt(dx*dx+dy*dy);
             if(dist>40) { dx*=40/dist; dy*=40/dist; }
             stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
             stick.x = dx/40; stick.y = dy/40;
         }
-        
         zone.addEventListener('touchmove', e=>{e.preventDefault(); handleInput(e.touches[0].clientX, e.touches[0].clientY)}, {passive:false});
         zone.addEventListener('touchend', ()=>handleInput(0,0,true));
-        
-        // Mouse for testing
         let drag=false;
         zone.addEventListener('mousedown', e=>{drag=true; handleInput(e.clientX, e.clientY)});
         window.addEventListener('mousemove', e=>{if(drag)handleInput(e.clientX, e.clientY)});
         window.addEventListener('mouseup', ()=>{drag=false; handleInput(0,0,true)});
 
-
-        // --- MAIN LOOP ---
+        // --- LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Day/Night Cycle
-            STATE.time += 0.0005; // Speed of day
+            // 1. Time (Slower: 0.0001)
+            STATE.time += 0.0001; 
             if(STATE.time > 1) STATE.time = 0;
-            
             const sunY = Math.sin(STATE.time * Math.PI) * 100;
-            const sunIntensity = Math.max(0, Math.sin(STATE.time * Math.PI));
-            const isNight = sunIntensity < 0.2;
+            const sunInt = Math.max(0, Math.sin(STATE.time * Math.PI));
+            const isNight = sunInt < 0.2;
             
-            // Visual Updates
-            sunLight.position.y = sunY;
-            sunLight.position.x = Math.cos(STATE.time * Math.PI) * 50;
-            sunLight.intensity = sunIntensity;
+            sunLight.position.set(Math.cos(STATE.time*Math.PI)*50, sunY, 0);
+            sunLight.intensity = sunInt;
+            const sky = CONFIG.dayColor.clone().lerp(CONFIG.nightColor, 1-sunInt);
+            scene.background = sky; scene.fog.color = sky;
+            fireLight.intensity = isNight ? 10+Math.random()*5 : 0;
+            fireMesh.visible = isNight || sunInt < 0.5;
             
-            const skyColor = CONFIG.dayColor.clone().lerp(CONFIG.nightColor, 1 - sunIntensity);
-            scene.background = skyColor;
-            scene.fog.color = skyColor;
-            
-            // Fire Logic
-            fireLight.intensity = isNight ? 10 + Math.random()*5 : 0;
-            fireMesh.visible = isNight || sunIntensity < 0.5;
+            if(STATE.location === 'OUTSIDE') playerLight.intensity = (STATE.flashlight && isNight) ? 2 : 0;
 
-            // Flashlight Logic
-            if(STATE.location === 'OUTSIDE') {
-                playerLight.intensity = (STATE.flashlight && isNight) ? 2 : 0;
-            } else {
-                playerLight.intensity = 0; // No flashlight inside
-            }
-
-            // HUD Time
             const hour = Math.floor(STATE.time * 24);
             document.getElementById('time-display').innerText = `${hour}:00`;
 
-
-            // 2. Movement
+            // 2. Player Move
             if(Math.abs(stick.x)>0.1 || Math.abs(stick.y)>0.1) {
-                const speed = 0.15;
-                player.position.x += stick.x * speed;
-                player.position.z += stick.y * speed;
+                player.position.x += stick.x * 0.15;
+                player.position.z += stick.y * 0.15;
                 player.rotation.y = Math.atan2(-stick.x, -stick.y);
             }
-
-            // 3. Constraints & Teleports
+            // Constraints
             if (STATE.location === 'OUTSIDE') {
-                // Map Boundary
                 const distCenter = Math.sqrt(player.position.x**2 + player.position.z**2);
                 if (distCenter > CONFIG.mapRadius) {
-                    const angle = Math.atan2(player.position.z, player.position.x);
-                    player.position.x = Math.cos(angle) * CONFIG.mapRadius;
-                    player.position.z = Math.sin(angle) * CONFIG.mapRadius;
+                    const ang = Math.atan2(player.position.z, player.position.x);
+                    player.position.x = Math.cos(ang) * CONFIG.mapRadius;
+                    player.position.z = Math.sin(ang) * CONFIG.mapRadius;
                 }
-
-                // Check Cabin Door
-                const distDoor = player.position.distanceTo(new THREE.Vector3(CONFIG.cabinPos.x, 1.5, CONFIG.cabinPos.z + 3));
-                if (distDoor < 1.5) {
+                if (player.position.distanceTo(new THREE.Vector3(CONFIG.cabinPos.x, 1.5, CONFIG.cabinPos.z+3)) < 1.5) {
                     STATE.location = 'INSIDE';
-                    player.position.set(0, -99, 5); // Teleport In
-                    camera.position.set(0, -90, 20); // Move Cam
-                    player.rotation.y = Math.PI;
+                    player.position.set(0, -99, 5); player.rotation.y = Math.PI;
+                    camera.position.set(0, -90, 20);
                 }
             } else {
-                // Inside Logic
-                // Limit movement inside
-                if(player.position.x < -9) player.position.x = -9;
-                if(player.position.x > 9) player.position.x = 9;
-                if(player.position.z < -9) player.position.z = -9;
-                if(player.position.z > 9) player.position.z = 9;
-
-                // Check Exit
-                if (player.position.z > 8) {
+                if(player.position.x<-9) player.position.x=-9; if(player.position.x>9) player.position.x=9;
+                if(player.position.z<-9) player.position.z=-9; if(player.position.z>9) player.position.z=9;
+                if(player.position.z > 8) {
                     STATE.location = 'OUTSIDE';
-                    player.position.set(CONFIG.cabinPos.x, 0.6, CONFIG.cabinPos.z + 5); // Teleport Out
+                    player.position.set(CONFIG.cabinPos.x, 0.6, CONFIG.cabinPos.z+5);
                 }
             }
 
-            // 4. Camera Follow
+            // 3. Camera
             if(STATE.location === 'OUTSIDE') {
-                const camOffset = new THREE.Vector3(0, STATE.zoom, STATE.zoom - 5);
-                camera.position.lerp(player.position.clone().add(camOffset), 0.1);
+                camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, STATE.zoom, STATE.zoom-5)), 0.1);
                 camera.lookAt(player.position);
-                
-                // Update Flashlight Target
-                const targetPos = new THREE.Vector3(player.position.x + (stick.x*5), 0, player.position.z + (stick.y*5));
-                playerLight.position.copy(player.position);
-                playerLight.position.y += 2;
-                playerLight.target.position.lerp(targetPos, 0.1);
+                playerLight.position.copy(player.position); playerLight.position.y+=2;
+                playerLight.target.position.lerp(new THREE.Vector3(player.position.x+stick.x*5, 0, player.position.z+stick.y*5), 0.1);
             } else {
-                // Interior Camera (Fixed angle)
-                camera.position.lerp(new THREE.Vector3(0, -90, 15), 0.1);
-                camera.lookAt(0, -95, -10);
+                camera.position.lerp(new THREE.Vector3(0, -90, 15), 0.1); camera.lookAt(0, -95, -10);
             }
 
-            // 5. Action Button Logic
+            // 4. Wildlife Logic
+            // Wolves
+            wolves.forEach(w => {
+                if(w.userData.timer <= 0) {
+                    // New target
+                    w.userData.timer = 100 + Math.random()*200;
+                    const ang = Math.random() * Math.PI*2;
+                    const r = 10 + Math.random() * 30; // Stay somewhat away from center
+                    w.userData.target.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
+                    w.lookAt(w.userData.target);
+                }
+                w.userData.timer--;
+                // Move
+                const dir = w.userData.target.clone().sub(w.position).normalize();
+                if(w.position.distanceTo(w.userData.target) > 1) {
+                    w.position.add(dir.multiplyScalar(0.04));
+                }
+            });
+
+            // Birds
+            if(Math.random() < 0.005 && trees.length > 0) {
+                // Spawn random bird from tree
+                const t = trees[Math.floor(Math.random()*trees.length)];
+                spawnBird(t.position);
+            }
+            birds.forEach((b, idx) => {
+                b.position.add(new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), b.rotation.y).multiplyScalar(0.1));
+                if(b.userData.dropping && Math.random() < 0.01) {
+                    dropNest(b.position);
+                    b.userData.dropping = false;
+                    b.rotation.x = -Math.PI/4; // Fly up
+                }
+                if(b.position.y > 20 || b.position.distanceTo(player.position) > 80) {
+                    scene.remove(b);
+                    birds.splice(idx, 1);
+                }
+            });
+
+            // 5. Interactions
             const btn = document.getElementById('action-btn');
             const txt = document.getElementById('action-text');
+            const modal = document.getElementById('interaction-modal');
             
-            // Check Trees
-            let closest = null;
-            let minDist = 2;
+            // Checks
+            let nearT = null, nearN = null, nearP = null;
             if(STATE.location === 'OUTSIDE') {
-                treeObjects.forEach(t => {
-                    if(t.userData.growing) {
-                        t.userData.scale += 0.02;
-                        t.scale.setScalar(t.userData.scale);
-                        if(t.userData.scale>=1) t.userData.growing=false;
-                    }
-                    const d = player.position.distanceTo(t.position);
-                    if(d<minDist) { minDist=d; closest=t; }
-                });
+                trees.forEach(t => { if(t.userData.growing){t.userData.scale+=0.02;t.scale.setScalar(t.userData.scale);if(t.userData.scale>=1)t.userData.growing=false;} if(player.position.distanceTo(t.position)<2) nearT=t; });
+                nests.forEach(n => { n.rotation.y+=0.05; if(player.position.distanceTo(n.position)<2) nearN=n; });
+                poiObjects.forEach(p => { if(player.position.distanceTo(p.position)<3) nearP=p; });
             }
-            STATE.nearbyTree = closest;
+            STATE.nearbyTree = nearT;
+            STATE.nearbyNest = nearN;
+            
+            // Button State
+            if(nearN) { btn.classList.add('ready'); btn.style.background='#d35400'; txt.innerText='GRAB'; }
+            else if(nearT) { btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP'; }
+            else if(STATE.wood>0 && STATE.location==='OUTSIDE') { btn.classList.add('ready'); btn.style.background='#27ae60'; txt.innerText='PLANT'; }
+            else { btn.classList.remove('ready'); btn.style.background='#e6c86e'; txt.innerText='...'; }
 
-            if (STATE.nearbyTree) {
-                btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP';
-            } else if (STATE.wood > 0 && STATE.location === 'OUTSIDE') {
-                btn.classList.add('ready'); btn.style.background='#27ae60'; txt.innerText='PLANT';
-            } else {
-                btn.classList.remove('ready'); btn.style.background='#e6c86e'; txt.innerText='...';
+            // Modal State (Signs)
+            if(nearP && STATE.nearbyPOI !== nearP) {
+                STATE.nearbyPOI = nearP;
+                document.getElementById('modal-title').innerText = nearP.userData.label;
+                document.getElementById('modal-desc').innerText = nearP.userData.desc;
+                document.getElementById('modal-link').href = nearP.userData.link;
+                modal.classList.add('active');
+            } else if(!nearP) {
+                modal.classList.remove('active');
+                STATE.nearbyPOI = null;
             }
 
             renderer.render(scene, camera);
         }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         animate();
     </script>
 </body>
