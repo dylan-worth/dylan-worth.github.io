@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>99 Nights in the Forest</title>
+    <style>
+        :root {
+            --pixel-size: 4px; /* Adjust for "chunky" pixel look */
+            --bg-color: #2d3c26;
+            --ui-color: #1a1a1a;
+            --accent-color: #e6c86e;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* --- GAME WORLD --- */
+        #game-area {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            transition: filter 1s ease;
+        }
+
+        /* Night Filter */
+        .night-mode {
+            filter: brightness(0.3) contrast(1.2) hue-rotate(20deg);
+        }
+
+        /* --- ENTITIES (Replace Background-Color with Background-Image for OGA Assets) --- */
+        
+        /* The Player */
+        .entity {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            transition: top 0.3s, left 0.3s; /* Smooth movement */
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #player {
+            /* REPLACE THIS WITH: background-image: url('hero.png'); */
+            background-color: #3498db; 
+            border-radius: 5px;
+            border: 2px solid white;
+            box-shadow: 0 4px 0 #1f5f8b;
+        }
+
+        /* Trees/Resources */
+        .tree {
+            /* REPLACE THIS WITH: background-image: url('tree.png'); */
+            background-color: #27ae60;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
+            width: 60px;
+            height: 80px;
+            z-index: 5;
+            cursor: pointer;
+        }
+
+        /* Enemies */
+        .enemy {
+            /* REPLACE THIS WITH: background-image: url('slime.png'); */
+            background-color: #e74c3c;
+            border-radius: 50%;
+            z-index: 9;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        /* Structures */
+        .fire {
+            background-color: orange;
+            border-radius: 50%;
+            box-shadow: 0 0 20px orange;
+            animation: flicker 0.2s infinite;
+        }
+
+        /* --- UI & HUD --- */
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: var(--ui-color);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .stat-box {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #log-container {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .log-msg {
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            animation: fadeOut 3s forwards;
+        }
+
+        #action-btn {
+            background: var(--accent-color);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes bounce { from { transform: translate(-50%, -50%) scale(0.9); } to { transform: translate(-50%, -50%) scale(1.1); } }
+        @keyframes flicker { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+        @keyframes fadeOut { 0% { opacity: 1; transform: translateY(0); } 90% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+        .shake { animation: shake 0.3s; }
+        @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-50%, -50%) rotate(5deg); } 75% { transform: translate(-50%, -50%) rotate(-5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-area">
+        <div id="player" class="entity" style="top: 50%; left: 50%;"></div>
+    </div>
+
+    <div id="log-container"></div>
+
+    <div id="hud">
+        <div class="stat-box">
+            <div>NIGHT</div>
+            <div id="night-count" style="color:var(--accent-color); font-size:18px;">1</div>
+        </div>
+        <div class="stat-box">
+            <div>WOOD</div>
+            <div id="wood-count">0</div>
+        </div>
+        <button id="action-btn" onclick="togglePhase()">WAIT FOR NIGHT</button>
+    </div>
+
+    <script>
+        // --- GAME CONFIGURATION ---
+        const GAME = {
+            night: 1,
+            phase: 'DAY', // DAY or NIGHT
+            wood: 0,
+            hp: 100,
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+
+        // --- THE FOREST'S PERSONALITY (The "Data") ---
+        const QUIPS = {
+            chop: [
+                "Ouch.", 
+                "That tree had a family.", 
+                "Deforestation? Really?", 
+                "You hit like a goblin.",
+                "Leave the leaves alone."
+            ],
+            nightStart: [
+                "The sun hates you. It's leaving.",
+                "Hope you aren't afraid of pixelated ghosts.",
+                "Good luck finding the bathroom in the dark.",
+                "The moon is judging your outfit."
+            ],
+            dayStart: [
+                "You survived? Disappointing.",
+                "The sun returns. My eyes burn.",
+                "Another day, another struggle."
+            ],
+            hit: [
+                "Stop hugging the monsters.",
+                "Your health bar looks sad.",
+                "Reflexes of a potato."
+            ]
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
+            // Spawn initial forest
+            for(let i=0; i<15; i++) spawnTree();
+            log("Welcome to the petty forest.");
+        }
+
+        // Tap to Move Logic
+        document.getElementById('game-area').addEventListener('click', (e) => {
+            // If we clicked a tree or button, ignore movement
+            if(e.target.classList.contains('tree') || e.target.closest('#hud')) return;
+
+            movePlayer(e.clientX, e.clientY);
+        });
+
+        function movePlayer(x, y) {
+            const player = document.getElementById('player');
+            player.style.left = x + 'px';
+            player.style.top = y + 'px';
+            
+            // Check for items nearby (simple collision check)
+            checkProximity(x, y);
+        }
+
+        function checkProximity(px, py) {
+            // If near a campfire, heal? If near enemy, take damage?
+            // Simple visual feedback only for this prototype
+        }
+
+        // --- ENTITY MANAGEMENT ---
+
+        function spawnTree() {
+            const tree = document.createElement('div');
+            tree.classList.add('entity', 'tree');
+            
+            // Random position (keeping padding from edges)
+            const x = Math.random() * (GAME.width - 60) + 30;
+            const y = Math.random() * (GAME.height - 150) + 30; // Keep away from HUD
+            
+            tree.style.left = x + 'px';
+            tree.style.top = y + 'px';
+
+            // Interaction
+            tree.onclick = function(e) {
+                e.stopPropagation(); // Don't move player
+                harvestTree(tree);
+            };
+
+            document.getElementById('game-area').appendChild(tree);
+        }
+
+        function spawnEnemy() {
+            const enemy = document.createElement('div');
+            enemy.classList.add('entity', 'enemy');
+            
+            const x = Math.random() * GAME.width;
+            const y = Math.random() * GAME.height;
+            
+            enemy.style.left = x + 'px';
+            enemy.style.top = y + 'px';
+
+            // Basic AI: Move toward player occasionally
+            setInterval(() => {
+                if(GAME.phase === 'NIGHT') {
+                    const p = document.getElementById('player');
+                    const pRect = p.getBoundingClientRect();
+                    const eRect = enemy.getBoundingClientRect();
+                    
+                    // Move 10% towards player
+                    const newX = eRect.left + (pRect.left - eRect.left) * 0.1;
+                    const newY = eRect.top + (pRect.top - eRect.top) * 0.1;
+                    
+                    enemy.style.left = (newX + 25) + 'px'; // +25 for center offset
+                    enemy.style.top = (newY + 25) + 'px';
+
+                    // Collision (Hit)
+                    if(Math.abs(pRect.left - eRect.left) < 30 && Math.abs(pRect.top - eRect.top) < 30) {
+                        log(rand(QUIPS.hit));
+                        // Flash red
+                        document.body.style.backgroundColor = '#500';
+                        setTimeout(() => document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-color'), 100);
+                    }
+                }
+            }, 1000);
+
+            document.getElementById('game-area').appendChild(enemy);
+        }
+
+        function harvestTree(el) {
+            // Move player to tree visually
+            const rect = el.getBoundingClientRect();
+            movePlayer(rect.left + 25, rect.top + 75);
+
+            // Shake animation
+            el.classList.add('shake');
+            
+            setTimeout(() => {
+                el.remove();
+                GAME.wood++;
+                updateUI();
+                
+                // 30% chance of the forest insulting you
+                if(Math.random() > 0.7) log(rand(QUIPS.chop));
+            }, 300);
+        }
+
+        // --- GAME LOOP & PHASE ---
+
+        function togglePhase() {
+            const btn = document.getElementById('action-btn');
+            const area = document.getElementById('game-area');
+
+            if (GAME.phase === 'DAY') {
+                // Switch to NIGHT
+                GAME.phase = 'NIGHT';
+                area.classList.add('night-mode');
+                btn.innerText = "SURVIVE...";
+                btn.style.background = "#555";
+                log(rand(QUIPS.nightStart));
+                
+                // Spawn Night Terrors
+                startNightEvent();
+
+            } else {
+                // Switch to DAY
+                GAME.phase = 'DAY';
+                GAME.night++;
+                area.classList.remove('night-mode');
+                btn.innerText = "WAIT FOR NIGHT";
+                btn.style.background = "#e6c86e";
+                log(rand(QUIPS.dayStart));
+                
+                // Cleanup Enemies
+                document.querySelectorAll('.enemy').forEach(e => e.remove());
+                
+                // Respawn Trees
+                for(let i=0; i<3; i++) spawnTree();
+                updateUI();
+            }
+        }
+
+        function startNightEvent() {
+            // Difficulty scaling
+            let enemyCount = Math.floor(GAME.night / 2) + 1;
+            
+            // Special events based on night number
+            if(GAME.night % 5 === 0) {
+                log("⚠️ BOSS NIGHT: The forest is extra grumpy.");
+                enemyCount += 2;
+            }
+
+            for(let i=0; i<enemyCount; i++) {
+                setTimeout(spawnEnemy, i * 1000);
+            }
+        }
+
+        // --- UTILS ---
+
+        function updateUI() {
+            document.getElementById('wood-count').innerText = GAME.wood;
+            document.getElementById('night-count').innerText = GAME.night;
+        }
+
+        function log(msg) {
+            const container = document.getElementById('log-container');
+            const div = document.createElement('div');
+            div.innerText = msg;
+            div.classList.add('log-msg');
+            container.appendChild(div);
+            
+            // Remove after animation
+            setTimeout(() => div.remove(), 3500);
+        }
+
+        function rand(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Start game
+        init();
+
+    </script>
+</body>
+</html>
