@@ -6,11 +6,7 @@
     <title>Forest RPG</title>
     <link rel="stylesheet" href="./css/forest.css">
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 </head>
 <body>
@@ -18,7 +14,6 @@
     <div id="ui-layer">
         <div id="stats-container">
             <div id="level-text">LEVEL 1</div>
-            
             <div class="bar-bg"><div id="xp-fill" class="bar-fill" style="background:#27ae60;"></div></div>
             <div class="bar-bg"><div id="health-fill" class="bar-fill" style="background:#e74c3c;"></div></div>
             <div class="bar-bg"><div id="hunger-fill" class="bar-fill" style="background:#d35400;"></div></div>
@@ -30,7 +25,8 @@
             <div class="inv-slot" id="inv-axe"><div class="inv-icon" id="icon-axe">🪓</div></div>
             <div class="inv-slot active" id="btn-flashlight"><div class="inv-icon">🔦</div></div>
             <div class="inv-slot"><div class="inv-icon">🪵</div><div id="wood-count">0</div></div>
-            <div class="inv-slot"><div class="inv-icon">🍒</div><div id="berry-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🥩</div><div id="raw-meat-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🍗</div><div id="cooked-meat-count">0</div></div>
         </div>
 
         <div id="zoom-controls">
