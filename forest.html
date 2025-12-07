@@ -4,120 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Forest RPG</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', sans-serif; user-select: none; }
-        canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
-
-        /* UI LAYER */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
-        /* STATS BAR (XP) */
-        #stats-bar {
-            position: absolute; top: 20px; left: 20px; width: 200px;
-            color: #e6c86e; pointer-events: auto;
-        }
-        #xp-container {
-            width: 100%; height: 10px; background: rgba(0,0,0,0.6); border: 2px solid #5d4037;
-            margin-top: 5px; border-radius: 5px; overflow: hidden;
-        }
-        #xp-fill {
-            width: 0%; height: 100%; background: #27ae60; transition: width 0.3s;
-        }
-        #level-text { font-weight: bold; font-size: 14px; text-shadow: 1px 1px 0 #000; }
-
-        /* INVENTORY */
-        #inventory {
-            position: absolute; top: 70px; left: 20px; display: flex; flex-direction: column; gap: 10px; pointer-events: auto;
-        }
-        .inv-slot {
-            background: rgba(0,0,0,0.6); border: 2px solid #5d4037; color: #e6c86e;
-            width: 50px; height: 50px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; cursor: pointer;
-            transition: all 0.2s;
-        }
-        .inv-slot.active { border-color: #e6c86e; background: rgba(230, 200, 110, 0.2); }
-        .inv-slot.broken { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); }
-        .inv-icon { font-size: 24px; }
-
-        /* TIME DISPLAY */
-        #time-display {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            color: white; text-shadow: 0 2px 2px black; font-weight: bold; font-size: 18px;
-        }
-
-        /* ZOOM */
-        #zoom-controls {
-            position: absolute; top: 50%; right: 20px; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 10px; pointer-events: auto;
-        }
-        .hud-btn {
-            width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer;
-        }
-
-        /* ACTION BUTTON */
-        #action-btn {
-            position: absolute; bottom: 50px; right: 40px; width: 80px; height: 80px;
-            background: #e6c86e; border: 4px solid #5d4037; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-            color: #3e2723; pointer-events: auto; transition: all 0.2s; opacity: 0.5;
-            flex-direction: column; line-height: 1.1; font-size: 14px; text-align: center;
-        }
-        #action-btn.ready { opacity: 1; transform: scale(1.1); cursor: pointer; }
-
-        /* JOYSTICK */
-        #joystick-zone {
-            position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px;
-            background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%; pointer-events: auto;
-        }
-        #stick {
-            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
-            background: rgba(230, 200, 110, 0.8); border-radius: 50%; transform: translate(-50%, -50%);
-        }
-
-        /* MODAL */
-        #interaction-modal {
-            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-            background: rgba(20, 20, 20, 0.95); border: 2px solid #e6c86e; padding: 20px;
-            border-radius: 10px; text-align: center; color: #e6c86e; opacity: 0; pointer-events: none; transition: 0.3s;
-        }
-        #interaction-modal.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .btn-visit { margin-top:10px; display:inline-block; padding:8px 16px; background:#e6c86e; color:black; text-decoration:none; border-radius:4px; font-weight: bold; }
-    </style>
+    <link rel="stylesheet" href="./css/forest.css">
     <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
     </script>
 </head>
 <body>
 
     <div id="ui-layer">
-        <div id="stats-bar">
+        <div id="stats-container">
             <div id="level-text">LEVEL 1</div>
-            <div id="xp-container"><div id="xp-fill"></div></div>
+            
+            <div class="bar-bg"><div id="xp-fill" class="bar-fill" style="background:#27ae60;"></div></div>
+            <div class="bar-bg"><div id="health-fill" class="bar-fill" style="background:#e74c3c;"></div></div>
+            <div class="bar-bg"><div id="hunger-fill" class="bar-fill" style="background:#d35400;"></div></div>
         </div>
 
         <div id="time-display">12:00 PM</div>
 
         <div id="inventory">
-            <div class="inv-slot" id="inv-axe">
-                <div class="inv-icon" id="icon-axe">🪓</div>
-            </div>
-            <div class="inv-slot active" id="btn-flashlight" onclick="toggleFlashlight()">
-                <div class="inv-icon">🔦</div>
-            </div>
-            <div class="inv-slot">
-                <div class="inv-icon">🪵</div>
-                <div id="wood-count">0</div>
-            </div>
+            <div class="inv-slot" id="inv-axe"><div class="inv-icon" id="icon-axe">🪓</div></div>
+            <div class="inv-slot active" id="btn-flashlight"><div class="inv-icon">🔦</div></div>
+            <div class="inv-slot"><div class="inv-icon">🪵</div><div id="wood-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🍒</div><div id="berry-count">0</div></div>
         </div>
 
         <div id="zoom-controls">
-            <div class="hud-btn" onclick="adjustZoom(-5)">+</div>
-            <div class="hud-btn" onclick="adjustZoom(5)">-</div>
+            <div class="hud-btn" id="zoom-in">+</div>
+            <div class="hud-btn" id="zoom-out">-</div>
         </div>
 
-        <div id="action-btn" onclick="performAction()">
+        <div id="action-btn">
             <span id="action-text">...</span>
         </div>
 
@@ -130,384 +51,13 @@
         <div id="joystick-zone">
             <div id="stick"></div>
         </div>
+        
+        <div id="death-screen">
+            <h1>YOU PERISHED</h1>
+            <button onclick="location.reload()">RESPAWN</button>
+        </div>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-
-        // --- STATE & XP LOGIC ---
-        const STATE = {
-            wood: 0,
-            xp: 0,
-            level: 1,
-            axeBroken: false,
-            flashlight: true,
-            zoom: 20,
-            nearbyTree: null,
-            nearbyPOI: null,
-            time: 0.5,
-            location: 'OUTSIDE'
-        };
-
-        const CONFIG = {
-            mapRadius: 50,
-            maxLevel: 99,
-            maxXP: 1000000,
-            cabinPos: new THREE.Vector3(-10, 0, -15)
-        };
-
-        // XP Curve: (Level / 99)^3 * 1,000,000
-        function getXpForLevel(lvl) {
-            return Math.floor(Math.pow(lvl / CONFIG.maxLevel, 3) * CONFIG.maxXP);
-        }
-
-        function addXP(amount) {
-            STATE.xp += amount;
-            
-            // Calculate Level
-            // Reverse formula roughly, or just check thresholds iteratively if performance allows (it does for 99 lvls)
-            // But let's simple check next level threshold
-            let nextLevelXP = getXpForLevel(STATE.level + 1);
-            if (STATE.level < CONFIG.maxLevel && STATE.xp >= nextLevelXP) {
-                STATE.level++;
-                // Flash UI?
-            }
-
-            // Update UI
-            const currentLevelBase = getXpForLevel(STATE.level);
-            nextLevelXP = getXpForLevel(STATE.level + 1);
-            if (STATE.level === CONFIG.maxLevel) nextLevelXP = CONFIG.maxXP;
-
-            const progress = (STATE.xp - currentLevelBase) / (nextLevelXP - currentLevelBase);
-            const pct = Math.min(100, Math.max(0, progress * 100));
-            
-            document.getElementById('level-text').innerText = `LEVEL ${STATE.level}`;
-            document.getElementById('xp-fill').style.width = `${pct}%`;
-        }
-        
-        // Initial UI update
-        addXP(0);
-
-
-        // --- SCENE SETUP ---
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x87CEEB, 10, 60);
-        scene.background = new THREE.Color(0x87CEEB);
-
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-
-        // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.DirectionalLight(0xffaa00, 1);
-        sunLight.position.set(50, 50, 0);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        scene.add(sunLight);
-
-        const playerLight = new THREE.SpotLight(0xffffff, 0);
-        playerLight.angle = Math.PI / 4;
-        playerLight.penumbra = 0.5;
-        playerLight.distance = 40;
-        playerLight.castShadow = true;
-        scene.add(playerLight);
-        scene.add(playerLight.target);
-
-        const fireLight = new THREE.PointLight(0xff4400, 0, 15);
-        fireLight.position.set(0, 2, 0);
-        scene.add(fireLight);
-
-        // --- ASSETS ---
-        
-        // 1. Ground
-        const ground = new THREE.Mesh(new THREE.CircleGeometry(60, 64), new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 }));
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // 2. Player
-        const player = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 4, 8), new THREE.MeshStandardMaterial({ color: 0xffaa00 }));
-        player.position.set(5, 0.6, 5);
-        player.castShadow = true;
-        scene.add(player);
-
-        // 3. Campfire
-        const fireGroup = new THREE.Group();
-        for(let i=0; i<4; i++) {
-            const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), new THREE.MeshStandardMaterial({color:0x5d4037}));
-            log.rotation.z = Math.PI/2;
-            log.rotation.y = (i/4) * Math.PI*2;
-            log.position.y = 0.1;
-            fireGroup.add(log);
-        }
-        const fireMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.8, 5), new THREE.MeshBasicMaterial({color: 0xff4400}));
-        fireMesh.position.y = 0.5;
-        fireGroup.add(fireMesh);
-        scene.add(fireGroup);
-
-        // 4. Cabin
-        const cabinGroup = new THREE.Group();
-        cabinGroup.position.copy(CONFIG.cabinPos);
-        const walls = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 6), new THREE.MeshStandardMaterial({ color: 0x4e342e }));
-        walls.position.y = 2; walls.castShadow = true; cabinGroup.add(walls);
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(5.5, 3, 4), new THREE.MeshStandardMaterial({ color: 0x3e2723 }));
-        roof.position.y = 5.5; roof.rotation.y = Math.PI/4; cabinGroup.add(roof);
-        const door = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-        door.position.set(0, 1.5, 3.1); cabinGroup.add(door);
-        scene.add(cabinGroup);
-
-        // 5. Interior
-        const interiorGroup = new THREE.Group();
-        interiorGroup.position.set(0, -100, 0);
-        scene.add(interiorGroup);
-        const intFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
-        intFloor.rotation.x = -Math.PI/2; interiorGroup.add(intFloor);
-        const intLight = new THREE.PointLight(0xffaa00, 1, 20); intLight.position.set(0, 8, 0); interiorGroup.add(intLight);
-        const badges = [ {n:"CIE", c:0xff0000, x:-5}, {n:"MRSA", c:0x00ff00, x:0}, {n:"MICRO", c:0x0000ff, x:5} ];
-        badges.forEach(b => {
-            const badge = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.5), new THREE.MeshStandardMaterial({color: b.c}));
-            badge.position.set(b.x, 5, -9); interiorGroup.add(badge);
-        });
-
-        // 6. Signs
-        const POI_DATA = [
-            { label: "PROFILE", link: "./profile", desc: "View my Bio", x: 10, z: 10, color: 0x3498db },
-            { label: "SOCIALS", link: "./socials", desc: "My Posts", x: -10, z: 10, color: 0xe74c3c }
-        ];
-        let poiObjects = [];
-        POI_DATA.forEach(p => {
-            const g = new THREE.Group();
-            g.position.set(p.x, 0, p.z);
-            const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2, 0.2), new THREE.MeshStandardMaterial({color: 0x5d4037}));
-            post.position.y = 1; g.add(post);
-            const board = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.1), new THREE.MeshStandardMaterial({color: p.color}));
-            board.position.set(0, 1.8, 0.1); g.add(board);
-            const light = new THREE.PointLight(p.color, 1, 5);
-            light.position.y = 2; g.add(light);
-            g.userData = p;
-            scene.add(g);
-            poiObjects.push(g);
-        });
-
-        // --- TREES ---
-        let trees = [];
-        function createTree(x, z, scale=1) {
-            const g = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2*scale, 0.4*scale, 2*scale), new THREE.MeshStandardMaterial({color: 0x3e2723}));
-            trunk.position.y = scale; trunk.castShadow = true; g.add(trunk);
-            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5*scale, 3*scale), new THREE.MeshStandardMaterial({color: 0x145a32}));
-            leaves.position.y = 2.5*scale; leaves.castShadow = true; g.add(leaves);
-            g.position.set(x, 0, z);
-            g.userData = { growing: scale===0.1, scale: scale };
-            if(scale===0.1) g.scale.set(0.1,0.1,0.1);
-            scene.add(g);
-            trees.push(g);
-        }
-        for(let i=0; i<200; i++) {
-            let x=(Math.random()-0.5)*90, z=(Math.random()-0.5)*90;
-            if(Math.sqrt(x*x+z*z)>5 && Math.abs(x-CONFIG.cabinPos.x)>6) createTree(x, z);
-        }
-
-        // --- FX: FLYING AXE HEAD ---
-        function spawnAxeHead(pos) {
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), new THREE.MeshStandardMaterial({color: 0x7f8c8d}));
-            head.position.copy(pos);
-            head.position.y += 1.5; // Player height
-            scene.add(head);
-
-            // Animate flying off
-            const vel = new THREE.Vector3((Math.random()-0.5), 1, (Math.random()-0.5)).normalize().multiplyScalar(0.2);
-            let rot = 0;
-            
-            const interval = setInterval(() => {
-                head.position.add(vel);
-                head.rotation.z += 0.5;
-                head.rotation.x += 0.2;
-                vel.y -= 0.01; // Gravity
-                
-                if (head.position.y < 0) {
-                    clearInterval(interval);
-                    scene.remove(head);
-                }
-            }, 16);
-        }
-
-        // --- CONTROLS ---
-        window.adjustZoom = (v) => { STATE.zoom = Math.max(10, Math.min(40, STATE.zoom + v)); };
-        window.toggleFlashlight = () => { 
-            STATE.flashlight = !STATE.flashlight;
-            document.getElementById('btn-flashlight').classList.toggle('active');
-        };
-
-        window.performAction = () => {
-            const btn = document.getElementById('action-btn');
-            const axeSlot = document.getElementById('inv-axe');
-
-            // 1. REPAIR
-            if (STATE.axeBroken) {
-                STATE.axeBroken = false;
-                axeSlot.classList.remove('broken');
-                document.getElementById('icon-axe').innerText = '🪓';
-                // Reset button state immediately for responsiveness
-                btn.style.background = '#e6c86e'; 
-                document.getElementById('action-text').innerText = '...';
-                return;
-            }
-
-            // 2. CHOP
-            if(STATE.nearbyTree) {
-                // Remove tree
-                scene.remove(STATE.nearbyTree);
-                trees = trees.filter(t => t !== STATE.nearbyTree);
-                STATE.nearbyTree = null;
-                
-                // Rewards
-                STATE.wood++;
-                addXP(25);
-                document.getElementById('wood-count').innerText = STATE.wood;
-                
-                // Axe Mechanics (5% chance break)
-                if (Math.random() < 0.05) {
-                    STATE.axeBroken = true;
-                    axeSlot.classList.add('broken');
-                    document.getElementById('icon-axe').innerText = '🦯'; // Broken stick/handle
-                    spawnAxeHead(player.position);
-                }
-            } 
-            // 3. PLANT
-            else if (STATE.wood > 0 && STATE.location === 'OUTSIDE') {
-                const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-                const pos = player.position.clone().add(dir.multiplyScalar(2));
-                createTree(pos.x, pos.z, 1);
-                trees[trees.length-1].userData.growing = true;
-                STATE.wood--;
-                document.getElementById('wood-count').innerText = STATE.wood;
-            }
-        };
-
-        const stick = { x: 0, y: 0 };
-        const stickEl = document.getElementById('stick');
-        const zone = document.getElementById('joystick-zone');
-        
-        function handleInput(cx, cy, end) {
-            if(end) { stick.x=0; stick.y=0; stickEl.style.transform=`translate(-50%,-50%)`; return; }
-            const rect = zone.getBoundingClientRect();
-            let dx = cx - (rect.left+rect.width/2), dy = cy - (rect.top+rect.height/2);
-            const dist = Math.sqrt(dx*dx+dy*dy);
-            if(dist>40) { dx*=40/dist; dy*=40/dist; }
-            stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-            stick.x = dx/40; stick.y = dy/40;
-        }
-        zone.addEventListener('touchmove', e=>{e.preventDefault(); handleInput(e.touches[0].clientX, e.touches[0].clientY)}, {passive:false});
-        zone.addEventListener('touchend', ()=>handleInput(0,0,true));
-        let drag=false;
-        zone.addEventListener('mousedown', e=>{drag=true; handleInput(e.clientX, e.clientY)});
-        window.addEventListener('mousemove', e=>{if(drag)handleInput(e.clientX, e.clientY)});
-        window.addEventListener('mouseup', ()=>{drag=false; handleInput(0,0,true)});
-
-        // --- LOOP ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Time & Lighting
-            STATE.time += 0.0001; 
-            if(STATE.time > 1) STATE.time = 0;
-            const sunY = Math.sin(STATE.time * Math.PI) * 100;
-            const sunInt = Math.max(0, Math.sin(STATE.time * Math.PI));
-            const isNight = sunInt < 0.2;
-            sunLight.position.set(Math.cos(STATE.time*Math.PI)*50, sunY, 0);
-            sunLight.intensity = sunInt;
-            const sky = new THREE.Color(0x87CEEB).lerp(new THREE.Color(0x050510), 1-sunInt);
-            scene.background = sky; scene.fog.color = sky;
-            fireLight.intensity = isNight ? 10+Math.random()*5 : 0;
-            fireMesh.visible = isNight || sunInt < 0.5;
-            if(STATE.location === 'OUTSIDE') playerLight.intensity = (STATE.flashlight && isNight) ? 2 : 0;
-            const hour = Math.floor(STATE.time * 24);
-            document.getElementById('time-display').innerText = `${hour}:00`;
-
-            // Movement
-            if(Math.abs(stick.x)>0.1 || Math.abs(stick.y)>0.1) {
-                player.position.x += stick.x * 0.15;
-                player.position.z += stick.y * 0.15;
-                player.rotation.y = Math.atan2(-stick.x, -stick.y);
-            }
-            if (STATE.location === 'OUTSIDE') {
-                const distCenter = Math.sqrt(player.position.x**2 + player.position.z**2);
-                if (distCenter > CONFIG.mapRadius) {
-                    const ang = Math.atan2(player.position.z, player.position.x);
-                    player.position.x = Math.cos(ang) * CONFIG.mapRadius;
-                    player.position.z = Math.sin(ang) * CONFIG.mapRadius;
-                }
-                if (player.position.distanceTo(new THREE.Vector3(CONFIG.cabinPos.x, 1.5, CONFIG.cabinPos.z+3)) < 1.5) {
-                    STATE.location = 'INSIDE';
-                    player.position.set(0, -99, 5); player.rotation.y = Math.PI;
-                    camera.position.set(0, -90, 20);
-                }
-            } else {
-                if(player.position.x<-9) player.position.x=-9; if(player.position.x>9) player.position.x=9;
-                if(player.position.z<-9) player.position.z=-9; if(player.position.z>9) player.position.z=9;
-                if(player.position.z > 8) {
-                    STATE.location = 'OUTSIDE';
-                    player.position.set(CONFIG.cabinPos.x, 0.6, CONFIG.cabinPos.z+5);
-                }
-            }
-
-            // Camera
-            if(STATE.location === 'OUTSIDE') {
-                camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, STATE.zoom, STATE.zoom-5)), 0.1);
-                camera.lookAt(player.position);
-                playerLight.position.copy(player.position); playerLight.position.y+=2;
-                playerLight.target.position.lerp(new THREE.Vector3(player.position.x+stick.x*5, 0, player.position.z+stick.y*5), 0.1);
-            } else {
-                camera.position.lerp(new THREE.Vector3(0, -90, 15), 0.1); camera.lookAt(0, -95, -10);
-            }
-
-            // Interactions
-            const btn = document.getElementById('action-btn');
-            const txt = document.getElementById('action-text');
-            const modal = document.getElementById('interaction-modal');
-            
-            let nearT = null, nearP = null;
-            if(STATE.location === 'OUTSIDE') {
-                trees.forEach(t => { if(t.userData.growing){t.userData.scale+=0.02;t.scale.setScalar(t.userData.scale);if(t.userData.scale>=1)t.userData.growing=false;} if(player.position.distanceTo(t.position)<2) nearT=t; });
-                poiObjects.forEach(p => { if(player.position.distanceTo(p.position)<3) nearP=p; });
-            }
-            STATE.nearbyTree = nearT;
-
-            // BUTTON STATES
-            if (STATE.axeBroken) {
-                btn.classList.add('ready'); btn.style.background='#95a5a6'; txt.innerText='FIX\nAXE';
-            } else if(nearT) { 
-                btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP'; 
-            } else if(STATE.wood>0 && STATE.location==='OUTSIDE') { 
-                btn.classList.add('ready'); btn.style.background='#27ae60'; txt.innerText='PLANT'; 
-            } else { 
-                btn.classList.remove('ready'); btn.style.background='#e6c86e'; txt.innerText='...'; 
-            }
-
-            // MODAL
-            if(nearP && STATE.nearbyPOI !== nearP) {
-                STATE.nearbyPOI = nearP;
-                document.getElementById('modal-title').innerText = nearP.userData.label;
-                document.getElementById('modal-desc').innerText = nearP.userData.desc;
-                document.getElementById('modal-link').href = nearP.userData.link;
-                modal.classList.add('active');
-            } else if(!nearP) {
-                modal.classList.remove('active');
-                STATE.nearbyPOI = null;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-        animate();
-    </script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
