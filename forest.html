@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99 Nights 3D</title>
+    <title>Forest Navigation</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: monospace; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', sans-serif; user-select: none; }
         canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
-        
-        /* UI OVERLAY */
-        #ui {
+
+        /* --- UI OVERLAY --- */
+        #ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
@@ -17,481 +17,358 @@
             flex-direction: column;
             justify-content: space-between;
         }
-        
-        #hud-top {
+
+        /* Top Header */
+        #header {
             padding: 20px;
             text-align: center;
             color: white;
-            text-shadow: 1px 1px 0 #000;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
         }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 2px; }
+        p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.8; }
 
-        #log {
-            background: rgba(0,0,0,0.5);
-            color: #ffeb3b;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 10px;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        #hud-bottom {
+        /* Interaction Popup (Hidden by default) */
+        #interaction-modal {
+            position: absolute;
+            top: 30%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #e6c86e;
             padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            pointer-events: auto; /* Enable clicks on buttons */
+            border-radius: 10px;
+            text-align: center;
+            color: #e6c86e;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; /* Click-through when hidden */
         }
-
-        .btn {
+        #interaction-modal.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+        .btn-visit {
+            display: block;
+            margin-top: 15px;
             background: #e6c86e;
-            border: 4px solid #5d4037;
-            padding: 15px 30px;
-            font-family: inherit;
+            color: #000;
+            padding: 10px 20px;
+            text-decoration: none;
             font-weight: bold;
-            font-size: 16px;
-            color: #3e2723;
-            border-radius: 8px;
-            box-shadow: 0 4px 0 #3e2723;
+            border-radius: 5px;
         }
-        .btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
 
-        .stat {
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid #555;
-            font-size: 14px;
+        /* --- ANALOG STICK --- */
+        #joystick-zone {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: auto;
+            touch-action: none; /* Prevent scroll on mobile */
         }
+
+        #stick {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px;
+            height: 50px;
+            background: rgba(230, 200, 110, 0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s; /* Smooth return to center */
+        }
+
+        /* Instructions */
+        #hint {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            max-width: 150px;
+            text-align: right;
+        }
+
     </style>
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
             }
         }
     </script>
 </head>
 <body>
 
-    <div id="ui">
-        <div id="hud-top">
-            <h2 style="margin:0">NIGHT <span id="night-display">1</span></h2>
-            <div id="log">Welcome to the forest. Stay near the fire.</div>
+    <div id="ui-layer">
+        <div id="header">
+            <h1>PORTFOLIO WOODS</h1>
+            <p>Use the stick to explore sections</p>
         </div>
-        <div id="hud-bottom">
-            <div class="stat">WOOD: <span id="wood-display">0</span></div>
-            <button class="btn" id="action-btn">WAIT FOR NIGHT</button>
+
+        <div id="interaction-modal">
+            <h2 id="modal-title">SECTION NAME</h2>
+            <p id="modal-desc">Description goes here.</p>
+            <a href="#" id="modal-link" class="btn-visit">ENTER</a>
+        </div>
+
+        <div id="joystick-zone">
+            <div id="stick"></div>
+        </div>
+
+        <div id="hint">
+            Explore the forest.<br>Find the campfires.
         </div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
 
-        // --- CONFIG ---
-        const CONFIG = {
-            safeRadius: 12, // Distance from fire where you are safe
-            moveSpeed: 0.2,
-            colors: {
-                daySky: 0x87CEEB,
-                nightSky: 0x050510,
-                grassDay: 0x4caf50,
-                grassNight: 0x1b3b22
-            }
-        };
-
-        const STATE = {
-            wood: 0,
-            night: 1,
-            phase: 'DAY', // DAY or NIGHT
-            isMoving: false,
-            targetPos: new THREE.Vector3()
-        };
-
-        const QUIPS = [
-            "The fire judges your fear.",
-            "Stay in the light, coward.",
-            "Something is watching from the dark.",
-            "You hear a twig snap. It wasn't you.",
-            "Trees: 'Get off my lawn.'"
+        // --- CONFIGURATION ---
+        // Define your website sections here
+        const POIS = [
+            { label: "ABOUT ME", desc: "The story behind the creator.", color: 0x3498db, x: 0, z: -15, link: "/about" },
+            { label: "PROJECTS", desc: "A showcase of recent work.", color: 0xe74c3c, x: -15, z: 8, link: "/projects" },
+            { label: "CONTACT", desc: "Let's build something.", color: 0x9b59b6, x: 15, z: 8, link: "/contact" }
         ];
 
-        // --- SCENE SETUP ---
+        // --- SETUP SCENE ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(CONFIG.colors.daySky);
-        scene.fog = new THREE.Fog(CONFIG.colors.daySky, 10, 50);
+        scene.background = new THREE.Color(0x1a1a2e); // Deep night blue
+        scene.fog = new THREE.Fog(0x1a1a2e, 10, 40);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 30, 30); // Isometric-ish view
-        camera.lookAt(0, 0, 0);
-
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // Enable shadows
+        renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
         // --- LIGHTING ---
-        // Sun/Moon Light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Very dark ambient
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 50, 20);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
-        scene.add(dirLight);
+        // Moonlight
+        const moonLight = new THREE.DirectionalLight(0xaaccff, 0.5);
+        moonLight.position.set(20, 50, -20);
+        moonLight.castShadow = true;
+        scene.add(moonLight);
 
-        // Campfire Light (Point Light)
-        const fireLight = new THREE.PointLight(0xff6600, 0, 20); // Initially off/dim during day
-        fireLight.position.set(0, 2, 0);
-        fireLight.castShadow = true;
-        scene.add(fireLight);
+        // Player Light (Lantern)
+        const playerLight = new THREE.PointLight(0xffaa00, 2, 15);
+        scene.add(playerLight);
 
         // --- OBJECTS ---
         
         // Ground
-        const planeGeometry = new THREE.PlaneGeometry(100, 100);
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: CONFIG.colors.grassDay });
-        const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(100, 100),
+            new THREE.MeshStandardMaterial({ color: 0x1b3b22, roughness: 0.8 })
+        );
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         scene.add(ground);
 
-        // Player (Simple Capsule/Cube)
-        const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
-        const playerMat = new THREE.MeshStandardMaterial({ color: 0x3498db });
-        const player = new THREE.Mesh(playerGeo, playerMat);
-        player.position.set(3, 1, 3);
+        // Player
+        const player = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.4, 0.8, 4, 8),
+            new THREE.MeshStandardMaterial({ color: 0xffaa00 })
+        );
+        player.position.set(0, 0.6, 5); // Start away from center
         player.castShadow = true;
         scene.add(player);
 
-        // Campfire Mesh
-        const fireGeo = new THREE.ConeGeometry(0.5, 1.5, 6);
-        const fireMat = new THREE.MeshStandardMaterial({ color: 0x444, emissive: 0xff4400, emissiveIntensity: 0.5 });
-        const campfire = new THREE.Mesh(fireGeo, fireMat);
-        campfire.position.y = 0.75;
-        scene.add(campfire);
-        
-        // Stones around fire
-        for(let i=0; i<6; i++) {
-            const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3), new THREE.MeshStandardMaterial({color:0x888}));
-            const angle = (i/6) * Math.PI * 2;
-            stone.position.set(Math.cos(angle)*1.2, 0.3, Math.sin(angle)*1.2);
-            scene.add(stone);
-        }
-
-        // Safe Zone Indicator (Subtle ring)
-        const ringGeo = new THREE.RingGeometry(CONFIG.safeRadius - 0.5, CONFIG.safeRadius, 32);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
-        const safeZoneRing = new THREE.Mesh(ringGeo, ringMat);
-        safeZoneRing.rotation.x = -Math.PI / 2;
-        safeZoneRing.position.y = 0.05;
-        scene.add(safeZoneRing);
-
-        // Trees & Enemies Arrays
-        let trees = [];
-        let enemies = [];
-
-        // --- GENERATION FUNCTIONS ---
-
-        function createLowPolyTree(x, z) {
+        // Generate Forest
+        const trees = [];
+        function createTree(x, z) {
             const group = new THREE.Group();
             
             // Trunk
-            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.4, 1.5, 5);
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.3, 1.5, 5),
+                new THREE.MeshStandardMaterial({ color: 0x3e2723 })
+            );
             trunk.position.y = 0.75;
             trunk.castShadow = true;
             group.add(trunk);
 
-            // Leaves (Cone layers)
-            const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
-            
-            const l1 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.5, 5), leafMat);
-            l1.position.y = 2;
-            l1.castShadow = true;
-            group.add(l1);
-
-            const l2 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.2, 5), leafMat);
-            l2.position.y = 2.8;
-            l2.castShadow = true;
-            group.add(l2);
+            // Leaves (Darker for night vibe)
+            const leaves = new THREE.Mesh(
+                new THREE.ConeGeometry(1, 2, 5),
+                new THREE.MeshStandardMaterial({ color: 0x145a32 })
+            );
+            leaves.position.y = 2;
+            leaves.castShadow = true;
+            group.add(leaves);
 
             group.position.set(x, 0, z);
-            
-            // Add custom data for gameplay
-            group.userData = { type: 'tree', hp: 3 };
-            
             scene.add(group);
             trees.push(group);
         }
 
-        function spawnEnemy() {
-            const geo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-            const mat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x550000 });
-            const enemy = new THREE.Mesh(geo, mat);
-            
-            // Spawn far away randomly
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 30 + Math.random() * 10;
-            enemy.position.set(Math.cos(angle)*dist, 0.4, Math.sin(angle)*dist);
-            
-            scene.add(enemy);
-            enemies.push(enemy);
+        // Fill forest (randomly, avoiding paths roughly)
+        for(let i=0; i<60; i++) {
+            let x = (Math.random() - 0.5) * 80;
+            let z = (Math.random() - 0.5) * 80;
+            // Simple distance check to keep center clear
+            if(Math.sqrt(x*x + z*z) > 5) createTree(x, z);
         }
 
-        function generateForest() {
-            // Clear old trees if any
-            trees.forEach(t => scene.remove(t));
-            trees = [];
+        // --- SIGNPOSTS / POIS ---
+        const poiObjects = [];
+        
+        POIS.forEach(data => {
+            const group = new THREE.Group();
+            group.position.set(data.x, 0, data.z);
 
-            for (let i = 0; i < 30; i++) {
-                // Don't spawn in safe zone
-                let x = (Math.random() - 0.5) * 80;
-                let z = (Math.random() - 0.5) * 80;
-                if (Math.sqrt(x*x + z*z) > CONFIG.safeRadius + 2) {
-                    createLowPolyTree(x, z);
-                }
+            // Post
+            const post = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 2, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0x5d4037 })
+            );
+            post.position.y = 1;
+            group.add(post);
+
+            // Signboard
+            const board = new THREE.Mesh(
+                new THREE.BoxGeometry(1.5, 0.8, 0.1),
+                new THREE.MeshStandardMaterial({ color: data.color }) // Section color
+            );
+            board.position.set(0, 1.8, 0.1);
+            group.add(board);
+
+            // Light Beacon (so you can see it from far away)
+            const beacon = new THREE.PointLight(data.color, 1, 8);
+            beacon.position.y = 2;
+            group.add(beacon);
+
+            group.userData = data; // Store info
+            scene.add(group);
+            poiObjects.push(group);
+        });
+
+
+        // --- ANALOG STICK LOGIC ---
+        const stick = { x: 0, y: 0, active: false };
+        const zone = document.getElementById('joystick-zone');
+        const stickEl = document.getElementById('stick');
+        const maxDist = 35; // Max drag distance in pixels
+
+        function handleInput(clientX, clientY, isEnd = false) {
+            if (isEnd) {
+                stick.x = 0; 
+                stick.y = 0; 
+                stick.active = false;
+                stickEl.style.transform = `translate(-50%, -50%)`;
+                stickEl.style.transition = 'transform 0.1s';
+                return;
             }
-        }
 
-        // Initial Gen
-        generateForest();
+            stick.active = true;
+            stickEl.style.transition = 'none';
 
-        // --- INPUT (RAYCASTING) ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+            const rect = zone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
 
-        window.addEventListener('pointerdown', onPointerDown);
+            let dx = clientX - centerX;
+            let dy = clientY - centerY;
 
-        function onPointerDown(event) {
-            // Don't move if clicking UI
-            if(event.target.closest('#hud-bottom')) return;
-
-            // Normalize mouse coords (-1 to +1)
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-
-            // Check intersections
-            const intersects = raycaster.intersectObjects(scene.children, true);
-
-            if (intersects.length > 0) {
-                const hit = intersects[0];
-                const obj = hit.object.parent || hit.object; // Handle groups (trees)
-
-                // Interaction: Tree
-                if (obj.userData && obj.userData.type === 'tree') {
-                    chopTree(obj);
-                    STATE.targetPos.copy(hit.point); // Move to tree
-                    STATE.targetPos.y = 1; 
-                    STATE.isMoving = true;
-                } 
-                // Interaction: Ground Movement
-                else if (hit.object === ground) {
-                    STATE.targetPos.copy(hit.point);
-                    STATE.targetPos.y = 1; // Keep player height
-                    STATE.isMoving = true;
-                    
-                    // FX: Little cursor feedback
-                    spawnClickFX(hit.point);
-                }
+            // Clamp distance
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > maxDist) {
+                const angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * maxDist;
+                dy = Math.sin(angle) * maxDist;
             }
+
+            // Move stick visual
+            stickEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+            // Normalize output (-1 to 1)
+            stick.x = dx / maxDist;
+            stick.y = dy / maxDist;
         }
 
-        function chopTree(treeGroup) {
-            // Shake animation
-            treeGroup.rotation.z = 0.2;
-            setTimeout(() => treeGroup.rotation.z = -0.2, 50);
-            setTimeout(() => treeGroup.rotation.z = 0, 100);
+        // Touch Events
+        zone.addEventListener('touchstart', e => handleInput(e.touches[0].clientX, e.touches[0].clientY));
+        zone.addEventListener('touchmove', e => { e.preventDefault(); handleInput(e.touches[0].clientX, e.touches[0].clientY); });
+        zone.addEventListener('touchend', () => handleInput(0, 0, true));
 
-            // Logic
-            treeGroup.userData.hp--;
-            if (treeGroup.userData.hp <= 0) {
-                scene.remove(treeGroup);
-                trees = trees.filter(t => t !== treeGroup);
-                STATE.wood++;
-                updateUI();
-                showLog("Got Wood. Trees are judging you.");
-            }
-        }
-
-        function spawnClickFX(pos) {
-            const geo = new THREE.RingGeometry(0.2, 0.3, 16);
-            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-            const ring = new THREE.Mesh(geo, mat);
-            ring.position.set(pos.x, 0.1, pos.z);
-            ring.rotation.x = -Math.PI / 2;
-            scene.add(ring);
-            
-            // Simple animation loop would handle removal, but for proto just setTimeout
-            let scale = 1;
-            const anim = setInterval(() => {
-                scale -= 0.1;
-                ring.scale.set(scale, scale, scale);
-                if(scale <= 0) {
-                    clearInterval(anim);
-                    scene.remove(ring);
-                }
-            }, 30);
-        }
+        // Mouse Events (for desktop testing)
+        let isDragging = false;
+        zone.addEventListener('mousedown', e => { isDragging = true; handleInput(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', e => { if(isDragging) handleInput(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', () => { isDragging = false; handleInput(0, 0, true); });
 
 
-        // --- GAME LOOP LOGIC ---
+        // --- GAME LOOP ---
+        const modal = document.getElementById('interaction-modal');
+        const titleEl = document.getElementById('modal-title');
+        const descEl = document.getElementById('modal-desc');
+        const linkEl = document.getElementById('modal-link');
+        let activePoi = null;
 
-        function updatePlayer() {
-            if (STATE.isMoving) {
-                const dir = new THREE.Vector3().subVectors(STATE.targetPos, player.position);
-                const dist = dir.length();
-                
-                if (dist < 0.2) {
-                    STATE.isMoving = false;
-                } else {
-                    dir.normalize();
-                    player.position.add(dir.multiplyScalar(CONFIG.moveSpeed));
-                    player.lookAt(STATE.targetPos);
-                }
-            }
-        }
-
-        function updateEnemies() {
-            if (STATE.phase !== 'NIGHT') return;
-
-            const playerPos = player.position;
-            const distToFire = playerPos.length(); // Fire is at 0,0,0
-            const isSafe = distToFire < CONFIG.safeRadius;
-
-            enemies.forEach(enemy => {
-                // Determine target
-                let target = player.position.clone();
-                let speed = 0.08;
-
-                if (isSafe) {
-                    // Safety mechanic: Enemies flee or hold position
-                    // Vector away from fire
-                    target = enemy.position.clone().normalize().multiplyScalar(40); 
-                    speed = 0.05; // Run away slower
-                }
-
-                const dir = new THREE.Vector3().subVectors(target, enemy.position);
-                dir.y = 0; // Keep on ground
-                dir.normalize();
-                
-                enemy.position.add(dir.multiplyScalar(speed));
-                enemy.lookAt(target);
-
-                // Attack check
-                if (!isSafe && enemy.position.distanceTo(player.position) < 1) {
-                    // Hit player
-                    player.material.color.setHex(0xff0000);
-                    setTimeout(() => player.material.color.setHex(0x3498db), 100);
-                }
-            });
-        }
-
-        function togglePhase() {
-            const btn = document.getElementById('action-btn');
-            
-            if (STATE.phase === 'DAY') {
-                // GO NIGHT
-                STATE.phase = 'NIGHT';
-                btn.innerText = "SURVIVE UNTIL DAWN";
-                btn.style.background = "#5d4037";
-                btn.style.color = "#fff";
-                
-                // Visuals
-                scene.background.setHex(CONFIG.colors.nightSky);
-                scene.fog.color.setHex(CONFIG.colors.nightSky);
-                scene.fog.near = 2; // Thick fog
-                ambientLight.intensity = 0.1;
-                dirLight.intensity = 0.0; // Moonlight only
-                fireLight.intensity = 2; // Fire lights up
-                ground.material.color.setHex(CONFIG.colors.grassNight);
-                safeZoneRing.material.opacity = 0.3; // Show safe zone boundary
-
-                showLog(QUIPS[Math.floor(Math.random() * QUIPS.length)]);
-                
-                // Spawn Enemies
-                const count = STATE.night + 2;
-                for(let i=0; i<count; i++) spawnEnemy();
-
-            } else {
-                // GO DAY
-                STATE.phase = 'DAY';
-                STATE.night++;
-                btn.innerText = "WAIT FOR NIGHT";
-                btn.style.background = "#e6c86e";
-                btn.style.color = "#3e2723";
-
-                // Visuals
-                scene.background.setHex(CONFIG.colors.daySky);
-                scene.fog.color.setHex(CONFIG.colors.daySky);
-                scene.fog.near = 10;
-                ambientLight.intensity = 0.6;
-                dirLight.intensity = 0.8;
-                fireLight.intensity = 0;
-                ground.material.color.setHex(CONFIG.colors.grassDay);
-                safeZoneRing.material.opacity = 0.0;
-
-                // Cleanup
-                enemies.forEach(e => scene.remove(e));
-                enemies = [];
-                
-                // Regrow some trees
-                for(let i=0; i<5; i++) {
-                     let x = (Math.random() - 0.5) * 80;
-                     let z = (Math.random() - 0.5) * 80;
-                     if (Math.sqrt(x*x + z*z) > CONFIG.safeRadius + 2) createLowPolyTree(x, z);
-                }
-
-                updateUI();
-                showLog("The sun returns. You lived.");
-            }
-        }
-
-        // --- UI FUNCS ---
-        document.getElementById('action-btn').addEventListener('click', togglePhase);
-
-        function updateUI() {
-            document.getElementById('wood-display').innerText = STATE.wood;
-            document.getElementById('night-display').innerText = STATE.night;
-        }
-
-        function showLog(msg) {
-            const el = document.getElementById('log');
-            el.innerText = msg;
-            el.style.opacity = 1;
-            setTimeout(() => el.style.opacity = 0, 3000);
-        }
-
-        // --- MAIN LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // Flicker fire
-            if (STATE.phase === 'NIGHT') {
-                fireLight.intensity = 1.5 + Math.random() * 1.0;
+            // Movement Logic
+            if (stick.active || stick.x !== 0 || stick.y !== 0) {
+                // Move relative to camera not implemented for simplicity, absolute X/Z movement
+                // Use small deadzone
+                if(Math.abs(stick.x) > 0.1 || Math.abs(stick.y) > 0.1) {
+                    player.position.x += stick.x * 0.15;
+                    player.position.z += stick.y * 0.15;
+                    player.lookAt(player.position.x + stick.x, player.position.y, player.position.z + stick.y);
+                }
             }
 
-            // Camera follow player (smoothly)
-            const idealOffset = new THREE.Vector3(0, 25, 25);
-            const idealPos = player.position.clone().add(idealOffset);
-            camera.position.lerp(idealPos, 0.05);
+            // Update Lantern Position
+            playerLight.position.copy(player.position);
+            playerLight.position.y += 1;
+
+            // Camera Follow
+            const camOffset = new THREE.Vector3(0, 15, 12); // High angle
+            camera.position.lerp(player.position.clone().add(camOffset), 0.1);
             camera.lookAt(player.position);
 
-            updatePlayer();
-            updateEnemies();
-            
+            // Check POI Distance
+            let nearAny = false;
+            poiObjects.forEach(poi => {
+                const dist = player.position.distanceTo(poi.position);
+                
+                // Rotate sign to face player
+                poi.lookAt(player.position.x, poi.position.y, player.position.z);
+
+                if (dist < 3) {
+                    nearAny = true;
+                    if (activePoi !== poi) {
+                        // Open Modal
+                        activePoi = poi;
+                        titleEl.innerText = poi.userData.label;
+                        descEl.innerText = poi.userData.desc;
+                        linkEl.href = poi.userData.link;
+                        modal.classList.add('active');
+                    }
+                }
+            });
+
+            if (!nearAny && activePoi) {
+                modal.classList.remove('active');
+                activePoi = null;
+            }
+
             renderer.render(scene, camera);
         }
 
-        // Handle Resize
+        // Resize handler
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
