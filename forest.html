@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dense Forest Portfolio</title>
+    <title>Forest RPG</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', sans-serif; user-select: none; }
         canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
@@ -11,17 +11,33 @@
         /* UI LAYER */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
+        /* STATS BAR (XP) */
+        #stats-bar {
+            position: absolute; top: 20px; left: 20px; width: 200px;
+            color: #e6c86e; pointer-events: auto;
+        }
+        #xp-container {
+            width: 100%; height: 10px; background: rgba(0,0,0,0.6); border: 2px solid #5d4037;
+            margin-top: 5px; border-radius: 5px; overflow: hidden;
+        }
+        #xp-fill {
+            width: 0%; height: 100%; background: #27ae60; transition: width 0.3s;
+        }
+        #level-text { font-weight: bold; font-size: 14px; text-shadow: 1px 1px 0 #000; }
+
         /* INVENTORY */
         #inventory {
-            position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; pointer-events: auto;
+            position: absolute; top: 70px; left: 20px; display: flex; flex-direction: column; gap: 10px; pointer-events: auto;
         }
         .inv-slot {
             background: rgba(0,0,0,0.6); border: 2px solid #5d4037; color: #e6c86e;
             width: 50px; height: 50px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; cursor: pointer;
+            transition: all 0.2s;
         }
         .inv-slot.active { border-color: #e6c86e; background: rgba(230, 200, 110, 0.2); }
-        .inv-icon { font-size: 18px; }
+        .inv-slot.broken { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); }
+        .inv-icon { font-size: 24px; }
 
         /* TIME DISPLAY */
         #time-display {
@@ -45,6 +61,7 @@
             background: #e6c86e; border: 4px solid #5d4037; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; font-weight: bold;
             color: #3e2723; pointer-events: auto; transition: all 0.2s; opacity: 0.5;
+            flex-direction: column; line-height: 1.1; font-size: 14px; text-align: center;
         }
         #action-btn.ready { opacity: 1; transform: scale(1.1); cursor: pointer; }
 
@@ -75,9 +92,17 @@
 <body>
 
     <div id="ui-layer">
+        <div id="stats-bar">
+            <div id="level-text">LEVEL 1</div>
+            <div id="xp-container"><div id="xp-fill"></div></div>
+        </div>
+
         <div id="time-display">12:00 PM</div>
 
         <div id="inventory">
+            <div class="inv-slot" id="inv-axe">
+                <div class="inv-icon" id="icon-axe">🪓</div>
+            </div>
             <div class="inv-slot active" id="btn-flashlight" onclick="toggleFlashlight()">
                 <div class="inv-icon">🔦</div>
             </div>
@@ -110,28 +135,64 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- STATE ---
+        // --- STATE & XP LOGIC ---
         const STATE = {
             wood: 0,
+            xp: 0,
+            level: 1,
+            axeBroken: false,
             flashlight: true,
             zoom: 20,
             nearbyTree: null,
             nearbyPOI: null,
-            time: 0.5, // 0.5 = Noon
+            time: 0.5,
             location: 'OUTSIDE'
         };
 
         const CONFIG = {
             mapRadius: 50,
-            dayColor: new THREE.Color(0x87CEEB),
-            nightColor: new THREE.Color(0x050510),
+            maxLevel: 99,
+            maxXP: 1000000,
             cabinPos: new THREE.Vector3(-10, 0, -15)
         };
 
+        // XP Curve: (Level / 99)^3 * 1,000,000
+        function getXpForLevel(lvl) {
+            return Math.floor(Math.pow(lvl / CONFIG.maxLevel, 3) * CONFIG.maxXP);
+        }
+
+        function addXP(amount) {
+            STATE.xp += amount;
+            
+            // Calculate Level
+            // Reverse formula roughly, or just check thresholds iteratively if performance allows (it does for 99 lvls)
+            // But let's simple check next level threshold
+            let nextLevelXP = getXpForLevel(STATE.level + 1);
+            if (STATE.level < CONFIG.maxLevel && STATE.xp >= nextLevelXP) {
+                STATE.level++;
+                // Flash UI?
+            }
+
+            // Update UI
+            const currentLevelBase = getXpForLevel(STATE.level);
+            nextLevelXP = getXpForLevel(STATE.level + 1);
+            if (STATE.level === CONFIG.maxLevel) nextLevelXP = CONFIG.maxXP;
+
+            const progress = (STATE.xp - currentLevelBase) / (nextLevelXP - currentLevelBase);
+            const pct = Math.min(100, Math.max(0, progress * 100));
+            
+            document.getElementById('level-text').innerText = `LEVEL ${STATE.level}`;
+            document.getElementById('xp-fill').style.width = `${pct}%`;
+        }
+        
+        // Initial UI update
+        addXP(0);
+
+
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(CONFIG.dayColor, 10, 60);
-        scene.background = CONFIG.dayColor;
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 60);
+        scene.background = new THREE.Color(0x87CEEB);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -148,10 +209,6 @@
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.top = 60;
-        sunLight.shadow.camera.bottom = -60;
-        sunLight.shadow.camera.left = -60;
-        sunLight.shadow.camera.right = 60;
         scene.add(sunLight);
 
         const playerLight = new THREE.SpotLight(0xffffff, 0);
@@ -205,21 +262,20 @@
         door.position.set(0, 1.5, 3.1); cabinGroup.add(door);
         scene.add(cabinGroup);
 
-        // 5. Interior (Hidden)
+        // 5. Interior
         const interiorGroup = new THREE.Group();
         interiorGroup.position.set(0, -100, 0);
         scene.add(interiorGroup);
         const intFloor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
         intFloor.rotation.x = -Math.PI/2; interiorGroup.add(intFloor);
         const intLight = new THREE.PointLight(0xffaa00, 1, 20); intLight.position.set(0, 8, 0); interiorGroup.add(intLight);
-        // Badges
         const badges = [ {n:"CIE", c:0xff0000, x:-5}, {n:"MRSA", c:0x00ff00, x:0}, {n:"MICRO", c:0x0000ff, x:5} ];
         badges.forEach(b => {
             const badge = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.5), new THREE.MeshStandardMaterial({color: b.c}));
             badge.position.set(b.x, 5, -9); interiorGroup.add(badge);
         });
 
-        // 6. Signposts (Teleporters)
+        // 6. Signs
         const POI_DATA = [
             { label: "PROFILE", link: "./profile", desc: "View my Bio", x: 10, z: 10, color: 0x3498db },
             { label: "SOCIALS", link: "./socials", desc: "My Posts", x: -10, z: 10, color: 0xe74c3c }
@@ -233,17 +289,14 @@
             const board = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 0.1), new THREE.MeshStandardMaterial({color: p.color}));
             board.position.set(0, 1.8, 0.1); g.add(board);
             const light = new THREE.PointLight(p.color, 1, 5);
-            light.position.y = 2; g.add(light); // Make signs glow
+            light.position.y = 2; g.add(light);
             g.userData = p;
             scene.add(g);
             poiObjects.push(g);
         });
 
-        // --- NATURE ---
-        
+        // --- TREES ---
         let trees = [];
-
-        // Trees
         function createTree(x, z, scale=1) {
             const g = new THREE.Group();
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2*scale, 0.4*scale, 2*scale), new THREE.MeshStandardMaterial({color: 0x3e2723}));
@@ -256,12 +309,33 @@
             scene.add(g);
             trees.push(g);
         }
-        
-        // Initial Forest (Increased density to 200)
         for(let i=0; i<200; i++) {
             let x=(Math.random()-0.5)*90, z=(Math.random()-0.5)*90;
-            // Avoid center fire and cabin door area
             if(Math.sqrt(x*x+z*z)>5 && Math.abs(x-CONFIG.cabinPos.x)>6) createTree(x, z);
+        }
+
+        // --- FX: FLYING AXE HEAD ---
+        function spawnAxeHead(pos) {
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), new THREE.MeshStandardMaterial({color: 0x7f8c8d}));
+            head.position.copy(pos);
+            head.position.y += 1.5; // Player height
+            scene.add(head);
+
+            // Animate flying off
+            const vel = new THREE.Vector3((Math.random()-0.5), 1, (Math.random()-0.5)).normalize().multiplyScalar(0.2);
+            let rot = 0;
+            
+            const interval = setInterval(() => {
+                head.position.add(vel);
+                head.rotation.z += 0.5;
+                head.rotation.x += 0.2;
+                vel.y -= 0.01; // Gravity
+                
+                if (head.position.y < 0) {
+                    clearInterval(interval);
+                    scene.remove(head);
+                }
+            }, 16);
         }
 
         // --- CONTROLS ---
@@ -272,14 +346,42 @@
         };
 
         window.performAction = () => {
-            // Priority: Chop Tree > Plant Tree
+            const btn = document.getElementById('action-btn');
+            const axeSlot = document.getElementById('inv-axe');
+
+            // 1. REPAIR
+            if (STATE.axeBroken) {
+                STATE.axeBroken = false;
+                axeSlot.classList.remove('broken');
+                document.getElementById('icon-axe').innerText = '🪓';
+                // Reset button state immediately for responsiveness
+                btn.style.background = '#e6c86e'; 
+                document.getElementById('action-text').innerText = '...';
+                return;
+            }
+
+            // 2. CHOP
             if(STATE.nearbyTree) {
+                // Remove tree
                 scene.remove(STATE.nearbyTree);
                 trees = trees.filter(t => t !== STATE.nearbyTree);
-                STATE.wood++;
-                document.getElementById('wood-count').innerText = STATE.wood;
                 STATE.nearbyTree = null;
-            } else if (STATE.wood > 0 && STATE.location === 'OUTSIDE') {
+                
+                // Rewards
+                STATE.wood++;
+                addXP(25);
+                document.getElementById('wood-count').innerText = STATE.wood;
+                
+                // Axe Mechanics (5% chance break)
+                if (Math.random() < 0.05) {
+                    STATE.axeBroken = true;
+                    axeSlot.classList.add('broken');
+                    document.getElementById('icon-axe').innerText = '🦯'; // Broken stick/handle
+                    spawnAxeHead(player.position);
+                }
+            } 
+            // 3. PLANT
+            else if (STATE.wood > 0 && STATE.location === 'OUTSIDE') {
                 const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
                 const pos = player.position.clone().add(dir.multiplyScalar(2));
                 createTree(pos.x, pos.z, 1);
@@ -313,32 +415,28 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Time (Slower: 0.0001)
+            // Time & Lighting
             STATE.time += 0.0001; 
             if(STATE.time > 1) STATE.time = 0;
             const sunY = Math.sin(STATE.time * Math.PI) * 100;
             const sunInt = Math.max(0, Math.sin(STATE.time * Math.PI));
             const isNight = sunInt < 0.2;
-            
             sunLight.position.set(Math.cos(STATE.time*Math.PI)*50, sunY, 0);
             sunLight.intensity = sunInt;
-            const sky = CONFIG.dayColor.clone().lerp(CONFIG.nightColor, 1-sunInt);
+            const sky = new THREE.Color(0x87CEEB).lerp(new THREE.Color(0x050510), 1-sunInt);
             scene.background = sky; scene.fog.color = sky;
             fireLight.intensity = isNight ? 10+Math.random()*5 : 0;
             fireMesh.visible = isNight || sunInt < 0.5;
-            
             if(STATE.location === 'OUTSIDE') playerLight.intensity = (STATE.flashlight && isNight) ? 2 : 0;
-
             const hour = Math.floor(STATE.time * 24);
             document.getElementById('time-display').innerText = `${hour}:00`;
 
-            // 2. Player Move
+            // Movement
             if(Math.abs(stick.x)>0.1 || Math.abs(stick.y)>0.1) {
                 player.position.x += stick.x * 0.15;
                 player.position.z += stick.y * 0.15;
                 player.rotation.y = Math.atan2(-stick.x, -stick.y);
             }
-            // Constraints
             if (STATE.location === 'OUTSIDE') {
                 const distCenter = Math.sqrt(player.position.x**2 + player.position.z**2);
                 if (distCenter > CONFIG.mapRadius) {
@@ -360,7 +458,7 @@
                 }
             }
 
-            // 3. Camera
+            // Camera
             if(STATE.location === 'OUTSIDE') {
                 camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, STATE.zoom, STATE.zoom-5)), 0.1);
                 camera.lookAt(player.position);
@@ -370,25 +468,30 @@
                 camera.position.lerp(new THREE.Vector3(0, -90, 15), 0.1); camera.lookAt(0, -95, -10);
             }
 
-            // 4. Interactions
+            // Interactions
             const btn = document.getElementById('action-btn');
             const txt = document.getElementById('action-text');
             const modal = document.getElementById('interaction-modal');
             
-            // Checks
             let nearT = null, nearP = null;
             if(STATE.location === 'OUTSIDE') {
                 trees.forEach(t => { if(t.userData.growing){t.userData.scale+=0.02;t.scale.setScalar(t.userData.scale);if(t.userData.scale>=1)t.userData.growing=false;} if(player.position.distanceTo(t.position)<2) nearT=t; });
                 poiObjects.forEach(p => { if(player.position.distanceTo(p.position)<3) nearP=p; });
             }
             STATE.nearbyTree = nearT;
-            
-            // Button State
-            if(nearT) { btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP'; }
-            else if(STATE.wood>0 && STATE.location==='OUTSIDE') { btn.classList.add('ready'); btn.style.background='#27ae60'; txt.innerText='PLANT'; }
-            else { btn.classList.remove('ready'); btn.style.background='#e6c86e'; txt.innerText='...'; }
 
-            // Modal State (Signs)
+            // BUTTON STATES
+            if (STATE.axeBroken) {
+                btn.classList.add('ready'); btn.style.background='#95a5a6'; txt.innerText='FIX\nAXE';
+            } else if(nearT) { 
+                btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP'; 
+            } else if(STATE.wood>0 && STATE.location==='OUTSIDE') { 
+                btn.classList.add('ready'); btn.style.background='#27ae60'; txt.innerText='PLANT'; 
+            } else { 
+                btn.classList.remove('ready'); btn.style.background='#e6c86e'; txt.innerText='...'; 
+            }
+
+            // MODAL
             if(nearP && STATE.nearbyPOI !== nearP) {
                 STATE.nearbyPOI = nearP;
                 document.getElementById('modal-title').innerText = nearP.userData.label;
