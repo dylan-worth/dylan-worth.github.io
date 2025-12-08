@@ -15,8 +15,6 @@
         <div id="stats-container">
             <div id="level-text">LEVEL 1</div>
             <div class="bar-bg"><div id="xp-fill" class="bar-fill" style="background:#27ae60;"></div></div>
-            <div class="bar-bg"><div id="health-fill" class="bar-fill" style="background:#e74c3c;"></div></div>
-            <div class="bar-bg"><div id="hunger-fill" class="bar-fill" style="background:#d35400;"></div></div>
         </div>
 
         <div id="time-display">12:00 PM</div>
@@ -25,8 +23,9 @@
             <div class="inv-slot" id="inv-axe"><div class="inv-icon" id="icon-axe">🪓</div></div>
             <div class="inv-slot active" id="btn-flashlight"><div class="inv-icon">🔦</div></div>
             <div class="inv-slot"><div class="inv-icon">🪵</div><div id="wood-count">0</div></div>
-            <div class="inv-slot"><div class="inv-icon">🥩</div><div id="raw-meat-count">0</div></div>
-            <div class="inv-slot"><div class="inv-icon">🍗</div><div id="cooked-meat-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🍒</div><div id="berry-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🥩</div><div id="raw-count">0</div></div>
+            <div class="inv-slot"><div class="inv-icon">🍗</div><div id="cooked-count">0</div></div>
         </div>
 
         <div id="zoom-controls">
@@ -44,16 +43,9 @@
             <a href="#" id="modal-link" class="btn-visit">GO</a>
         </div>
 
-        <div id="joystick-zone">
-            <div id="stick"></div>
-        </div>
-        
-        <div id="death-screen">
-            <h1>YOU PERISHED</h1>
-            <button onclick="location.reload()">RESPAWN</button>
-        </div>
+        <div id="joystick-zone"><div id="stick"></div></div>
     </div>
 
-    <script type="module" src="js/main-game.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
