@@ -7,7 +7,7 @@ export const bushObjects = [];
 export const poiObjects = [];
 export const rabbitObjects = []; // New Array
 
-// 1. Create Tree (Existing)
+// 1. Create Tree
 export function createTree(x, z, scale=1) {
     const g = new THREE.Group();
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2*scale, 0.4*scale, 2*scale), new THREE.MeshStandardMaterial({color: 0x3e2723}));
@@ -21,7 +21,7 @@ export function createTree(x, z, scale=1) {
     treeObjects.push(g);
 }
 
-// 2. Create Bush (Existing)
+// 2. Create Bush
 export function createBush(x, z) {
     const g = new THREE.Group();
     const bush = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6), new THREE.MeshStandardMaterial({color: 0x2ecc71}));
@@ -39,7 +39,7 @@ export function createBush(x, z) {
     bushObjects.push(g);
 }
 
-// 3. Create Rabbit (NEW)
+// 3. Create Rabbit
 export function createRabbit(x, z) {
     const g = new THREE.Group();
     
@@ -65,7 +65,7 @@ export function createRabbit(x, z) {
     rabbitObjects.push(g);
 }
 
-// 4. Create Sign (Existing)
+// 4. Create Sign
 export function createSign(data) {
     const g = new THREE.Group();
     g.position.set(data.x, 0, data.z);
@@ -80,7 +80,7 @@ export function createSign(data) {
     poiObjects.push(g);
 }
 
-// 5. Init World (Updated)
+// 5. Init World
 export function initWorld() {
     const ground = new THREE.Mesh(new THREE.CircleGeometry(60, 64), new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 }));
     ground.rotation.x = -Math.PI / 2;
