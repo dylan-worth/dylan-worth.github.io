@@ -183,4 +183,60 @@ zone.addEventListener('mousedown', e=>{drag=true; handleInput(e.clientX, e.clien
 window.addEventListener('mousemove', e=>{if(drag)handleInput(e.clientX, e.clientY)});
 window.addEventListener('mouseup', ()=>{drag=false; handleInput(0,0,true)});
 
-document.getElementById('action-btn').addEventListener('click', () =>
+document.getElementById('action-btn').addEventListener('click', () => {
+    const txt = document.getElementById('action-text').innerText;
+
+    if(STATE.axeBroken) {
+        STATE.axeBroken = false;
+        document.getElementById('inv-axe').classList.remove('broken');
+        return;
+    }
+    
+    if(txt.includes('COOK')) {
+        STATE.rawMeat--;
+        STATE.cookedMeat++;
+        STATE.xp += 15;
+        updateStatsUI();
+    }
+    else if(txt.includes('ATTACK') && STATE.nearbyRabbit) {
+        WORLD.scene.remove(STATE.nearbyRabbit);
+        const idx = WORLD.rabbitObjects.indexOf(STATE.nearbyRabbit);
+        if(idx > -1) WORLD.rabbitObjects.splice(idx, 1);
+        STATE.nearbyRabbit = null;
+        STATE.rawMeat++;
+        STATE.xp += 10;
+        updateStatsUI();
+    }
+    else if(txt === 'PICK' && STATE.nearbyBush) {
+        STATE.nearbyBush.userData.hasBerries = false;
+        STATE.nearbyBush.getObjectByName('berries').visible = false;
+        STATE.berries++;
+        STATE.xp += 5;
+        updateStatsUI();
+    }
+    else if(txt === 'CHOP' && STATE.nearbyTree) {
+        WORLD.scene.remove(STATE.nearbyTree);
+        const idx = WORLD.treeObjects.indexOf(STATE.nearbyTree);
+        if(idx > -1) WORLD.treeObjects.splice(idx, 1);
+        STATE.nearbyTree = null;
+        STATE.wood++;
+        STATE.xp += 25;
+        if(Math.random() < 0.05) { 
+            STATE.axeBroken = true;
+            document.getElementById('inv-axe').classList.add('broken');
+            spawnAxeHead(player.position);
+        }
+        updateStatsUI();
+    }
+    else if(txt === 'PLANT' && STATE.wood > 0) {
+        const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
+        WORLD.createTree(player.position.x + dir.x*2, player.position.z + dir.z*2, 1);
+        STATE.wood--;
+        updateStatsUI();
+    }
+});
+
+document.getElementById('zoom-in').onclick = () => STATE.zoom = Math.max(10, STATE.zoom - 5);
+document.getElementById('zoom-out').onclick = () => STATE.zoom = Math.min(40, STATE.zoom + 5);
+
+animate();
