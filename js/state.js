@@ -2,8 +2,6 @@ export const STATE = {
     // Stats
     level: 1,
     xp: 0,
-    health: 100,
-    hunger: 100,
     
     // Inventory
     wood: 0,
@@ -16,14 +14,15 @@ export const STATE = {
     
     // Config
     zoom: 20,
-    time: 0.5,
+    time: 0.5, 
     location: 'OUTSIDE',
     
     // Interaction Targets
     nearbyTree: null,
     nearbyBush: null,
-    nearbyPOI: null,
-    nearbyBunny: null // New target
+    nearbyRabbit: null,
+    nearbyFire: false,
+    nearbyPOI: null
 };
 
 export const CONFIG = {
