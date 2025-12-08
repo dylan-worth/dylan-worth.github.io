@@ -10,10 +10,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// Clock for stable timing (Fixes the random dying issue)
-const clock = new THREE.Clock();
-let hungerTimer = 0;
-
 const sunLight = new THREE.DirectionalLight(0xffaa00, 1);
 sunLight.position.set(50, 50, 0);
 sunLight.castShadow = true;
@@ -49,9 +45,8 @@ function updateStatsUI() {
     
     document.getElementById('xp-fill').style.width = `${Math.max(0, Math.min(100, pct))}%`;
     document.getElementById('level-text').innerText = `LEVEL ${STATE.level}`;
-    document.getElementById('health-fill').style.width = `${STATE.health}%`;
-    document.getElementById('hunger-fill').style.width = `${STATE.hunger}%`;
     
+    // Inventory
     document.getElementById('wood-count').innerText = STATE.wood;
     document.getElementById('berry-count').innerText = STATE.berries;
     document.getElementById('raw-count').innerText = STATE.rawMeat;
@@ -69,25 +64,10 @@ function spawnAxeHead(pos) {
     }, 16);
 }
 
-function flashDamage() {
-    const overlay = document.createElement('div');
-    overlay.style.position = 'absolute';
-    overlay.style.top = '0'; overlay.style.left = '0';
-    overlay.style.width = '100%'; overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
-    overlay.style.pointerEvents = 'none';
-    overlay.style.transition = 'opacity 0.5s';
-    document.body.appendChild(overlay);
-    setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }, 100);
-}
-
 // --- GAME LOOP ---
 
 function animate() {
-    if(STATE.health <= 0) return;
     requestAnimationFrame(animate);
-
-    const delta = clock.getDelta(); // Time in seconds since last frame
 
     // 1. Time & Environment
     STATE.time += 0.0001; if(STATE.time > 1) STATE.time = 0;
@@ -101,40 +81,7 @@ function animate() {
 
     document.getElementById('time-display').innerText = `${Math.floor(STATE.time * 24)}:00`;
 
-    // 2. Hunger & Healing (TIME BASED NOW)
-    hungerTimer += delta;
-    if(hungerTimer > 10.0) { // Every 10 seconds exactly
-        STATE.hunger -= 1;
-        
-        // Starvation Damage
-        if(STATE.hunger <= 0) { 
-            STATE.hunger = 0; 
-            STATE.health -= 5; 
-            flashDamage(); // Visual cue
-            document.getElementById('status-msg').innerText = "STARVING!";
-            document.getElementById('status-msg').style.color = "#e74c3c";
-            document.getElementById('status-msg').style.opacity = 1;
-            
-            if(STATE.health <= 0) document.getElementById('death-screen').style.display='flex'; 
-        } else {
-            document.getElementById('status-msg').style.opacity = 0;
-        }
-
-        // Campfire Healing
-        const distToFire = player.position.distanceTo(new THREE.Vector3(0,0,0));
-        if (distToFire < 4 && STATE.health < 100 && STATE.hunger > 0) {
-            STATE.health += 5;
-            if(STATE.health > 100) STATE.health = 100;
-            document.getElementById('status-msg').innerText = "HEALING...";
-            document.getElementById('status-msg').style.color = "#2ecc71";
-            document.getElementById('status-msg').style.opacity = 1;
-        }
-
-        hungerTimer = 0;
-        updateStatsUI();
-    }
-
-    // 3. Movement
+    // 2. Movement
     if(Math.abs(stick.x)>0.1 || Math.abs(stick.y)>0.1) {
         player.position.x += stick.x * 0.15; 
         player.position.z += stick.y * 0.15;
@@ -143,7 +90,7 @@ function animate() {
     camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, STATE.zoom, STATE.zoom-5)), 0.1);
     camera.lookAt(player.position);
 
-    // 4. Rabbit AI
+    // 3. Rabbit AI
     WORLD.rabbitObjects.forEach(r => {
         r.userData.hopTimer++;
         if(r.userData.hopTimer > 100 + Math.random()*200) {
@@ -160,7 +107,7 @@ function animate() {
         }
     });
 
-    // 5. Interaction Checks
+    // 4. Interaction Checks
     let nearT=null, nearB=null, nearR=null, nearP=null;
     
     WORLD.treeObjects.forEach(t => { if(player.position.distanceTo(t.position)<2) nearT=t; });
@@ -168,7 +115,7 @@ function animate() {
         if(b.userData.hasBerries && player.position.distanceTo(b.position)<2) nearB=b;
         if(!b.userData.hasBerries) { 
             b.userData.regenTimer++; 
-            if(b.userData.regenTimer > 3000) { // Approx 50 seconds at 60fps
+            if(b.userData.regenTimer > 3000) { 
                 b.userData.hasBerries = true; 
                 b.userData.regenTimer = 0; 
                 b.getObjectByName('berries').visible=true; 
@@ -192,9 +139,7 @@ function animate() {
     } else if(nearR) {
         btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='ATTACK';
     } else if(nearB) {
-        btn.classList.add('ready'); btn.style.background='#e67e22'; txt.innerText='EAT';
-    } else if(STATE.cookedMeat > 0 && STATE.hunger < 100 && !nearT && !nearP && !nearB) {
-        btn.classList.add('ready'); btn.style.background='#e67e22'; txt.innerText='EAT\nMEAT';
+        btn.classList.add('ready'); btn.style.background='#e67e22'; txt.innerText='PICK';
     } else if(nearT) {
         btn.classList.add('ready'); btn.style.background='#e74c3c'; txt.innerText='CHOP';
     } else if(STATE.wood>0) {
@@ -238,66 +183,4 @@ zone.addEventListener('mousedown', e=>{drag=true; handleInput(e.clientX, e.clien
 window.addEventListener('mousemove', e=>{if(drag)handleInput(e.clientX, e.clientY)});
 window.addEventListener('mouseup', ()=>{drag=false; handleInput(0,0,true)});
 
-document.getElementById('action-btn').addEventListener('click', () => {
-    const txt = document.getElementById('action-text').innerText;
-
-    if(STATE.axeBroken) {
-        STATE.axeBroken = false;
-        document.getElementById('inv-axe').classList.remove('broken');
-        return;
-    }
-    
-    if(txt.includes('COOK')) {
-        STATE.rawMeat--;
-        STATE.cookedMeat++;
-        updateStatsUI();
-    }
-    else if(txt.includes('ATTACK') && STATE.nearbyRabbit) {
-        WORLD.scene.remove(STATE.nearbyRabbit);
-        const idx = WORLD.rabbitObjects.indexOf(STATE.nearbyRabbit);
-        if(idx > -1) WORLD.rabbitObjects.splice(idx, 1);
-        STATE.nearbyRabbit = null;
-        STATE.rawMeat++;
-        STATE.xp += 10;
-        updateStatsUI();
-    }
-    else if(txt === 'EAT' && STATE.nearbyBush) {
-        STATE.nearbyBush.userData.hasBerries = false;
-        STATE.nearbyBush.getObjectByName('berries').visible = false;
-        STATE.hunger = Math.min(100, STATE.hunger + 15);
-        STATE.health = Math.min(100, STATE.health + 5);
-        STATE.berries++;
-        updateStatsUI();
-    }
-    else if(txt.includes('EAT MEAT')) {
-        STATE.cookedMeat--;
-        STATE.hunger = Math.min(100, STATE.hunger + 40);
-        STATE.health = Math.min(100, STATE.health + 15);
-        updateStatsUI();
-    }
-    else if(txt === 'CHOP' && STATE.nearbyTree) {
-        WORLD.scene.remove(STATE.nearbyTree);
-        const idx = WORLD.treeObjects.indexOf(STATE.nearbyTree);
-        if(idx > -1) WORLD.treeObjects.splice(idx, 1);
-        STATE.nearbyTree = null;
-        STATE.wood++;
-        STATE.xp += 25;
-        if(Math.random() < 0.05) { 
-            STATE.axeBroken = true;
-            document.getElementById('inv-axe').classList.add('broken');
-            spawnAxeHead(player.position);
-        }
-        updateStatsUI();
-    }
-    else if(txt === 'PLANT' && STATE.wood > 0) {
-        const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-        WORLD.createTree(player.position.x + dir.x*2, player.position.z + dir.z*2, 1);
-        STATE.wood--;
-        updateStatsUI();
-    }
-});
-
-document.getElementById('zoom-in').onclick = () => STATE.zoom = Math.max(10, STATE.zoom - 5);
-document.getElementById('zoom-out').onclick = () => STATE.zoom = Math.min(40, STATE.zoom + 5);
-
-animate();
+document.getElementById('action-btn').addEventListener('click', () =>
