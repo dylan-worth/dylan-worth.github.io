@@ -110,7 +110,14 @@ function animate() {
     // 4. Interaction Checks
     let nearT=null, nearB=null, nearR=null, nearP=null;
     
-    WORLD.treeObjects.forEach(t => { if(player.position.distanceTo(t.position)<2) nearT=t; });
+    WORLD.treeObjects.forEach(t => { 
+        if(t.userData.growing) {
+            t.userData.scale += 0.02;
+            t.scale.setScalar(t.userData.scale);
+            if(t.userData.scale >= 1) t.userData.growing = false;
+        }
+        if(player.position.distanceTo(t.position)<2) nearT=t; 
+    });
     WORLD.bushObjects.forEach(b => { 
         if(b.userData.hasBerries && player.position.distanceTo(b.position)<2) nearB=b;
         if(!b.userData.hasBerries) { 
@@ -230,7 +237,19 @@ document.getElementById('action-btn').addEventListener('click', () => {
     }
     else if(txt === 'PLANT' && STATE.wood > 0) {
         const dir = new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0), player.rotation.y);
-        WORLD.createTree(player.position.x + dir.x*2, player.position.z + dir.z*2, 1);
+        const pos = player.position.clone().add(dir.multiplyScalar(2));
+        
+        // RANDOM TREE PLANTING
+        const rand = Math.random();
+        if(rand < 0.6) WORLD.createTree(pos.x, pos.z, 1);
+        else if(rand < 0.8) WORLD.createWillow(pos.x, pos.z, 1);
+        else WORLD.createMahogany(pos.x, pos.z, 1);
+        
+        // Set new tree to growing
+        WORLD.treeObjects[WORLD.treeObjects.length-1].userData.growing = true;
+        WORLD.treeObjects[WORLD.treeObjects.length-1].scale.set(0.1, 0.1, 0.1);
+        WORLD.treeObjects[WORLD.treeObjects.length-1].userData.scale = 0.1;
+
         STATE.wood--;
         updateStatsUI();
     }
