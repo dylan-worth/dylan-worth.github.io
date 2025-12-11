@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Micron Scale | Aesthetic View</title>
+    <title>SMB Assessments | Micron Scale</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -15,7 +15,7 @@
             --bg-light: #1a1a1e;
             --text-main: #ececec;
             --text-muted: #a1a1aa;
-            --accent-gold: #c6a87c; /* Luxury gold accent */
+            --accent-gold: #c6a87c;
             --glass-bg: rgba(20, 20, 23, 0.65);
             --glass-border: rgba(255, 255, 255, 0.08);
         }
@@ -27,7 +27,6 @@
             padding: 0;
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
-            /* Cinematic Background Gradient */
             background: radial-gradient(circle at 70% 50%, #2a2a30 0%, var(--bg-dark) 60%);
             color: var(--text-main);
             height: 100vh;
@@ -52,7 +51,7 @@
             justify-content: center;
             padding: 40px;
             z-index: 20;
-            pointer-events: none; /* Let clicks pass through to background if needed */
+            pointer-events: none; 
         }
 
         .glass-card {
@@ -64,8 +63,9 @@
             border-radius: 24px;
             max-width: 500px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            pointer-events: auto; /* Re-enable clicks on the card */
+            pointer-events: auto;
             animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative; /* For absolute positioning inside if needed */
         }
 
         h1 {
@@ -136,36 +136,24 @@
 
         .visual-stage:active { cursor: grabbing; }
 
-        /* The 3D Object Container */
         .hair-spiral {
             position: relative;
-            width: 0; 
-            height: 0;
+            width: 0; height: 0;
             transform-style: preserve-3d;
-            /* Initial Isometric-ish Tilt */
             transform: rotateX(5deg); 
         }
 
-        /* The Hair Segments - High Gloss */
         .hair-segment {
             position: absolute;
-            width: 100px; /* Represents 100 microns */
+            width: 100px; 
             height: 8px;
-            /* Glossy Brown Gradient */
             background: linear-gradient(90deg, 
-                #1e1109 0%, 
-                #3e2723 20%, 
-                #8d6e63 45%, /* Shine highlight */
-                #a1887f 50%, /* Brightest specular */
-                #8d6e63 55%, 
-                #3e2723 80%, 
-                #1e1109 100%);
+                #1e1109 0%, #3e2723 20%, #8d6e63 45%, 
+                #a1887f 50%, #8d6e63 55%, #3e2723 80%, #1e1109 100%);
             border-radius: 4px;
-            /* Soft shadow for depth */
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* UI Elements in 3D Space */
         .measurement-ui {
             position: absolute;
             top: 50%;
@@ -183,16 +171,8 @@
             margin-bottom: 10px;
             opacity: 0.6;
         }
-        .measure-line::after {
-            content: '';
-            position: absolute;
-            right: 0; top: -3px; width: 1px; height: 8px; background: var(--accent-gold);
-        }
-        .measure-line::before {
-            content: '';
-            position: absolute;
-            left: 0; top: -3px; width: 1px; height: 8px; background: var(--accent-gold);
-        }
+        .measure-line::after { content: ''; position: absolute; right: 0; top: -3px; width: 1px; height: 8px; background: var(--accent-gold); }
+        .measure-line::before { content: ''; position: absolute; left: 0; top: -3px; width: 1px; height: 8px; background: var(--accent-gold); }
 
         .measure-label {
             display: block;
@@ -217,11 +197,43 @@
             align-items: center;
             gap: 10px;
         }
-        .drag-indicator::before, .drag-indicator::after {
-            content: ''; display: block; width: 30px; height: 1px; background: var(--text-muted);
+        .drag-indicator::before, .drag-indicator::after { content: ''; display: block; width: 30px; height: 1px; background: var(--text-muted); }
+
+        /* --- LOGO STYLES --- */
+        .brand-footer {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: none; /* Let user drag hair even if mouse is over logo area */
+            animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* Animations */
+        .brand-logo-mark {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            line-height: 1;
+            letter-spacing: -1px;
+            border: 2px solid var(--accent-gold);
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        .brand-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
@@ -230,30 +242,22 @@
         /* Mobile Responsive */
         @media (max-width: 900px) {
             .container { flex-direction: column-reverse; }
-            
-            .info-wrapper {
-                flex: 0 0 auto;
-                padding: 20px;
-                background: linear-gradient(to top, var(--bg-dark), transparent);
-            }
-            
-            .glass-card {
-                padding: 30px;
-                width: 100%;
-                backdrop-filter: blur(15px);
-            }
-
+            .info-wrapper { flex: 0 0 auto; padding: 20px; background: linear-gradient(to top, var(--bg-dark), transparent); }
+            .glass-card { padding: 30px; width: 100%; backdrop-filter: blur(15px); }
             h1 { font-size: 2rem; }
+            .visual-stage { flex: 1; min-height: 50vh; }
+            .measurement-ui { right: 20px; top: 20%; }
             
-            .visual-stage {
-                flex: 1;
-                min-height: 50vh;
+            /* Logo adjustment for mobile */
+            .brand-footer {
+                bottom: 20px;
+                right: 0;
+                left: 0;
+                align-items: center;
+                opacity: 0.7;
             }
-
-            .measurement-ui {
-                right: 20px;
-                top: 20%;
-            }
+            .brand-logo-mark { font-size: 1.5rem; border-width: 1px; }
+            .brand-name { font-size: 0.6rem; }
         }
     </style>
 </head>
@@ -293,71 +297,63 @@
                 <span class="measure-label">100 Microns</span>
             </div>
 
-            <div class="hair-spiral" id="hairObject">
-                </div>
+            <div class="hair-spiral" id="hairObject"></div>
 
             <div class="drag-indicator">Drag to Rotate</div>
+            
+            <div class="brand-footer">
+                <div class="brand-logo-mark">SMB</div>
+                <div class="brand-name">Assessments</div>
+            </div>
+
         </section>
     </div>
 
     <script>
-        // --- 1. Aesthetic Hair Generation ---
+        // --- Hair Generation ---
         function generateHair() {
             const container = document.getElementById('hairObject');
-            const segmentCount = 160; // More segments for smoother spiral
-            const curlTightness = 3;  // Number of rotations
-            const height = 600;       // Total height in px
-            const radius = 40;        // Radius of the curl
+            const segmentCount = 160; 
+            const curlTightness = 3; 
+            const height = 600;       
+            const radius = 40;        
             
             for (let i = 0; i < segmentCount; i++) {
                 const div = document.createElement('div');
                 div.className = 'hair-segment';
-                
                 const progress = i / segmentCount;
                 const yPos = (progress * height) - (height / 2);
                 const angle = progress * 360 * curlTightness;
                 
-                // 3D Transform
                 div.style.transform = `
                     translateY(${yPos}px)
                     rotateY(${angle}deg)
                     translateZ(${radius}px)
                     rotateX(-12deg)
                 `;
-                
-                // Add slight opacity variation for texture
                 div.style.opacity = 0.9 + (Math.random() * 0.1);
-                
                 container.appendChild(div);
             }
         }
 
-        // --- 2. Physics & Interaction ---
+        // --- Interaction Logic ---
         const stage = document.getElementById('stage');
         const object = document.getElementById('hairObject');
         
         let isDragging = false;
         let startX = 0;
-        let currentRotation = -20; // Start at a nice angle
+        let currentRotation = -20;
         let targetRotation = -20;
         
-        // Smooth Animation Loop
         function animate() {
-            // Linear interpolation (Lerp) for smooth weightiness
             currentRotation += (targetRotation - currentRotation) * 0.1;
-            
-            // Apply rotation (Keep the tilt fixed, rotate Y)
             object.style.transform = `rotateX(5deg) rotateY(${currentRotation}deg)`;
-            
             requestAnimationFrame(animate);
         }
         
-        // Start Everything
         generateHair();
         animate();
 
-        // --- 3. Input Handling ---
-        
         // Mouse
         stage.addEventListener('mousedown', (e) => {
             isDragging = true;
@@ -369,8 +365,8 @@
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const delta = e.clientX - startX;
-            targetRotation += delta * 0.4; // Sensitivity
-            startX = e.clientX; // Reset start to prevent acceleration
+            targetRotation += delta * 0.4;
+            startX = e.clientX; 
         });
 
         window.addEventListener('mouseup', () => {
@@ -387,16 +383,12 @@
         window.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
             if(e.cancelable) e.preventDefault();
-            
             const delta = e.touches[0].clientX - startX;
             targetRotation += delta * 0.4;
             startX = e.touches[0].clientX;
         }, { passive: false });
 
-        window.addEventListener('touchend', () => {
-            isDragging = false;
-        });
-
+        window.addEventListener('touchend', () => { isDragging = false; });
     </script>
 </body>
 </html>
