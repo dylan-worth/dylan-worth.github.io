@@ -3,222 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hair vs Mold Spore Comparison</title>
+    <title>Micron Scale Visualization</title>
     <style>
+        :root {
+            --hair-width: 150px; /* Visual width of the hair on screen */
+            --bg-color: #f8f9fa;
+            --text-color: #2d3436;
+            --accent-color: #d63031;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #f0f4f8;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Prevent scrolling while dragging */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
         }
 
-        /* UI Overlay */
-        .info-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 100;
-            max-width: 300px;
+        /* Main Layout Container */
+        .container {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Side: Content & Explanation */
+        .content-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 600px;
+            z-index: 10; /* Keep text above absolute elements if needed */
         }
 
         h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        .explanation {
             font-size: 1.2rem;
-            margin: 0 0 10px 0;
-            color: #333;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 20px;
         }
 
-        p {
+        .note {
             font-size: 0.9rem;
-            color: #555;
-            line-height: 1.4;
+            color: #636e72;
+            margin-top: auto;
         }
 
-        .controls {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            color: #888;
-            font-style: italic;
-        }
-
-        /* Scene Container */
-        .scene {
-            perspective: 1000px;
-            width: 300px; /* Represents ~150 microns roughly in this view */
-            height: 100%;
+        /* Right Side: The Interactive Visual */
+        .visual-section {
+            flex: 1;
+            background-color: #e1e4e8;
+            position: relative;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             cursor: grab;
+            overflow: hidden;
+            perspective: 1000px; /* Essential for 3D effect */
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.05);
         }
 
-        .scene:active {
+        .visual-section:active {
             cursor: grabbing;
         }
 
-        /* The Hair Strand (Cylinder via CSS) */
-        .hair-strand-container {
-            position: relative;
-            width: 200px; /* Let's say 200px = 100 microns */
-            height: 120vh; /* Extends off screen */
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
+        /* Floating Label in Visual Area */
+        .visual-label {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .hair-surface {
+        .drag-hint {
             position: absolute;
-            top: 0;
-            left: 0;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #636e72;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* 3D Hair Strand Implementation */
+        .hair-container {
+            width: var(--hair-width); 
+            height: 120%; /* Taller than screen to look continuous */
+            transform-style: preserve-3d;
+            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .hair-shaft {
             width: 100%;
             height: 100%;
-            /* Gradient creates the cylindrical 3D effect */
+            /* Realistic Hair Gradient */
             background: linear-gradient(90deg, 
-                #2a1a11 0%, 
-                #4a3b32 20%, 
-                #8b6c5c 50%, 
-                #4a3b32 80%, 
-                #2a1a11 100%);
-            /* Texture for cuticle pattern */
+                #1a110d 0%, 
+                #3e2b22 25%, 
+                #6d4c41 50%, 
+                #3e2b22 75%, 
+                #1a110d 100%);
+            /* Subtle texture for cuticle scales */
             background-image: repeating-linear-gradient(
                 185deg,
-                rgba(255,255,255,0) 0px,
-                rgba(255,255,255,0) 20px,
-                rgba(255,255,255,0.05) 21px,
-                rgba(255,255,255,0) 22px
+                transparent 0px,
+                transparent 10px,
+                rgba(255,255,255,0.03) 11px,
+                transparent 12px
             );
-            border-radius: 10px; /* Slight rounding at edges */
+            border-radius: 10px;
+            position: relative;
         }
 
-        /* Mold Spores */
-        .spore {
+        /* A visual ruler line on the hair to emphasize width */
+        .width-marker {
             position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #a8d5a2, #4caf50);
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-            z-index: 10;
+            top: 50%;
+            left: -20px;
+            right: -20px;
+            height: 1px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateZ(80px); /* Push slightly in front */
         }
 
-        /* Spore Size Classes based on 200px = 100 microns scale */
-        /* 1 micron = 2px */
-        
-        /* 2 microns = 4px */
-        .spore-small {
-            width: 4px;
-            height: 4px;
-            background: #8bc34a; /* Lighter green */
+        .width-marker span {
+            background: #333;
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 4px;
         }
 
-        /* 10 microns = 20px */
-        .spore-medium {
-            width: 20px;
-            height: 20px;
-        }
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
 
-        /* 20 microns = 40px (Stachybotrys/etc size) */
-        .spore-large {
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle at 30% 30%, #444, #000); /* Dark mold */
+            .content-section {
+                flex: 0 0 auto;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 1.8rem; }
+            
+            .visual-section {
+                flex: 1; /* Takes remaining height */
+                min-height: 400px;
+                box-shadow: inset 0 10px 20px rgba(0,0,0,0.05);
+            }
         }
-
-        /* Floating label for scale */
-        .measurement-line {
-            position: absolute;
-            bottom: 50%;
-            width: 200px;
-            text-align: center;
-            border-bottom: 2px solid red;
-            color: red;
-            font-weight: bold;
-            transform: translateZ(110px); /* Push it in front of the hair */
-            pointer-events: none;
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="info-panel">
-        <h1>Scale Comparison</h1>
-        <p>One strand of hair is <strong>100 microns</strong> in width.</p>
-        <p>Mold spores typically range from <strong>2-20 microns</strong>.</p>
-        <div class="controls">
-            <p><strong>Click & Drag</strong> horizontally to spin the hair strand.</p>
-        </div>
-    </div>
-
-    <div class="scene" id="scene">
-        <div class="hair-strand-container" id="hair">
-            <div class="hair-surface"></div>
+    <div class="container">
+        <section class="content-section">
+            <h1>Size Comparison</h1>
             
-            <div class="measurement-line">100 microns</div>
+            <div class="explanation">
+                <p>
+                    A single strand of human hair is approximately <span class="highlight">100 microns</span> wide.
+                </p>
+                <p>
+                    In comparison, mold spores are microscopic, typically ranging from <span class="highlight">2 to 20 microns</span>.
+                </p>
+                <p style="font-size: 0.95em; color: #555; margin-top: 20px;">
+                    This means you could fit roughly <strong>5 to 50 mold spores</strong> across the width of the single hair strand shown here.
+                </p>
+            </div>
 
-            <div class="spore spore-large" style="top: 30%; left: -60px; transform: translateZ(20px);"></div>
+            <p class="note">
+                Reference: Typical human hair width ranges from 17 to 181 µm.
+            </p>
+        </section>
+
+        <section class="visual-section" id="visualArea">
+            <div class="visual-label">Interactive View</div>
             
-            <div class="spore spore-medium" style="top: 45%; left: 50px; transform: translateZ(60px);"></div>
-            <div class="spore spore-medium" style="top: 42%; left: 210px; transform: translateZ(-20px);"></div>
+            <div class="hair-container" id="hairObject">
+                <div class="hair-shaft">
+                    <div class="width-marker">
+                        <span>100 µm</span>
+                        <span>100 µm</span>
+                    </div>
+                </div>
+            </div>
 
-            <div class="spore spore-small" style="top: 55%; left: 80%; transform: translateZ(10px);"></div>
-            <div class="spore spore-small" style="top: 55.5%; left: 82%; transform: translateZ(10px);"></div>
-            <div class="spore spore-small" style="top: 54.5%; left: 81%; transform: translateZ(10px);"></div>
-        </div>
+            <div class="drag-hint">Drag to spin the strand</div>
+        </section>
     </div>
 
     <script>
-        const scene = document.getElementById('scene');
-        const hair = document.getElementById('hair');
+        const container = document.getElementById('visualArea');
+        const hair = document.getElementById('hairObject');
         
         let isDragging = false;
         let startX = 0;
         let currentRotation = 0;
         let previousRotation = 0;
 
-        // Mouse Down
-        scene.addEventListener('mousedown', (e) => {
+        // --- Mouse Events ---
+        container.addEventListener('mousedown', (e) => {
             isDragging = true;
             startX = e.clientX;
-            scene.style.cursor = 'grabbing';
+            container.style.cursor = 'grabbing';
+            // Stop text selection while dragging
+            e.preventDefault();
         });
 
-        // Mouse Move
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            
             const deltaX = e.clientX - startX;
-            // 0.5 sensitivity multiplier
-            currentRotation = previousRotation + (deltaX * 0.5);
-            
+            currentRotation = previousRotation + (deltaX * 0.4); // 0.4 = spin speed
             hair.style.transform = `rotateY(${currentRotation}deg)`;
         });
 
-        // Mouse Up
         window.addEventListener('mouseup', () => {
-            isDragging = false;
-            scene.style.cursor = 'grab';
-            previousRotation = currentRotation;
+            if (isDragging) {
+                isDragging = false;
+                container.style.cursor = 'grab';
+                previousRotation = currentRotation;
+            }
         });
 
-        // Touch Support for Mobile
-        scene.addEventListener('touchstart', (e) => {
+        // --- Touch Events (Mobile) ---
+        container.addEventListener('touchstart', (e) => {
             isDragging = true;
             startX = e.touches[0].clientX;
-        });
+        }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
+            // Prevent page scrolling while interacting with the hair
+            if(e.cancelable) e.preventDefault(); 
+            
             const deltaX = e.touches[0].clientX - startX;
-            currentRotation = previousRotation + (deltaX * 0.5);
+            currentRotation = previousRotation + (deltaX * 0.4);
             hair.style.transform = `rotateY(${currentRotation}deg)`;
-        });
+        }, { passive: false });
 
         window.addEventListener('touchend', () => {
             isDragging = false;
