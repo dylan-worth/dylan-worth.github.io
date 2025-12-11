@@ -28,18 +28,18 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
             background: radial-gradient(circle at 70% 50%, #2a2a30 0%, var(--bg-dark) 60%);
+            background-attachment: fixed; /* Keeps the glow in place while scrolling */
             color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scrollbar from 3D elements */
         }
 
         /* --- Layout --- */
         .container {
             display: flex;
             flex-direction: row;
+            min-height: 100vh;
             width: 100%;
-            height: 100%;
             position: relative;
         }
 
@@ -51,7 +51,8 @@
             justify-content: center;
             padding: 40px;
             z-index: 20;
-            pointer-events: none; 
+            /* Allow scrolling if content is tall */
+            min-height: 100vh; 
         }
 
         .glass-card {
@@ -63,9 +64,8 @@
             border-radius: 24px;
             max-width: 500px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            pointer-events: auto;
-            animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative; /* For absolute positioning inside if needed */
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         h1 {
@@ -132,6 +132,9 @@
             justify-content: center;
             cursor: grab;
             perspective: 1000px;
+            min-height: 100vh; /* Ensure it takes up full height */
+            /* Prevent user selecting text while dragging */
+            user-select: none;
         }
 
         .visual-stage:active { cursor: grabbing; }
@@ -208,8 +211,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            pointer-events: none; /* Let user drag hair even if mouse is over logo area */
-            animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            pointer-events: none; 
         }
 
         .brand-logo-mark {
@@ -234,27 +236,47 @@
             font-weight: 600;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         /* Mobile Responsive */
         @media (max-width: 900px) {
-            .container { flex-direction: column-reverse; }
-            .info-wrapper { flex: 0 0 auto; padding: 20px; background: linear-gradient(to top, var(--bg-dark), transparent); }
-            .glass-card { padding: 30px; width: 100%; backdrop-filter: blur(15px); }
-            h1 { font-size: 2rem; }
-            .visual-stage { flex: 1; min-height: 50vh; }
-            .measurement-ui { right: 20px; top: 20%; }
+            .container { 
+                flex-direction: column; /* Stack Text top, Visual bottom */
+                height: auto; /* Allow growth */
+            }
             
-            /* Logo adjustment for mobile */
+            .info-wrapper { 
+                flex: 0 0 auto; 
+                padding: 40px 20px; 
+                min-height: auto; /* Don't force full height on mobile text section */
+            }
+            
+            .glass-card { 
+                padding: 30px; 
+                width: 100%; 
+                margin: 0;
+            }
+
+            h1 { font-size: 2rem; }
+            
+            /* Give the visual section a fixed height on mobile so you can scroll past it */
+            .visual-stage {
+                height: 80vh; 
+                min-height: 500px;
+                background: rgba(0,0,0,0.2); /* Slight darkening to separate sections */
+            }
+
+            .measurement-ui { 
+                right: 20px; 
+                top: 20%; 
+            }
+            
+            /* Logo positioning for mobile */
             .brand-footer {
                 bottom: 20px;
                 right: 0;
                 left: 0;
                 align-items: center;
-                opacity: 0.7;
+                opacity: 0.8;
+                position: absolute;
             }
             .brand-logo-mark { font-size: 1.5rem; border-width: 1px; }
             .brand-name { font-size: 0.6rem; }
@@ -354,7 +376,7 @@
         generateHair();
         animate();
 
-        // Mouse
+        // Mouse Events
         stage.addEventListener('mousedown', (e) => {
             isDragging = true;
             startX = e.clientX;
@@ -374,15 +396,19 @@
             stage.style.cursor = 'grab';
         });
 
-        // Touch
+        // Touch Events (Updated for Scrolling)
         stage.addEventListener('touchstart', (e) => {
+            // We only capture the touch if it hits the visual stage area
             isDragging = true;
             startX = e.touches[0].clientX;
         }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
+            
+            // CRITICAL: We prevent default scrolling behavior ONLY when dragging the hair
             if(e.cancelable) e.preventDefault();
+            
             const delta = e.touches[0].clientX - startX;
             targetRotation += delta * 0.4;
             startX = e.touches[0].clientX;
