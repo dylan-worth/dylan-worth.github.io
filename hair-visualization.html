@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Micron Scale Visualization</title>
+    <title>Micron Scale Visualization: Curly Hair</title>
     <style>
         :root {
-            --hair-width: 150px; /* Visual width of the hair on screen */
             --bg-color: #f8f9fa;
             --text-color: #2d3436;
             --accent-color: #d63031;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -25,17 +22,17 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Prevent scroll on body */
         }
 
-        /* Main Layout Container */
+        /* --- Layout --- */
         .container {
             display: flex;
             flex: 1;
             height: 100%;
-            overflow: hidden;
         }
 
-        /* Left Side: Content & Explanation */
+        /* Left Side: Content */
         .content-section {
             flex: 1;
             padding: 40px;
@@ -43,66 +40,29 @@
             flex-direction: column;
             justify-content: center;
             max-width: 600px;
-            z-index: 10; /* Keep text above absolute elements if needed */
+            z-index: 10;
+            background: var(--bg-color); /* Ensure text legibility */
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
+        h1 { font-size: 2.5rem; margin-bottom: 20px; letter-spacing: -1px; }
+        .highlight { color: var(--accent-color); font-weight: 700; }
+        .explanation { font-size: 1.2rem; line-height: 1.6; margin-bottom: 30px; border-left: 4px solid var(--accent-color); padding-left: 20px; }
+        .note { font-size: 0.9rem; color: #636e72; margin-top: auto; }
 
-        .highlight {
-            color: var(--accent-color);
-            font-weight: 700;
-        }
-
-        .explanation {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 20px;
-        }
-
-        .note {
-            font-size: 0.9rem;
-            color: #636e72;
-            margin-top: auto;
-        }
-
-        /* Right Side: The Interactive Visual */
+        /* Right Side: Interactive Visual */
         .visual-section {
-            flex: 1;
+            flex: 1.5; /* Give visual more space */
             background-color: #e1e4e8;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: grab;
-            overflow: hidden;
-            perspective: 1000px; /* Essential for 3D effect */
+            perspective: 1200px; /* Deeper perspective for better 3D view */
             box-shadow: inset 10px 0 20px rgba(0,0,0,0.05);
         }
 
-        .visual-section:active {
-            cursor: grabbing;
-        }
-
-        /* Floating Label in Visual Area */
-        .visual-label {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.8);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            pointer-events: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .visual-section:active { cursor: grabbing; }
 
         .drag-hint {
             position: absolute;
@@ -113,78 +73,71 @@
             font-size: 0.8rem;
             pointer-events: none;
             opacity: 0.7;
+            background: rgba(255,255,255,0.6);
+            padding: 5px 10px;
+            border-radius: 15px;
         }
 
-        /* 3D Hair Strand Implementation */
-        .hair-container {
-            width: var(--hair-width); 
-            height: 120%; /* Taller than screen to look continuous */
-            transform-style: preserve-3d;
-            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        .hair-shaft {
-            width: 100%;
+        /* --- 3D Curly Hair Implementation --- */
+        
+        /* The main rotating container holding all segments */
+        .hair-container-3d {
+            position: relative;
+            width: 100px; /* Base width for center alignment */
             height: 100%;
-            /* Realistic Hair Gradient */
-            background: linear-gradient(90deg, 
-                #1a110d 0%, 
-                #3e2b22 25%, 
-                #6d4c41 50%, 
-                #3e2b22 75%, 
-                #1a110d 100%);
-            /* Subtle texture for cuticle scales */
-            background-image: repeating-linear-gradient(
-                185deg,
-                transparent 0px,
-                transparent 10px,
-                rgba(255,255,255,0.03) 11px,
-                transparent 12px
-            );
-            border-radius: 10px;
+            transform-style: preserve-3d; /* Crucial for nested 3D elements */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Initial tilt for better viewing angle */
+             transform: rotateX(10deg); 
+        }
+
+        /* Individual segment of the curl */
+        .hair-segment {
+            position: absolute;
+            /* This width represents the 100 microns visually */
+            width: 80px; 
+            height: 6px; /* Short height to make the curve smooth */
+            background: linear-gradient(to right, #2a1a11, #5d3a29, #8b5e3c, #5d3a29, #2a1a11);
+            border-radius: 3px;
+            backface-visibility: visible;
+            /* Slight texture */
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Floating width marker */
+        .floating-marker {
+            position: absolute;
+            top: 40%;
+            right: 20%;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            color: #d63031;
+            font-weight: bold;
+        }
+        .marker-line {
+            width: 80px; /* Matches hair segment width visually */
+            height: 2px;
+            background: #d63031;
+            margin-right: 10px;
             position: relative;
         }
-
-        /* A visual ruler line on the hair to emphasize width */
-        .width-marker {
-            position: absolute;
-            top: 50%;
-            left: -20px;
-            right: -20px;
-            height: 1px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transform: translateZ(80px); /* Push slightly in front */
+        .marker-line::before, .marker-line::after {
+            content: ''; position: absolute; height: 10px; width: 2px; background: #d63031; top: -4px;
         }
+        .marker-line::before { left: 0; }
+        .marker-line::after { right: 0; }
 
-        .width-marker span {
-            background: #333;
-            color: #fff;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            border-radius: 4px;
-        }
 
-        /* Mobile Responsive Adjustments */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .content-section {
-                flex: 0 0 auto;
-                padding: 30px 20px;
-            }
-            
+            .container { flex-direction: column; }
+            .content-section { flex: 0 0 auto; padding: 30px 20px; }
             h1 { font-size: 1.8rem; }
-            
-            .visual-section {
-                flex: 1; /* Takes remaining height */
-                min-height: 400px;
-                box-shadow: inset 0 10px 20px rgba(0,0,0,0.05);
-            }
+            .visual-section { flex: 1; min-height: 50vh; box-shadow: inset 0 10px 20px rgba(0,0,0,0.05); }
+            .floating-marker { right: 5%; top: 20%;}
         }
     </style>
 </head>
@@ -193,41 +146,67 @@
     <div class="container">
         <section class="content-section">
             <h1>Size Comparison</h1>
-            
             <div class="explanation">
-                <p>
-                    A single strand of human hair is approximately <span class="highlight">100 microns</span> wide.
-                </p>
-                <p>
-                    In comparison, mold spores are microscopic, typically ranging from <span class="highlight">2 to 20 microns</span>.
-                </p>
-                <p style="font-size: 0.95em; color: #555; margin-top: 20px;">
-                    This means you could fit roughly <strong>5 to 50 mold spores</strong> across the width of the single hair strand shown here.
-                </p>
+                <p>A single strand of human hair (shown here as curly and brown) is approximately <span class="highlight">100 microns</span> wide.</p>
+                <p>Mold spores are typically <span class="highlight">2 to 20 microns</span>.</p>
+                <p style="font-size: 0.95em; color: #555; margin-top: 20px;">You could fit roughly <strong>5 to 50 mold spores</strong> across the width of the hair strand shown.</p>
             </div>
-
-            <p class="note">
-                Reference: Typical human hair width ranges from 17 to 181 µm.
-            </p>
+            <p class="note">Reference: Typical human hair width ranges from 17 to 181 µm.</p>
         </section>
 
         <section class="visual-section" id="visualArea">
-            <div class="visual-label">Interactive View</div>
-            
-            <div class="hair-container" id="hairObject">
-                <div class="hair-shaft">
-                    <div class="width-marker">
-                        <span>100 µm</span>
-                        <span>100 µm</span>
-                    </div>
-                </div>
+             <div class="floating-marker">
+                <div class="marker-line"></div>
+                <span>~100 µm width</span>
             </div>
 
-            <div class="drag-hint">Drag to spin the strand</div>
+            <div class="hair-container-3d" id="hairObject">
+                </div>
+
+            <div class="drag-hint">Drag to spin the curly strand</div>
         </section>
     </div>
 
     <script>
+        // --- Generate the 3D Curly Hair ---
+        function generateCurlyHair() {
+            const hairContainer = document.getElementById('hairObject');
+            const numSegments = 150; // Number of slices to make it look smooth
+            const curls = 3.5; // How many full loops the curl makes
+            const heightSpread = 4; // Vertical distance between segments
+            const curlRadius = 35; // How wide the curl circle is
+
+            for (let i = 0; i < numSegments; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'hair-segment';
+                
+                // Calculate position in the spiral
+                const percentage = i / numSegments;
+                // Center the vertical stack
+                const yPos = (i * heightSpread) - (numSegments * heightSpread / 2);
+                const angle = percentage * 360 * curls;
+                
+                // The magic 3D transform:
+                // 1. Move up/down (translateY)
+                // 2. Rotate around center (rotateY)
+                // 3. Push outwards to form ring (translateZ)
+                // 4. Slight rotateX to angle the segment to match the curl slope
+                segment.style.transform = `
+                    translateY(${yPos}px) 
+                    rotateY(${angle}deg) 
+                    translateZ(${curlRadius}px)
+                    rotateX(-15deg) 
+                `;
+                
+                hairContainer.appendChild(segment);
+            }
+        }
+
+        // Initialize hair generation
+        generateCurlyHair();
+
+
+        // --- Interaction Logic (Spinning) ---
         const container = document.getElementById('visualArea');
         const hair = document.getElementById('hairObject');
         
@@ -235,21 +214,22 @@
         let startX = 0;
         let currentRotation = 0;
         let previousRotation = 0;
+        let initialTilt = 10; // Matches CSS rotateX
 
-        // --- Mouse Events ---
+        // Mouse Events
         container.addEventListener('mousedown', (e) => {
             isDragging = true;
             startX = e.clientX;
             container.style.cursor = 'grabbing';
-            // Stop text selection while dragging
             e.preventDefault();
         });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - startX;
-            currentRotation = previousRotation + (deltaX * 0.4); // 0.4 = spin speed
-            hair.style.transform = `rotateY(${currentRotation}deg)`;
+            currentRotation = previousRotation + (deltaX * 0.5);
+            // Keep the initial X tilt, only rotate Y based on drag
+            hair.style.transform = `rotateX(${initialTilt}deg) rotateY(${currentRotation}deg)`;
         });
 
         window.addEventListener('mouseup', () => {
@@ -260,7 +240,7 @@
             }
         });
 
-        // --- Touch Events (Mobile) ---
+        // Touch Events (Mobile)
         container.addEventListener('touchstart', (e) => {
             isDragging = true;
             startX = e.touches[0].clientX;
@@ -268,12 +248,10 @@
 
         window.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
-            // Prevent page scrolling while interacting with the hair
-            if(e.cancelable) e.preventDefault(); 
-            
+            if(e.cancelable) e.preventDefault();
             const deltaX = e.touches[0].clientX - startX;
-            currentRotation = previousRotation + (deltaX * 0.4);
-            hair.style.transform = `rotateY(${currentRotation}deg)`;
+            currentRotation = previousRotation + (deltaX * 0.5);
+            hair.style.transform = `rotateX(${initialTilt}deg) rotateY(${currentRotation}deg)`;
         }, { passive: false });
 
         window.addEventListener('touchend', () => {
