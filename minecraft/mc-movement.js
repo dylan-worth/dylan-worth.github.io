@@ -1,4 +1,3 @@
-// mc-movement.js
 import { WORLD_RADIUS } from './mc-world.js';
 
 const MOVE_SPEED = 0.14;
@@ -26,24 +25,23 @@ export function updatePhysics(player, velocity, input, blockMap, state) {
         }
     }
 
-    // 3. Calculate Movement Direction (The Fix)
-    // We calculate the X and Z movement based on Camera Rotation (yaw)
+    // 3. Calculate Movement Direction (FIXED)
     const yaw = player.rotation.y;
     
-    // Forward Vector (Where are we looking?)
-    // In Three.js, Forward is usually -Z.
+    // Forward Vector (Three.js standard is -Z for forward)
     const fwdX = -Math.sin(yaw);
     const fwdZ = -Math.cos(yaw);
 
-    // Right Vector (90 degrees to the right of Forward)
-    const rightX = -Math.cos(yaw); 
-    const rightZ = Math.sin(yaw);
+    // Right Vector (90 degrees relative to forward)
+    // FIX: Removed the negative sign from Cos and added it to Sin to swap direction
+    const rightX = Math.cos(yaw); 
+    const rightZ = -Math.sin(yaw);
 
-    // Combine inputs: (Forward * stickUp) + (Right * stickRight)
+    // Combine inputs
     const moveX = (fwdX * fwd) + (rightX * side);
     const moveZ = (fwdZ * fwd) + (rightZ * side);
 
-    // Normalize speed (so diagonal isn't faster)
+    // Normalize speed
     const dx = moveX * MOVE_SPEED;
     const dz = moveZ * MOVE_SPEED;
 
