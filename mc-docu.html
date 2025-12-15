@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Clone v7.0 - Developer Wiki</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background: #f4f4f9; }
+        h1 { border-bottom: 2px solid #567d46; padding-bottom: 10px; color: #2e4a25; }
+        h2 { margin-top: 40px; color: #0066cc; }
+        h3 { color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin-top: 25px; }
+        code { background: #e0e0e0; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .note { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 20px 0; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: white; }
+        .tag.core { background: #dc3545; }
+        .tag.logic { background: #0d6efd; }
+        .tag.ui { background: #198754; }
+        .nav { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #333; font-weight: bold; }
+        .nav a:hover { color: #0066cc; }
+    </style>
+</head>
+<body>
+
+    <h1>⛏️ Minecraft Clone v7.0 Documentation</h1>
+    
+    <div class="nav">
+        <a href="#getting-started">🚀 Getting Started</a>
+        <a href="#architecture">🏗️ Architecture</a>
+        <a href="#functions">📚 Function Reference</a>
+        <a href="#physics">⚛️ Physics Engine</a>
+    </div>
+
+    <div id="getting-started">
+        <h2>🚀 Getting Started Guide</h2>
+        <p>This project is a <strong>single-file</strong> HTML5 game engine built on Three.js.</p>
+        
+        <h3>1. Installation</h3>
+        <ol>
+            <li>Create a new folder on your computer (e.g., <code>MyGame</code>).</li>
+            <li>Create a text file named <code>index.html</code>.</li>
+            <li>Paste the v7.0 source code into it.</li>
+            <li>Save the file.</li>
+        </ol>
+
+        <h3>2. How to Run</h3>
+        <p>Because this project uses modern web standards (Web Audio API), it is best run on a local server, though it often works by double-clicking.</p>
+        <ul>
+            <li><strong>Desktop:</strong> Right-click <code>index.html</code> > Open with Chrome/Edge.</li>
+            <li><strong>Mobile (Testing):</strong> You must host the file.
+                <ul>
+                    <li><strong>Option A (Easy):</strong> Upload `index.html` to <a href="https://pages.github.com/">GitHub Pages</a> or <a href="https://www.netlify.com/">Netlify</a> (Drag and drop).</li>
+                    <li><strong>Option B (Local):</strong> Use VS Code "Live Server" extension and access via your local IP (e.g., <code>192.168.1.5:5500</code>) on your phone.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="note">
+            <strong>⚠️ Mobile Requirement:</strong> The game enforces <strong>Landscape Mode</strong>. If your screen is black or shows a warning, rotate your phone!
+        </div>
+    </div>
+
+    <div id="architecture">
+        <h2>🏗️ Architecture Overview</h2>
+        <p>The game runs on a loop composed of three main systems:</p>
+        <ul>
+            <li><strong>Rendering (Three.js):</strong> Handles the 3D scene, camera, and the sky shader.</li>
+            <li><strong>Physics (Custom):</strong> Handles AABB (Axis-Aligned Bounding Box) collision detection against the voxel grid.</li>
+            <li><strong>Input (Nipple.js + Touch):</strong> Handles the virtual joystick and multi-touch gestures.</li>
+        </ul>
+    </div>
+
+    <div id="functions">
+        <h2>📚 Function Wiki</h2>
+        <p>A breakdown of every major function in the codebase.</p>
+
+        <h3><code>init()</code> <span class="tag core">Core</span></h3>
+        <p>The entry point. It sets up the Three.js scene, camera, renderer, and lights. It calls the sub-functions to generate the world and setup inputs. It also adds event listeners for window resizing and audio unlock.</p>
+
+        <h3><code>createSky(sunPos)</code> <span class="tag ui">Visuals</span></h3>
+        <p>Generates the procedural skybox using a GLSL shader.</p>
+        <ul>
+            <li><strong>Inputs:</strong> <code>sunPos</code> (Vector3) - The direction of the sun light.</li>
+            <li><strong>How it works:</strong> Creates a massive sphere around the player with <code>THREE.BackSide</code> (rendered on the inside). The shader mixes a top color (Blue) and bottom color (Fog/White) based on the vertex height, and adds a "sun glare" spot.</li>
+        </ul>
+
+        <h3><code>generateWorld()</code> <span class="tag logic">Logic</span></h3>
+        <p>The "God Function" that builds the terrain.</p>
+        <ul>
+            <li><strong>Algorithm:</strong> Loops through X and Z coordinates. Uses <code>Math.sin(x) + Math.cos(z)</code> to generate height maps (hills/valleys).</li>
+            <li><strong>Biomes:</strong> Checks height level. If below -1, it places Sand and Water. If above, it places Grass/Dirt.</li>
+            <li><strong>Trees:</strong> Randomly calls <code>createTree</code> on grass blocks.</li>
+        </ul>
+
+        <h3><code>createTree(x, y, z, treeType)</code> <span class="tag logic">Logic</span></h3>
+        <p>Procedurally builds a tree structure.</p>
+        <ul>
+            <li><strong>Inputs:</strong> Coordinates and a `tree` object (defining log type, leaf type, and height).</li>
+            <li><strong>Process:</strong> Builds a vertical column of logs, then loops through a 3x3x3 area at the top to place leaves, skipping corners to make it rounder.</li>
+        </ul>
+
+        <h3><code>createBlock(x, y, z, type)</code> <span class="tag core">Core</span></h3>
+        <p>The fundamental builder.</p>
+        <ul>
+            <li><strong>Optimization:</strong> Checks <code>blockMap</code> first to prevent duplicate blocks in the same spot.</li>
+            <li><strong>Matrix:</strong> Sets <code>matrixAutoUpdate = false</code> on the mesh. This is a critical optimization for Three.js when dealing with static objects to save CPU cycles.</li>
+        </ul>
+
+        <h3><code>setupInput()</code> <span class="tag ui">Input</span></h3>
+        <p>Handles the complex mobile inputs.</p>
+        <ul>
+            <li><strong>Joystick:</strong> Initializes <code>nipple.js</code> and binds its output to <code>moveFwd</code> and <code>moveSide</code> variables.</li>
+            <li><strong>Look Zone:</strong> Tracks touch movement on the right side of the screen to rotate the camera.</li>
+            <li><strong>Tap vs Hold:</strong> Uses a <code>setTimeout</code>. If you hold longer than 500ms, it triggers a BREAK action. If you release before 500ms, it triggers a PLACE action.</li>
+        </ul>
+
+        <h3><code>doRaycast(action)</code> <span class="tag logic">Logic</span></h3>
+        <p>Performs the 3D interaction.</p>
+        <ul>
+            <li>Shoots an invisible laser (Raycaster) from the center of the camera.</li>
+            <li><strong>BREAK:</strong> Removes the intersected block and plays a sound.</li>
+            <li><strong>PLACE:</strong> Calculates the position adjacent to the hit face (Normal vector) and places a block there, ensuring it doesn't collide with the player.</li>
+        </ul>
+
+        <h3><code>updatePhysics()</code> <span class="tag core">Physics</span></h3>
+        <p>Runs every frame to handle movement.</p>
+        <ul>
+            <li><strong>Gravity:</strong> Continuously subtracts from Y velocity.</li>
+            <li><strong>Collision:</strong> Calculates where the player <em>wants</em> to go. Checks <code>blockMap</code> to see if a solid block exists at that coordinate. If yes, it cancels the movement (Slide effect).</li>
+        </ul>
+
+        <h3><code>playSound(type)</code> <span class="tag ui">Audio</span></h3>
+        <p>A synthesizers built with Web Audio API.</p>
+        <ul>
+            <li><strong>Bird:</strong> Creates a Sine wave oscillator with high frequency to mimic a chirp.</li>
+            <li><strong>Break:</strong> Creates a Square/Sawtooth wave with a rapid frequency drop to mimic a "crunch" or impact sound.</li>
+        </ul>
+    </div>
+
+    <div id="physics">
+        <h2>⚛️ The Collision System Explained</h2>
+        <p>Instead of using a heavy physics engine like Cannon.js, this project uses <strong>Discrete Voxel Collision</strong>.</p>
+        <pre>
+function checkColl(x, y, z) {
+    // Round the float coordinates to integers (Grid ID)
+    // Check if the Map contains a block at "x,y,z"
+    return blockMap.has(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
+}</pre>
+        <p>When the player moves, we check <code>(PlayerPos + Velocity)</code>. If that coordinate returns true in <code>checkColl</code>, we simply set Velocity to 0.</p>
+    </div>
+
+</body>
+</html>
