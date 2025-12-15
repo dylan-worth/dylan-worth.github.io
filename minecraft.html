@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Mobile Minecraft Clone</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: Arial, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        /* UI Overlay */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* Crosshair */
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            background-image: linear-gradient(to bottom, transparent 45%, white 45%, white 55%, transparent 55%),
+                              linear-gradient(to right, transparent 45%, white 45%, white 55%, transparent 55%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* Controls Zones */
+        #joystick-zone { position: absolute; bottom: 50px; left: 50px; width: 150px; height: 150px; pointer-events: auto; }
+        #look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 100%; pointer-events: auto; }
+
+        /* Action Buttons */
+        .btn { position: absolute; background: rgba(0,0,0,0.5); color: white; padding: 15px; border-radius: 10px; border: 2px solid white; pointer-events: auto; font-weight: bold; }
+        #btn-jump { bottom: 50px; right: 50px; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #btn-mode { top: 20px; left: 20px; width: 100px; text-align: center; }
+        
+        /* Instructions */
+        #info { position: absolute; top: 20px; right: 20px; color: white; text-align: right; text-shadow: 1px 1px 2px black; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <div id="crosshair"></div>
+        <div id="info">Tap Right Side to Place/Break<br>Drag Right Side to Look</div>
+        
+        <div id="joystick-zone"></div> <div id="look-zone"></div>     <div id="btn-jump" class="btn">JUMP</div>
+        <div id="btn-mode" class="btn">MODE: BUILD</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+
+    <script>
+        // --- Configuration ---
+        const RENDER_DISTANCE = 40; // Fog distance
+        const MOVE_SPEED = 0.15;
+        const JUMP_FORCE = 0.25;
+        const GRAVITY = 0.01;
+        const BLOCK_SIZE = 1;
+
+        // --- Global Variables ---
+        let camera, scene, renderer;
+        let blocks = []; // Array to store block meshes
+        let raycaster = new THREE.Raycaster();
+        let pointer = new THREE.Vector2(0, 0); // Center of screen
+        
+        // Player State
+        let playerVelocity = new THREE.Vector3();
+        let isGrounded = false;
+        let canJump = false;
+        let moveForward = 0, moveRight = 0;
+        
+        // Game State
+        let mode = 'BUILD'; // or 'BREAK'
+        
+        // Look Controls State
+        let pitchObject, yawObject;
+        let lookSpeed = 0.004;
+
+        init();
+        animate();
+
+        function init() {
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 10, RENDER_DISTANCE);
+
+            // 2. Camera & Player Rig
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            // We use a Pitch/Yaw object hierarchy for rotation stability
+            pitchObject = new THREE.Object3D();
+            pitchObject.add(camera);
+            
+            yawObject = new THREE.Object3D();
+            yawObject.position.y = 2; // Player height
+            yawObject.add(pitchObject);
+            scene.add(yawObject);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('game-container').appendChild(renderer.domElement);
+
+            // 4. Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+
+            // 5. World Generation (Simple Flat Floor)
+            const geometry = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            const material = new THREE.MeshLambertMaterial({ color: 0x228B22 }); // Grass Green
+
+            // Create a 20x20 floor
+            for (let x = -10; x < 10; x++) {
+                for (let z = -10; z < 10; z++) {
+                    createBlock(x, 0, z, material);
+                }
+            }
+
+            // 6. Controls Setup
+            setupMobileControls();
+            
+            // Handle Window Resize
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        // Helper: Create a block
+        function createBlock(x, y, z, mat) {
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mat);
+            mesh.position.set(x, y, z);
+            
+            // Add black outline for "voxel" look
+            const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 }));
+            mesh.add(line);
+
+            scene.add(mesh);
+            blocks.push(mesh);
+            return mesh;
+        }
+
+        function setupMobileControls() {
+            // A. Joystick (Movement)
+            const joystickManager = nipplejs.create({
+                zone: document.getElementById('joystick-zone'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'white'
+            });
+
+            joystickManager.on('move', function (evt, data) {
+                const forward = data.vector.y;
+                const right = data.vector.x;
+                
+                // Map joystick input to movement variables
+                moveForward = forward;
+                moveRight = right; 
+            });
+
+            joystickManager.on('end', function () {
+                moveForward = 0;
+                moveRight = 0;
+            });
+
+            // B. Jump Button
+            const jumpBtn = document.getElementById('btn-jump');
+            jumpBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                if (isGrounded) {
+                    playerVelocity.y = JUMP_FORCE;
+                    isGrounded = false;
+                }
+            });
+
+            // C. Mode Toggle
+            const modeBtn = document.getElementById('btn-mode');
+            modeBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                mode = (mode === 'BUILD') ? 'BREAK' : 'BUILD';
+                modeBtn.innerText = "MODE: " + mode;
+                modeBtn.style.borderColor = (mode === 'BUILD') ? 'white' : 'red';
+            });
+
+            // D. Touch Look (Right side screen drag)
+            const lookZone = document.getElementById('look-zone');
+            let lastTouchX = 0;
+            let lastTouchY = 0;
+
+            lookZone.addEventListener('touchstart', (e) => {
+                lastTouchX = e.touches[0].pageX;
+                lastTouchY = e.touches[0].pageY;
+            }, {passive: false});
+
+            lookZone.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                const touchX = e.touches[0].pageX;
+                const touchY = e.touches[0].pageY;
+
+                const deltaX = touchX - lastTouchX;
+                const deltaY = touchY - lastTouchY;
+
+                // Rotate Camera
+                yawObject.rotation.y -= deltaX * lookSpeed;
+                pitchObject.rotation.x -= deltaY * lookSpeed;
+
+                // Clamp look up/down
+                pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitchObject.rotation.x));
+
+                lastTouchX = touchX;
+                lastTouchY = touchY;
+            }, {passive: false});
+
+            // E. Tap to Interact (Place/Break)
+            // We use 'touchend' to detect a quick tap, distinguishing it from a drag
+            let touchStartTime = 0;
+            lookZone.addEventListener('touchstart', () => { touchStartTime = Date.now(); });
+            
+            lookZone.addEventListener('touchend', (e) => {
+                const duration = Date.now() - touchStartTime;
+                if (duration < 200) { // If tap was short (less than 200ms)
+                    performAction();
+                }
+            });
+        }
+
+        function performAction() {
+            // Raycast from center of camera
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(blocks);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                
+                if (mode === 'BREAK') {
+                    // Remove Block
+                    scene.remove(intersect.object);
+                    blocks.splice(blocks.indexOf(intersect.object), 1);
+                } else {
+                    // Place Block
+                    // Calculate position of new block based on face normal
+                    const newPos = new THREE.Vector3().copy(intersect.point).add(intersect.face.normal);
+                    newPos.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE/2); // Snap to grid
+                    
+                    const mat = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }); // Random Color for fun
+                    createBlock(newPos.x, newPos.y, newPos.z, mat);
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. Physics (Simple Gravity/Collision with floor)
+            // Apply Gravity
+            playerVelocity.y -= GRAVITY;
+
+            // Simple floor collision (y = 0 is the floor surface roughly)
+            // Note: In a real game, you need AABB collision detection against all blocks.
+            // Here we just keep player above y=1 (top of first block layer + player height)
+            if (yawObject.position.y <= 1.5 && playerVelocity.y < 0) {
+                 playerVelocity.y = 0;
+                 yawObject.position.y = 1.5;
+                 isGrounded = true;
+            } else {
+                isGrounded = false;
+            }
+
+            // 2. Apply Movement
+            const direction = new THREE.Vector3();
+            // Get camera direction but ignore Y (so we don't fly up/down)
+            const forwardDir = new THREE.Vector3(0, 0, -1).applyQuaternion(yawObject.quaternion);
+            const rightDir = new THREE.Vector3(1, 0, 0).applyQuaternion(yawObject.quaternion);
+
+            if (moveForward !== 0) yawObject.position.add(forwardDir.multiplyScalar(moveForward * MOVE_SPEED));
+            if (moveRight !== 0) yawObject.position.add(rightDir.multiplyScalar(moveRight * MOVE_SPEED));
+            
+            yawObject.position.y += playerVelocity.y;
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
