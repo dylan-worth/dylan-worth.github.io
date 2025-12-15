@@ -3,53 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Minecraft Mobile v3.0</title>
+    <title>Minecraft Mobile v4.0</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Courier New', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
-        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         /* UI Layer */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
+        /* Crosshair */
         #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; width: 12px; height: 12px;
+            background: rgba(255, 255, 255, 0.8); border: 1px solid black;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.1);
         }
 
-        /* Controls */
-        #joystick-zone { position: absolute; bottom: 40px; left: 40px; width: 150px; height: 150px; pointer-events: auto; }
-        #look-zone { position: absolute; top: 0; right: 0; width: 60%; height: 80%; pointer-events: auto; }
+        /* Instructions */
+        #hint { position: absolute; top: 10px; left: 0; width: 100%; text-align: center; color: white; text-shadow: 1px 1px 0 #000; font-size: 14px; pointer-events: none; opacity: 0.8; }
 
-        /* Buttons */
-        .btn { position: absolute; background: rgba(0,0,0,0.5); color: white; border: 2px solid rgba(255,255,255,0.3); pointer-events: auto; font-weight: bold; backdrop-filter: blur(4px); }
-        #btn-jump { bottom: 160px; right: 40px; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        #btn-mode { top: 20px; left: 20px; padding: 10px; border-radius: 8px; font-size: 12px; text-transform: uppercase; }
+        /* Controls */
+        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; pointer-events: auto; }
+        #look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 100%; pointer-events: auto; }
+
+        /* Jump Button */
+        #btn-jump { 
+            position: absolute; bottom: 120px; right: 30px; width: 80px; height: 80px; 
+            background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.5); 
+            border-radius: 50%; pointer-events: auto; 
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 16px;
+        }
+        #btn-jump:active { background: rgba(255,255,255,0.2); }
 
         /* Inventory */
         #inventory {
             position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 6px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px;
+            display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 12px;
             pointer-events: auto;
         }
         .slot {
-            width: 36px; height: 36px; border: 2px solid #555; border-radius: 6px;
-            transition: transform 0.1s;
+            width: 40px; height: 40px; border: 2px solid #333; border-radius: 6px;
+            transition: transform 0.1s; cursor: pointer;
         }
-        .slot.active { border-color: white; transform: scale(1.15); box-shadow: 0 0 10px white; }
+        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 8px white; }
         
-        /* Block Colors for UI */
+        /* Colors */
         .c-grass { background: #567d46; }
         .c-dirt { background: #5c4033; }
         .c-stone { background: #808080; }
         .c-wood { background: #4a3728; }
         .c-leaves { background: #228b22; }
         .c-sand { background: #eecfa1; }
-        .c-water { background: #40a4df; }
-        .c-snow { background: #ffffff; }
-        .c-tnt { background: #cd5c5c; } /* Just for fun visual */
-
+        .c-plank { background: #8B4513; }
+        .c-brick { background: #800000; }
     </style>
 </head>
 <body>
@@ -57,11 +62,11 @@
     <div id="game-container"></div>
 
     <div id="ui-layer">
+        <div id="hint">TAP to Place &nbsp;|&nbsp; HOLD to Break</div>
         <div id="crosshair"></div>
         <div id="joystick-zone"></div>
         <div id="look-zone"></div>
-        <div id="btn-jump" class="btn">JUMP</div>
-        <div id="btn-mode" class="btn">MODE: BREAK</div>
+        <div id="btn-jump">JUMP</div>
 
         <div id="inventory">
             <div class="slot c-grass active" data-type="grass"></div>
@@ -70,8 +75,8 @@
             <div class="slot c-wood" data-type="wood"></div>
             <div class="slot c-leaves" data-type="leaves"></div>
             <div class="slot c-sand" data-type="sand"></div>
-            <div class="slot c-water" data-type="water"></div>
-            <div class="slot c-snow" data-type="snow"></div>
+            <div class="slot c-plank" data-type="plank"></div>
+            <div class="slot c-brick" data-type="brick"></div>
         </div>
     </div>
 
@@ -80,344 +85,297 @@
 
     <script>
         // --- CONFIG ---
-        const RENDER_DIST = 30; // Reduced slightly for particle performance
-        const MOVE_SPEED = 0.14;
-        const GRAVITY = 0.012;
-        const WATER_LEVEL = -2;
+        const WORLD_SIZE = 16; // Smaller radius for better FPS
+        const RENDER_DIST = 25;
+        const MOVE_SPEED = 0.13;
+        const JUMP_FORCE = 0.23; // Adjusted for better feel
+        const GRAVITY = 0.011;
+        const PLAYER_WIDTH = 0.3; // Collision width radius
+        const HOLD_TIME = 400; // ms to trigger break
         
         // --- GLOBALS ---
         let scene, camera, renderer;
         let objects = []; 
         let blockMap = new Map();
-        let particles = [];
+        let crabs = [];
         
-        // Player & Tools
-        let playerObj = new THREE.Object3D();
-        let cameraRig = new THREE.Object3D(); // Holds camera
-        let handGroup = new THREE.Object3D(); // Holds the tool
-        let handMesh; // The actual visible block in hand
-        let isSwinging = false;
-        
+        // Player
+        let player = new THREE.Object3D();
+        let head = new THREE.Object3D();
         let velocity = new THREE.Vector3();
         let onGround = false;
-        let isInWater = false;
         let moveFwd = 0, moveSide = 0;
         
-        // State
-        let mode = 'BREAK';
+        // Interaction
+        let raycaster = new THREE.Raycaster();
         let currentMat = 'grass';
         let materials = {};
-        
+        let blockGeo; // Shared geometry
+        let touchTimer = null;
+        let isHolding = false;
+
         init();
         animate();
 
         function init() {
-            // 1. Setup
+            // 1. Scene
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 10, RENDER_DIST);
+            scene.fog = new THREE.Fog(0x87CEEB, 5, RENDER_DIST);
 
             // 2. Camera Rig
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
-            cameraRig.position.y = 1.6;
-            cameraRig.add(camera);
-            playerObj.add(cameraRig);
-            scene.add(playerObj);
-            playerObj.position.set(0, 10, 0);
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 60);
+            head.position.y = 1.6;
+            head.add(camera);
+            player.add(head);
+            scene.add(player);
+            player.position.set(0, 10, 0);
 
-            // 3. The Hand/Tool
-            createHandTool();
-
-            // 4. Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: false });
+            // 3. Renderer (OPTIMIZATION: Low Pixel Ratio)
+            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(1); // Force 1.0 for FPS
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // 5. Lights
-            const amb = new THREE.AmbientLight(0xffffff, 0.6);
+            // 4. Lights
+            const amb = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(amb);
-            const sun = new THREE.DirectionalLight(0xffffff, 0.6);
-            sun.position.set(20, 50, 20);
+            const sun = new THREE.DirectionalLight(0xffffff, 0.5);
+            sun.position.set(10, 30, 10);
             scene.add(sun);
 
-            // 6. Materials & World
-            initMaterials();
+            // 5. Assets
+            setupMaterials();
             generateWorld();
 
-            // 7. Input
-            setupControls();
-            
+            // 6. Controls
+            setupInput();
+
             window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth/window.innerHeight;
+                camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         }
 
-        function initMaterials() {
-            const loadColor = (c, transp = false) => new THREE.MeshLambertMaterial({ 
-                color: c, 
-                transparent: transp, 
-                opacity: transp ? 0.6 : 1 
-            });
-            
+        function setupMaterials() {
+            // Shared Geometry for performance
+            blockGeo = new THREE.BoxGeometry(1, 1, 1);
+
+            const mkMat = (c) => new THREE.MeshLambertMaterial({ color: c });
             materials = {
-                grass: loadColor(0x567d46),
-                dirt: loadColor(0x5c4033),
-                stone: loadColor(0x808080),
-                wood: loadColor(0x4a3728),
-                leaves: loadColor(0x228b22),
-                sand: loadColor(0xeecfa1),
-                water: loadColor(0x40a4df, true),
-                snow: loadColor(0xffffff),
-                bedrock: loadColor(0x222222)
+                grass: mkMat(0x567d46),
+                dirt: mkMat(0x5c4033),
+                stone: mkMat(0x808080),
+                wood: mkMat(0x4a3728),
+                leaves: mkMat(0x228b22),
+                sand: mkMat(0xeecfa1),
+                plank: mkMat(0x8B4513),
+                brick: mkMat(0x800000),
+                water: new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 }),
+                crab: new THREE.MeshLambertMaterial({ color: 0xff4400 })
             };
         }
 
-        function createHandTool() {
-            // The "Hand" is a child of the camera so it stays on screen
-            handGroup.position.set(0.5, -0.4, -0.8);
-            handGroup.rotation.set(0.2, -0.2, 0);
-            camera.add(handGroup);
-
-            const geo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-            handMesh = new THREE.Mesh(geo, materials['grass']);
-            handGroup.add(handMesh);
-        }
-
-        function updateHandVisual() {
-            handMesh.material = materials[currentMat];
-        }
-
-        function swingHand() {
-            if(isSwinging) return;
-            isSwinging = true;
-            
-            // Simple manual animation curve
-            let start = Date.now();
-            let dur = 200;
-            
-            function loop() {
-                let p = (Date.now() - start) / dur;
-                if(p > 1) {
-                    isSwinging = false;
-                    handGroup.rotation.set(0.2, -0.2, 0); // Reset
-                    handGroup.position.set(0.5, -0.4, -0.8);
-                    return;
-                }
-                
-                // Dip down and rotate forward
-                let wave = Math.sin(p * Math.PI); 
-                handGroup.rotation.x = 0.2 + (wave * 0.5); 
-                handGroup.rotation.z = -wave * 0.5;
-                handGroup.position.z = -0.8 - (wave * 0.3);
-                
-                requestAnimationFrame(loop);
-            }
-            loop();
-        }
-
         function generateWorld() {
-            const size = 20; // Chunk radius
-            const geo = new THREE.BoxGeometry(1, 1, 1);
-
-            for (let x = -size; x <= size; x++) {
-                for (let z = -size; z <= size; z++) {
+            for (let x = -WORLD_SIZE; x <= WORLD_SIZE; x++) {
+                for (let z = -WORLD_SIZE; z <= WORLD_SIZE; z++) {
                     // Terrain Math
-                    let h = Math.floor(Math.sin(x/7)*3 + Math.cos(z/5)*2); 
+                    let h = Math.floor(Math.sin(x/5) * 3 + Math.cos(z/6) * 3);
                     
-                    // Biome logic
-                    let surface = 'grass';
-                    if (h > 4) surface = 'snow';
-                    if (h <= WATER_LEVEL + 1) surface = 'sand';
+                    // Surface determination
+                    let type = 'grass';
+                    if (h <= -1) type = 'sand';
+                    if (h < -2) h = -2; // Flatten sea floor
 
-                    // Fill columns
-                    for (let y = -5; y <= h; y++) {
-                        let type = surface;
-                        if (y < h) type = 'dirt';
-                        if (y < h - 3) type = 'stone';
-                        if (y === -5) type = 'bedrock';
-                        
-                        // Don't spawn water where there is land
-                        createBlock(x, y, z, type, geo);
+                    // Column
+                    for (let y = -4; y <= h; y++) {
+                        let t = type;
+                        if (y < h) t = 'dirt';
+                        if (y < h - 2) t = 'stone';
+                        createBlock(x, y, z, t);
                     }
 
-                    // Water Fill
-                    for (let y = h + 1; y <= WATER_LEVEL; y++) {
-                        createBlock(x, y, z, 'water', geo);
+                    // Water
+                    for (let y = h + 1; y <= -1; y++) {
+                        createBlock(x, y, z, 'water');
                     }
 
-                    // Trees (Only on grass, not in water)
-                    if (surface === 'grass' && h > WATER_LEVEL && Math.random() < 0.03) {
-                        spawnTree(x, h+1, z, geo);
+                    // Crabs (On sand, near water)
+                    if (type === 'sand' && h === -1 && Math.random() < 0.05) {
+                        createCrab(x, h + 1, z);
                     }
                 }
             }
         }
 
-        function createBlock(x, y, z, type, geo) {
+        function createBlock(x, y, z, type) {
             if(blockMap.has(`${x},${y},${z}`)) return;
 
-            const mesh = new THREE.Mesh(geo, materials[type]);
+            const mesh = new THREE.Mesh(blockGeo, materials[type]);
             mesh.position.set(x, y, z);
             
-            // Water logic (No outline, transparent)
-            if (type !== 'water') {
-                 // Add simple edges for block look
-                const edges = new THREE.EdgesGeometry(geo);
-                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.1, transparent: true }));
-                mesh.add(line);
-            }
+            // Optimization: Static matrix, no auto update
+            mesh.updateMatrix();
+            mesh.matrixAutoUpdate = false;
 
             mesh.userData = { type: type, solid: type !== 'water' };
+            
             scene.add(mesh);
             objects.push(mesh);
             blockMap.set(`${x},${y},${z}`, mesh);
             return mesh;
         }
 
-        function spawnTree(x, y, z, geo) {
-            for(let i=0; i<4; i++) createBlock(x, y+i, z, 'wood', geo);
-            for(let lx=x-2; lx<=x+2; lx++){
-                for(let lz=z-2; lz<=z+2; lz++){
-                    for(let ly=y+2; ly<=y+4; ly++){
-                         if(Math.abs(lx-x)+Math.abs(lz-z) < 3 && !blockMap.has(`${lx},${ly},${lz}`)) {
-                             createBlock(lx, ly, lz, 'leaves', geo);
-                         }
-                    }
-                }
-            }
-        }
-
-        // --- PARTICLES ---
-        function spawnParticles(pos, colorMaterial) {
-            const count = 8;
-            const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        function createCrab(x, y, z) {
+            const crab = new THREE.Group();
             
-            for(let i=0; i<count; i++) {
-                const p = new THREE.Mesh(geo, colorMaterial);
-                p.position.copy(pos);
-                // Random offset within block
-                p.position.x += (Math.random()-0.5)*0.5;
-                p.position.y += (Math.random()-0.5)*0.5;
-                p.position.z += (Math.random()-0.5)*0.5;
-                
-                // Random velocity
-                p.userData.vel = new THREE.Vector3(
-                    (Math.random()-0.5)*0.2,
-                    (Math.random())*0.2,
-                    (Math.random()-0.5)*0.2
-                );
-                p.userData.life = 1.0; // 1 second life
-                
-                scene.add(p);
-                particles.push(p);
-            }
+            // Body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.3), materials.crab);
+            crab.add(body);
+
+            // Eyes
+            const eyeGeo = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+            const eyeMat = new THREE.MeshBasicMaterial({color:0x000000});
+            const e1 = new THREE.Mesh(eyeGeo, eyeMat); e1.position.set(0.1, 0.15, 0.15);
+            const e2 = new THREE.Mesh(eyeGeo, eyeMat); e2.position.set(-0.1, 0.15, 0.15);
+            crab.add(e1); crab.add(e2);
+
+            crab.position.set(x, y, z);
+            scene.add(crab);
+            crabs.push({ mesh: crab, speed: 0.02, offset: Math.random() * 100 });
         }
 
-        function updateParticles() {
-            for(let i=particles.length-1; i>=0; i--) {
-                const p = particles[i];
-                p.userData.life -= 0.05;
-                p.position.add(p.userData.vel);
-                p.userData.vel.y -= 0.01; // Gravity on particles
-                
-                // Rotation tumble
-                p.rotation.x += 0.1;
-                p.rotation.y += 0.1;
+        // --- PHYSICS & COLLISION ---
+        function checkCollision(pos) {
+            // Check bounding box corners for player width
+            const range = PLAYER_WIDTH;
+            const checks = [
+                {x: pos.x, z: pos.z},
+                {x: pos.x + range, z: pos.z + range},
+                {x: pos.x - range, z: pos.z - range},
+                {x: pos.x + range, z: pos.z - range},
+                {x: pos.x - range, z: pos.z + range}
+            ];
 
-                if(p.userData.life <= 0) {
-                    scene.remove(p);
-                    particles.splice(i, 1);
-                }
+            for (let c of checks) {
+                const bx = Math.round(c.x);
+                const by = Math.round(pos.y);
+                const bz = Math.round(c.z);
+                const block = blockMap.get(`${bx},${by},${bz}`);
+                if (block && block.userData.solid) return true;
             }
-        }
-
-        // --- PHYSICS ---
-        function getBlock(x, y, z) {
-            return blockMap.get(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
+            return false;
         }
 
         function updatePhysics() {
-            // Apply Gravity or Water Buoyancy
-            const headBlock = getBlock(playerObj.position.x, playerObj.position.y, playerObj.position.z);
-            const footBlock = getBlock(playerObj.position.x, playerObj.position.y - 1, playerObj.position.z);
-            
-            isInWater = (headBlock && headBlock.userData.type === 'water') || (footBlock && footBlock.userData.type === 'water');
+            // 1. Gravity
+            velocity.y -= GRAVITY;
 
-            if (isInWater) {
-                velocity.y *= 0.8; // Drag
-                velocity.y -= 0.002; // Slower gravity
-                if (moveFwd || moveSide) velocity.y += 0.005; // Swim up slightly when moving
-            } else {
-                velocity.y -= GRAVITY;
+            // 2. Horizontal Movement
+            const yaw = player.rotation.y;
+            const dx = Math.sin(yaw) * moveFwd + Math.cos(yaw) * moveSide;
+            const dz = Math.cos(yaw) * moveFwd - Math.sin(yaw) * moveSide;
+            
+            // Try X movement
+            let nextPos = player.position.clone();
+            nextPos.x -= dx * MOVE_SPEED;
+            if (!checkCollision(new THREE.Vector3(nextPos.x, player.position.y, player.position.z)) && 
+                !checkCollision(new THREE.Vector3(nextPos.x, player.position.y - 1, player.position.z))) {
+                player.position.x = nextPos.x;
             }
 
-            // Move
-            // Fix: Use Math.cos/sin correctly for Forward/Strafing relative to Look Direction
-            // 0 rotation = Looking down -Z. 
-            const yaw = playerObj.rotation.y;
-            
-            // Forward/Back
-            const dx = Math.sin(yaw) * moveFwd; // Sin is X component for rotation Y
-            const dz = Math.cos(yaw) * moveFwd; // Cos is Z component
-            
-            // Left/Right (Strafing) - 90 degree offset
-            const sx = Math.sin(yaw + Math.PI/2) * moveSide;
-            const sz = Math.cos(yaw + Math.PI/2) * moveSide;
-
-            // Combine
-            let nextX = playerObj.position.x - (dx + sx) * MOVE_SPEED * (isInWater ? 0.5 : 1.0);
-            let nextZ = playerObj.position.z - (dz + sz) * MOVE_SPEED * (isInWater ? 0.5 : 1.0);
-
-            // Wall Collision (Only check solid blocks)
-            if (!isSolid(nextX, playerObj.position.y, playerObj.position.z) && 
-                !isSolid(nextX, playerObj.position.y - 1, playerObj.position.z)) {
-                playerObj.position.x = nextX;
-                playerObj.position.z = nextZ;
+            // Try Z movement
+            nextPos = player.position.clone();
+            nextPos.z -= dz * MOVE_SPEED;
+            if (!checkCollision(new THREE.Vector3(player.position.x, player.position.y, nextPos.z)) && 
+                !checkCollision(new THREE.Vector3(player.position.x, player.position.y - 1, nextPos.z))) {
+                player.position.z = nextPos.z;
             }
 
-            // Y Movement
-            let nextY = playerObj.position.y + velocity.y;
-            if (isSolid(playerObj.position.x, nextY - 1.5, playerObj.position.z)) {
+            // 3. Vertical Movement
+            let nextY = player.position.y + velocity.y;
+            
+            // Check feet
+            if (velocity.y < 0 && checkCollision(new THREE.Vector3(player.position.x, nextY - 1.5, player.position.z))) {
                 velocity.y = 0;
                 onGround = true;
-                playerObj.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001; 
+                player.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001; 
+            } else if (velocity.y > 0 && checkCollision(new THREE.Vector3(player.position.x, nextY, player.position.z))) {
+                // Head bonk
+                velocity.y = 0;
             } else {
-                playerObj.position.y = nextY;
+                player.position.y = nextY;
                 onGround = false;
             }
 
-            if (playerObj.position.y < -20) playerObj.position.set(0, 15, 0); // Respawn
+            // Floor boundary
+            if (player.position.y < -10) player.position.set(0, 10, 0);
         }
 
-        function isSolid(x, y, z) {
-            const b = getBlock(x, y, z);
-            return b && b.userData.solid;
-        }
-
-        // --- INPUT ---
-        function setupControls() {
-            // Inventory
+        // --- INPUT SYSTEM ---
+        function setupInput() {
+            // Inventory Select
             document.querySelectorAll('.slot').forEach(s => {
                 s.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     document.querySelectorAll('.slot').forEach(el => el.classList.remove('active'));
                     s.classList.add('active');
                     currentMat = s.dataset.type;
-                    updateHandVisual();
                 });
             });
 
-            // Mode
-            const mBtn = document.getElementById('btn-mode');
-            mBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                mode = mode === 'BREAK' ? 'BUILD' : 'BREAK';
-                mBtn.innerText = "MODE: " + mode;
-                mBtn.style.borderColor = mode === 'BREAK' ? 'red' : 'white';
+            // Jump
+            const btnJump = document.getElementById('btn-jump');
+            btnJump.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                if (onGround) {
+                    velocity.y = JUMP_FORCE;
+                    onGround = false;
+                }
+            });
+
+            // Look & Action Zone
+            const zone = document.getElementById('look-zone');
+            let lastX, lastY;
+
+            zone.addEventListener('touchstart', (e) => {
+                lastX = e.touches[0].pageX;
+                lastY = e.touches[0].pageY;
+                
+                // Start Hold Timer
+                isHolding = false;
+                touchTimer = setTimeout(() => {
+                    isHolding = true;
+                    performRaycastAction('BREAK');
+                }, HOLD_TIME);
+
+            }, {passive: false});
+
+            zone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                // If moving finger, cancel the hold timer
+                if (Math.abs(e.touches[0].pageX - lastX) > 5) {
+                    clearTimeout(touchTimer);
+                    isHolding = false;
+                }
+
+                // Look Logic
+                const x = e.touches[0].pageX; 
+                const y = e.touches[0].pageY;
+                player.rotation.y -= (x - lastX) * 0.005;
+                head.rotation.x -= (y - lastY) * 0.005;
+                head.rotation.x = Math.max(-1.5, Math.min(1.5, head.rotation.x));
+                lastX = x; lastY = y;
+            }, {passive: false});
+
+            zone.addEventListener('touchend', (e) => {
+                clearTimeout(touchTimer);
+                // If we didn't hold long enough, it's a tap -> PLACE
+                if (!isHolding) {
+                    performRaycastAction('PLACE');
+                }
+                isHolding = false;
             });
 
             // Joystick
@@ -427,81 +385,74 @@
                 position: { left: '50%', top: '50%' },
                 color: 'white'
             });
-
             joy.on('move', (evt, data) => {
-                // Fix: Map joystick Y to Forward, X to Strafe
-                // data.vector.y is positive UP -> We want Forward
-                // data.vector.x is positive RIGHT -> We want Right
-                moveFwd = data.vector.y; 
-                moveSide = data.vector.x; 
+                moveFwd = data.vector.y;
+                moveSide = data.vector.x;
             });
             joy.on('end', () => { moveFwd = 0; moveSide = 0; });
-
-            // Jump
-            document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (onGround || isInWater) velocity.y = 0.25;
-            });
-
-            // Look/Action
-            const touchZone = document.getElementById('look-zone');
-            let lastX, lastY, startT;
-
-            touchZone.addEventListener('touchstart', e => {
-                lastX = e.touches[0].pageX; lastY = e.touches[0].pageY; startT = Date.now();
-            }, {passive:false});
-
-            touchZone.addEventListener('touchmove', e => {
-                e.preventDefault();
-                const x = e.touches[0].pageX, y = e.touches[0].pageY;
-                playerObj.rotation.y -= (x - lastX) * 0.005;
-                cameraRig.rotation.x -= (y - lastY) * 0.005;
-                cameraRig.rotation.x = Math.max(-1.5, Math.min(1.5, cameraRig.rotation.x));
-                lastX = x; lastY = y;
-            }, {passive:false});
-
-            touchZone.addEventListener('touchend', e => {
-                if (Date.now() - startT < 250) doAction();
-            });
         }
 
-        function doAction() {
-            swingHand();
-            
-            const rc = new THREE.Raycaster();
-            rc.setFromCamera(new THREE.Vector2(0,0), camera);
-            const hits = rc.intersectObjects(objects);
+        function performRaycastAction(actionType) {
+            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            const intersects = raycaster.intersectObjects(objects);
 
-            if(hits.length > 0) {
-                const hit = hits[0];
-                if(hit.distance > 5) return;
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                if (hit.distance > 6) return;
 
-                if(mode === 'BREAK') {
-                    if (hit.object.userData.type === 'bedrock') return; // Unbreakable
+                if (actionType === 'BREAK') {
+                    if (hit.object.userData.type === 'water') return; // Can't break water
                     
-                    // Particles!
-                    spawnParticles(hit.object.position, hit.object.material);
+                    // FX
+                    createParticles(hit.object.position, hit.object.material.color);
                     
+                    // Remove
                     scene.remove(hit.object);
                     objects.splice(objects.indexOf(hit.object), 1);
-                    blockMap.delete(`${Math.round(hit.object.position.x)},${Math.round(hit.object.position.y)},${Math.round(hit.object.position.z)}`);
-                } else {
+                    const p = hit.object.position;
+                    blockMap.delete(`${p.x},${p.y},${p.z}`);
+                } 
+                else if (actionType === 'PLACE') {
                     const p = hit.point.add(hit.face.normal.multiplyScalar(0.5));
                     const bx = Math.round(p.x), by = Math.round(p.y), bz = Math.round(p.z);
                     
-                    // Prevent placing in self
-                    if (new THREE.Vector3(bx, by, bz).distanceTo(playerObj.position) > 1.5) {
-                        createBlock(bx, by, bz, currentMat, new THREE.BoxGeometry(1,1,1));
+                    // Collision check for placement (don't place inside self)
+                    const dist = new THREE.Vector3(bx, by, bz).distanceTo(player.position);
+                    if (dist > 1.2) {
+                        createBlock(bx, by, bz, currentMat);
+                        // FX
+                        createParticles(new THREE.Vector3(bx, by, bz), materials[currentMat].color);
                     }
                 }
+            }
+        }
+
+        function createParticles(pos, color) {
+            // Simple particle burst
+            const geo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+            const mat = new THREE.MeshBasicMaterial({ color: color });
+            for(let i=0; i<5; i++) {
+                const p = new THREE.Mesh(geo, mat);
+                p.position.copy(pos);
+                p.position.x += (Math.random()-0.5);
+                p.position.y += (Math.random()-0.5);
+                p.position.z += (Math.random()-0.5);
+                scene.add(p);
+                // Animate and remove later (simplified for perf)
+                setTimeout(() => scene.remove(p), 500);
             }
         }
 
         function animate() {
             requestAnimationFrame(animate);
             updatePhysics();
-            updateParticles();
             renderer.render(scene, camera);
+
+            // Animate Crabs
+            const time = Date.now() * 0.002;
+            crabs.forEach(c => {
+                c.mesh.position.y += Math.sin(time + c.offset) * 0.002; // Bobbing
+            });
         }
     </script>
 </body>
