@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Minecraft Pro Modular</title>
+    <link rel="stylesheet" href="mc-art.css">
+</head>
+<body>
+    
+    <div id="rotate-msg"><h2>Please Rotate Device 🔄</h2></div>
+    
+    <div id="start-screen">
+        <div id="btn-start">TAP TO START</div>
+        <div id="loading-text">System Ready</div>
+    </div>
+
+    <a id="btn-wiki" href="./mc-docu.html" target="_blank" title="Wiki">?</a>
+
+    <div id="game-container"></div>
+    
+    <div id="ui-layer">
+        <div id="danger-msg">⚠️ WHIRLPOOL! ⚠️</div>
+        <div id="crosshair"></div>
+        <div id="joystick-zone"></div>
+        <div id="look-zone"></div>
+        <div id="btn-jump">JUMP</div>
+        <div id="inventory">
+            <div class="slot icon-hand active" data-type="hand"></div>
+            <div class="slot c-grass" data-type="grass"></div>
+            <div class="slot c-dirt" data-type="dirt"></div>
+            <div class="slot c-stone" data-type="stone"></div>
+            <div class="slot c-sand" data-type="sand"></div>
+            <div class="slot c-water" data-type="water"></div>
+            <div class="slot c-oak" data-type="wood_oak"></div>
+            <div class="slot c-leaves" data-type="leaves_oak"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+
+    <script type="module" src="mc-main.js"></script>
+</body>
+</html>
