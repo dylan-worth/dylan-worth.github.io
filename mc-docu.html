@@ -3,139 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Clone v8.0 - Developer Wiki</title>
+    <title>Minecraft Clone v10.0 - Ultimate Wiki</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background: #f0f8ff; }
-        h1 { border-bottom: 2px solid #0077ff; padding-bottom: 10px; color: #004488; }
-        h2 { margin-top: 40px; color: #0066cc; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        h3 { color: #444; border-left: 4px solid #0066cc; padding-left: 10px; margin-top: 25px; }
-        code { background: #e6f2ff; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; }
-        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; }
-        .note { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 20px 0; }
-        .danger { background: #ffe6e6; border-left: 5px solid #cc0000; padding: 15px; margin: 20px 0; }
-        .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: white; }
-        .tag.core { background: #dc3545; }
-        .tag.logic { background: #0d6efd; }
-        .tag.new { background: #00cccc; } /* New v8.0 tag */
+        :root { --primary: #567d46; --sec: #0077ff; --accent: #ff9900; --dark: #222; --light: #f4f4f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; color: #333; max-width: 960px; margin: 0 auto; padding: 20px; background: var(--light); }
         
-        .nav { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; display: flex; gap: 15px; flex-wrap: wrap;}
-        .nav a { text-decoration: none; color: #333; font-weight: bold; border-bottom: 2px solid transparent; }
-        .nav a:hover { color: #0066cc; border-color: #0066cc; }
+        /* Header */
+        header { border-bottom: 4px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { margin: 0; color: var(--primary); font-size: 2.5rem; }
+        .version { background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px; font-size: 1rem; vertical-align: middle; }
+        
+        /* Navigation */
+        .nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+        .nav a { text-decoration: none; color: #444; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; transition: 0.2s; }
+        .nav a:hover { background: var(--sec); color: white; transform: translateY(-2px); }
+
+        /* Sections */
+        section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        h2 { color: var(--sec); margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h3 { border-left: 4px solid var(--accent); padding-left: 10px; margin-top: 25px; color: #444; }
+
+        /* Code & Tags */
+        code { background: #eee; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: white; font-weight: bold; text-transform: uppercase; margin-left: 8px; }
+        .tag.new { background: var(--accent); }
+        .tag.core { background: var(--primary); }
+        .tag.tech { background: #6610f2; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { color: var(--sec); }
+
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fafafa; }
+        .card h4 { margin: 0 0 10px 0; color: #333; }
     </style>
 </head>
 <body>
 
-    <h1>⛏️ Minecraft Clone v8.0 (Hydro Update) Docs</h1>
-    
+    <header>
+        <h1>Minecraft Clone <span class="version">v10.0</span></h1>
+        <p>A single-file, mobile-first voxel engine built with Three.js.</p>
+    </header>
+
     <div class="nav">
-        <a href="#getting-started">🚀 Start Here</a>
-        <a href="#architecture">🏗️ Architecture</a>
-        <a href="#hydro-logic">🌊 Hydro Systems (New)</a>
-        <a href="#functions">📚 Function Reference</a>
-        <a href="#physics">⚛️ Physics Engine</a>
+        <a href="#getting-started">🚀 Start</a>
+        <a href="#environment">☀️ Environment</a>
+        <a href="#hydro">🌊 Hydro System</a>
+        <a href="#mobs">🦀 Living World</a>
+        <a href="#engine">⚙️ Engine Tech</a>
+        <a href="#audio">🔊 Audio</a>
     </div>
 
-    <div id="getting-started">
+    <section id="getting-started">
         <h2>🚀 Getting Started</h2>
-        <p>This project is a <strong>single-file</strong> HTML5 game engine. v8.0 introduces complex water mechanics, larger terrain generation, and hazardous whirlpools.</p>
+        <p>v10.0 is the "Day & Night" update. It runs entirely in the browser using WebGL and Web Audio API.</p>
         
-        <h3>Quick Run Guide</h3>
+        <h3>Requirements</h3>
         <ul>
-            <li><strong>PC:</strong> Right-click <code>index.html</code> > Open with Chrome.</li>
-            <li><strong>Mobile:</strong> Requires a local server (e.g., VS Code Live Server) or hosting on GitHub Pages.</li>
-            <li><strong>Orientation:</strong> Strictly requires Landscape mode.</li>
-        </ul>
-    </div>
-
-    <div id="hydro-logic">
-        <h2>🌊 Hydro Systems (New in v8.0)</h2>
-        <p>The "Hydro Update" adds three major systems to the engine.</p>
-
-        <h3>1. River Generation Algorithm <span class="tag new">New</span></h3>
-        <p>Instead of just using hills, we now subtract terrain to create rivers.</p>
-        <pre>
-// Inside generateWorld() loop:
-// 1. Calculate Base Height (Hills)
-let h = Math.sin(x/7) + Math.cos(z/9);
-
-// 2. Calculate River Noise (Long, winding channels)
-let riverNoise = Math.sin(x/12) + Math.cos(z/15); 
-
-// 3. Cut the River
-// If riverNoise is close to 0, we are in a "channel"
-if (Math.abs(riverNoise) < 0.2) {
-    h = WATER_LEVEL - 2; // Flatten the land below water level
-}</pre>
-
-        <h3>2. Whirlpool Physics <span class="tag new">New</span></h3>
-        <p>Whirlpools are invisible objects spawned randomly in the ocean. The physics engine checks your distance to them every frame.</p>
-        <ul>
-            <li><strong>Detection:</strong> Uses Euclidean distance (<code>Math.sqrt(dx*dx + dz*dz)</code>).</li>
-            <li><strong>Suction:</strong> If distance < 4 blocks, the player is "caught".</li>
-            <li><strong>Effect:</strong>
-                <ul>
-                    <li><code>velocity.y -= 0.005</code> (Pulls you down)</li>
-                    <li><code>player.rotation.y += 0.05</code> (Spins the camera)</li>
-                    <li><code>player.position.x -= dx * 0.02</code> (Drags you to center)</li>
-                </ul>
-            </li>
+            <li><strong>Device:</strong> Mobile Phone (iOS/Android) or Desktop.</li>
+            <li><strong>Orientation:</strong> Landscape Mode is enforced via overlay.</li>
+            <li><strong>Server:</strong> Due to browser security (CORS/Audio), use a local server (VS Code Live Server) or host on GitHub Pages.</li>
         </ul>
 
-        <h3>3. Water Buoyancy</h3>
-        <p>We check if the player's head or feet are inside a block with <code>type === 'water'</code>.</p>
+        <h3>Controls</h3>
         <ul>
-            <li><strong>Gravity:</strong> Reduced to <code>0.002</code> (simulates floating).</li>
-            <li><strong>Drag:</strong> Velocity is multiplied by <code>0.9</code> every frame (simulates water resistance).</li>
+            <li><strong>Left Joystick:</strong> Move (Forward/Back/Strafing).</li>
+            <li><strong>Right Screen:</strong> Drag to Look.</li>
+            <li><strong>Tap Right:</strong> Place Block.</li>
+            <li><strong>Hold Right (500ms):</strong> Break Block.</li>
+            <li><strong>Jump Button:</strong> Jump / Swim Up.</li>
         </ul>
-    </div>
+    </section>
 
-    <div id="functions">
-        <h2>📚 Core Functions Wiki</h2>
-
-        <h3><code>init()</code> <span class="tag core">Core</span></h3>
-        <p>Sets up Three.js, Lights, Procedural Sky, and calls <code>generateWorld()</code>. In v8.0, it also initializes the audio context triggers.</p>
-
-        <h3><code>generateWorld()</code> <span class="tag logic">Updated</span></h3>
-        <p>Loops through X/Z coordinates from <code>-WORLD_RADIUS</code> to <code>WORLD_RADIUS</code>.</p>
-        <ul>
-            <li><strong>Step 1:</strong> Calculate terrain height.</li>
-            <li><strong>Step 2:</strong> Apply River Noise logic.</li>
-            <li><strong>Step 3:</strong> Fill solid blocks (Stone -> Dirt -> Grass/Sand).</li>
-            <li><strong>Step 4:</strong> Fill Water blocks (from Terrain Height up to <code>WATER_LEVEL</code>).</li>
-            <li><strong>Step 5:</strong> Plant Trees (only if on Grass and NOT in a river).</li>
-        </ul>
-
-        <h3><code>updatePhysics()</code> <span class="tag logic">Updated</span></h3>
-        <p>The main game loop logic.</p>
-        <ul>
-            <li><strong>Whirlpool Check:</strong> Prioritized first. If caught, override standard movement.</li>
-            <li><strong>Water Check:</strong> If in water, apply buoyancy and drag. If on land, apply normal gravity.</li>
-            <li><strong>Collision:</strong> Checks <code>blockMap</code>. If a coordinate is solid, movement stops.</li>
-        </ul>
-
-        <h3><code>checkWater(x, y, z)</code> <span class="tag new">New</span></h3>
-        <p>Helper function that returns <code>true</code> if the block at the given coordinates is water. Used for swimming logic.</p>
-    </div>
-
-    <div id="architecture">
-        <h2>🏗️ Data Structures</h2>
+    <section id="environment">
+        <h2>☀️ The Day/Night Cycle <span class="tag new">New in v10.0</span></h2>
+        <p>The world now features a dynamic time system that affects lighting, sky color, and fog.</p>
         
-        <h3>The Block Map</h3>
-        <p>We use a JavaScript <code>Map</code> for O(1) collision lookups.</p>
-        <pre>
-// Key: "x,y,z" (String)
-// Value: THREE.Mesh
-blockMap.set("5,10,-3", meshObject);</pre>
+        <div class="feature-grid">
+            <div class="card">
+                <h4>Dynamic Sun</h4>
+                <p>A DirectionalLight rotates around the map (0,0,0) based on `sunAngle`. Shadows and glare update in real-time.</p>
+            </div>
+            <div class="card">
+                <h4>Procedural Sky Shader</h4>
+                <p>Custom GLSL shader. It mixes <code>topColor</code> and <code>bottomColor</code> based on the sun's Y position. It creates Blue days, Orange sunsets, and Black nights.</p>
+            </div>
+            <div class="card">
+                <h4>Fog Integration</h4>
+                <p>The `scene.fog` color updates every frame to match the sky horizon, ensuring seamless distance rendering.</p>
+            </div>
+        </div>
+    </section>
 
-        <h3>Whirlpool Object</h3>
-        <p>Stored in the global <code>whirlpools</code> array.</p>
+    <section id="hydro">
+        <h2>🌊 Hydro & Physics System</h2>
+        <p>Complex interactions for water-based gameplay.</p>
+
+        <h3>1. River Generation</h3>
+        <p>We use a secondary Perlin-like noise function to "carve" rivers out of the terrain.</p>
+        <code>if (Math.abs(riverNoise) < 0.2) height = RIVER_BED_LEVEL;</code>
+
+        <h3>2. Whirlpools</h3>
+        <p>Dangerous entities spawned in the ocean.</p>
+        <ul>
+            <li><strong>Visual:</strong> A rotating blue plane mesh using <code>opacity: 0.8</code>.</li>
+            <li><strong>Physics:</strong> A distance check runs every frame. If <code>dist < 2.5</code>, the player is sucked in, pushed down, and the camera spins.</li>
+        </ul>
+
+        <h3>3. Buoyancy</h3>
+        <p>When entering water blocks:</p>
+        <ul>
+            <li>Gravity is reduced (Floating).</li>
+            <li>Velocity is dampened (Drag/Resistance).</li>
+            <li>Jump button acts as "Swim Up".</li>
+        </ul>
+    </section>
+
+    <section id="mobs">
+        <h2>🦀 The Living World</h2>
+        <p>The world is populated by procedural voxel mobs. They are constructed using `THREE.Group` and primitives.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Mob</th>
+                    <th>Color</th>
+                    <th>Behavior</th>
+                    <th>Spawn Condition</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Fish</strong></td>
+                    <td>Orange</td>
+                    <td>Swims in circles underwater.</td>
+                    <td>Water blocks (Low chance).</td>
+                </tr>
+                <tr>
+                    <td><strong>Crab</strong></td>
+                    <td>Red</td>
+                    <td>Scuttles side-to-side.</td>
+                    <td>Sand blocks at water level.</td>
+                </tr>
+                <tr>
+                    <td><strong>Bird</strong></td>
+                    <td>White</td>
+                    <td>Flies in wide circles overhead.</td>
+                    <td>Sky above Grass blocks.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="engine">
+        <h2>⚙️ Engine Technology</h2>
+        
+        <h3>Async Terrain Loading <span class="tag tech">Optimization</span></h3>
+        <p>To prevent the phone from freezing on load, the world generates in "batches".</p>
         <pre>
-{
-    x: 12.5,       // World X position
-    z: -8.2,       // World Z position
-    strength: 0.1  // Pull force (reserved for future use)
+function generateBatch() {
+    let startTime = performance.now();
+    // Run generation for only 15ms per frame
+    while (performance.now() - startTime < 15) {
+        generateRow(currentX);
+    }
+    requestAnimationFrame(generateBatch);
 }</pre>
-    </div>
+        <p>This keeps the UI responsive (60 FPS) while the heavy math runs in the background.</p>
+
+        <h3>Voxel Collision</h3>
+        <p>We use a <code>Map&lt;String, Mesh&gt;</code> for O(1) collision lookups. We round the player's float position to integers to check if a block exists.</p>
+    </section>
+
+    <section id="audio">
+        <h2>🔊 Audio Engine</h2>
+        <p>We do not use mp3/wav files to keep the project single-file. We use the <strong>Web Audio API</strong>.</p>
+
+        <h3>The "Hard Unlock" Fix</h3>
+        <p>Mobile browsers mute audio contexts until a user gesture occurs. In v10.0, the "START GAME" button executes a silent buffer play to force the audio engine to wake up.</p>
+
+        <h3>Synthesizer</h3>
+        <ul>
+            <li><strong>Break Sound:</strong> A Square wave with a rapid exponential frequency drop (mimics a crunch).</li>
+            <li><strong>Bird Chirp:</strong> A high-frequency Sine wave with a quick envelope.</li>
+        </ul>
+    </section>
 
 </body>
 </html>
