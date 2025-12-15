@@ -3,43 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Minecraft Mobile v9.0</title>
+    <title>Minecraft Mobile v10.0</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        /* Start Screen (Forces Audio Unlock) */
+        /* Start Screen */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 1000; pointer-events: auto;
         }
         #btn-start {
-            padding: 20px 40px; font-size: 24px; background: #567d46; color: white;
-            border: 2px solid white; border-radius: 10px; cursor: pointer;
+            padding: 25px 50px; font-size: 24px; background: #567d46; color: white;
+            border: 3px solid white; border-radius: 12px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        #loading-text { color: white; margin-top: 20px; font-family: monospace; }
+        #btn-start:active { transform: scale(0.95); }
+        #loading-text { color: white; margin-top: 20px; font-family: monospace; font-size: 16px; }
 
-        /* HUD */
+        /* Wiki Button */
+        #btn-wiki {
+            position: absolute; top: 10px; right: 10px; width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 50%;
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 20px; text-decoration: none; pointer-events: auto; z-index: 500;
+        }
+
+        /* Danger Warning */
+        #danger-msg {
+            position: absolute; top: 30%; left: 0; width: 100%; text-align: center;
+            color: #ff3333; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 black;
+            display: none; animation: pulse 0.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* HUD & Controls */
         #crosshair {
             position: absolute; top: 50%; left: 50%; width: 14px; height: 14px;
             background: rgba(255, 255, 255, 0.3); border: 2px solid white;
             transform: translate(-50%, -50%); border-radius: 50%;
         }
-
-        #danger-msg {
-            position: absolute; top: 30%; left: 0; width: 100%; text-align: center;
-            color: #ff3333; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 black;
-            display: none; animation: pulse 1s infinite;
-        }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* Controls */
         #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 40vw; height: 40vh; pointer-events: auto; }
         #look-zone { position: absolute; top: 0; right: 0; width: 50vw; height: 100%; pointer-events: auto; }
-
         #btn-jump { 
             position: absolute; bottom: 30%; right: 20px; width: 70px; height: 70px; 
             background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); 
@@ -48,6 +56,7 @@
             color: white; font-weight: bold; font-size: 14px; z-index: 10;
         }
 
+        /* Inventory */
         #inventory {
             position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px;
@@ -58,12 +67,12 @@
             flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .slot.active { border-color: #fff; transform: scale(1.1); background-color: rgba(255,255,255,0.2); }
-        
         .icon-hand::after { content: "✋"; font-size: 20px; }
         .c-grass { background: #567d46; } .c-dirt { background: #5c4033; }
         .c-stone { background: #808080; } .c-sand { background: #eecfa1; }
         .c-water { background: #40a4df; } .c-oak { background: #4a3728; } .c-leaves { background: #228b22; }
 
+        /* Rotate Msg */
         #rotate-msg {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #222; color: white; z-index: 2000;
@@ -76,13 +85,15 @@
     <div id="rotate-msg"><h2>Please Rotate Device 🔄</h2></div>
     
     <div id="start-screen">
-        <div id="btn-start">TAP TO START</div>
-        <div id="loading-text">Ready to Load</div>
+        <div id="btn-start">TAP TO START GAME</div>
+        <div id="loading-text">Terrain Loading...</div>
     </div>
+
+    <a id="btn-wiki" href="./mc-docu.html" target="_blank" title="View Documentation">?</a>
 
     <div id="game-container"></div>
     <div id="ui-layer">
-        <div id="danger-msg">⚠️ WHIRLPOOL! SWIMMING HARDER! ⚠️</div>
+        <div id="danger-msg">⚠️ WHIRLPOOL! ⚠️</div>
         <div id="crosshair"></div>
         <div id="joystick-zone"></div>
         <div id="look-zone"></div>
@@ -116,7 +127,7 @@
             vec3 sky = mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) );
             vec3 sunDir = normalize(sunPosition);
             float sun = max(dot(sunDir, normalize(vWorldPosition)), 0.0);
-            vec3 sunColor = vec3(1.0, 0.9, 0.7) * pow(sun, 100.0);
+            vec3 sunColor = vec3(1.0, 0.9, 0.7) * pow(sun, 50.0);
             gl_FragColor = vec4( sky + sunColor, 1.0 );
         }
     </script>
@@ -132,14 +143,14 @@
         const JUMP_FORCE = 0.22; 
         const GRAVITY = 0.012;
         const WATER_LEVEL = -1;
-        const FOG_COLOR = 0xcce0ff;
         
         // --- GLOBALS ---
         let scene, camera, renderer, audioCtx;
         let objects = []; 
         let blockMap = new Map();
         let whirlpools = [];
-        let mobs = []; // Fish, Crabs, Birds
+        let mobs = []; 
+        let skyUniforms;
         
         let player = new THREE.Object3D();
         let head = new THREE.Object3D();
@@ -157,17 +168,34 @@
         // Async Generation State
         let genX = -WORLD_RADIUS;
         let isGenerating = false;
+        
+        // Day/Night State
+        let sunAngle = 0;
+        let sunLight;
 
-        // Setup Start Button
+        // --- AUDIO STARTUP FIX ---
         document.getElementById('btn-start').addEventListener('click', () => {
-            initAudio();
+            // 1. Create AudioContext inside user interaction
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 2. Resume if suspended
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // 3. Play silent buffer to unlock iOS audio engine
+            const buffer = audioCtx.createBuffer(1, 1, 22050);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+
+            // 4. Start Game
             init();
             document.getElementById('btn-start').style.display = 'none';
         });
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(FOG_COLOR, 10, RENDER_DIST * 1.5);
+            scene.fog = new THREE.Fog(0xcce0ff, 10, RENDER_DIST * 1.5);
 
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 90);
             head.position.y = 1.6;
@@ -181,14 +209,14 @@
             renderer.setPixelRatio(1); 
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // Lighting & Sky
-            const amb = new THREE.AmbientLight(0xffffff, 0.6);
+            // Lighting
+            const amb = new THREE.AmbientLight(0xffffff, 0.4); // Start dim
             scene.add(amb);
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.6);
-            sunLight.position.set(100, 200, 100);
+            sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            sunLight.position.set(0, 100, 0);
             scene.add(sunLight);
-            createSky(sunLight.position);
 
+            createSky();
             setupMaterials();
             setupInput();
             
@@ -200,18 +228,18 @@
             window.addEventListener('resize', onResize);
         }
 
-        function createSky(sunPos) {
-            const uniforms = {
+        function createSky() {
+            skyUniforms = {
                 topColor: { value: new THREE.Color(0x0077ff) },
-                bottomColor: { value: new THREE.Color(FOG_COLOR) },
+                bottomColor: { value: new THREE.Color(0xcce0ff) },
                 offset: { value: 33 }, exponent: { value: 0.6 },
-                sunPosition: { value: sunPos.clone().normalize() }
+                sunPosition: { value: new THREE.Vector3(0, 1, 0) }
             };
             const skyGeo = new THREE.SphereGeometry(70, 32, 15);
             const skyMat = new THREE.ShaderMaterial({
                 vertexShader: document.getElementById('vertexShader').textContent,
                 fragmentShader: document.getElementById('fragmentShader').textContent,
-                uniforms: uniforms, side: THREE.BackSide
+                uniforms: skyUniforms, side: THREE.BackSide
             });
             player.add(new THREE.Mesh(skyGeo, skyMat));
         }
@@ -228,35 +256,27 @@
             };
         }
 
-        // --- ASYNC GENERATION LOOP ---
+        // --- GENERATION ---
         function generateBatch() {
             if (genX > WORLD_RADIUS) {
                 isGenerating = false;
-                document.getElementById('start-screen').style.display = 'none'; // Hide loading screen
-                // Spawn Whirlpools after world is done
+                document.getElementById('start-screen').style.display = 'none';
                 spawnWhirlpools();
                 return;
             }
-
             const startTime = performance.now();
-            // Process rows until 15ms have passed (keep 60fps UI)
             while (performance.now() - startTime < 15 && genX <= WORLD_RADIUS) {
                 generateRow(genX);
                 genX++;
             }
-
             let progress = Math.floor(((genX + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100);
-            document.getElementById('loading-text').innerText = `Generating Terrain... ${progress}%`;
-
+            document.getElementById('loading-text').innerText = `Building World... ${progress}%`;
             requestAnimationFrame(generateBatch);
         }
 
         function generateRow(x) {
             for (let z = -WORLD_RADIUS; z <= WORLD_RADIUS; z++) {
-                // Terrain Height
                 let h = Math.floor(Math.sin(x/7) * 4 + Math.cos(z/9) * 4);
-                
-                // River Logic
                 let riverNoise = Math.sin(x/12) + Math.cos(z/15); 
                 let isRiver = Math.abs(riverNoise) < 0.2; 
                 if (isRiver && h > WATER_LEVEL - 2) h = WATER_LEVEL - 2;
@@ -264,47 +284,38 @@
                 let type = 'grass';
                 if (h <= WATER_LEVEL) type = 'sand';
 
-                // Solid Blocks
                 for (let y = -6; y <= h; y++) {
-                    let t = type;
-                    if (y < h) t = 'dirt';
-                    if (y < h - 3) t = 'stone';
+                    let t = type; if (y < h) t = 'dirt'; if (y < h - 3) t = 'stone';
                     createBlock(x, y, z, t);
                 }
-
-                // Water
                 for (let y = h + 1; y <= WATER_LEVEL; y++) {
                     createBlock(x, y, z, 'water');
-                    // Fish spawning
-                    if (Math.random() < 0.05) spawnMob('fish', x, y, z);
+                    // FISH: Reduced spawn rate significantly (0.05 -> 0.01)
+                    if (Math.random() < 0.01) spawnMob('fish', x, y, z);
                 }
 
-                // Trees & Nature
                 if (type === 'grass' && !isRiver) {
                     if (Math.random() < 0.03) createTree(x, h+1, z);
-                    if (Math.random() < 0.01) spawnMob('bird', x, h+10, z);
+                    // BIRDS: Reduced spawn rate (0.01 -> 0.002)
+                    if (Math.random() < 0.002) spawnMob('bird', x, h+10, z);
                 }
                 
-                // Crabs
-                if (type === 'sand' && h === WATER_LEVEL && Math.random() < 0.02) {
+                // CRABS: Reduced spawn rate (0.02 -> 0.005)
+                if (type === 'sand' && h === WATER_LEVEL && Math.random() < 0.005) {
                     spawnMob('crab', x, h+1, z);
                 }
             }
         }
 
         function spawnWhirlpools() {
-            // Create 5 whirlpools at random spots
             for(let i=0; i<5; i++) {
                 let wx = (Math.random()-0.5) * WORLD_RADIUS;
                 let wz = (Math.random()-0.5) * WORLD_RADIUS;
-                
-                // Visual Indicator (Spinning Plane)
                 const geo = new THREE.PlaneGeometry(3, 3);
                 const mesh = new THREE.Mesh(geo, materials.whirlpool);
                 mesh.rotation.x = -Math.PI / 2;
                 mesh.position.set(wx, WATER_LEVEL + 0.1, wz);
                 scene.add(mesh);
-                
                 whirlpools.push({ x: wx, z: wz, mesh: mesh });
             }
         }
@@ -340,7 +351,7 @@
             let geo;
             if(type === 'crab') geo = new THREE.BoxGeometry(0.4, 0.2, 0.3);
             else if(type === 'fish') geo = new THREE.BoxGeometry(0.3, 0.15, 0.1);
-            else geo = new THREE.BoxGeometry(0.2, 0.1, 0.2); // Bird
+            else geo = new THREE.BoxGeometry(0.2, 0.1, 0.2); 
 
             const body = new THREE.Mesh(geo, materials[type]);
             mob.add(body);
@@ -349,15 +360,6 @@
             
             scene.add(mob);
             mobs.push(mob);
-        }
-
-        // --- AUDIO ---
-        function initAudio() {
-            if(audioCtx) return;
-            try { 
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-                audioCtx.resume(); // Force resume
-            } catch(e) {}
         }
 
         function playSound(type) {
@@ -375,21 +377,50 @@
             }
         }
 
+        // --- DAY/NIGHT CYCLE ---
+        function updateEnvironment() {
+            sunAngle += 0.0005; // Speed of day
+            const x = Math.sin(sunAngle) * 100;
+            const y = Math.cos(sunAngle) * 100;
+            sunLight.position.set(x, y, 50);
+            
+            if (skyUniforms) {
+                skyUniforms.sunPosition.value.copy(sunLight.position);
+                
+                // Color Gradients
+                if (y > 20) {
+                    // Day
+                    skyUniforms.topColor.value.setHex(0x0077ff);
+                    skyUniforms.bottomColor.value.setHex(0xcce0ff);
+                    scene.fog.color.setHex(0xcce0ff);
+                } else if (y > -20) {
+                    // Sunset
+                    skyUniforms.topColor.value.setHex(0xffaa00);
+                    skyUniforms.bottomColor.value.setHex(0xff5500);
+                    scene.fog.color.setHex(0xff9900);
+                } else {
+                    // Night
+                    skyUniforms.topColor.value.setHex(0x000000);
+                    skyUniforms.bottomColor.value.setHex(0x000022);
+                    scene.fog.color.setHex(0x000022);
+                }
+            }
+        }
+
         // --- PHYSICS & LOGIC ---
         function updatePhysics() {
-            // Mobs Animation
+            updateEnvironment();
+
+            // Mob Movement
             const time = Date.now() * 0.001;
             mobs.forEach(m => {
                 if (m.userData.type === 'fish') {
-                    // Swim in circles
                     m.position.x = m.userData.anchor.x + Math.sin(time + m.userData.offset) * 2;
                     m.position.z = m.userData.anchor.z + Math.cos(time + m.userData.offset) * 2;
                     m.rotation.y = -(time + m.userData.offset);
                 } else if (m.userData.type === 'crab') {
-                    // Scuttle back and forth
                     m.position.x = m.userData.anchor.x + Math.sin(time * 2 + m.userData.offset) * 0.5;
                 } else if (m.userData.type === 'bird') {
-                    // Fly overhead
                     m.position.x = m.userData.anchor.x + Math.sin(time + m.userData.offset) * 15;
                     m.position.z = m.userData.anchor.z + Math.cos(time + m.userData.offset) * 15;
                     m.rotation.y = -(time + m.userData.offset);
@@ -401,12 +432,10 @@
             if (isInWater) {
                 let nearDanger = false;
                 whirlpools.forEach(w => {
-                    w.mesh.rotation.z += 0.1; // Visual spin
+                    w.mesh.rotation.z += 0.1; 
                     const dx = player.position.x - w.x;
                     const dz = player.position.z - w.z;
                     const dist = Math.sqrt(dx*dx + dz*dz);
-                    
-                    // Reduced radius from 4 to 2.5 for fairer gameplay
                     if (dist < 2.5) {
                         nearDanger = true;
                         velocity.y -= 0.005; 
@@ -421,16 +450,11 @@
                 document.getElementById('danger-msg').style.display = 'none';
             }
 
-            // Gravity/Water
             if (!inWhirlpool) {
-                if (isInWater) {
-                    velocity.y -= 0.002; velocity.y *= 0.9;
-                } else {
-                    velocity.y -= GRAVITY;
-                }
+                if (isInWater) { velocity.y -= 0.002; velocity.y *= 0.9; } 
+                else { velocity.y -= GRAVITY; }
             }
 
-            // Movement
             const yaw = player.rotation.y;
             const fx = -Math.sin(yaw) * moveFwd; const fz = -Math.cos(yaw) * moveFwd;
             const rx = -Math.cos(yaw) * moveSide; const rz = Math.sin(yaw) * moveSide;
@@ -451,7 +475,6 @@
                 player.position.y = nextY; onGround = false;
             }
             
-            // Check Water State
             const headB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y)},${Math.round(player.position.z)}`);
             const footB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y-1)},${Math.round(player.position.z)}`);
             isInWater = (headB && headB.userData.type === 'water') || (footB && footB.userData.type === 'water');
