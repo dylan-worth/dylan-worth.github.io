@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Minecraft Mobile v7.0</title>
+    <title>Minecraft Mobile v8.0</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
@@ -21,8 +21,14 @@
             color: white; text-shadow: 1px 1px 2px black; font-size: 14px; 
             pointer-events: none; opacity: 0.8; z-index: 5;
         }
+        
+        #danger-msg {
+            position: absolute; top: 40%; left: 0; width: 100%; text-align: center;
+            color: red; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0 black;
+            display: none; pointer-events: none;
+        }
 
-        /* Controls Zones */
+        /* Controls */
         #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 40vw; height: 40vh; pointer-events: auto; }
         #look-zone { position: absolute; top: 0; right: 0; width: 50vw; height: 100%; pointer-events: auto; }
 
@@ -33,14 +39,12 @@
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: bold; font-size: 14px; z-index: 10;
         }
-        #btn-jump:active { background: rgba(255,255,255,0.5); }
 
-        /* Scrollable Inventory */
+        /* Inventory */
         #inventory {
             position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px;
-            pointer-events: auto; overflow-x: scroll; max-width: 80vw;
-            scrollbar-width: none;
+            pointer-events: auto; overflow-x: scroll; max-width: 80vw; scrollbar-width: none;
         }
         #inventory::-webkit-scrollbar { display: none; }
         
@@ -48,36 +52,29 @@
             min-width: 40px; height: 40px; border: 2px solid #555; border-radius: 8px;
             flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 10px white; z-index: 20; background-color: rgba(255,255,255,0.2); }
+        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 10px white; background-color: rgba(255,255,255,0.2); }
         
         .icon-hand { border: 2px dashed #888; } .icon-hand::after { content: "✋"; font-size: 20px; }
         .c-grass { background: #567d46; } .c-dirt { background: #5c4033; }
-        .c-stone { background: #808080; } .c-oak { background: #4a3728; }
-        .c-oak-leaf { background: #228b22; } .c-birch { background: #e3e3e3; }
-        .c-birch-leaf { background: #82ac63; } .c-maple { background: #5d4037; }
-        .c-maple-leaf { background: #d35400; } .c-willow { background: #3b2f2f; }
-        .c-willow-leaf { background: #4e603b; }
+        .c-stone { background: #808080; } .c-sand { background: #eecfa1; }
+        .c-water { background: #40a4df; }
+        .c-oak { background: #4a3728; } .c-leaves { background: #228b22; }
 
-        /* Rotation Enforcer */
+        /* Rotate Msg */
         #rotate-msg {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #222; color: white; z-index: 999;
             flex-direction: column; align-items: center; justify-content: center; text-align: center;
         }
-        .phone-icon { font-size: 50px; animation: rotate 2s infinite; margin-bottom: 20px; }
-        @keyframes rotate { 0% { transform: rotate(0deg); } 25% { transform: rotate(90deg); } 100% { transform: rotate(90deg); } }
         @media (orientation: portrait) { #rotate-msg { display: flex; } }
     </style>
 </head>
 <body>
-    <div id="rotate-msg">
-        <div class="phone-icon">📱</div>
-        <h2>Please Rotate Device</h2>
-        <p>This game requires Landscape mode.</p>
-    </div>
+    <div id="rotate-msg"><h2>Please Rotate Device 🔄</h2></div>
     <div id="game-container"></div>
     <div id="ui-layer">
-        <div id="hint">Tap once for Audio<br>HOLD right side to Break</div>
+        <div id="hint">Tap once for Audio<br>Explore the Rivers!</div>
+        <div id="danger-msg">⚠️ WHIRLPOOL DETECTED ⚠️</div>
         <div id="crosshair"></div>
         <div id="joystick-zone"></div>
         <div id="look-zone"></div>
@@ -87,14 +84,10 @@
             <div class="slot c-grass" data-type="grass"></div>
             <div class="slot c-dirt" data-type="dirt"></div>
             <div class="slot c-stone" data-type="stone"></div>
+            <div class="slot c-sand" data-type="sand"></div>
+            <div class="slot c-water" data-type="water"></div>
             <div class="slot c-oak" data-type="wood_oak"></div>
-            <div class="slot c-oak-leaf" data-type="leaves_oak"></div>
-            <div class="slot c-birch" data-type="wood_birch"></div>
-            <div class="slot c-birch-leaf" data-type="leaves_birch"></div>
-            <div class="slot c-maple" data-type="wood_maple"></div>
-            <div class="slot c-maple-leaf" data-type="leaves_maple"></div>
-            <div class="slot c-willow" data-type="wood_willow"></div>
-            <div class="slot c-willow-leaf" data-type="leaves_willow"></div>
+            <div class="slot c-leaves" data-type="leaves_oak"></div>
         </div>
     </div>
 
@@ -107,22 +100,15 @@
         }
     </script>
     <script type="x-shader/x-fragment" id="fragmentShader">
-        uniform vec3 topColor;
-        uniform vec3 bottomColor;
-        uniform float offset;
-        uniform float exponent;
-        uniform vec3 sunPosition;
+        uniform vec3 topColor; uniform vec3 bottomColor;
+        uniform float offset; uniform float exponent; uniform vec3 sunPosition;
         varying vec3 vWorldPosition;
         void main() {
             float h = normalize( vWorldPosition + offset ).y;
             vec3 sky = mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) );
-            
-            // Sun Glare
             vec3 sunDir = normalize(sunPosition);
-            vec3 viewDir = normalize(vWorldPosition);
-            float sun = max(dot(sunDir, viewDir), 0.0);
-            vec3 sunColor = vec3(1.0, 0.9, 0.7) * pow(sun, 100.0); // Sharp sun disk
-            
+            float sun = max(dot(sunDir, normalize(vWorldPosition)), 0.0);
+            vec3 sunColor = vec3(1.0, 0.9, 0.7) * pow(sun, 100.0);
             gl_FragColor = vec4( sky + sunColor, 1.0 );
         }
     </script>
@@ -132,23 +118,26 @@
 
     <script>
         // --- CONFIG ---
-        const RENDER_DIST = 24;
+        const WORLD_RADIUS = 32; // Much bigger land mass
+        const RENDER_DIST = 26;
         const MOVE_SPEED = 0.14;
-        const JUMP_FORCE = 0.23; 
+        const JUMP_FORCE = 0.22; 
         const GRAVITY = 0.012;
-        const FOG_COLOR = 0xcce0ff; // Horizon color
+        const WATER_LEVEL = -1;
+        const FOG_COLOR = 0xcce0ff;
         
         // --- GLOBALS ---
         let scene, camera, renderer;
         let objects = []; 
         let blockMap = new Map();
-        let birds = [];
+        let whirlpools = [];
         let audioCtx;
         
         let player = new THREE.Object3D();
         let head = new THREE.Object3D();
         let velocity = new THREE.Vector3();
         let onGround = false;
+        let isInWater = false;
         let moveFwd = 0, moveSide = 0;
         
         let raycaster = new THREE.Raycaster();
@@ -158,114 +147,55 @@
         let touchTimer = null;
         let isHolding = false;
 
-        const TREES = {
-            oak: { log: 'wood_oak', leaf: 'leaves_oak', height: 4 },
-            birch: { log: 'wood_birch', leaf: 'leaves_birch', height: 5 },
-            willow: { log: 'wood_willow', leaf: 'leaves_willow', height: 3 },
-            maple: { log: 'wood_maple', leaf: 'leaves_maple', height: 4 }
-        };
-
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            // Fog matches horizon color for seamless blend
             scene.fog = new THREE.Fog(FOG_COLOR, 10, RENDER_DIST * 1.5);
 
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 80);
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 90);
             head.position.y = 1.6;
             head.add(camera);
             player.add(head);
             scene.add(player);
-            player.position.set(0, 10, 0);
+            player.position.set(0, 15, 0); // Spawn high
 
             renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(1); 
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // Lighting
             const amb = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(amb);
             const sunLight = new THREE.DirectionalLight(0xffffff, 0.6);
             sunLight.position.set(100, 200, 100);
             scene.add(sunLight);
 
-            // --- SKYBOX (Procedural Shader) ---
             createSky(sunLight.position);
-
             setupMaterials();
             generateWorld();
             setupInput();
 
             window.addEventListener('resize', onResize);
-            window.addEventListener('click', initAudio, { once: true });
             window.addEventListener('touchstart', initAudio, { once: true });
+            window.addEventListener('click', initAudio, { once: true });
         }
 
         function createSky(sunPos) {
-            const vertexShader = document.getElementById('vertexShader').textContent;
-            const fragmentShader = document.getElementById('fragmentShader').textContent;
-            
             const uniforms = {
                 topColor: { value: new THREE.Color(0x0077ff) },
                 bottomColor: { value: new THREE.Color(FOG_COLOR) },
-                offset: { value: 33 },
-                exponent: { value: 0.6 },
+                offset: { value: 33 }, exponent: { value: 0.6 },
                 sunPosition: { value: sunPos.clone().normalize() }
             };
-
-            const skyGeo = new THREE.SphereGeometry(60, 32, 15);
+            const skyGeo = new THREE.SphereGeometry(70, 32, 15);
             const skyMat = new THREE.ShaderMaterial({
-                vertexShader: vertexShader,
-                fragmentShader: fragmentShader,
-                uniforms: uniforms,
-                side: THREE.BackSide
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+                uniforms: uniforms, side: THREE.BackSide
             });
-
-            const sky = new THREE.Mesh(skyGeo, skyMat);
-            player.add(sky); // Attach sky to player so you never reach the edge
-        }
-
-        function onResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function initAudio() {
-            if(audioCtx) return;
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                document.getElementById('hint').innerText = "Audio ON";
-                setTimeout(() => document.getElementById('hint').style.display = 'none', 2000);
-            } catch(e) {}
-        }
-
-        function playSound(type) {
-            if (!audioCtx) return;
-            const t = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'break') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(100, t);
-                osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
-                gain.gain.setValueAtTime(0.1, t);
-                gain.gain.linearRampToValueAtTime(0, t + 0.1);
-                osc.start(t); osc.stop(t + 0.1);
-            } else if (type === 'bird') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1500, t);
-                osc.frequency.linearRampToValueAtTime(2500, t + 0.1);
-                gain.gain.setValueAtTime(0.05, t); 
-                gain.gain.linearRampToValueAtTime(0, t + 0.1);
-                osc.start(t); osc.stop(t + 0.2);
-            }
+            player.add(new THREE.Mesh(skyGeo, skyMat));
         }
 
         function setupMaterials() {
@@ -274,46 +204,71 @@
             materials = {
                 grass: mat(0x567d46), dirt: mat(0x5c4033), stone: mat(0x808080), sand: mat(0xeecfa1),
                 wood_oak: mat(0x4a3728), leaves_oak: mat(0x228b22),
-                wood_birch: mat(0xe3e3e3), leaves_birch: mat(0x82ac63),
-                wood_willow: mat(0x3b2f2f), leaves_willow: mat(0x4e603b),
-                wood_maple: mat(0x5d4037), leaves_maple: mat(0xd35400),
-                bird: new THREE.MeshBasicMaterial({ color: 0xffffff })
+                water: new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 })
             };
         }
 
         function generateWorld() {
-            for(let i=0; i<8; i++) spawnBird(); 
+            const size = WORLD_RADIUS;
+            
+            // Generate Whirlpool Locations (Random spots in potential water areas)
+            for(let i=0; i<8; i++) {
+                whirlpools.push({
+                    x: (Math.random()-0.5) * size * 1.5,
+                    z: (Math.random()-0.5) * size * 1.5,
+                    strength: 0.05 + Math.random() * 0.05
+                });
+            }
 
-            const size = 18;
             for (let x = -size; x <= size; x++) {
                 for (let z = -size; z <= size; z++) {
-                    let h = Math.floor(Math.sin(x/5) * 3 + Math.cos(z/6) * 3);
-                    let type = 'grass';
-                    if (h < -1) type = 'sand';
+                    // Base Terrain (Hills)
+                    let h = Math.floor(Math.sin(x/7) * 4 + Math.cos(z/9) * 4);
+                    
+                    // River Logic (Noise Channels)
+                    // If this value is near 0, we cut the terrain down
+                    let riverNoise = Math.sin(x/12) + Math.cos(z/15); 
+                    let isRiver = Math.abs(riverNoise) < 0.2; 
 
-                    for (let y = -4; y <= h; y++) {
+                    if (isRiver) {
+                        // Flatten terrain for river bed
+                        if (h > WATER_LEVEL - 2) h = WATER_LEVEL - 2;
+                    }
+
+                    // Surface Type
+                    let type = 'grass';
+                    if (h <= WATER_LEVEL) type = 'sand';
+
+                    // 1. Build Solid Land
+                    for (let y = -6; y <= h; y++) {
                         let t = type;
                         if (y < h) t = 'dirt';
-                        if (y < h - 2) t = 'stone';
+                        if (y < h - 3) t = 'stone';
                         createBlock(x, y, z, t);
                     }
 
-                    if (type === 'grass' && Math.random() < 0.04) {
-                        const types = ['oak', 'birch', 'willow', 'maple'];
-                        createTree(x, h+1, z, TREES[types[Math.floor(Math.random() * types.length)]]);
+                    // 2. Build Water (This was missing in v7!)
+                    // Fill from top of land up to WATER_LEVEL
+                    for (let y = h + 1; y <= WATER_LEVEL; y++) {
+                        createBlock(x, y, z, 'water');
+                    }
+
+                    // 3. Trees (Only on grass, not inside rivers)
+                    if (type === 'grass' && !isRiver && Math.random() < 0.03) {
+                        createTree(x, h+1, z);
                     }
                 }
             }
         }
 
-        function createTree(x, y, z, tree) {
-            for(let i=0; i<tree.height; i++) createBlock(x, y+i, z, tree.log);
-            let top = y + tree.height;
+        function createTree(x, y, z) {
+            for(let i=0; i<4; i++) createBlock(x, y+i, z, 'wood_oak');
+            let top = y + 4;
             for(let lx=x-2; lx<=x+2; lx++){
                 for(let lz=z-2; lz<=z+2; lz++){
                     for(let ly=top-2; ly<=top+1; ly++){
-                        if (Math.abs(lx-x) + Math.abs(lz-z) + Math.abs(ly-top) <= 3) {
-                             if (!blockMap.has(`${lx},${ly},${lz}`)) createBlock(lx, ly, lz, tree.leaf);
+                        if (Math.abs(lx-x)+Math.abs(lz-z)+Math.abs(ly-top) <= 3) {
+                             if (!blockMap.has(`${lx},${ly},${lz}`)) createBlock(lx, ly, lz, 'leaves_oak');
                         }
                     }
                 }
@@ -326,92 +281,88 @@
             mesh.position.set(x, y, z);
             mesh.matrixAutoUpdate = false; 
             mesh.updateMatrix();
-            mesh.userData = { type: type, solid: true };
+            mesh.userData = { type: type, solid: type !== 'water' };
             scene.add(mesh);
             objects.push(mesh);
             blockMap.set(`${x},${y},${z}`, mesh);
             return mesh;
         }
 
-        function spawnBird() {
-            const bird = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.2), materials.bird);
-            bird.add(body);
-            bird.position.set(0, 15, 0);
-            bird.userData = { angle: Math.random()*10, speed: 0.02 + Math.random()*0.02, center: new THREE.Vector3(0, 0, 0) };
-            scene.add(bird);
-            birds.push(bird);
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        function initAudio() {
+            if(audioCtx) return;
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'break') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(100, t);
+                osc.frequency.exponentialRampToValueAtTime(40, t+0.1);
+                gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t+0.1);
+                osc.start(t); osc.stop(t+0.1);
+            }
+        }
+
+        // --- INPUT ---
         function setupInput() {
             const slots = document.querySelectorAll('.slot');
             slots.forEach(s => {
                 s.addEventListener('touchstart', (e) => {
                     e.preventDefault(); e.stopPropagation();
-                    slots.forEach(el => el.classList.remove('active'));
-                    s.classList.add('active');
+                    slots.forEach(el => el.classList.remove('active')); s.classList.add('active');
                     currentMat = s.dataset.type;
                 });
             });
 
             const zone = document.getElementById('look-zone');
-            let lastX = 0, lastY = 0;
-            let activeTouchId = null;
+            let lastX = 0, lastY = 0, activeTouchId = null;
 
             zone.addEventListener('touchstart', (e) => {
-                const t = e.changedTouches[0];
-                activeTouchId = t.identifier;
-                lastX = t.pageX; 
-                lastY = t.pageY;
-                isHolding = false;
-                touchTimer = setTimeout(() => { isHolding = true; doRaycast('BREAK'); }, 500); 
+                const t = e.changedTouches[0]; activeTouchId = t.identifier;
+                lastX = t.pageX; lastY = t.pageY;
+                isHolding = false; touchTimer = setTimeout(() => { isHolding = true; doRaycast('BREAK'); }, 500);
             }, {passive: false});
 
             zone.addEventListener('touchmove', (e) => {
                 e.preventDefault(); 
                 let t = null;
-                for (let i=0; i<e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === activeTouchId) t = e.changedTouches[i];
-                }
+                for (let i=0; i<e.changedTouches.length; i++) { if (e.changedTouches[i].identifier === activeTouchId) t = e.changedTouches[i]; }
                 if (!t) return;
-
-                const dx = t.pageX - lastX;
-                const dy = t.pageY - lastY;
-
-                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                    clearTimeout(touchTimer); 
-                    isHolding = false;
-                }
-
+                
+                const dx = t.pageX - lastX; const dy = t.pageY - lastY;
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { clearTimeout(touchTimer); isHolding = false; }
+                
                 player.rotation.y -= dx * 0.005;
                 head.rotation.x -= dy * 0.005;
                 head.rotation.x = Math.max(-1.5, Math.min(1.5, head.rotation.x));
-                lastX = t.pageX;
-                lastY = t.pageY;
+                lastX = t.pageX; lastY = t.pageY;
             }, {passive: false});
 
             zone.addEventListener('touchend', (e) => {
                 clearTimeout(touchTimer);
                 if (!isHolding && currentMat !== 'hand') {
-                    let t = e.changedTouches[0];
-                    if (Math.abs(t.pageX - lastX) < 10) doRaycast('PLACE');
+                     if (Math.abs(e.changedTouches[0].pageX - lastX) < 10) doRaycast('PLACE');
                 }
                 activeTouchId = null;
             });
 
             document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                if (onGround) velocity.y = JUMP_FORCE;
+                e.preventDefault(); if (onGround || isInWater) velocity.y = 0.22;
             });
 
-            const joy = nipplejs.create({ 
-                zone: document.getElementById('joystick-zone'), 
-                mode: 'static', position: {left: '50%', top: '50%'}, color: 'white' 
-            });
-            joy.on('move', (evt, data) => { 
-                moveFwd = data.vector.y; 
-                moveSide = data.vector.x; 
-            });
+            const joy = nipplejs.create({ zone: document.getElementById('joystick-zone'), mode: 'static', position: {left: '50%', top: '50%'}, color: 'white' });
+            joy.on('move', (evt, data) => { moveFwd = data.vector.y; moveSide = data.vector.x; });
             joy.on('end', () => { moveFwd = 0; moveSide = 0; });
         }
 
@@ -421,6 +372,7 @@
             if (hits.length > 0 && hits[0].distance < 6) {
                 const hit = hits[0];
                 if (action === 'BREAK') {
+                    if(hit.object.userData.type === 'water') return; // Can't break water
                     scene.remove(hit.object);
                     objects.splice(objects.indexOf(hit.object), 1);
                     blockMap.delete(`${Math.round(hit.object.position.x)},${Math.round(hit.object.position.y)},${Math.round(hit.object.position.z)}`);
@@ -436,55 +388,85 @@
         }
 
         function checkColl(x, y, z) {
-            return blockMap.has(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
+            const b = blockMap.get(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
+            return b && b.userData.solid;
+        }
+        
+        function checkWater(x, y, z) {
+            const b = blockMap.get(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
+            return b && b.userData.type === 'water';
         }
 
         function updatePhysics() {
-            velocity.y -= GRAVITY;
-            
+            // Whirlpool Logic
+            let inWhirlpool = false;
+            if (isInWater) {
+                const warn = document.getElementById('danger-msg');
+                let nearDanger = false;
+                
+                whirlpools.forEach(w => {
+                    const dx = player.position.x - w.x;
+                    const dz = player.position.z - w.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
+                    
+                    if (dist < 4) {
+                        nearDanger = true;
+                        // Suck logic
+                        velocity.y -= 0.005; // Pull down strong
+                        // Rotate camera slightly
+                        player.rotation.y += 0.05;
+                        // Pull towards center
+                        player.position.x -= dx * 0.02;
+                        player.position.z -= dz * 0.02;
+                        inWhirlpool = true;
+                    }
+                });
+                warn.style.display = nearDanger ? 'block' : 'none';
+            } else {
+                document.getElementById('danger-msg').style.display = 'none';
+            }
+
+            // Normal Physics
+            if (!inWhirlpool) {
+                if (isInWater) {
+                    velocity.y -= 0.002; // Light gravity in water
+                    velocity.y *= 0.9;   // Drag
+                } else {
+                    velocity.y -= GRAVITY;
+                }
+            }
+
             const yaw = player.rotation.y;
-            const fx = -Math.sin(yaw) * moveFwd; 
-            const fz = -Math.cos(yaw) * moveFwd;
-            const rx = -Math.cos(yaw) * moveSide;
-            const rz = Math.sin(yaw) * moveSide;
+            const fx = -Math.sin(yaw) * moveFwd; const fz = -Math.cos(yaw) * moveFwd;
+            const rx = -Math.cos(yaw) * moveSide; const rz = Math.sin(yaw) * moveSide;
+            const dx = (fx + rx) * MOVE_SPEED; const dz = (fz + rz) * MOVE_SPEED;
 
-            const dx = (fx + rx) * MOVE_SPEED;
-            const dz = (fz + rz) * MOVE_SPEED;
-
-            if (!checkColl(player.position.x + dx, player.position.y, player.position.z) &&
-                !checkColl(player.position.x + dx, player.position.y - 1, player.position.z)) {
+            if (!checkColl(player.position.x + dx, player.position.y, player.position.z) && !checkColl(player.position.x + dx, player.position.y - 1, player.position.z)) {
                 player.position.x += dx;
             }
-            if (!checkColl(player.position.x, player.position.y, player.position.z + dz) &&
-                !checkColl(player.position.x, player.position.y - 1, player.position.z + dz)) {
+            if (!checkColl(player.position.x, player.position.y, player.position.z + dz) && !checkColl(player.position.x, player.position.y - 1, player.position.z + dz)) {
                 player.position.z += dz;
             }
 
             let nextY = player.position.y + velocity.y;
             if (velocity.y < 0 && checkColl(player.position.x, nextY - 1.5, player.position.z)) {
-                velocity.y = 0; 
-                onGround = true;
+                velocity.y = 0; onGround = true;
                 player.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001;
             } else {
-                player.position.y = nextY; 
-                onGround = false;
+                player.position.y = nextY; onGround = false;
             }
+            
+            // Water check for next frame
+            const headB = checkWater(player.position.x, player.position.y, player.position.z);
+            const footB = checkWater(player.position.x, player.position.y - 1, player.position.z);
+            isInWater = headB || footB;
 
-            if (player.position.y < -15) player.position.set(0, 15, 0);
+            if (player.position.y < -15) player.position.set(0, 20, 0);
         }
 
         function animate() {
             requestAnimationFrame(animate);
             updatePhysics();
-            
-            birds.forEach((b, i) => {
-                b.userData.angle += b.userData.speed;
-                b.position.x = Math.sin(b.userData.angle) * 12;
-                b.position.z = Math.cos(b.userData.angle) * 12;
-                b.rotation.y = -b.userData.angle;
-                if (Math.random() < 0.001) playSound('bird');
-            });
-
             renderer.render(scene, camera);
         }
     </script>
