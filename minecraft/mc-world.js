@@ -19,7 +19,12 @@ export function initWorld(scene) {
     materials.sand = mat(0xeecfa1);
     materials.wood_oak = mat(0x4a3728); 
     materials.leaves_oak = mat(0x228b22);
-    materials.water = new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 });
+    materials.water = new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 }); 
+materials.planks_oak = mat(0xDEB887);
+materials.glass = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+materials.bricks_stone = mat(0x555555);
+materials.torch = new THREE.MeshBasicMaterial({ color: 0xffff00 }); // Simple yellow block for now
+
     
     // NEW LANTERN MATERIAL (Glows in Dark)
     materials.lantern = new THREE.MeshLambertMaterial({ 
