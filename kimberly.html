@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimberly Worth | Personal Page</title>
+    <style>
+        /* --- CSS STYLING --- */
+        :root {
+            --primary-color: #d4a373; /* Earthy/Gold tone */
+            --secondary-color: #faedcd;
+            --text-color: #333;
+            --bg-color: #fefae0;
+            --accent-color: #e9edc9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Header / Hero Section */
+        header {
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://via.placeholder.com/1200x600'); /* Replace with her photo */
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: -50px auto 50px; /* Pulls it up into the header */
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* Gallery Grid */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .gallery img {
+            width: 100%;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Interactive Section */
+        .interactive-box {
+            text-align: center;
+            background-color: var(--secondary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #bc8a5f;
+        }
+
+        #fact-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 1.5em;
+            color: #555;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Kimberly Worth</h1>
+            <p>Mother &bull; Wife &bull; Inspiration</p>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <section class="card" id="about">
+            <h2>About Kimberly</h2>
+            <p>
+                Welcome to Kimberly's personal page. This space is dedicated to the woman who holds everything together. 
+                Whether she is balancing work, family, or her own passions, she does it with grace and strength.
+            </p>
+            <p style="margin-top: 15px;">
+                [You can write a short bio here about where she is from, her personality, and what she loves doing.]
+            </p>
+        </section>
+
+        <section class="card interactive-box">
+            <h2>Why She's Amazing</h2>
+            <p>Click the button to see a fun fact or reason why we love her.</p>
+            
+            <div id="fact-display">Are you ready?</div>
+            <button onclick="showFact()">Tell me something!</button>
+        </section>
+
+        <section class="card">
+            <h2>Her Favorites</h2>
+            <div class="gallery">
+                <img src="https://via.placeholder.com/200" alt="Hobby 1">
+                <img src="https://via.placeholder.com/200" alt="Hobby 2">
+                <img src="https://via.placeholder.com/200" alt="Hobby 3">
+                <img src="https://via.placeholder.com/200" alt="Family">
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Made with love for Kimberly Worth</p>
+    </footer>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+        
+        // You can edit these sentences to customize the message!
+        const facts = [
+            "She has the best laugh in the world.",
+            "She creates magic out of ordinary days.",
+            "Her resilience is inspiring.",
+            "She makes the world's best coffee (or tea!).",
+            "She is the heart of our family."
+        ];
+
+        function showFact() {
+            const display = document.getElementById('fact-display');
+            // Get a random index from the array
+            const randomIndex = Math.floor(Math.random() * facts.length);
+            
+            // Fade out effect (simple)
+            display.style.opacity = 0;
+            
+            setTimeout(() => {
+                display.innerText = facts[randomIndex];
+                display.style.opacity = 1;
+                display.style.transition = "opacity 0.5s ease-in";
+            }, 200);
+        }
+    </script>
+</body>
+</html>
