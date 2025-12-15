@@ -3,71 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Minecraft Mobile v5.0</title>
+    <title>Minecraft Mobile v6.0</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
+        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        /* UI Layer */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
         #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 12px; height: 12px;
-            background: rgba(255, 255, 255, 0.4); border: 2px solid white;
-            transform: translate(-50%, -50%);
+            position: absolute; top: 50%; left: 50%; width: 14px; height: 14px;
+            background: rgba(255, 255, 255, 0.3); border: 2px solid white;
+            transform: translate(-50%, -50%); border-radius: 50%;
         }
 
-        #hint { position: absolute; top: 10px; left: 0; width: 100%; text-align: center; color: white; text-shadow: 1px 1px 0 #000; font-size: 14px; pointer-events: none; opacity: 0.9; }
+        #hint { 
+            position: absolute; top: 10px; left: 0; width: 100%; text-align: center; 
+            color: white; text-shadow: 1px 1px 2px black; font-size: 14px; 
+            pointer-events: none; opacity: 0.8; z-index: 5;
+        }
 
-        /* Controls */
-        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; pointer-events: auto; }
-        #look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 100%; pointer-events: auto; }
+        /* Controls Zones */
+        #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 40vw; height: 40vh; pointer-events: auto; }
+        #look-zone { position: absolute; top: 0; right: 0; width: 50vw; height: 100%; pointer-events: auto; }
 
         #btn-jump { 
-            position: absolute; bottom: 120px; right: 30px; width: 80px; height: 80px; 
-            background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.5); 
+            position: absolute; bottom: 30%; right: 20px; width: 70px; height: 70px; 
+            background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); 
             border-radius: 50%; pointer-events: auto; 
             display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; font-size: 16px;
+            color: white; font-weight: bold; font-size: 14px; z-index: 10;
         }
+        #btn-jump:active { background: rgba(255,255,255,0.5); }
 
-        /* Inventory */
+        /* Scrollable Inventory */
         #inventory {
             position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 6px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px;
-            pointer-events: auto; overflow-x: auto; max-width: 90%;
+            display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px;
+            pointer-events: auto; overflow-x: scroll; max-width: 80vw;
+            scrollbar-width: none; /* Firefox */
         }
+        #inventory::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        
         .slot {
-            min-width: 36px; height: 36px; border: 2px solid #444; border-radius: 6px;
-            transition: transform 0.1s; cursor: pointer; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
+            min-width: 40px; height: 40px; border: 2px solid #555; border-radius: 8px;
+            flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .slot.active { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 10px white; z-index: 10; }
+        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 10px white; z-index: 20; background-color: rgba(255,255,255,0.2); }
         
         /* Icons */
-        .icon-hand { background: #333; }
+        .icon-hand { border: 2px dashed #888; }
         .icon-hand::after { content: "✋"; font-size: 20px; }
         
+        /* Materials */
         .c-grass { background: #567d46; }
         .c-dirt { background: #5c4033; }
         .c-stone { background: #808080; }
-        .c-wood-oak { background: #4a3728; }
-        .c-leaves-oak { background: #228b22; }
-        .c-wood-birch { background: #d3d3d3; } /* White-ish */
-        .c-leaves-birch { background: #82ac63; }
-        .c-wood-willow { background: #3b2f2f; }
-        .c-leaves-willow { background: #4e603b; }
-        .c-wood-maple { background: #5d4037; }
-        .c-leaves-maple { background: #d35400; } /* Orange */
-        .c-wood-mahog { background: #3e2723; }
-        .c-leaves-mahog { background: #1b5e20; }
+        .c-oak { background: #4a3728; }
+        .c-oak-leaf { background: #228b22; }
+        .c-birch { background: #e3e3e3; }
+        .c-birch-leaf { background: #82ac63; }
+        .c-maple { background: #5d4037; }
+        .c-maple-leaf { background: #d35400; }
+        .c-willow { background: #3b2f2f; }
+        .c-willow-leaf { background: #4e603b; }
+
+        /* Rotation Enforcer */
+        #rotate-msg {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #222; color: white; z-index: 999;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .phone-icon { font-size: 50px; animation: rotate 2s infinite; margin-bottom: 20px; }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 25% { transform: rotate(90deg); } 100% { transform: rotate(90deg); } }
         
+        /* Show message only in portrait */
+        @media (orientation: portrait) {
+            #rotate-msg { display: flex; }
+        }
+
     </style>
 </head>
 <body>
 
+    <div id="rotate-msg">
+        <div class="phone-icon">📱</div>
+        <h2>Please Rotate Device</h2>
+        <p>This game requires Landscape mode.</p>
+    </div>
+
     <div id="game-container"></div>
 
     <div id="ui-layer">
-        <div id="hint">Tap screen to Start Audio<br>HOLD to Break | TAP to Place</div>
+        <div id="hint">Tap once for Audio<br>HOLD right side to Break</div>
         <div id="crosshair"></div>
         <div id="joystick-zone"></div>
         <div id="look-zone"></div>
@@ -78,11 +107,14 @@
             <div class="slot c-grass" data-type="grass"></div>
             <div class="slot c-dirt" data-type="dirt"></div>
             <div class="slot c-stone" data-type="stone"></div>
-            <div class="slot c-wood-oak" data-type="wood_oak"></div>
-            <div class="slot c-leaves-oak" data-type="leaves_oak"></div>
-            <div class="slot c-wood-birch" data-type="wood_birch"></div>
-            <div class="slot c-leaves-birch" data-type="leaves_birch"></div>
-            <div class="slot c-leaves-maple" data-type="leaves_maple"></div>
+            <div class="slot c-oak" data-type="wood_oak"></div>
+            <div class="slot c-oak-leaf" data-type="leaves_oak"></div>
+            <div class="slot c-birch" data-type="wood_birch"></div>
+            <div class="slot c-birch-leaf" data-type="leaves_birch"></div>
+            <div class="slot c-maple" data-type="wood_maple"></div>
+            <div class="slot c-maple-leaf" data-type="leaves_maple"></div>
+            <div class="slot c-willow" data-type="wood_willow"></div>
+            <div class="slot c-willow-leaf" data-type="leaves_willow"></div>
         </div>
     </div>
 
@@ -91,17 +123,17 @@
 
     <script>
         // --- CONFIG ---
-        const RENDER_DIST = 24;
-        const MOVE_SPEED = 0.13;
-        const JUMP_FORCE = 0.22; 
-        const GRAVITY = 0.011;
+        const RENDER_DIST = 22;
+        const MOVE_SPEED = 0.14;
+        const JUMP_FORCE = 0.23; 
+        const GRAVITY = 0.012;
         
         // --- GLOBALS ---
         let scene, camera, renderer;
         let objects = []; 
         let blockMap = new Map();
         let birds = [];
-        let audioCtx; // Web Audio API
+        let audioCtx;
         
         // Player
         let player = new THREE.Object3D();
@@ -112,7 +144,7 @@
         
         // Interaction
         let raycaster = new THREE.Raycaster();
-        let currentMat = 'hand'; // Start with empty hand
+        let currentMat = 'hand'; 
         let materials = {};
         let blockGeo; 
         let touchTimer = null;
@@ -123,8 +155,7 @@
             oak: { log: 'wood_oak', leaf: 'leaves_oak', height: 4 },
             birch: { log: 'wood_birch', leaf: 'leaves_birch', height: 5 },
             willow: { log: 'wood_willow', leaf: 'leaves_willow', height: 3 },
-            maple: { log: 'wood_maple', leaf: 'leaves_maple', height: 4 },
-            mahogany: { log: 'wood_mahog', leaf: 'leaves_mahog', height: 6 }
+            maple: { log: 'wood_maple', leaf: 'leaves_maple', height: 4 }
         };
 
         init();
@@ -133,7 +164,7 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 5, RENDER_DIST);
+            scene.fog = new THREE.Fog(0x87CEEB, 2, RENDER_DIST);
 
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 60);
             head.position.y = 1.6;
@@ -157,69 +188,71 @@
             generateWorld();
             setupInput();
 
-            // Init Audio on first touch
+            window.addEventListener('resize', onResize);
+            window.addEventListener('click', initAudio, { once: true });
             window.addEventListener('touchstart', initAudio, { once: true });
         }
 
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
         function initAudio() {
+            if(audioCtx) return;
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                document.getElementById('hint').innerText = "Audio Enabled!";
-                setTimeout(() => document.getElementById('hint').innerText = "", 3000);
-            } catch(e) { console.log("Audio failed"); }
+                document.getElementById('hint').innerText = "Audio ON";
+                setTimeout(() => document.getElementById('hint').style.display = 'none', 2000);
+            } catch(e) {}
         }
 
         function playSound(type) {
             if (!audioCtx) return;
+            const t = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             if (type === 'break') {
-                // "Crunch" noise (White noise approx using random freq)
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, t);
+                osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                osc.start(t); osc.stop(t + 0.1);
             } else if (type === 'bird') {
-                // High pitch chirp
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200 + Math.random()*500, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(1500, t);
+                osc.frequency.linearRampToValueAtTime(2500, t + 0.1);
+                gain.gain.setValueAtTime(0.05, t); // Lower volume
+                gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                osc.start(t); osc.stop(t + 0.2);
             }
         }
 
         function setupMaterials() {
             blockGeo = new THREE.BoxGeometry(1, 1, 1);
             const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
-
             materials = {
                 grass: mat(0x567d46), dirt: mat(0x5c4033), stone: mat(0x808080), sand: mat(0xeecfa1),
                 wood_oak: mat(0x4a3728), leaves_oak: mat(0x228b22),
                 wood_birch: mat(0xe3e3e3), leaves_birch: mat(0x82ac63),
                 wood_willow: mat(0x3b2f2f), leaves_willow: mat(0x4e603b),
                 wood_maple: mat(0x5d4037), leaves_maple: mat(0xd35400),
-                wood_mahog: mat(0x3e2723), leaves_mahog: mat(0x1b5e20),
                 bird: new THREE.MeshBasicMaterial({ color: 0xffffff })
             };
         }
 
         function generateWorld() {
-            // Spawn Birds
-            for(let i=0; i<10; i++) spawnBird();
+            for(let i=0; i<8; i++) spawnBird(); // Fewer birds
 
-            // Spawn Terrain
-            const size = 16;
+            const size = 18;
             for (let x = -size; x <= size; x++) {
                 for (let z = -size; z <= size; z++) {
                     let h = Math.floor(Math.sin(x/5) * 3 + Math.cos(z/6) * 3);
-                    
                     let type = 'grass';
                     if (h < -1) type = 'sand';
 
@@ -230,29 +263,22 @@
                         createBlock(x, y, z, t);
                     }
 
-                    // Trees
-                    if (type === 'grass' && Math.random() < 0.05) {
-                        const types = ['oak', 'birch', 'willow', 'maple', 'mahogany'];
-                        const treeType = types[Math.floor(Math.random() * types.length)];
-                        createTree(x, h+1, z, TREES[treeType]);
+                    if (type === 'grass' && Math.random() < 0.04) {
+                        const types = ['oak', 'birch', 'willow', 'maple'];
+                        createTree(x, h+1, z, TREES[types[Math.floor(Math.random() * types.length)]]);
                     }
                 }
             }
         }
 
         function createTree(x, y, z, tree) {
-            // Trunk
             for(let i=0; i<tree.height; i++) createBlock(x, y+i, z, tree.log);
-            
-            // Leaves
             let top = y + tree.height;
             for(let lx=x-2; lx<=x+2; lx++){
                 for(let lz=z-2; lz<=z+2; lz++){
                     for(let ly=top-2; ly<=top+1; ly++){
                         if (Math.abs(lx-x) + Math.abs(lz-z) + Math.abs(ly-top) <= 3) {
-                             if (!blockMap.has(`${lx},${ly},${lz}`)) {
-                                 createBlock(lx, ly, lz, tree.leaf);
-                             }
+                             if (!blockMap.has(`${lx},${ly},${lz}`)) createBlock(lx, ly, lz, tree.leaf);
                         }
                     }
                 }
@@ -275,113 +301,93 @@
         function spawnBird() {
             const bird = new THREE.Group();
             const body = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.2), materials.bird);
-            const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.3), materials.bird);
-            const wingR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.3), materials.bird);
-            wingL.position.x = 0.2; wingR.position.x = -0.2;
-            bird.add(body); bird.add(wingL); bird.add(wingR);
-            
-            bird.position.set((Math.random()-0.5)*30, 8 + Math.random()*5, (Math.random()-0.5)*30);
-            
-            bird.userData = { 
-                angle: Math.random() * Math.PI * 2, 
-                speed: 0.05 + Math.random()*0.05,
-                center: new THREE.Vector3(0, 10, 0)
-            };
-            
+            bird.add(body);
+            bird.position.set(0, 15, 0);
+            bird.userData = { angle: Math.random()*10, speed: 0.02 + Math.random()*0.02, center: new THREE.Vector3(0, 0, 0) };
             scene.add(bird);
             birds.push(bird);
         }
 
-        // --- PHYSICS ---
-        function checkColl(pos) {
-            const r = 0.3; // radius
-            const checks = [{x:0, z:0}, {x:r, z:r}, {x:-r, z:-r}, {x:r, z:-r}, {x:-r, z:r}];
-            for(let c of checks) {
-                if (blockMap.has(`${Math.round(pos.x+c.x)},${Math.round(pos.y)},${Math.round(pos.z+c.z)}`)) return true;
-            }
-            return false;
-        }
-
-        function updatePhysics() {
-            velocity.y -= GRAVITY;
-            
-            // Movement: Fixed Strafe Logic
-            const yaw = player.rotation.y;
-            // Fwd/Back
-            let dx = Math.sin(yaw) * moveFwd;
-            let dz = Math.cos(yaw) * moveFwd;
-            // Left/Right: Add 90 degrees (PI/2) to yaw
-            dx += Math.sin(yaw + Math.PI/2) * moveSide;
-            dz += Math.cos(yaw + Math.PI/2) * moveSide;
-
-            // X axis
-            let nextX = player.position.x - dx * MOVE_SPEED; // SUBTRACT because we want to move opposite to camera pull
-            if (!checkColl({x: nextX, y: player.position.y, z: player.position.z}) && 
-                !checkColl({x: nextX, y: player.position.y-1, z: player.position.z})) {
-                player.position.x = nextX;
-            }
-
-            // Z axis
-            let nextZ = player.position.z - dz * MOVE_SPEED;
-            if (!checkColl({x: player.position.x, y: player.position.y, z: nextZ}) && 
-                !checkColl({x: player.position.x, y: player.position.y-1, z: nextZ})) {
-                player.position.z = nextZ;
-            }
-
-            let nextY = player.position.y + velocity.y;
-            if (checkColl({x: player.position.x, y: nextY-1.5, z: player.position.z})) {
-                velocity.y = 0; onGround = true;
-                player.position.y = Math.round(nextY-1.5)+1.5+0.001;
-            } else {
-                player.position.y = nextY; onGround = false;
-            }
-            
-            if (player.position.y < -15) player.position.set(0, 15, 0);
-        }
-
         // --- INPUT ---
         function setupInput() {
-            document.querySelectorAll('.slot').forEach(s => {
+            // Inventory
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach(s => {
                 s.addEventListener('touchstart', (e) => {
                     e.preventDefault(); e.stopPropagation();
-                    document.querySelectorAll('.slot').forEach(el => el.classList.remove('active'));
+                    slots.forEach(el => el.classList.remove('active'));
                     s.classList.add('active');
                     currentMat = s.dataset.type;
                 });
             });
 
+            // Camera Look (Fixed)
             const zone = document.getElementById('look-zone');
-            let lastX, lastY;
+            let lastX = 0, lastY = 0;
+            let activeTouchId = null;
 
             zone.addEventListener('touchstart', (e) => {
-                lastX = e.touches[0].pageX; lastY = e.touches[0].pageY;
+                const t = e.changedTouches[0];
+                activeTouchId = t.identifier;
+                lastX = t.pageX; 
+                lastY = t.pageY;
+                
+                // Hold Timer Logic
                 isHolding = false;
-                touchTimer = setTimeout(() => { isHolding = true; doRaycast('BREAK'); }, 400);
+                touchTimer = setTimeout(() => { isHolding = true; doRaycast('BREAK'); }, 500); // 500ms Hold
             }, {passive: false});
 
             zone.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (Math.abs(e.touches[0].pageX - lastX) > 5) { clearTimeout(touchTimer); isHolding = false; }
-                const x = e.touches[0].pageX, y = e.touches[0].pageY;
-                player.rotation.y -= (x - lastX) * 0.005;
-                head.rotation.x -= (y - lastY) * 0.005;
+                e.preventDefault(); 
+                // Find the touch that started this event
+                let t = null;
+                for (let i=0; i<e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) t = e.changedTouches[i];
+                }
+                if (!t) return;
+
+                const dx = t.pageX - lastX;
+                const dy = t.pageY - lastY;
+
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                    clearTimeout(touchTimer); // Moving cancels break
+                    isHolding = false;
+                }
+
+                player.rotation.y -= dx * 0.005;
+                head.rotation.x -= dy * 0.005;
                 head.rotation.x = Math.max(-1.5, Math.min(1.5, head.rotation.x));
-                lastX = x; lastY = y;
+                
+                lastX = t.pageX;
+                lastY = t.pageY;
             }, {passive: false});
 
-            zone.addEventListener('touchend', () => {
+            zone.addEventListener('touchend', (e) => {
                 clearTimeout(touchTimer);
-                if (!isHolding && currentMat !== 'hand') doRaycast('PLACE');
+                // Only place if we didn't hold (Tap) and hand is not empty
+                if (!isHolding && currentMat !== 'hand') {
+                    // Slight check to ensure it wasn't a drag release
+                    let t = e.changedTouches[0];
+                    if (Math.abs(t.pageX - lastX) < 10) doRaycast('PLACE');
+                }
+                activeTouchId = null;
             });
 
+            // Jump
             document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
-                e.preventDefault(); if (onGround) velocity.y = JUMP_FORCE;
+                e.preventDefault(); 
+                if (onGround) velocity.y = JUMP_FORCE;
             });
 
-            const joy = nipplejs.create({ zone: document.getElementById('joystick-zone'), mode: 'static', position: {left: '50%', top: '50%'}, color: 'white' });
+            // Joystick
+            const joy = nipplejs.create({ 
+                zone: document.getElementById('joystick-zone'), 
+                mode: 'static', position: {left: '50%', top: '50%'}, color: 'white' 
+            });
             joy.on('move', (evt, data) => { 
+                // Fix: NippleJS 'up' is +Y. We map Y->Fwd, X->Right
                 moveFwd = data.vector.y; 
-                moveSide = data.vector.x; // Positive is Right
+                moveSide = data.vector.x; 
             });
             joy.on('end', () => { moveFwd = 0; moveSide = 0; });
         }
@@ -399,479 +405,74 @@
                 } else if (action === 'PLACE') {
                     const p = hit.point.add(hit.face.normal.multiplyScalar(0.5));
                     const bx = Math.round(p.x), by = Math.round(p.y), bz = Math.round(p.z);
-                    if (new THREE.Vector3(bx, by, bz).distanceTo(player.position) > 1.2) {
+                    // Collision check
+                    if (Math.abs(bx - player.position.x) > 0.8 || Math.abs(by - player.position.y) > 1.8 || Math.abs(bz - player.position.z) > 0.8) {
                         createBlock(bx, by, bz, currentMat);
                     }
                 }
             }
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            updatePhysics();
-            
-            // Birds Logic
-            birds.forEach(b => {
-                b.userData.angle += b.userData.speed;
-                b.position.x = b.userData.center.x + Math.sin(b.userData.angle) * 15;
-                b.position.z = b.userData.center.z + Math.cos(b.userData.angle) * 15;
-                b.rotation.y = -b.userData.angle;
-                // Random Chirp
-                if (Math.random() < 0.002) playSound('bird');
-            });
-
-            renderer.render(scene, camera);
-        }
-    </script>
-</body>
-</html>
-
-        /* UI Layer */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        
-        /* Crosshair */
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 12px; height: 12px;
-            background: rgba(255, 255, 255, 0.8); border: 1px solid black;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Instructions */
-        #hint { position: absolute; top: 10px; left: 0; width: 100%; text-align: center; color: white; text-shadow: 1px 1px 0 #000; font-size: 14px; pointer-events: none; opacity: 0.8; }
-
-        /* Controls */
-        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; pointer-events: auto; }
-        #look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 100%; pointer-events: auto; }
-
-        /* Jump Button */
-        #btn-jump { 
-            position: absolute; bottom: 120px; right: 30px; width: 80px; height: 80px; 
-            background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.5); 
-            border-radius: 50%; pointer-events: auto; 
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; font-size: 16px;
-        }
-        #btn-jump:active { background: rgba(255,255,255,0.2); }
-
-        /* Inventory */
-        #inventory {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 12px;
-            pointer-events: auto;
-        }
-        .slot {
-            width: 40px; height: 40px; border: 2px solid #333; border-radius: 6px;
-            transition: transform 0.1s; cursor: pointer;
-        }
-        .slot.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 8px white; }
-        
-        /* Colors */
-        .c-grass { background: #567d46; }
-        .c-dirt { background: #5c4033; }
-        .c-stone { background: #808080; }
-        .c-wood { background: #4a3728; }
-        .c-leaves { background: #228b22; }
-        .c-sand { background: #eecfa1; }
-        .c-plank { background: #8B4513; }
-        .c-brick { background: #800000; }
-    </style>
-</head>
-<body>
-
-    <div id="game-container"></div>
-
-    <div id="ui-layer">
-        <div id="hint">TAP to Place &nbsp;|&nbsp; HOLD to Break</div>
-        <div id="crosshair"></div>
-        <div id="joystick-zone"></div>
-        <div id="look-zone"></div>
-        <div id="btn-jump">JUMP</div>
-
-        <div id="inventory">
-            <div class="slot c-grass active" data-type="grass"></div>
-            <div class="slot c-dirt" data-type="dirt"></div>
-            <div class="slot c-stone" data-type="stone"></div>
-            <div class="slot c-wood" data-type="wood"></div>
-            <div class="slot c-leaves" data-type="leaves"></div>
-            <div class="slot c-sand" data-type="sand"></div>
-            <div class="slot c-plank" data-type="plank"></div>
-            <div class="slot c-brick" data-type="brick"></div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
-
-    <script>
-        // --- CONFIG ---
-        const WORLD_SIZE = 16; // Smaller radius for better FPS
-        const RENDER_DIST = 25;
-        const MOVE_SPEED = 0.13;
-        const JUMP_FORCE = 0.23; // Adjusted for better feel
-        const GRAVITY = 0.011;
-        const PLAYER_WIDTH = 0.3; // Collision width radius
-        const HOLD_TIME = 400; // ms to trigger break
-        
-        // --- GLOBALS ---
-        let scene, camera, renderer;
-        let objects = []; 
-        let blockMap = new Map();
-        let crabs = [];
-        
-        // Player
-        let player = new THREE.Object3D();
-        let head = new THREE.Object3D();
-        let velocity = new THREE.Vector3();
-        let onGround = false;
-        let moveFwd = 0, moveSide = 0;
-        
-        // Interaction
-        let raycaster = new THREE.Raycaster();
-        let currentMat = 'grass';
-        let materials = {};
-        let blockGeo; // Shared geometry
-        let touchTimer = null;
-        let isHolding = false;
-
-        init();
-        animate();
-
-        function init() {
-            // 1. Scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 5, RENDER_DIST);
-
-            // 2. Camera Rig
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 60);
-            head.position.y = 1.6;
-            head.add(camera);
-            player.add(head);
-            scene.add(player);
-            player.position.set(0, 10, 0);
-
-            // 3. Renderer (OPTIMIZATION: Low Pixel Ratio)
-            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(1); // Force 1.0 for FPS
-            document.getElementById('game-container').appendChild(renderer.domElement);
-
-            // 4. Lights
-            const amb = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(amb);
-            const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-            sun.position.set(10, 30, 10);
-            scene.add(sun);
-
-            // 5. Assets
-            setupMaterials();
-            generateWorld();
-
-            // 6. Controls
-            setupInput();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-
-        function setupMaterials() {
-            // Shared Geometry for performance
-            blockGeo = new THREE.BoxGeometry(1, 1, 1);
-
-            const mkMat = (c) => new THREE.MeshLambertMaterial({ color: c });
-            materials = {
-                grass: mkMat(0x567d46),
-                dirt: mkMat(0x5c4033),
-                stone: mkMat(0x808080),
-                wood: mkMat(0x4a3728),
-                leaves: mkMat(0x228b22),
-                sand: mkMat(0xeecfa1),
-                plank: mkMat(0x8B4513),
-                brick: mkMat(0x800000),
-                water: new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 }),
-                crab: new THREE.MeshLambertMaterial({ color: 0xff4400 })
-            };
-        }
-
-        function generateWorld() {
-            for (let x = -WORLD_SIZE; x <= WORLD_SIZE; x++) {
-                for (let z = -WORLD_SIZE; z <= WORLD_SIZE; z++) {
-                    // Terrain Math
-                    let h = Math.floor(Math.sin(x/5) * 3 + Math.cos(z/6) * 3);
-                    
-                    // Surface determination
-                    let type = 'grass';
-                    if (h <= -1) type = 'sand';
-                    if (h < -2) h = -2; // Flatten sea floor
-
-                    // Column
-                    for (let y = -4; y <= h; y++) {
-                        let t = type;
-                        if (y < h) t = 'dirt';
-                        if (y < h - 2) t = 'stone';
-                        createBlock(x, y, z, t);
-                    }
-
-                    // Water
-                    for (let y = h + 1; y <= -1; y++) {
-                        createBlock(x, y, z, 'water');
-                    }
-
-                    // Crabs (On sand, near water)
-                    if (type === 'sand' && h === -1 && Math.random() < 0.05) {
-                        createCrab(x, h + 1, z);
-                    }
-                }
-            }
-        }
-
-        function createBlock(x, y, z, type) {
-            if(blockMap.has(`${x},${y},${z}`)) return;
-
-            const mesh = new THREE.Mesh(blockGeo, materials[type]);
-            mesh.position.set(x, y, z);
-            
-            // Optimization: Static matrix, no auto update
-            mesh.updateMatrix();
-            mesh.matrixAutoUpdate = false;
-
-            mesh.userData = { type: type, solid: type !== 'water' };
-            
-            scene.add(mesh);
-            objects.push(mesh);
-            blockMap.set(`${x},${y},${z}`, mesh);
-            return mesh;
-        }
-
-        function createCrab(x, y, z) {
-            const crab = new THREE.Group();
-            
-            // Body
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.3), materials.crab);
-            crab.add(body);
-
-            // Eyes
-            const eyeGeo = new THREE.BoxGeometry(0.05, 0.05, 0.05);
-            const eyeMat = new THREE.MeshBasicMaterial({color:0x000000});
-            const e1 = new THREE.Mesh(eyeGeo, eyeMat); e1.position.set(0.1, 0.15, 0.15);
-            const e2 = new THREE.Mesh(eyeGeo, eyeMat); e2.position.set(-0.1, 0.15, 0.15);
-            crab.add(e1); crab.add(e2);
-
-            crab.position.set(x, y, z);
-            scene.add(crab);
-            crabs.push({ mesh: crab, speed: 0.02, offset: Math.random() * 100 });
-        }
-
-        // --- PHYSICS & COLLISION ---
-        function checkCollision(pos) {
-            // Check bounding box corners for player width
-            const range = PLAYER_WIDTH;
-            const checks = [
-                {x: pos.x, z: pos.z},
-                {x: pos.x + range, z: pos.z + range},
-                {x: pos.x - range, z: pos.z - range},
-                {x: pos.x + range, z: pos.z - range},
-                {x: pos.x - range, z: pos.z + range}
-            ];
-
-            for (let c of checks) {
-                const bx = Math.round(c.x);
-                const by = Math.round(pos.y);
-                const bz = Math.round(c.z);
-                const block = blockMap.get(`${bx},${by},${bz}`);
-                if (block && block.userData.solid) return true;
-            }
-            return false;
+        // --- PHYSICS & LOOP ---
+        function checkColl(x, y, z) {
+            return blockMap.has(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
         }
 
         function updatePhysics() {
-            // 1. Gravity
             velocity.y -= GRAVITY;
-
-            // 2. Horizontal Movement
+            
+            // Movement - Subtract from Position because camera looks down -Z
             const yaw = player.rotation.y;
-            const dx = Math.sin(yaw) * moveFwd + Math.cos(yaw) * moveSide;
-            const dz = Math.cos(yaw) * moveFwd - Math.sin(yaw) * moveSide;
-            
-            // Try X movement
-            let nextPos = player.position.clone();
-            nextPos.x -= dx * MOVE_SPEED;
-            if (!checkCollision(new THREE.Vector3(nextPos.x, player.position.y, player.position.z)) && 
-                !checkCollision(new THREE.Vector3(nextPos.x, player.position.y - 1, player.position.z))) {
-                player.position.x = nextPos.x;
+            // Forward vector
+            const fx = -Math.sin(yaw) * moveFwd; 
+            const fz = -Math.cos(yaw) * moveFwd;
+            // Right vector (90 deg)
+            const rx = -Math.cos(yaw) * moveSide;
+            const rz = Math.sin(yaw) * moveSide;
+
+            const dx = (fx + rx) * MOVE_SPEED;
+            const dz = (fz + rz) * MOVE_SPEED;
+
+            // X Axis
+            if (!checkColl(player.position.x + dx, player.position.y, player.position.z) &&
+                !checkColl(player.position.x + dx, player.position.y - 1, player.position.z)) {
+                player.position.x += dx;
+            }
+            // Z Axis
+            if (!checkColl(player.position.x, player.position.y, player.position.z + dz) &&
+                !checkColl(player.position.x, player.position.y - 1, player.position.z + dz)) {
+                player.position.z += dz;
             }
 
-            // Try Z movement
-            nextPos = player.position.clone();
-            nextPos.z -= dz * MOVE_SPEED;
-            if (!checkCollision(new THREE.Vector3(player.position.x, player.position.y, nextPos.z)) && 
-                !checkCollision(new THREE.Vector3(player.position.x, player.position.y - 1, nextPos.z))) {
-                player.position.z = nextPos.z;
-            }
-
-            // 3. Vertical Movement
+            // Y Axis
             let nextY = player.position.y + velocity.y;
-            
-            // Check feet
-            if (velocity.y < 0 && checkCollision(new THREE.Vector3(player.position.x, nextY - 1.5, player.position.z))) {
-                velocity.y = 0;
+            if (velocity.y < 0 && checkColl(player.position.x, nextY - 1.5, player.position.z)) {
+                velocity.y = 0; 
                 onGround = true;
-                player.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001; 
-            } else if (velocity.y > 0 && checkCollision(new THREE.Vector3(player.position.x, nextY, player.position.z))) {
-                // Head bonk
-                velocity.y = 0;
+                player.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001;
             } else {
-                player.position.y = nextY;
+                player.position.y = nextY; 
                 onGround = false;
             }
 
-            // Floor boundary
-            if (player.position.y < -10) player.position.set(0, 10, 0);
-        }
-
-        // --- INPUT SYSTEM ---
-        function setupInput() {
-            // Inventory Select
-            document.querySelectorAll('.slot').forEach(s => {
-                s.addEventListener('touchstart', (e) => {
-                    e.preventDefault(); e.stopPropagation();
-                    document.querySelectorAll('.slot').forEach(el => el.classList.remove('active'));
-                    s.classList.add('active');
-                    currentMat = s.dataset.type;
-                });
-            });
-
-            // Jump
-            const btnJump = document.getElementById('btn-jump');
-            btnJump.addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                if (onGround) {
-                    velocity.y = JUMP_FORCE;
-                    onGround = false;
-                }
-            });
-
-            // Look & Action Zone
-            const zone = document.getElementById('look-zone');
-            let lastX, lastY;
-
-            zone.addEventListener('touchstart', (e) => {
-                lastX = e.touches[0].pageX;
-                lastY = e.touches[0].pageY;
-                
-                // Start Hold Timer
-                isHolding = false;
-                touchTimer = setTimeout(() => {
-                    isHolding = true;
-                    performRaycastAction('BREAK');
-                }, HOLD_TIME);
-
-            }, {passive: false});
-
-            zone.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                // If moving finger, cancel the hold timer
-                if (Math.abs(e.touches[0].pageX - lastX) > 5) {
-                    clearTimeout(touchTimer);
-                    isHolding = false;
-                }
-
-                // Look Logic
-                const x = e.touches[0].pageX; 
-                const y = e.touches[0].pageY;
-                player.rotation.y -= (x - lastX) * 0.005;
-                head.rotation.x -= (y - lastY) * 0.005;
-                head.rotation.x = Math.max(-1.5, Math.min(1.5, head.rotation.x));
-                lastX = x; lastY = y;
-            }, {passive: false});
-
-            zone.addEventListener('touchend', (e) => {
-                clearTimeout(touchTimer);
-                // If we didn't hold long enough, it's a tap -> PLACE
-                if (!isHolding) {
-                    performRaycastAction('PLACE');
-                }
-                isHolding = false;
-            });
-
-            // Joystick
-            const joy = nipplejs.create({
-                zone: document.getElementById('joystick-zone'),
-                mode: 'static',
-                position: { left: '50%', top: '50%' },
-                color: 'white'
-            });
-            joy.on('move', (evt, data) => {
-                moveFwd = data.vector.y;
-                moveSide = data.vector.x;
-            });
-            joy.on('end', () => { moveFwd = 0; moveSide = 0; });
-        }
-
-        function performRaycastAction(actionType) {
-            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-            const intersects = raycaster.intersectObjects(objects);
-
-            if (intersects.length > 0) {
-                const hit = intersects[0];
-                if (hit.distance > 6) return;
-
-                if (actionType === 'BREAK') {
-                    if (hit.object.userData.type === 'water') return; // Can't break water
-                    
-                    // FX
-                    createParticles(hit.object.position, hit.object.material.color);
-                    
-                    // Remove
-                    scene.remove(hit.object);
-                    objects.splice(objects.indexOf(hit.object), 1);
-                    const p = hit.object.position;
-                    blockMap.delete(`${p.x},${p.y},${p.z}`);
-                } 
-                else if (actionType === 'PLACE') {
-                    const p = hit.point.add(hit.face.normal.multiplyScalar(0.5));
-                    const bx = Math.round(p.x), by = Math.round(p.y), bz = Math.round(p.z);
-                    
-                    // Collision check for placement (don't place inside self)
-                    const dist = new THREE.Vector3(bx, by, bz).distanceTo(player.position);
-                    if (dist > 1.2) {
-                        createBlock(bx, by, bz, currentMat);
-                        // FX
-                        createParticles(new THREE.Vector3(bx, by, bz), materials[currentMat].color);
-                    }
-                }
-            }
-        }
-
-        function createParticles(pos, color) {
-            // Simple particle burst
-            const geo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-            const mat = new THREE.MeshBasicMaterial({ color: color });
-            for(let i=0; i<5; i++) {
-                const p = new THREE.Mesh(geo, mat);
-                p.position.copy(pos);
-                p.position.x += (Math.random()-0.5);
-                p.position.y += (Math.random()-0.5);
-                p.position.z += (Math.random()-0.5);
-                scene.add(p);
-                // Animate and remove later (simplified for perf)
-                setTimeout(() => scene.remove(p), 500);
-            }
+            if (player.position.y < -15) player.position.set(0, 15, 0);
         }
 
         function animate() {
             requestAnimationFrame(animate);
             updatePhysics();
-            renderer.render(scene, camera);
-
-            // Animate Crabs
-            const time = Date.now() * 0.002;
-            crabs.forEach(c => {
-                c.mesh.position.y += Math.sin(time + c.offset) * 0.002; // Bobbing
+            
+            // Birds
+            birds.forEach((b, i) => {
+                b.userData.angle += b.userData.speed;
+                b.position.x = Math.sin(b.userData.angle) * 12;
+                b.position.z = Math.cos(b.userData.angle) * 12;
+                b.rotation.y = -b.userData.angle;
+                // Rare Chirp (1 in 1000 chance per frame)
+                if (Math.random() < 0.001) playSound('bird');
             });
+
+            renderer.render(scene, camera);
         }
     </script>
 </body>
