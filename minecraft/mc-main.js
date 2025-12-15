@@ -18,12 +18,16 @@ let moveFwd = 0, moveSide = 0;
 let onGround = false, isInWater = false;
 let currentMat = 'hand';
 
-// --- BREAKING ANIMATION STATE ---
+// Breaking State
 let isHolding = false;
 let breakStartTime = 0;
-let breakTarget = null; // The block we are currently breaking
-let breakMesh = null; // The visual wireframe
-const BREAK_DURATION = 600; // Time in ms to break a block
+let breakTarget = null;
+let breakMesh = null;
+const BREAK_DURATION = 600;
+
+// Firefly State
+let fireflies = [];
+const FIREFLY_COUNT = 30;
 
 // Async Gen
 let genX = -WORLD_RADIUS;
@@ -56,15 +60,27 @@ function init() {
     sunLight.position.set(0, 100, 0);
     scene.add(sunLight);
 
-    // Initialize Modules
+    // Modules
     createSky(player);
     initWorld(scene);
     
-    // Create the Breaking Overlay Mesh
+    // Break Overlay
     const breakGeo = new THREE.BoxGeometry(1.01, 1.01, 1.01);
     const breakMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, transparent: true, opacity: 0 });
     breakMesh = new THREE.Mesh(breakGeo, breakMat);
-    scene.add(breakMesh); // Add it to scene, but keep it invisible/hidden initially
+    scene.add(breakMesh);
+
+    // --- NEW: Create Fireflies ---
+    const ffGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+    const ffMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    for(let i=0; i<FIREFLY_COUNT; i++) {
+        const ff = new THREE.Mesh(ffGeo, ffMat);
+        ff.visible = false;
+        ff.position.set(0, 0, 0);
+        ff.userData = { speed: 0.02 + Math.random() * 0.03, yOffset: Math.random()*100, xOffset: Math.random()*100 };
+        scene.add(ff);
+        fireflies.push(ff);
+    }
 
     setupInput();
     generateBatch();
@@ -97,35 +113,48 @@ function animate() {
     
     updateDayNight(sunLight, scene.fog);
     updateMobs();
+    
+    // --- NEW: Update Fireflies ---
+    updateFireflies();
+
     const inWhirlpool = updateHydro(player, velocity, isInWater);
     updatePhysics(inWhirlpool);
-    updateBreakingAnimation(); // New function called every frame
+    updateBreakingAnimation();
     
     renderer.render(scene, camera);
 }
 
-// --- NEW BREAKING LOGIC ---
+// --- FIREFLY LOGIC ---
+function updateFireflies() {
+    const sunY = sunLight.position.y;
+    const isNight = sunY < 10;
+    const time = Date.now() * 0.001;
+
+    fireflies.forEach((ff, i) => {
+        if (isNight) {
+            ff.visible = true;
+            ff.position.x = player.position.x + Math.sin(time * ff.userData.speed + ff.userData.xOffset) * 8;
+            ff.position.z = player.position.z + Math.cos(time * ff.userData.speed + ff.userData.xOffset) * 8;
+            ff.position.y = 2 + Math.abs(Math.sin(time + ff.userData.yOffset)) * 2;
+            const blink = Math.sin(time * 5 + i);
+            ff.scale.setScalar(0.8 + blink * 0.3);
+        } else {
+            ff.visible = false;
+        }
+    });
+}
+
+// --- BREAKING ANIMATION ---
 function updateBreakingAnimation() {
     if (isHolding && breakTarget) {
         const elapsed = Date.now() - breakStartTime;
         const progress = Math.min(elapsed / BREAK_DURATION, 1.0);
-        
-        // 1. Move Break Mesh to target
         breakMesh.position.copy(breakTarget.position);
         breakMesh.visible = true;
-
-        // 2. Animate opacity/scale based on progress
-        // This simulates the "cracks" getting bigger
         breakMesh.material.opacity = 0.2 + (progress * 0.8);
-        
-        // Jiggle effect for feedback
         const jiggle = Math.sin(Date.now() * 0.05) * 0.02;
         breakMesh.scale.set(1.01 + jiggle, 1.01 + jiggle, 1.01 + jiggle);
-
-        // 3. Break Check
-        if (progress >= 1.0) {
-            finishBreak();
-        }
+        if (progress >= 1.0) finishBreak();
     } else {
         breakMesh.visible = false;
         breakMesh.scale.set(1.01, 1.01, 1.01);
@@ -133,14 +162,11 @@ function updateBreakingAnimation() {
 }
 
 function startBreak() {
-    // Find what we are looking at
     raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
     const hits = raycaster.intersectObjects(objects);
-    
     if (hits.length > 0 && hits[0].distance < 6) {
         const hit = hits[0];
-        if(hit.object.userData.type === 'water') return; // Cannot break water
-
+        if(hit.object.userData.type === 'water') return;
         breakTarget = hit.object;
         isHolding = true;
         breakStartTime = Date.now();
@@ -149,17 +175,11 @@ function startBreak() {
 
 function finishBreak() {
     if (!breakTarget) return;
-
-    // Remove logic
     scene.remove(breakTarget);
     objects.splice(objects.indexOf(breakTarget), 1);
     blockMap.delete(`${Math.round(breakTarget.position.x)},${Math.round(breakTarget.position.y)},${Math.round(breakTarget.position.z)}`);
     playSound('break');
-
-    // Create Particles
     createParticles(breakTarget.position, breakTarget.material.color);
-
-    // Reset
     isHolding = false;
     breakTarget = null;
     breakMesh.visible = false;
@@ -175,16 +195,13 @@ function createParticles(pos, color) {
         p.position.y += (Math.random()-0.5)*0.8;
         p.position.z += (Math.random()-0.5)*0.8;
         scene.add(p);
-        
-        // Animate out (simple cleanup)
         setTimeout(() => scene.remove(p), 400);
     }
 }
 
 function updatePhysics(inWhirlpool) {
-    if (!inWhirlpool && !isInWater) velocity.y -= 0.012; // Gravity
+    if (!inWhirlpool && !isInWater) velocity.y -= 0.012; 
 
-    // Movement
     const yaw = player.rotation.y;
     const fx = -Math.sin(yaw) * moveFwd; const fz = -Math.cos(yaw) * moveFwd;
     const rx = -Math.cos(yaw) * moveSide; const rz = Math.sin(yaw) * moveSide;
@@ -235,43 +252,26 @@ function setupInput() {
     zone.addEventListener('touchstart', (e) => {
         const t = e.changedTouches[0]; activeId = t.identifier;
         lastX = t.pageX; lastY = t.pageY;
-        
-        // Start breaking immediately on touch
         startBreak();
-
     }, {passive:false});
     
     zone.addEventListener('touchmove', (e) => {
         e.preventDefault();
         let t = null; for(let i=0; i<e.changedTouches.length; i++) if(e.changedTouches[i].identifier === activeId) t = e.changedTouches[i];
         if(!t) return;
-        
         const dx = t.pageX - lastX; const dy = t.pageY - lastY;
-        
-        // If moved significantly, cancel breaking
         if(Math.abs(dx)>5 || Math.abs(dy)>5) { 
-            isHolding = false;
-            breakTarget = null;
-            breakMesh.visible = false;
+            isHolding = false; breakTarget = null; breakMesh.visible = false;
         }
-        
         player.rotation.y -= dx * 0.005; head.rotation.x -= dy * 0.005;
         head.rotation.x = Math.max(-1.5, Math.min(1.5, head.rotation.x));
         lastX = t.pageX; lastY = t.pageY;
     }, {passive:false});
 
     zone.addEventListener('touchend', (e) => {
-        // If we release before it broke, it counts as a PLACE attempt
         if(isHolding && breakTarget) {
-            // It didn't break yet, so we cancel break
-            isHolding = false;
-            breakTarget = null;
-            breakMesh.visible = false;
-
-            // Only Place if the tap was short
-            if (Date.now() - breakStartTime < 300 && currentMat !== 'hand') {
-                doPlace();
-            }
+            isHolding = false; breakTarget = null; breakMesh.visible = false;
+            if (Date.now() - breakStartTime < 300 && currentMat !== 'hand') doPlace();
         }
         activeId = null;
     });
