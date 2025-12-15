@@ -37,6 +37,52 @@ body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-se
     border: 2px solid #ffaa00; 
     box-shadow: 0 0 10px #ffcc00; 
 }
+/* --- CRAFTING UI --- */
+#btn-craft-toggle {
+    position: absolute; top: 10px; left: 10px; width: 40px; height: 40px;
+    background: #8B4513; border: 2px solid #deb887; border-radius: 8px;
+    color: white; font-size: 20px; z-index: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+
+#craft-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 2000;
+    display: none; align-items: center; justify-content: center;
+}
+
+.craft-window {
+    background: #c6c6c6; border: 4px solid #555; padding: 20px;
+    border-radius: 4px; text-align: center;
+}
+
+.craft-container { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
+
+.craft-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    background: #8b8b8b; padding: 4px; border: 2px solid #333;
+}
+
+.c-slot {
+    width: 50px; height: 50px; background: #8b8b8b;
+    border: 2px solid #373737; border-right-color: #fff; border-bottom-color: #fff;
+}
+
+.output-slot { width: 70px; height: 70px; }
+
+.craft-arrow { font-size: 30px; color: #555; }
+
+.craft-controls button {
+    padding: 10px 20px; font-weight: bold; background: #555; color: white; border: none; margin: 5px;
+}
+
+/* --- NEW BLOCK STYLES --- */
+.c-plank { background: #DEB887; border: 2px solid #8B4513; }
+.c-glass { background: #e0f7fa; border: 2px solid #fff; opacity: 0.8; }
+.c-brick { background: #757575; border: 2px solid #424242; }
+.c-stick { background: #3e2723; width: 10px !important; margin: 0 auto; } /* Visual hack for UI */
+.c-torch { background: #ffff00; border: 2px solid #ff6d00; }
+
 
 #rotate-msg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #222; color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 @media (orientation: portrait) { #rotate-msg { display: flex; } }
