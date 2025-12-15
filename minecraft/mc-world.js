@@ -13,10 +13,20 @@ const blockGeo = new THREE.BoxGeometry(1, 1, 1);
 export function initWorld(scene) {
     sceneRef = scene;
     const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
-    materials.grass = mat(0x567d46); materials.dirt = mat(0x5c4033);
-    materials.stone = mat(0x808080); materials.sand = mat(0xeecfa1);
-    materials.wood_oak = mat(0x4a3728); materials.leaves_oak = mat(0x228b22);
+    materials.grass = mat(0x567d46); 
+    materials.dirt = mat(0x5c4033);
+    materials.stone = mat(0x808080); 
+    materials.sand = mat(0xeecfa1);
+    materials.wood_oak = mat(0x4a3728); 
+    materials.leaves_oak = mat(0x228b22);
     materials.water = new THREE.MeshBasicMaterial({ color: 0x40a4df, transparent: true, opacity: 0.6 });
+    
+    // NEW LANTERN MATERIAL (Glows in Dark)
+    materials.lantern = new THREE.MeshLambertMaterial({ 
+        color: 0xffaa00, 
+        emissive: 0xffaa00, 
+        emissiveIntensity: 0.8 
+    });
 }
 
 export function createBlock(x, y, z, type) {
