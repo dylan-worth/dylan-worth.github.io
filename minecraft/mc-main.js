@@ -4,6 +4,8 @@ import { updateDayNight } from './mc-cycle.js';
 import { updateHydro, spawnWhirlpools } from './mc-water.js';
 import { updateMobs } from './mc-entity.js';
 import { initWorld, generateRow, createBlock, blockMap, objects, WORLD_RADIUS } from './mc-world.js';
+// NEW IMPORT
+import { updatePhysics } from './mc-movement.js';
 
 // --- GLOBALS ---
 let scene, camera, renderer;
@@ -12,13 +14,13 @@ let head = new THREE.Object3D();
 let sunLight;
 let raycaster = new THREE.Raycaster();
 
-// Physics State
+// Physics State (Simplified)
 let velocity = new THREE.Vector3();
-let moveFwd = 0, moveSide = 0;
-let onGround = false, isInWater = false;
-let currentMat = 'hand';
+let physicsState = { onGround: false, isInWater: false, inWhirlpool: false };
+let inputs = { fwd: 0, side: 0, isJumping: false };
 
 // Breaking State
+let currentMat = 'hand';
 let isHolding = false;
 let breakStartTime = 0;
 let breakTarget = null;
@@ -60,7 +62,6 @@ function init() {
     sunLight.position.set(0, 100, 0);
     scene.add(sunLight);
 
-    // Modules
     createSky(player);
     initWorld(scene);
     
@@ -70,7 +71,7 @@ function init() {
     breakMesh = new THREE.Mesh(breakGeo, breakMat);
     scene.add(breakMesh);
 
-    // --- NEW: Create Fireflies ---
+    // Fireflies
     const ffGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
     const ffMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
     for(let i=0; i<FIREFLY_COUNT; i++) {
@@ -113,18 +114,29 @@ function animate() {
     
     updateDayNight(sunLight, scene.fog);
     updateMobs();
-    
-    // --- NEW: Update Fireflies ---
     updateFireflies();
 
-    const inWhirlpool = updateHydro(player, velocity, isInWater);
-    updatePhysics(inWhirlpool);
+    // 1. Update Water/Hydro status
+    physicsState.inWhirlpool = updateHydro(player, velocity, physicsState.isInWater);
+    
+    // 2. Update Physics (Movement & Collision) - NOW USING NEW FILE
+    physicsState = updatePhysics(player, velocity, inputs, blockMap, physicsState);
+    inputs.isJumping = false; // Reset jump trigger
+
+    // 3. Update Block Checks (Water status for next frame)
+    checkWaterStatus();
+
     updateBreakingAnimation();
     
     renderer.render(scene, camera);
 }
 
-// --- FIREFLY LOGIC ---
+function checkWaterStatus() {
+    const headB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y)},${Math.round(player.position.z)}`);
+    const footB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y-1)},${Math.round(player.position.z)}`);
+    physicsState.isInWater = (headB && headB.userData.type === 'water') || (footB && footB.userData.type === 'water');
+}
+
 function updateFireflies() {
     const sunY = sunLight.position.y;
     const isNight = sunY < 10;
@@ -144,7 +156,6 @@ function updateFireflies() {
     });
 }
 
-// --- BREAKING ANIMATION ---
 function updateBreakingAnimation() {
     if (isHolding && breakTarget) {
         const elapsed = Date.now() - breakStartTime;
@@ -199,43 +210,6 @@ function createParticles(pos, color) {
     }
 }
 
-function updatePhysics(inWhirlpool) {
-    if (!inWhirlpool && !isInWater) velocity.y -= 0.012; 
-
-    const yaw = player.rotation.y;
-    const fx = -Math.sin(yaw) * moveFwd; const fz = -Math.cos(yaw) * moveFwd;
-    const rx = -Math.cos(yaw) * moveSide; const rz = Math.sin(yaw) * moveSide;
-    const dx = (fx + rx) * 0.14; const dz = (fz + rz) * 0.14;
-
-    if (!checkColl(player.position.x + dx, player.position.y, player.position.z) && 
-        !checkColl(player.position.x + dx, player.position.y - 1, player.position.z)) {
-        player.position.x += dx;
-    }
-    if (!checkColl(player.position.x, player.position.y, player.position.z + dz) && 
-        !checkColl(player.position.x, player.position.y - 1, player.position.z + dz)) {
-        player.position.z += dz;
-    }
-
-    let nextY = player.position.y + velocity.y;
-    if (velocity.y < 0 && checkColl(player.position.x, nextY - 1.5, player.position.z)) {
-        velocity.y = 0; onGround = true;
-        player.position.y = Math.round(nextY - 1.5) + 1.5 + 0.001;
-    } else {
-        player.position.y = nextY; onGround = false;
-    }
-    
-    const headB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y)},${Math.round(player.position.z)}`);
-    const footB = blockMap.get(`${Math.round(player.position.x)},${Math.round(player.position.y-1)},${Math.round(player.position.z)}`);
-    isInWater = (headB && headB.userData.type === 'water') || (footB && footB.userData.type === 'water');
-    
-    if (player.position.y < -15) player.position.set(0, 20, 0);
-}
-
-function checkColl(x, y, z) {
-    const b = blockMap.get(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`);
-    return b && b.userData.solid;
-}
-
 function setupInput() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(s => {
@@ -276,13 +250,24 @@ function setupInput() {
         activeId = null;
     });
 
+    // Jump
     document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
-        e.preventDefault(); if(onGround || isInWater) velocity.y = 0.22;
+        e.preventDefault(); 
+        inputs.isJumping = true;
     });
 
+    // Joystick
     const joy = nipplejs.create({ zone: document.getElementById('joystick-zone'), mode: 'static', position: {left: '50%', top: '50%'}, color: 'white' });
-    joy.on('move', (evt, data) => { moveFwd = data.vector.y; moveSide = data.vector.x; });
-    joy.on('end', () => { moveFwd = 0; moveSide = 0; });
+    
+    joy.on('move', (evt, data) => { 
+        inputs.fwd = data.vector.y;   // Up is Positive Y
+        inputs.side = data.vector.x;  // Right is Positive X
+    });
+    
+    joy.on('end', () => { 
+        inputs.fwd = 0; 
+        inputs.side = 0; 
+    });
 }
 
 function doPlace() {
