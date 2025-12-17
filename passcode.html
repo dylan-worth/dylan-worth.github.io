@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winter Password Gen</title>
+    <style>
+        body {
+            background-color: #e3f2fd; /* Icy light blue */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle at 20% 20%, white 2px, transparent 2.5px), 
+                              radial-gradient(circle at 80% 60%, white 2px, transparent 2.5px);
+            background-size: 100px 100px; /* Simple CSS snow effect */
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 50, 100, 0.15);
+            width: 350px;
+            text-align: center;
+            border: 2px solid #ffffff;
+        }
+
+        h2 {
+            color: #1565c0;
+            margin-bottom: 1.5rem;
+            text-shadow: 1px 1px 2px #bbdefb;
+        }
+
+        .display-box {
+            background-color: #ffffff;
+            border: 2px solid #90caf9;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #password {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            color: #333;
+            border: none;
+            outline: none;
+            width: 80%;
+            background: transparent;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            color: #1e88e5;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        .controls {
+            text-align: left;
+            color: #455a64;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+            accent-color: #1e88e5;
+        }
+
+        .gen-btn {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s, transform 0.1s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(30, 136, 229, 0.2);
+        }
+
+        .gen-btn:hover {
+            background-color: #1565c0;
+        }
+
+        .gen-btn:active {
+            transform: translateY(2px);
+        }
+
+        /* Snowflake decoration */
+        .snowflake {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            font-size: 3rem;
+            color: #90caf9;
+            opacity: 0.8;
+            transform: rotate(20deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="snowflake">❄️</div>
+        <h2>❄️ Frosty Pass</h2>
+        
+        <div class="display-box">
+            <input type="text" id="password" readonly placeholder="Generator...">
+            <button class="icon-btn" onclick="copyPassword()" title="Copy to Clipboard">📋</button>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Length: <span id="lengthVal">12</span></label>
+            </div>
+            <input type="range" id="length" min="6" max="30" value="12" oninput="updateLength(this.value)">
+            
+            <div class="control-group">
+                <label for="uppercase">Include Uppercase</label>
+                <input type="checkbox" id="uppercase" checked>
+            </div>
+            <div class="control-group">
+                <label for="numbers">Include Numbers</label>
+                <input type="checkbox" id="numbers" checked>
+            </div>
+            <div class="control-group">
+                <label for="symbols">Include Symbols</label>
+                <input type="checkbox" id="symbols">
+            </div>
+        </div>
+
+        <button class="gen-btn" onclick="generatePassword()">Generate New Password</button>
+    </div>
+
+    <script>
+        const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+        const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const numberChars = "0123456789";
+        const symbolChars = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+
+        function updateLength(val) {
+            document.getElementById('lengthVal').innerText = val;
+        }
+
+        function generatePassword() {
+            const length = document.getElementById('length').value;
+            const includeUpper = document.getElementById('uppercase').checked;
+            const includeNumbers = document.getElementById('numbers').checked;
+            const includeSymbols = document.getElementById('symbols').checked;
+
+            let charSet = lowercaseChars;
+            if (includeUpper) charSet += uppercaseChars;
+            if (includeNumbers) charSet += numberChars;
+            if (includeSymbols) charSet += symbolChars;
+
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charSet.length);
+                password += charSet[randomIndex];
+            }
+
+            document.getElementById('password').value = password;
+        }
+
+        function copyPassword() {
+            const passwordField = document.getElementById('password');
+            if (!passwordField.value) return;
+
+            passwordField.select();
+            passwordField.setSelectionRange(0, 99999); // Mobile support
+
+            navigator.clipboard.writeText(passwordField.value).then(() => {
+                const btn = document.querySelector('.icon-btn');
+                const originalText = btn.innerText;
+                btn.innerText = "✅"; // Change icon to checkmark
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                }, 1500);
+            }).catch(err => {
+                alert("Failed to copy text: " + err);
+            });
+        }
+
+        // Generate one on load
+        generatePassword();
+    </script>
+</body>
+</html>
