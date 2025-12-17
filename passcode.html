@@ -3,131 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Winter Password Gen</title>
+    <title>Winter Password Gen Ultra</title>
     <style>
         body {
-            background-color: #e3f2fd; /* Icy light blue */
+            background: linear-gradient(to bottom, #b3e5fc, #e1f5fe); /* Colder gradient sky */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-image: radial-gradient(circle at 20% 20%, white 2px, transparent 2.5px), 
-                              radial-gradient(circle at 80% 60%, white 2px, transparent 2.5px);
-            background-size: 100px 100px; /* Simple CSS snow effect */
+            overflow: hidden; /* Prevents scrollbars from falling snow */
         }
 
+        /* --- Falling Snow Animation CSS --- */
+        .falling-flake {
+            position: fixed;
+            top: -2rem;
+            color: white;
+            user-select: none;
+            pointer-events: none; /* Clicks pass through the snow */
+            z-index: 9999;
+            /* Use slight rotation for more natural fall */
+            animation: snowfall linear forwards;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                /* Fall down past screen bottom and rotate */
+                transform: translateY(110vh) rotate(360deg); 
+                opacity: 0.7;
+            }
+        }
+        /* ---------------------------------- */
+
+
         .container {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(5px); /* Frosted glass effect */
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 50, 100, 0.15);
-            width: 350px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px); /* Stronger frosted glass */
+            padding: 2rem 2.5rem;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 90, 150, 0.2);
+            width: 380px;
             text-align: center;
-            border: 2px solid #ffffff;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 10; /* Ensure container is above background */
+        }
+
+        .header-container {
+            position: relative;
+            margin-bottom: 1.5rem;
         }
 
         h2 {
-            color: #1565c0;
-            margin-bottom: 1.5rem;
-            text-shadow: 1px 1px 2px #bbdefb;
+            color: #0d47a1;
+            margin: 0;
+            position: relative;
+            z-index: 5;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            font-size: 1.8rem;
+        }
+
+        /* The Snow Pile under the header */
+        .snow-pile {
+            background: #ffffff;
+            height: 40px;
+            width: 110%;
+            /* Organic, lumpy border radius shape */
+            border-radius: 50% 50% 30% 30% / 60% 60% 20% 20%;
+            margin-left: -5%; /* Center the wider pile */
+            margin-top: -20px; /* Pull it up under the text */
+            position: relative;
+            z-index: 4;
+            box-shadow: inset 0 -5px 15px rgba(179, 229, 252, 0.6); /* Icy inner shadow */
         }
 
         .display-box {
-            background-color: #ffffff;
-            border: 2px solid #90caf9;
-            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #81d4fa;
+            border-radius: 12px;
             padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 25px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
 
         #password {
             font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            color: #333;
+            font-size: 1.3rem;
+            color: #0277bd;
             border: none;
             outline: none;
-            width: 80%;
+            width: 85%;
             background: transparent;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
         .icon-btn {
-            background: none;
-            border: none;
+            background: #e1f5fe;
+            border: 1px solid #81d4fa;
+            padding: 8px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1.2rem;
-            transition: transform 0.2s;
-            color: #1e88e5;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+            color: #0288d1;
         }
 
-        .icon-btn:active {
-            transform: scale(0.9);
+        .icon-btn:hover {
+            background: #b3e5fc;
+            transform: scale(1.05);
         }
 
         .controls {
             text-align: left;
             color: #455a64;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-weight: 500;
         }
 
         .control-group {
-            margin: 10px 0;
+            margin: 12px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        /* Custom Checkboxes */
+        input[type="checkbox"] {
+            accent-color: #0288d1;
+            transform: scale(1.2);
+        }
+        
         input[type="range"] {
             width: 100%;
-            margin-top: 5px;
-            accent-color: #1e88e5;
+            margin-top: 8px;
+            accent-color: #0288d1;
         }
 
         .gen-btn {
-            background-color: #1e88e5;
+            background: linear-gradient(to right, #0288d1, #29b6f6);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1rem;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 1.1rem;
             cursor: pointer;
             width: 100%;
-            transition: background 0.3s, transform 0.1s;
+            transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(30, 136, 229, 0.2);
+            box-shadow: 0 5px 15px rgba(2, 136, 209, 0.3);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .gen-btn:hover {
-            background-color: #1565c0;
+            background: linear-gradient(to right, #01579b, #0288d1);
+            box-shadow: 0 8px 20px rgba(2, 136, 209, 0.4);
         }
 
         .gen-btn:active {
             transform: translateY(2px);
         }
 
-        /* Snowflake decoration */
-        .snowflake {
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            font-size: 3rem;
-            color: #90caf9;
-            opacity: 0.8;
-            transform: rotate(20deg);
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="snowflake">❄️</div>
-        <h2>❄️ Frosty Pass</h2>
+        <div class="header-container">
+            <h2>❄️ Frosty Pass Gen</h2>
+            <div class="snow-pile"></div>
+        </div>
         
         <div class="display-box">
             <input type="text" id="password" readonly placeholder="Generator...">
@@ -135,33 +189,68 @@
         </div>
 
         <div class="controls">
-            <div class="control-group">
-                <label>Length: <span id="lengthVal">12</span></label>
+            <div class="control-group" style="display:block;">
+                <div style="display:flex; justify-content: space-between;">
+                     <label>Length:</label> 
+                     <span id="lengthVal" style="color:#0288d1; font-weight:bold;">16</span>
+                </div>
+                <input type="range" id="length" min="8" max="32" value="16" oninput="updateLength(this.value)">
             </div>
-            <input type="range" id="length" min="6" max="30" value="12" oninput="updateLength(this.value)">
             
             <div class="control-group">
-                <label for="uppercase">Include Uppercase</label>
+                <label for="uppercase">Include Uppercase (A-Z)</label>
                 <input type="checkbox" id="uppercase" checked>
             </div>
             <div class="control-group">
-                <label for="numbers">Include Numbers</label>
+                <label for="numbers">Include Numbers (0-9)</label>
                 <input type="checkbox" id="numbers" checked>
             </div>
             <div class="control-group">
-                <label for="symbols">Include Symbols</label>
-                <input type="checkbox" id="symbols">
+                <label for="symbols">Include Symbols ($%#)</label>
+                <input type="checkbox" id="symbols" checked>
             </div>
         </div>
 
-        <button class="gen-btn" onclick="generatePassword()">Generate New Password</button>
+        <button class="gen-btn" onclick="generatePassword()">Generate Blizzard Password</button>
     </div>
 
     <script>
+        // --- Falling Snow JavaScript ---
+        function createSnowflake() {
+            const flake = document.createElement('div');
+            flake.classList.add('falling-flake');
+            // Use either a snow emoji or a simple dot
+            flake.innerHTML = Math.random() > 0.5 ? '❄️' : '•'; 
+            
+            // Randomize starting position, size, and fall speed
+            flake.style.left = Math.random() * 100 + 'vw';
+            const size = Math.random() * 15 + 8; // Size between 8px and 23px
+            flake.style.fontSize = size + 'px';
+            
+            // Duration between 3s and 8s
+            const duration = Math.random() * 5 + 3; 
+            flake.style.animationDuration = duration + 's';
+
+            // Add to body
+            document.body.appendChild(flake);
+
+            // Remove flake after animation ends to prevent memory leaks
+            setTimeout(() => {
+                flake.remove();
+            }, duration * 1000);
+        }
+
+        // Start the snow loop (creates a flake every 200ms)
+        setInterval(createSnowflake, 200);
+        // -------------------------------
+
+
+        // --- Password Generator JavaScript ---
         const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
         const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const numberChars = "0123456789";
-        const symbolChars = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+        // Removed some ambiguous characters like I, l, O, 0 for clarity
+        const symbolChars = "!@#$%^&*()_+~|}{[]:;?><./-=";
 
         function updateLength(val) {
             document.getElementById('lengthVal').innerText = val;
@@ -178,11 +267,27 @@
             if (includeNumbers) charSet += numberChars;
             if (includeSymbols) charSet += symbolChars;
 
+            if (charSet === "") {
+                alert("Please select at least one character type!");
+                return;
+            }
+
             let password = "";
-            for (let i = 0; i < length; i++) {
+            // Ensure at least one of each selected type is included
+            let mandatoryChars = "";
+            if (includeUpper) mandatoryChars += uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)];
+            if (includeNumbers) mandatoryChars += numberChars[Math.floor(Math.random() * numberChars.length)];
+            if (includeSymbols) mandatoryChars += symbolChars[Math.floor(Math.random() * symbolChars.length)];
+            
+            // Fill remaining length randomly
+            for (let i = 0; i < length - mandatoryChars.length; i++) {
                 const randomIndex = Math.floor(Math.random() * charSet.length);
                 password += charSet[randomIndex];
             }
+
+            // Add mandatory chars and shuffle
+            password += mandatoryChars;
+            password = password.split('').sort(() => 0.5 - Math.random()).join('');
 
             document.getElementById('password').value = password;
         }
@@ -198,11 +303,15 @@
                 const btn = document.querySelector('.icon-btn');
                 const originalText = btn.innerText;
                 btn.innerText = "✅"; // Change icon to checkmark
+                btn.style.background = "#c8e6c9";
+                btn.style.color = "#2e7d32";
                 setTimeout(() => {
                     btn.innerText = originalText;
+                    btn.style.background = "";
+                    btn.style.color = "";
                 }, 1500);
             }).catch(err => {
-                alert("Failed to copy text: " + err);
+                alert("Failed to copy text based on browser permissions.");
             });
         }
 
