@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Camera Lab</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="roblox-joystick.js"></script>
+    <script src="roblox-cam.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; background: #111; user-select: none; font-family: sans-serif; }
+        
+        /* UI */
+        .overlay { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
+        .instructions { font-size: 14px; color: #aaa; margin-top: 5px; }
+        
+        /* EXIT BUTTON */
+        .exit-btn {
+            display: inline-block; background: rgba(255,255,255,0.2); 
+            padding: 8px 15px; border-radius: 5px; color: white; text-decoration: none; 
+            pointer-events: auto; font-weight: bold;
+        }
+
+        /* JOYSTICK */
+        #joystick-zone {
+            position: absolute; bottom: 50px; left: 50px;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%; pointer-events: auto;
+        }
+        #joystick-knob {
+            position: absolute; top: 50%; left: 50%;
+            width: 40px; height: 40px;
+            background: white; border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <a href="roblox.html" class="exit-btn">⬅ Home</a>
+        <h1>Camera Lab</h1>
+        <div class="instructions">
+            • Left Stick: Move<br>
+            • Right Side: Rotate Camera<br>
+            • Pinch: Zoom In/Out
+        </div>
+    </div>
+
+    <div id="joystick-zone"><div id="joystick-knob"></div></div>
+
+    <script>
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x222222);
+        
+        // Grid Floor
+        const grid = new THREE.GridHelper(100, 100, 0x00ff00, 0x444444);
+        scene.add(grid);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({color: 0x111111}));
+        plane.rotation.x = -Math.PI/2; scene.add(plane);
+
+        // Player (Cube)
+        const player = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshNormalMaterial() // Colorful for orientation
+        );
+        player.position.y = 1;
+        scene.add(player);
+
+        // Objects to look at
+        const cube2 = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), new THREE.MeshBasicMaterial({color:'red', wireframe:true}));
+        cube2.position.set(5,1,5); scene.add(cube2);
+        const cube3 = new THREE.Mesh(new THREE.BoxGeometry(2,4,2), new THREE.MeshBasicMaterial({color:'blue', wireframe:true}));
+        cube3.position.set(-8,2,2); scene.add(cube3);
+
+        // --- CAMERA SETUP ---
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // INIT ROBLOX CAMERA
+        // We pass 'document.body' as the touch zone
+        const rCam = new RobloxCamera(camera, document.body);
+
+        // --- JOYSTICK SETUP ---
+        // (Assuming roblox-joystick.js logic is global or copied here)
+        // Re-implementing simplified joystick logic for this file to ensure it works standalone
+        const joyZone = document.getElementById('joystick-zone');
+        const joyKnob = document.getElementById('joystick-knob');
+        let moveX = 0, moveY = 0;
+        
+        joyZone.addEventListener('touchstart', (e) => handleJoy(e.touches[0].clientX, e.touches[0].clientY));
+        joyZone.addEventListener('touchmove', (e) => { e.preventDefault(); handleJoy(e.touches[0].clientX, e.touches[0].clientY); });
+        joyZone.addEventListener('touchend', () => { moveX=0; moveY=0; joyKnob.style.transform=`translate(-50%,-50%)`; });
+
+        function handleJoy(x, y) {
+            const rect = joyZone.getBoundingClientRect();
+            const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
+            let dx = x - cx; let dy = y - cy;
+            const dist = Math.sqrt(dx*dx+dy*dy);
+            if(dist > 50) { dx *= 50/dist; dy *= 50/dist; }
+            joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            moveX = dx/50; moveY = dy/50;
+        }
+
+        // --- MAIN LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. MOVEMENT (Camera Relative)
+            if (moveX !== 0 || moveY !== 0) {
+                // Get Camera Angle (Horizontal only)
+                const camAngle = rCam.theta; 
+                
+                const fX = Math.sin(camAngle);
+                const fZ = Math.cos(camAngle);
+                const rX = Math.sin(camAngle + Math.PI/2);
+                const rZ = Math.cos(camAngle + Math.PI/2);
+
+                const speed = 0.2;
+                // Forward/Back moves based on joystick Y (inverted usually)
+                const worldX = (rX * moveX) + (fX * moveY);
+                const worldZ = (rZ * moveX) + (fZ * moveY);
+
+                player.position.x += worldX * speed;
+                player.position.z += worldZ * speed;
+                
+                // Rotate Player to face move dir
+                player.rotation.y = Math.atan2(worldX, worldZ);
+            }
+
+            // 2. UPDATE CAMERA
+            rCam.update(player.position);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>
