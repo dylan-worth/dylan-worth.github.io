@@ -24,36 +24,29 @@
         }
         #xp-bar-fill { height: 100%; width: 0%; background: #00b06f; transition: width 0.2s; }
 
-        /* MINIMAP (Hidden by default) */
+        /* MINIMAP */
         #minimap-container {
             position: absolute; top: 20px; right: 20px;
-            width: 120px; height: 120px;
+            width: 100px; height: 100px;
             background: rgba(0,0,0,0.5); border: 2px solid #777;
             border-radius: 50%; overflow: hidden; display: none;
         }
         #minimap-canvas { width: 100%; height: 100%; }
 
-        /* INVENTORY (Bottom Center) */
+        /* INVENTORY */
         #inventory-bar {
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 5px; background: rgba(0,0,0,0.6); padding: 10px;
             border-radius: 10px; pointer-events: auto;
         }
-
         .inv-slot {
             width: 50px; height: 50px; background: rgba(255,255,255,0.1);
             border: 2px solid #555; border-radius: 5px; position: relative;
             display: flex; justify-content: center; align-items: center;
             color: white; font-size: 20px; user-select: none;
         }
-
-        .item-icon {
-            width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
-            cursor: grab;
-        }
-        .item-count {
-            position: absolute; bottom: 2px; right: 2px; font-size: 10px; font-weight: bold;
-        }
+        .item-icon { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; }
+        .item-count { position: absolute; bottom: 2px; right: 2px; font-size: 10px; font-weight: bold; }
 
         /* BUTTONS */
         #jump-btn {
@@ -76,7 +69,7 @@
         }
         #action-btn:active { background: #00b06f; transform: scale(0.95); }
 
-        /* CRAFTING MENU */
+        /* CRAFT MENU */
         #craft-menu {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px;
@@ -123,7 +116,6 @@
 
     <div id="game-container">
         <div id="touch-layer"></div>
-
         <div id="ui-layer">
             <a href="roblox.html" class="exit-btn">⬅ Exit</a>
             
@@ -133,27 +125,18 @@
                 <div><span id="time-display">Day 1</span></div>
             </div>
 
-            <div id="minimap-container">
-                <canvas id="minimap-canvas" width="120" height="120"></canvas>
-            </div>
+            <div id="minimap-container"><canvas id="minimap-canvas" width="100" height="100"></canvas></div>
 
             <div id="jump-btn" ontouchstart="jump(event)">JUMP</div>
             <div id="action-btn" ontouchstart="performAction(event)">👋</div>
-            
             <div id="toast">Message</div>
 
             <div id="inventory-bar">
-                <div class="inv-slot" id="slot-0" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="item-icon" draggable="true" ondragstart="drag(event)" id="item-axe">🪓</div>
-                </div>
-                <div class="inv-slot" id="slot-1" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="item-icon" draggable="true" ondragstart="drag(event)" id="item-sack">🎒
-                        <div class="item-count" id="sack-count">0/10</div>
-                    </div>
-                </div>
-                <div class="inv-slot" id="slot-2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="inv-slot" id="slot-3" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-                <div class="inv-slot" id="slot-4" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div class="inv-slot" id="slot-0"><div class="item-icon" id="item-axe">🪓</div></div>
+                <div class="inv-slot" id="slot-1"><div class="item-icon" id="item-sack">🎒<div class="item-count" id="sack-count">0/10</div></div></div>
+                <div class="inv-slot" id="slot-2"></div>
+                <div class="inv-slot" id="slot-3"></div>
+                <div class="inv-slot" id="slot-4"></div>
             </div>
 
             <div id="craft-menu">
@@ -164,7 +147,6 @@
                 <button class="craft-btn" onclick="closeCraft()">Close</button>
             </div>
         </div>
-
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
 
@@ -176,14 +158,15 @@
             xp: 0,
             xpToNextLevel: 100,
             campLevel: 1,
-            time: 0.25, 
+            // START AT 0.5 (NOON) to ensure it is bright!
+            time: 0.5, 
             day: 1,
             nearbyObject: null,
             isSwinging: false,
             velocityY: 0,
             isGrounded: true,
             hasMap: false,
-            fogDist: 25 // Starting view distance
+            fogDist: 25
         };
 
         const droppedLogs = [];
@@ -193,7 +176,6 @@
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
-        // Fog System (Dynamic)
         scene.fog = new THREE.Fog(0x87CEEB, 5, gameState.fogDist);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -211,7 +193,7 @@
         let targetCamTheta = camTheta;
 
         // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Increased base light
         scene.add(ambientLight);
         const sunLight = new THREE.DirectionalLight(0xffaa33, 1.2);
         sunLight.position.set(50, 50, 0);
@@ -231,14 +213,12 @@
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd}));
         head.position.y = 2.3;
         
-        // Sack Mesh
         const sackGeo = new THREE.BoxGeometry(0.8, 0.8, 0.5);
         const sackMat = new THREE.MeshStandardMaterial({color: 0x8d6e63});
         const sack = new THREE.Mesh(sackGeo, sackMat);
         sack.position.set(0, 1.5, -0.4);
         playerGroup.add(sack);
 
-        // Axe Visuals
         const axePivot = new THREE.Group();
         axePivot.position.set(0.6, 1.8, 0);
         const axeGroup = new THREE.Group();
@@ -255,17 +235,18 @@
         playerGroup.castShadow = true;
         scene.add(playerGroup);
 
-        // --- WORLD GEN ---
+        // --- WORLD OBJECTS ---
         const fireGroup = new THREE.Group();
         const fireLight = new THREE.PointLight(0xff4500, 0, 15);
         fireLight.position.y = 1;
         fireGroup.add(fireLight);
-        // Visuals
+        
         const log1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
         log1.rotation.z = Math.PI/2; log1.position.y = 0.1;
         const log2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
         log2.rotation.x = Math.PI/2; log2.position.y = 0.1;
         fireGroup.add(log1); fireGroup.add(log2);
+        
         for(let i=0; i<8; i++) {
             const p = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.15,0.15), new THREE.MeshBasicMaterial({color: 0xffaa00}));
             p.position.set((Math.random()-0.5), Math.random()*1.5, (Math.random()-0.5));
@@ -303,7 +284,7 @@
             if(Math.abs(tx) > 8 || Math.abs(tz) > 8) spawnTree(tx, tz);
         }
 
-        // --- MOBS (Wolves & Bunnies) ---
+        // --- MOBS ---
         function spawnMob(type, x, z) {
             const mob = new THREE.Group();
             let color = type === 'wolf' ? 0x7f8c8d : 0xffffff;
@@ -316,29 +297,14 @@
             
             mob.add(body); mob.add(head);
             mob.position.set(x, 0, z);
-            mob.userData = { type: type, speed: type === 'wolf' ? 0.08 : 0.03, state: 'idle', moveTimer: 0 };
-            
+            mob.userData = { type: type, speed: type === 'wolf' ? 0.08 : 0.03, moveTimer: 0 };
             scene.add(mob);
             mobs.push(mob);
         }
-
-        // Spawn Mobs
         for(let i=0; i<5; i++) spawnMob('wolf', (Math.random()-0.5)*80, (Math.random()-0.5)*80);
         for(let i=0; i<10; i++) spawnMob('bunny', (Math.random()-0.5)*80, (Math.random()-0.5)*80);
 
-        // --- DRAG & DROP INVENTORY ---
-        window.allowDrop = function(ev) { ev.preventDefault(); }
-        window.drag = function(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-        window.drop = function(ev) {
-            ev.preventDefault();
-            var data = ev.dataTransfer.getData("text");
-            // Simple visual move
-            if(ev.target.classList.contains('inv-slot') && ev.target.children.length === 0) {
-                ev.target.appendChild(document.getElementById(data));
-            }
-        }
-
-        // --- INPUTS (Joystick, Look, Tap) ---
+        // --- JOYSTICK ---
         const joyZone = document.getElementById('joystick-zone');
         const joyKnob = document.getElementById('joystick-knob');
         let moveX = 0, moveY = 0;
@@ -362,7 +328,7 @@
         joyZone.addEventListener('touchmove', e => { e.preventDefault(); handleJoystick(e.touches[0].clientX, e.touches[0].clientY); });
         joyZone.addEventListener('touchend', () => handleJoystick(0,0,true));
 
-        // Touch Layer
+        // --- TOUCH INPUT (Look, Zoom, Tap) ---
         const touchLayer = document.getElementById('touch-layer');
         let lastTouchX = 0, lastTouchY = 0, pinchStartDist = 0, startRadius = 12;
 
@@ -407,14 +373,14 @@
             const intersects = raycaster.intersectObjects(droppedLogs, true);
             if (intersects.length > 0) {
                 const log = intersects[0].object;
-                if (playerGroup.position.distanceTo(log.position) < 5) pickupLog(log);
+                if (playerGroup.position.distanceTo(log.position) < 6) pickupLog(log);
                 else showToast("Too far!");
             }
         }
 
         function pickupLog(logObj) {
             if(gameState.wood >= gameState.maxWood) {
-                showToast("Sack is Full! (10/10)");
+                showToast("Sack is Full!");
                 return;
             }
             scene.remove(logObj);
@@ -426,7 +392,7 @@
             showToast("+1 Wood");
         }
 
-        // --- GAME LOGIC ---
+        // --- ACTIONS ---
         function spawnLog(x, z) {
             const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
             log.rotation.z = Math.PI / 2; log.rotation.y = Math.random() * Math.PI;
@@ -446,7 +412,6 @@
                     else axePivot.rotation.x = Math.sin(p*Math.PI)*2;
                 }, 16);
             }
-            // Interaction logic
             if (gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
                 const t = gameState.nearbyObject.obj;
                 setTimeout(() => {
@@ -478,13 +443,10 @@
                 gameState.campLevel++; gameState.xp = 0;
                 gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5);
                 document.getElementById('camp-lvl').innerText = gameState.campLevel;
-                
-                // Open Fog
-                gameState.fogDist += 15;
-                scene.fog.far = gameState.fogDist;
-                
-                showToast(`Campfire Lv ${gameState.campLevel}! Fog pushed back.`);
+                gameState.fogDist += 15; scene.fog.far = gameState.fogDist;
+                showToast(`Campfire Lv ${gameState.campLevel}! Fog receding.`);
                 updateHUD();
+                fireLight.distance += 5;
             }
         }
         
@@ -495,46 +457,40 @@
                     document.getElementById('minimap-container').style.display = 'block';
                     showToast("Map Crafted!");
                 } else showToast("Need 5 Wood");
-            } else if(i === 'upgrade_bench') {
-                 showToast("Bench Upgraded (Visual Only)");
-            } else if(i === 'bed') {
-                showToast("Bed Crafted");
-            }
-            updateHUD();
-            document.getElementById('craft-menu').style.display='none'; 
+            } else if(i === 'upgrade_bench') showToast("Bench Upgraded (Visual)");
+            else if(i === 'bed') showToast("Bed Crafted");
+            updateHUD(); document.getElementById('craft-menu').style.display='none'; 
         };
         window.closeCraft = () => document.getElementById('craft-menu').style.display='none';
         function showToast(msg) { const t = document.getElementById('toast'); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0, 2000); }
 
-        // --- MINIMAP RENDER ---
+        // --- MINIMAP ---
         const mapCanvas = document.getElementById('minimap-canvas');
         const mapCtx = mapCanvas.getContext('2d');
         function drawMinimap() {
             if(!gameState.hasMap) return;
-            mapCtx.clearRect(0,0,120,120);
-            mapCtx.fillStyle = "rgba(0,0,0,0.5)"; mapCtx.fillRect(0,0,120,120);
+            mapCtx.clearRect(0,0,100,100);
+            mapCtx.fillStyle = "rgba(0,0,0,0.5)"; mapCtx.fillRect(0,0,100,100);
             
-            // Draw Player (Center)
-            mapCtx.fillStyle = "cyan"; mapCtx.beginPath(); mapCtx.arc(60, 60, 3, 0, Math.PI*2); mapCtx.fill();
+            // Draw Player
+            mapCtx.fillStyle = "cyan"; mapCtx.beginPath(); mapCtx.arc(50, 50, 3, 0, Math.PI*2); mapCtx.fill();
 
-            // Draw objects relative to player (Scale: 1 unit = 2 pixels)
-            const scale = 1.5;
-            // Fire
-            const fx = 60 + (fireGroup.position.x - playerGroup.position.x) * scale;
-            const fz = 60 + (fireGroup.position.z - playerGroup.position.z) * scale;
-            if(fx>0 && fx<120 && fz>0 && fz<120) {
-                mapCtx.fillStyle = "orange"; mapCtx.fillRect(fx-2, fz-2, 4, 4);
-            }
+            // Draw objects (Scale: 1 unit = 1.5 pixels)
+            const scale = 1.0;
+            const fx = 50 + (fireGroup.position.x - playerGroup.position.x) * scale;
+            const fz = 50 + (fireGroup.position.z - playerGroup.position.z) * scale;
+            if(fx>0 && fx<100 && fz>0 && fz<100) { mapCtx.fillStyle="orange"; mapCtx.fillRect(fx-2, fz-2, 4, 4); }
         }
 
-        // --- MAIN LOOP ---
+        // --- LOOP ---
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            const dt = clock.getDelta();
+            let dt = clock.getDelta();
+            if(dt > 0.1) dt = 0.1; // Clamp lag spike
 
             // Environment
-            gameState.time += dt / gameState.dayDuration;
+            gameState.time += dt / 180; // 3 min days
             if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
             let hour = Math.floor(gameState.time * 24);
             let ampm = hour >= 12 ? 'PM' : 'AM';
@@ -542,46 +498,41 @@
 
             const sunAngle = (gameState.time - 0.25) * Math.PI * 2; 
             sunLight.position.x = Math.cos(sunAngle) * 50; sunLight.position.y = Math.sin(sunAngle) * 50;
-            let intensity = Math.max(0, Math.sin(sunAngle)); if(gameState.time>0.75 || gameState.time<0.25) intensity=0;
-            sunLight.intensity = intensity; ambientLight.intensity = 0.1 + (intensity * 0.4);
-            scene.background.setHSL(0.6, 0.5, intensity * 0.5); scene.fog.color.copy(scene.background);
+            // Prevent total blackness at night
+            let intensity = Math.max(0, Math.sin(sunAngle));
+            if(gameState.time > 0.75 || gameState.time < 0.25) intensity = 0;
+            sunLight.intensity = intensity; 
+            ambientLight.intensity = 0.3 + (intensity * 0.4); // Minimum 0.3 light
+            scene.background.setHSL(0.6, 0.5, intensity * 0.5); 
+            scene.fog.color.copy(scene.background);
+            fireLight.intensity = (1 - intensity) * (2 + gameState.campLevel);
 
             // Mobs
             mobs.forEach(mob => {
-                mob.moveTimer += dt;
+                mob.userData.moveTimer += dt;
                 if(mob.userData.type === 'bunny') {
-                    if(mob.moveTimer > 2) { // Random hop
-                        mob.rotation.y = Math.random() * Math.PI * 2;
-                        mob.moveTimer = 0;
-                    }
-                    mob.position.z += Math.cos(mob.rotation.y) * mob.userData.speed;
-                    mob.position.x += Math.sin(mob.rotation.y) * mob.userData.speed;
+                    if(mob.userData.moveTimer > 2) { mob.rotation.y = Math.random() * Math.PI * 2; mob.userData.moveTimer = 0; }
+                    mob.position.z += Math.cos(mob.rotation.y) * 0.03; mob.position.x += Math.sin(mob.rotation.y) * 0.03;
                 } else if(mob.userData.type === 'wolf') {
-                    // Chase logic
                     const dist = playerGroup.position.distanceTo(mob.position);
                     if(dist < 15 && dist > 1) {
                         mob.lookAt(playerGroup.position);
-                        mob.position.z += Math.cos(mob.rotation.y) * mob.userData.speed;
-                        mob.position.x += Math.sin(mob.rotation.y) * mob.userData.speed;
-                    } else if (mob.moveTimer > 3) {
-                        mob.rotation.y = Math.random() * Math.PI * 2;
-                        mob.moveTimer = 0;
-                    }
+                        mob.position.z += Math.cos(mob.rotation.y) * 0.08; mob.position.x += Math.sin(mob.rotation.y) * 0.08;
+                    } else if (mob.userData.moveTimer > 3) { mob.rotation.y = Math.random() * Math.PI * 2; mob.userData.moveTimer = 0; }
                 }
             });
 
-            // Player Physics
+            // Physics
             gameState.velocityY -= 0.015; playerGroup.position.y += gameState.velocityY;
             if (playerGroup.position.y <= 0) { playerGroup.position.y = 0; gameState.velocityY = 0; gameState.isGrounded = true; }
 
-            // Movement & Camera
+            // Movement
             camTheta += (targetCamTheta - camTheta) * 0.1; camPhi += (targetCamPhi - camPhi) * 0.1;
             const fX = Math.sin(camTheta); const fZ = Math.cos(camTheta);
             const rX = Math.sin(camTheta + Math.PI/2); const rZ = Math.cos(camTheta + Math.PI/2);
             if (moveX !== 0 || moveY !== 0) {
-                const spd = 0.15;
                 const wx = (rX * moveX) + (fX * moveY); const wz = (rZ * moveX) + (fZ * moveY);
-                playerGroup.position.x += wx * spd; playerGroup.position.z += wz * spd;
+                playerGroup.position.x += wx * 0.15; playerGroup.position.z += wz * 0.15;
                 playerGroup.rotation.y = Math.atan2(wx, wz);
             }
             camera.position.x = playerGroup.position.x + camRadius * Math.sin(camTheta) * Math.sin(camPhi);
