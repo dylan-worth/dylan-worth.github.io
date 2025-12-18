@@ -4,12 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Home - Roblox</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- EMBEDDED CSS (Guaranteed to work) --- */
+        :root {
+            --bg-app: #121212;
+            --bg-card: #2b2d31;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --nav-bg: #1a1c1e;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Helvetica, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            padding-bottom: 80px; /* Space for bottom nav */
+            user-select: none;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(20,20,20,0) 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-pill {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .robux-icon {
+            width: 18px; height: 18px;
+            border: 2px solid white;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%;
+            font-size: 10px;
+        }
+
+        /* SECTIONS */
+        .section { padding: 20px; }
+        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
+
+        /* HORIZONTAL SCROLL */
+        .scroller {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        /* CARDS */
+        .game-card {
+            background: transparent;
+            cursor: pointer;
+            width: 100%;
+            min-width: 140px; /* For scroller */
+        }
+
+        .thumb-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            background: #333;
+            margin-bottom: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .game-title { font-weight: 700; font-size: 16px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .game-stats { color: var(--text-secondary); font-size: 12px; }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%; height: 65px;
+            background: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 10px;
+            gap: 4px;
+        }
+        .nav-item.active { color: white; }
+        .nav-icon { font-size: 24px; }
+    </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight:900; font-size:22px;">Home</div>
+        <div style="font-weight:900; font-size:24px;">Home</div>
         <div class="user-pill">
             <div class="robux-icon">⬡</div>
             <span id="r-amount">0</span>
@@ -20,73 +137,47 @@
         <div class="section-title">Continue</div>
         <div class="scroller">
             <div class="game-card" onclick="window.location.href='99nights.html'">
-                <div class="thumb-container">
-                    <div class="thumb-img" style="background:linear-gradient(45deg, #000, #2c3e50);">🔦</div>
-                </div>
+                <div class="thumb-container" style="background: linear-gradient(135deg, #111, #333);">🔦</div>
                 <div class="game-title">99 Nights</div>
-                <div class="game-stats">👍 92% &bull; 👤 12.4k</div>
+                <div class="game-stats">92% Rating</div>
             </div>
-
             <div class="game-card" onclick="window.location.href='brookhaven.html'">
-                <div class="thumb-container">
-                    <div class="thumb-img" style="background:linear-gradient(45deg, #74b9ff, #0984e3);">🏡</div>
-                </div>
+                <div class="thumb-container" style="background: linear-gradient(135deg, #74b9ff, #0984e3);">🏡</div>
                 <div class="game-title">Brookhaven RP</div>
-                <div class="game-stats">👍 96% &bull; 👤 450k</div>
+                <div class="game-stats">96% Rating</div>
             </div>
-            
-            <div class="game-card" onclick="window.location.href='roblox-mov.html'">
-                <div class="thumb-container">
-                    <div class="thumb-img" style="background: #e17055;">🏃</div>
-                </div>
+             <div class="game-card" onclick="window.location.href='roblox-mov.html'">
+                <div class="thumb-container" style="background: linear-gradient(135deg, #e17055, #d63031);">🏃</div>
                 <div class="game-title">Move Lab</div>
-                <div class="game-stats">🛠️ Dev</div>
+                <div class="game-stats">Dev Test</div>
             </div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Recommended for You</div>
+        <div class="section-title">Recommended</div>
         <div class="grid">
             <div class="game-card" onclick="window.location.href='rainbowfriends.html'">
-                <div class="thumb-container">
-                    <div class="thumb-img" style="background: #6c5ce7;">📦</div>
-                </div>
+                <div class="thumb-container" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">📦</div>
                 <div class="game-title">Rainbow Friends</div>
-                <div class="game-stats">Survive the night</div>
+                <div class="game-stats">Horror</div>
             </div>
-
             <div class="game-card" onclick="window.location.href='roblox-char.html'">
-                <div class="thumb-container">
-                    <div class="thumb-img" style="background: #fdcb6e;">👕</div>
-                </div>
+                <div class="thumb-container" style="background: linear-gradient(135deg, #fdcb6e, #ffeaa7);">👕</div>
                 <div class="game-title">Avatar Editor</div>
-                <div class="game-stats">Customize Look</div>
+                <div class="game-stats">Customize</div>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="roblox.html" class="nav-item active">
-            <span class="nav-icon">🏠</span>
-            Home
-        </a>
-        <a href="#" class="nav-item">
-            <span class="nav-icon">🎮</span>
-            Games
-        </a>
-        <a href="roblox-char.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            Avatar
-        </a>
-        <a href="roblox-bucs.html" class="nav-item">
-            <span class="nav-icon">💬</span>
-            More
-        </a>
+        <a href="roblox.html" class="nav-item active"><span class="nav-icon">🏠</span>Home</a>
+        <a href="#" class="nav-item"><span class="nav-icon">🎮</span>Games</a>
+        <a href="roblox-char.html" class="nav-item"><span class="nav-icon">👤</span>Avatar</a>
+        <a href="roblox-bucs.html" class="nav-item"><span class="nav-icon">💬</span>More</a>
     </nav>
 
     <script>
-        // Load Currency
         document.getElementById('r-amount').innerText = localStorage.getItem('robux') || 0;
     </script>
 </body>
