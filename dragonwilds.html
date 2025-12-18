@@ -2,49 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dragon Wilds Recreated</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dragon Wilds Mobile</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Cinzel', serif; }
+        body { margin: 0; overflow: hidden; font-family: 'Cinzel', serif; touch-action: none; /* Disables browser scrolling */ }
         canvas { display: block; }
 
-        /* UI Overlay for "Region Discovered" */
+        /* --- REGION UI --- */
         #ui-layer {
             position: absolute;
-            top: 20%;
+            top: 15%; /* Higher up to clear center screen */
             width: 100%;
-            text-align: center;
+            display: flex;
+            justify-content: center;
             pointer-events: none;
             opacity: 0;
             transition: opacity 1s ease-in;
+            z-index: 10;
         }
         
         #region-box {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px 40px;
-            border-top: 2px solid #d4af37; /* Gold border */
-            border-bottom: 2px solid #d4af37;
+            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8), transparent);
+            padding: 10px 20px;
+            border-top: 1px solid #d4af37;
+            border-bottom: 1px solid #d4af37;
             color: white;
+            text-align: center;
             transform: scale(0.8);
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 80%; /* Don't span full width on desktop, but wide on mobile */
+            max-width: 400px;
         }
 
-        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; color: #ddd; }
-        h2 { margin: 5px 0 0 0; font-size: 3rem; color: #d4af37; text-shadow: 0 0 10px #d4af37; }
+        h1 { margin: 0; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: #bbb; }
+        h2 { margin: 2px 0 0 0; font-size: 1.5rem; color: #d4af37; text-shadow: 0 0 5px #d4af37; }
         
         .visible { opacity: 1 !important; }
         .pop-in { transform: scale(1) !important; }
 
-        /* Controls hint */
-        #controls {
+        /* --- MOBILE CONTROLS (D-PAD) --- */
+        #controls-layer {
             position: absolute;
             bottom: 20px;
             left: 20px;
+            width: 150px;
+            height: 150px;
+            z-index: 20;
+            /* Only show on touch devices or small screens if preferred, 
+               but keeping visible here for desktop testing too */
+        }
+
+        .d-pad-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
             color: white;
+            user-select: none;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        
+        .d-pad-btn:active, .d-pad-btn.active { background: rgba(212, 175, 55, 0.5); }
+
+        /* D-Pad Positioning */
+        #btn-up { top: 0; left: 50px; }
+        #btn-down { bottom: 0; left: 50px; }
+        #btn-left { top: 50px; left: 0; }
+        #btn-right { top: 50px; right: 0; }
+
+        /* PC hint hidden on small screens */
+        #pc-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
             font-family: sans-serif;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
+            pointer-events: none;
+        }
+        @media (max-width: 600px) {
+            #pc-hint { display: none; }
+            h2 { font-size: 1.2rem; }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
@@ -58,7 +104,14 @@
     </div>
 </div>
 
-<div id="controls">WASD / Arrows to Move</div>
+<div id="controls-layer">
+    <div class="d-pad-btn" id="btn-up" data-key="w">▲</div>
+    <div class="d-pad-btn" id="btn-left" data-key="a">◀</div>
+    <div class="d-pad-btn" id="btn-right" data-key="d">▶</div>
+    <div class="d-pad-btn" id="btn-down" data-key="s">▼</div>
+</div>
+
+<div id="pc-hint">WASD / ARROWS also work</div>
 
 <script type="importmap">
   {
@@ -74,30 +127,28 @@
 
     // --- 1. SETUP ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky blue
-    scene.fog = new THREE.Fog(0x87CEEB, 10, 50);  // Distance fog for depth
+    scene.background = new THREE.Color(0x87CEEB); 
+    scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize performance for mobile
     document.body.appendChild(renderer.domElement);
 
     // --- 2. LIGHTING ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffdfba, 1.5); // Warm sunlight
+    const dirLight = new THREE.DirectionalLight(0xffdfba, 1.5);
     dirLight.position.set(10, 20, 10);
     dirLight.castShadow = true;
-    dirLight.shadow.camera.bottom = -20; // Increase shadow area
-    dirLight.shadow.camera.top = 20;
-    dirLight.shadow.camera.left = -20;
-    dirLight.shadow.camera.right = 20;
+    dirLight.shadow.mapSize.width = 1024; // Lower res shadows for mobile perf
+    dirLight.shadow.mapSize.height = 1024;
     scene.add(dirLight);
 
     // --- 3. ENVIRONMENT ---
-    // Ground (The Woods)
     const planeGeo = new THREE.PlaneGeometry(200, 200);
     const planeMat = new THREE.MeshStandardMaterial({ color: 0x55aa55 });
     const ground = new THREE.Mesh(planeGeo, planeMat);
@@ -105,10 +156,9 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // The "Castle" Archway (represented by simple blocks)
+    // Simple Castle Arch
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const wallGeo = new THREE.BoxGeometry(4, 6, 1);
-    
     const leftWall = new THREE.Mesh(wallGeo, wallMat);
     leftWall.position.set(-3, 3, 0);
     leftWall.castShadow = true;
@@ -124,63 +174,79 @@
     topWall.castShadow = true;
     scene.add(topWall);
 
-    // Roof/Tunnel to make it dark inside
-    const tunnelGeo = new THREE.BoxGeometry(10, 8, 10);
-    const tunnel = new THREE.Mesh(tunnelGeo, new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
+    const tunnel = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 10), new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
     tunnel.position.set(0, 4, -5.5);
     tunnel.receiveShadow = true;
     scene.add(tunnel);
 
-    // Trees (Simple Cones)
     function addTree(x, z) {
         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 2), new THREE.MeshStandardMaterial({color: 0x8B4513}));
         trunk.position.set(x, 1, z);
-        trunk.castShadow = true;
         
         const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 6, 8), new THREE.MeshStandardMaterial({color: 0x228b22}));
         leaves.position.set(x, 4, z);
-        leaves.castShadow = true;
         
         scene.add(trunk);
         scene.add(leaves);
     }
-    // Add some random trees outside
-    for(let i=0; i<20; i++) {
-        addTree(-20 + Math.random()*40, 10 + Math.random()*40);
-    }
+    for(let i=0; i<15; i++) addTree(-20 + Math.random()*40, 10 + Math.random()*40);
 
     // --- 4. PLAYER ---
     const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
-    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 }); // Gold shirt like video
+    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
     const player = new THREE.Mesh(playerGeo, playerMat);
-    player.position.set(0, 1, -8); // Start inside the tunnel
+    player.position.set(0, 1, -8);
     player.castShadow = true;
     scene.add(player);
 
-    // --- 5. DRAGON (Simplified) ---
+    // --- 5. DRAGON ---
     const dragonGroup = new THREE.Group();
-    // Body
     const dBody = new THREE.Mesh(new THREE.ConeGeometry(0.5, 3, 4), new THREE.MeshStandardMaterial({color: 0xff0000}));
     dBody.rotation.x = Math.PI / 2;
-    // Wings
     const dWing = new THREE.Mesh(new THREE.BoxGeometry(4, 0.1, 1), new THREE.MeshStandardMaterial({color: 0xaa0000}));
     dragonGroup.add(dBody, dWing);
-    dragonGroup.position.set(0, 15, 20); // High up in the sky
+    dragonGroup.position.set(0, 15, 20);
     scene.add(dragonGroup);
 
-    // --- 6. LOGIC & CONTROLS ---
+    // --- 6. CONTROLS SYSTEM ---
     const keys = { w: false, a: false, s: false, d: false };
-    window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true); // Using 'we' implies group effort!
+    
+    // Keyboard Listeners
+    window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
 
+    // Touch Listeners (D-Pad)
+    const dpadButtons = document.querySelectorAll('.d-pad-btn');
+    
+    dpadButtons.forEach(btn => {
+        // Handle Touch Start
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Stop scrolling/zooming on touch
+            keys[btn.dataset.key] = true;
+            btn.classList.add('active');
+        }, { passive: false });
+
+        // Handle Touch End
+        btn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys[btn.dataset.key] = false;
+            btn.classList.remove('active');
+        }, { passive: false });
+
+        // Mouse fallbacks for testing on PC with mouse clicks
+        btn.addEventListener('mousedown', () => { keys[btn.dataset.key] = true; });
+        btn.addEventListener('mouseup', () => { keys[btn.dataset.key] = false; });
+        btn.addEventListener('mouseleave', () => { keys[btn.dataset.key] = false; });
+    });
+
+    // --- 7. ANIMATION LOOP ---
     let regionDiscovered = false;
-    const playerSpeed = 0.1;
-    const cameraOffset = new THREE.Vector3(0, 3, -5); // Behind the player
+    const playerSpeed = 0.15;
 
     function animate() {
         requestAnimationFrame(animate);
 
-        // Player Movement
+        // Movement Logic
         if (keys['w'] || keys['arrowup']) player.position.z += playerSpeed;
         if (keys['s'] || keys['arrowdown']) player.position.z -= playerSpeed;
         if (keys['a'] || keys['arrowleft']) player.position.x += playerSpeed;
@@ -188,17 +254,17 @@
 
         // Camera Follow
         const targetPos = player.position.clone();
-        targetPos.add(new THREE.Vector3(0, 5, -8)); // Offset camera
-        camera.position.lerp(targetPos, 0.1); // Smooth follow
+        targetPos.add(new THREE.Vector3(0, 6, -10)); // Higher and further back for mobile visibility
+        camera.position.lerp(targetPos, 0.1);
         camera.lookAt(player.position);
 
-        // Dragon Animation (Circle around)
+        // Dragon Animation
         const time = Date.now() * 0.001;
         dragonGroup.position.x = Math.sin(time) * 20;
         dragonGroup.position.z = 20 + Math.cos(time) * 10;
-        dragonGroup.rotation.y = -time; // Spin
+        dragonGroup.rotation.y = -time;
 
-        // Trigger Event: Exiting the Castle (Z > 0)
+        // Trigger Event
         if (player.position.z > 2 && !regionDiscovered) {
             regionDiscovered = true;
             triggerUI();
@@ -212,18 +278,14 @@
         const box = document.getElementById('region-box');
         
         ui.classList.add('visible');
-        setTimeout(() => {
-            box.classList.add('pop-in');
-        }, 100);
-
-        // Hide after a few seconds
+        setTimeout(() => box.classList.add('pop-in'), 100);
         setTimeout(() => {
             ui.classList.remove('visible');
             box.classList.remove('pop-in');
         }, 4000);
     }
 
-    // Handle Resize
+    // Resize Handler
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
