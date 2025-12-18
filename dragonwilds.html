@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Runescape: Dragon Wilds Prototype</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', Courier, monospace; }
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffff00; /* RS Gold Text */
+            text-shadow: 2px 2px #000;
+            pointer-events: none;
+        }
+        #health-bar {
+            width: 200px;
+            height: 20px;
+            background: #500;
+            border: 2px solid #333;
+            margin-top: 10px;
+        }
+        #health-fill {
+            width: 100%;
+            height: 100%;
+            background: #0f0;
+        }
+        #chat-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #555;
+            color: white;
+            padding: 10px;
+            font-size: 12px;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ui-layer">
+    <h1 style="margin: 0; font-size: 24px;">Dragon Wilds (Level 55)</h1>
+    <div>Status: <span id="status-text">Patrolling</span></div>
+    <div id="health-bar"><div id="health-fill"></div></div>
+</div>
+
+<div id="chat-box">
+    <div>Welcome to the Wilderness. Watch out for PKers... and Dragons.</div>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- 1. SETUP ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x2a2a2a); // Dark grey sky
+    scene.fog = new THREE.Fog(0x2a2a2a, 20, 100); // Wilderness fog
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 15, 20);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // Controls (Orbit similar to RS classic camera)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enablePan = false;
+    controls.maxPolarAngle = Math.PI / 2.2; // Don't go below ground
+    controls.minDistance = 10;
+    controls.maxDistance = 40;
+
+    // --- 2. ENVIRONMENT (The Wilds) ---
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 1.5); // Soft white light
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+    sunLight.position.set(50, 100, 50);
+    sunLight.castShadow = true;
+    scene.add(sunLight);
+
+    // Ground
+    const textureLoader = new THREE.TextureLoader();
+    // Use a grid helper as a retro ground texture feel
+    const groundGeo = new THREE.PlaneGeometry(200, 200);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x3b3b3b, roughness: 1 }); // Dark grey waste
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Random Scenery (Dead Trees & Rocks)
+    function createScenery() {
+        const rockGeo = new THREE.DodecahedronGeometry(1);
+        const rockMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+        const treeGeo = new THREE.CylinderGeometry(0.1, 0.3, 4, 5);
+        const treeMat = new THREE.MeshStandardMaterial({ color: 0x2f1e0e }); // Dead wood
+
+        for (let i = 0; i < 40; i++) {
+            // Rocks
+            const rock = new THREE.Mesh(rockGeo, rockMat);
+            rock.position.set((Math.random() - 0.5) * 150, 0.5, (Math.random() - 0.5) * 150);
+            rock.scale.setScalar(Math.random() * 2 + 0.5);
+            rock.castShadow = true;
+            scene.add(rock);
+
+            // Trees
+            const tree = new THREE.Mesh(treeGeo, treeMat);
+            tree.position.set((Math.random() - 0.5) * 150, 2, (Math.random() - 0.5) * 150);
+            tree.castShadow = true;
+            scene.add(tree);
+        }
+    }
+    createScenery();
+
+    // --- 3. CHARACTERS ---
+
+    // Player (Blue box for now - typical 'rune armor' placeholder)
+    const playerGeo = new THREE.BoxGeometry(1, 2, 1);
+    const playerMat = new THREE.MeshStandardMaterial({ color: 0x00ffff }); // Cyan/Rune color
+    const player = new THREE.Mesh(playerGeo, playerMat);
+    player.position.y = 1;
+    player.castShadow = true;
+    scene.add(player);
+
+    // Dragon (Red winged shape)
+    const dragonGroup = new THREE.Group();
+    
+    // Body
+    const bodyGeo = new THREE.BoxGeometry(2, 2, 4);
+    const dragonMat = new THREE.MeshStandardMaterial({ color: 0x880000 }); // Dragon red
+    const body = new THREE.Mesh(bodyGeo, dragonMat);
+    body.position.y = 2;
+    dragonGroup.add(body);
+
+    // Wings
+    const wingGeo = new THREE.BoxGeometry(6, 0.2, 2);
+    const wing = new THREE.Mesh(wingGeo, dragonMat);
+    wing.position.set(0, 3, 0);
+    dragonGroup.add(wing);
+
+    dragonGroup.position.set(20, 0, 20);
+    scene.add(dragonGroup);
+
+    // --- 4. GAME LOGIC ---
+
+    // Input state
+    const keys = { w: false, a: false, s: false, d: false };
+    window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+    // Variables
+    let playerSpeed = 0.2;
+    let dragonSpeed = 0.12;
+    let playerHealth = 100;
+    let isDead = false;
+
+    function logChat(msg) {
+        const chat = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.textContent = msg;
+        chat.insertBefore(div, chat.firstChild);
+    }
+
+    function updatePlayer() {
+        if (isDead) return;
+
+        // Move relative to camera orientation would be better, but world-space is easier for retro feel
+        if (keys.w) player.position.z -= playerSpeed;
+        if (keys.s) player.position.z += playerSpeed;
+        if (keys.a) player.position.x -= playerSpeed;
+        if (keys.d) player.position.x += playerSpeed;
+
+        // Camera follow
+        camera.position.x += (player.position.x - camera.position.x) * 0.1;
+        camera.position.z += (player.position.z + 15 - camera.position.z) * 0.1;
+        controls.target.copy(player.position);
+        controls.update();
+    }
+
+    function updateDragon() {
+        const dist = player.position.distanceTo(dragonGroup.position);
+        
+        // Dragon Logic: Aggro range
+        if (dist < 25 && dist > 2 && !isDead) {
+            document.getElementById('status-text').textContent = "Under Attack!";
+            document.getElementById('status-text').style.color = "red";
+            
+            // Look at player
+            dragonGroup.lookAt(player.position);
+            
+            // Move towards player
+            const direction = new THREE.Vector3().subVectors(player.position, dragonGroup.position).normalize();
+            dragonGroup.position.add(direction.multiplyScalar(dragonSpeed));
+
+            // "Animation" - flap wings
+            wing.rotation.z = Math.sin(Date.now() * 0.01) * 0.5;
+
+        } else if (dist <= 2 && !isDead) {
+            // Damage
+            playerHealth -= 1;
+            document.getElementById('health-fill').style.width = playerHealth + "%";
+            
+            if (Math.random() > 0.95) logChat("The dragon burns you!");
+
+            if (playerHealth <= 0) {
+                isDead = true;
+                player.rotation.x = Math.PI / 2; // Fall over
+                player.position.y = 0.5;
+                logChat("Oh dear, you are dead!");
+                document.getElementById('status-text').textContent = "DEAD";
+            }
+        } else {
+             document.getElementById('status-text').textContent = "Safe";
+             document.getElementById('status-text').style.color = "lime";
+        }
+    }
+
+    // --- 5. ANIMATION LOOP ---
+    function animate() {
+        requestAnimationFrame(animate);
+        updatePlayer();
+        updateDragon();
+        renderer.render(scene, camera);
+    }
+
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+</script>
+</body>
+</html>
