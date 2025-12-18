@@ -2,54 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BloxHome - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Home - Roblox</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <h1>BLOX</h1>
-        <div class="nav-links">
-            <a href="roblox.html" style="color:white;">Games</a>
-            <a href="roblox-char.html">Avatar</a>
-            <a href="roblox-bucs.html">Store</a>
-            <a href="roblox-mov.html">Movement Lab</a>
+
+    <header>
+        <div style="font-weight:900; font-size:22px;">Home</div>
+        <div class="user-pill">
+            <div class="robux-icon">⬡</div>
+            <span id="r-amount">0</span>
         </div>
-        <div class="currency-display">R$ <span id="r-amount">0</span></div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <h2>Recommended For You</h2>
-        <div class="game-grid">
-            <div class="card" onclick="window.location.href='99nights.html'">
-                <div class="card-img" style="background:#2d3436;">🌲</div>
-                <div class="card-content">
-                    <h3>99 Nights</h3>
-                    <p>Survival Horror</p>
+    <div class="section">
+        <div class="section-title">Continue</div>
+        <div class="scroller">
+            <div class="game-card" onclick="window.location.href='99nights.html'">
+                <div class="thumb-container">
+                    <div class="thumb-img" style="background:linear-gradient(45deg, #000, #2c3e50);">🔦</div>
                 </div>
+                <div class="game-title">99 Nights</div>
+                <div class="game-stats">👍 92% &bull; 👤 12.4k</div>
             </div>
 
-            <div class="card" onclick="window.location.href='brookhaven.html'">
-                <div class="card-img" style="background:#0984e3;">🏡</div>
-                <div class="card-content">
-                    <h3>Brookhaven RP</h3>
-                    <p>Town & City</p>
+            <div class="game-card" onclick="window.location.href='brookhaven.html'">
+                <div class="thumb-container">
+                    <div class="thumb-img" style="background:linear-gradient(45deg, #74b9ff, #0984e3);">🏡</div>
                 </div>
+                <div class="game-title">Brookhaven RP</div>
+                <div class="game-stats">👍 96% &bull; 👤 450k</div>
             </div>
-
-            <div class="card" onclick="window.location.href='rainbowfriends.html'">
-                <div class="card-img" style="background:#6c5ce7;">📦</div>
-                <div class="card-content">
-                    <h3>Rainbow Friends</h3>
-                    <p>Horror Puzzle</p>
+            
+            <div class="game-card" onclick="window.location.href='roblox-mov.html'">
+                <div class="thumb-container">
+                    <div class="thumb-img" style="background: #e17055;">🏃</div>
                 </div>
+                <div class="game-title">Move Lab</div>
+                <div class="game-stats">🛠️ Dev</div>
             </div>
         </div>
     </div>
 
+    <div class="section">
+        <div class="section-title">Recommended for You</div>
+        <div class="grid">
+            <div class="game-card" onclick="window.location.href='rainbowfriends.html'">
+                <div class="thumb-container">
+                    <div class="thumb-img" style="background: #6c5ce7;">📦</div>
+                </div>
+                <div class="game-title">Rainbow Friends</div>
+                <div class="game-stats">Survive the night</div>
+            </div>
+
+            <div class="game-card" onclick="window.location.href='roblox-char.html'">
+                <div class="thumb-container">
+                    <div class="thumb-img" style="background: #fdcb6e;">👕</div>
+                </div>
+                <div class="game-title">Avatar Editor</div>
+                <div class="game-stats">Customize Look</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="roblox.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            Home
+        </a>
+        <a href="#" class="nav-item">
+            <span class="nav-icon">🎮</span>
+            Games
+        </a>
+        <a href="roblox-char.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            Avatar
+        </a>
+        <a href="roblox-bucs.html" class="nav-item">
+            <span class="nav-icon">💬</span>
+            More
+        </a>
+    </nav>
+
     <script>
-        // Load Currency on every page
-        let bucs = localStorage.getItem('robux') || 0;
-        document.getElementById('r-amount').innerText = bucs;
+        // Load Currency
+        document.getElementById('r-amount').innerText = localStorage.getItem('robux') || 0;
     </script>
 </body>
 </html>
