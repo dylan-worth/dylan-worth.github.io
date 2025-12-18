@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Wilds: Smithing Update</title>
+    <title>Dragon Wilds: RPG Edition</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Verdana', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
@@ -13,63 +13,65 @@
         /* MINIMAP */
         #minimap-container {
             position: absolute; top: 10px; right: 10px;
-            width: 100px; height: 100px;
-            background: rgba(0,0,0,0.5); border: 2px solid #5d5d5d; border-radius: 50%; overflow: hidden; pointer-events: auto;
+            width: 110px; height: 110px;
+            background: rgba(0,0,0,0.6); border: 2px solid #5d5d5d; border-radius: 50%; overflow: hidden; pointer-events: auto;
         }
 
         /* STATS */
         #stats-panel { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .stat-bar { width: 140px; height: 16px; background: #333; border: 1px solid #000; position: relative; }
+        .stat-bar { width: 140px; height: 18px; background: #333; border: 1px solid #000; position: relative; border-radius: 4px; overflow: hidden; }
         .bar-fill { height: 100%; transition: width 0.2s; }
         #hp-fill { background: #d63031; width: 100%; }
-        #run-fill { background: #fdcb6e; width: 100%; }
-        .stat-icon { position: absolute; top: -1px; left: 4px; font-size: 10px; color: #fff; text-shadow: 1px 1px 0 #000; }
+        #mana-fill { background: #0984e3; width: 100%; } /* Mana/Run Energy */
+        .stat-text { position: absolute; top: 0; left: 5px; font-size: 11px; color: #fff; text-shadow: 1px 1px 0 #000; line-height: 18px; font-weight: bold; }
 
-        /* INVENTORY (RS Style 28 Slots) */
+        /* COIN POUCH */
+        #coin-pouch {
+            position: absolute; top: 60px; left: 10px;
+            color: #f1c40f; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 0 #000;
+            display: flex; align-items: center; gap: 5px;
+        }
+        #coin-pouch::before { content: '💰'; }
+
+        /* INVENTORY */
         #inventory-container {
-            position: absolute; bottom: 100px; right: 10px;
-            width: 180px; background: #3c3c3c; border: 2px solid #1a1a1a;
-            display: none; /* Hidden by default */
-            grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 5px;
-            pointer-events: auto;
+            position: absolute; bottom: 90px; right: 10px;
+            width: 190px; background: #3c3c3c; border: 2px solid #5e4c35;
+            display: none; 
+            grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 5px;
+            pointer-events: auto; border-radius: 4px;
         }
         .inv-slot {
             width: 40px; height: 36px; background: #2b2b2b; border: 1px inset #555;
             display: flex; justify-content: center; align-items: center; position: relative;
         }
-        .inv-item { width: 24px; height: 24px; border-radius: 2px; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-        /* Item Colors */
+        .inv-item { width: 28px; height: 28px; border-radius: 2px; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-size: 18px; line-height: 28px; text-align: center; cursor: pointer; }
+        
+        /* Item Styles (Emoji/Color based) */
+        .item-bones { background: #eee; } .item-bones::after { content: '🦴'; }
+        .item-hide { background: #2ecc71; border: 1px solid #27ae60; } 
         .item-log { background: #654321; }
-        .item-copper { background: #e67e22; border: 1px solid #d35400; }
-        .item-tin { background: #95a5a6; border: 1px solid #7f8c8d; }
-        .item-bar { background: #cd7f32; border: 1px solid #fff; } /* Bronze Bar */
+        .item-ore { background: #7f8c8d; border: 1px solid #95a5a6; }
 
         #bag-btn {
             position: absolute; bottom: 20px; right: 20px;
             width: 60px; height: 60px; border-radius: 50%;
             background: #5d4037; border: 2px solid #a1887f;
             display: flex; justify-content: center; align-items: center;
-            color: white; font-size: 24px; pointer-events: auto; cursor: pointer;
-        }
-
-        /* TELEPORT BTN */
-        #home-btn {
-            position: absolute; top: 60px; left: 10px;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: #6c5ce7; border: 2px solid #a29bfe;
-            color: white; font-size: 10px; display: flex; justify-content: center; align-items: center;
-            pointer-events: auto; font-weight: bold;
+            color: white; font-size: 24px; pointer-events: auto; cursor: pointer; box-shadow: 0 4px 5px rgba(0,0,0,0.5);
         }
 
         /* TEXT POPS */
         .float-text {
-            position: absolute; font-weight: bold; font-size: 16px;
+            position: absolute; font-weight: bold; font-size: 14px;
             text-shadow: 1px 1px 0 #000; pointer-events: none;
-            animation: floatUp 1.5s forwards;
+            animation: floatUp 1.2s forwards; white-space: nowrap;
         }
-        @keyframes floatUp { 0% {transform: translateY(0); opacity: 1;} 100% {transform: translateY(-50px); opacity: 0;} }
+        .dmg-text { color: #e74c3c; font-size: 18px; }
+        .xp-text { color: #f1c40f; }
+        @keyframes floatUp { 0% {transform: translateY(0); opacity: 1;} 100% {transform: translateY(-40px); opacity: 0;} }
 
-        /* CONTROLS */
+        /* JOYSTICK */
         #joystick-zone {
             position: absolute; bottom: 20px; left: 20px;
             width: 120px; height: 120px;
@@ -80,21 +82,26 @@
             position: absolute; top: 50%; left: 50%;
             width: 50px; height: 50px; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%);
         }
+
+        /* TARGET INFO */
+        #target-info {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 15px; border: 1px solid #e74c3c;
+            color: white; font-weight: bold; display: none;
+        }
     </style>
 </head>
 <body>
 
 <div id="ui-layer">
     <div id="stats-panel">
-        <div class="stat-bar"><div id="hp-fill" class="bar-fill"></div><span class="stat-icon">HP</span></div>
-        <div class="stat-bar"><div id="run-fill" class="bar-fill"></div><span class="stat-icon">RUN</span></div>
+        <div class="stat-bar"><div id="hp-fill" class="bar-fill"></div><span class="stat-text">HP</span></div>
+        <div class="stat-bar"><div id="mana-fill" class="bar-fill"></div><span class="stat-text">MANA</span></div>
     </div>
-    <div id="home-btn">HOME</div>
-    
-    <div id="minimap-container"><canvas id="minimap-canvas" width="100" height="100"></canvas></div>
-
-    <div id="inventory-container">
-        </div>
+    <div id="coin-pouch">0</div>
+    <div id="target-info">Target: Green Dragon</div>
+    <div id="minimap-container"><canvas id="minimap-canvas" width="110" height="110"></canvas></div>
+    <div id="inventory-container"></div>
     <div id="bag-btn">🎒</div>
 </div>
 
@@ -113,26 +120,27 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // --- 1. SETUP & DAY/NIGHT ---
+    // --- 1. CORE SETUP ---
     const scene = new THREE.Scene();
     const skyColor = new THREE.Color(0x87CEEB);
-    const nightColor = new THREE.Color(0x050510);
+    const nightColor = new THREE.Color(0x0a0a1a);
     scene.background = skyColor.clone();
-    scene.fog = new THREE.Fog(scene.background, 20, 90);
+    scene.fog = new THREE.Fog(scene.background, 20, 80);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 15, 20);
+    camera.position.set(0, 18, 22);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false; controls.minDistance = 5; controls.maxDistance = 35; controls.maxPolarAngle = Math.PI/2.1;
 
     // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambient);
     const sun = new THREE.DirectionalLight(0xfff0dd, 1.2);
     sun.position.set(50, 80, 50);
@@ -140,320 +148,352 @@
     sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
     scene.add(sun);
 
-    // Ground
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
-    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    // Ground & Path
+    const groundGroup = new THREE.Group();
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 1 });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), grassMat);
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
+    groundGroup.add(ground);
+    
+    // Dirt Path (Town Center to Wilds)
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
+    const path = new THREE.Mesh(new THREE.PlaneGeometry(10, 80), pathMat);
+    path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -30); path.receiveShadow = true;
+    groundGroup.add(path);
+    scene.add(groundGroup);
 
-    // --- 2. GAME OBJECTS ---
-    const interactables = []; // Raycast targets
-    const trees = [];
-    const rocks = [];
 
-    // Materials
-    const mTree = new THREE.MeshStandardMaterial({ color: 0x155e19 });
-    const mTrunk = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-    const mRock = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.9 });
-    const mCopper = new THREE.MeshStandardMaterial({ color: 0xd35400 });
-    const mTin = new THREE.MeshStandardMaterial({ color: 0xbdc3c7 });
+    // --- 2. TOWN GENERATION (House Hiding & Furniture) ---
+    const buildings = []; // Store houses to check player position
+    const houseMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6 }); // Stone walls
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x8e44ad }); // Purple/Slate roof
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
 
-    // Spawn Tree
-    function spawnTree(x, z) {
-        const g = new THREE.Group();
-        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.8,2,6), mTrunk); t.position.y=1; t.castShadow=true; g.add(t);
-        const l = new THREE.Mesh(new THREE.ConeGeometry(2.5,7,7), mTree); l.position.y=4.5; l.castShadow=true; g.add(l);
-        g.position.set(x,0,z); g.userData = { type: 'tree', hp: 3, maxHp: 3 };
-        scene.add(g); trees.push(g); interactables.push(l);
-    }
+    function createHouse(x, z, w, d) {
+        const houseGroup = new THREE.Group();
+        houseGroup.position.set(x, 0, z);
 
-    // Spawn Ore Rock
-    function spawnRock(x, z, type) {
-        const g = new THREE.Group();
-        const r = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5), mRock);
-        r.position.y = 1; r.castShadow=true; r.scale.set(1, 0.7, 1); g.add(r);
+        // Walls (constructed so we can walk in)
+        const h = 4;
+        const walls = new THREE.Group();
+        // Back
+        const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.5), houseMat); b.position.set(0, h/2, -d/2); b.castShadow=true; walls.add(b);
+        // Sides
+        const l = new THREE.Mesh(new THREE.BoxGeometry(0.5, h, d), houseMat); l.position.set(-w/2, h/2, 0); l.castShadow=true; walls.add(l);
+        const r = new THREE.Mesh(new THREE.BoxGeometry(0.5, h, d), houseMat); r.position.set(w/2, h/2, 0); r.castShadow=true; walls.add(r);
+        // Front (Doorway)
+        const f1 = new THREE.Mesh(new THREE.BoxGeometry(w/2-1, h, 0.5), houseMat); f1.position.set(-(w/4)-0.5, h/2, d/2); f1.castShadow=true; walls.add(f1);
+        const f2 = new THREE.Mesh(new THREE.BoxGeometry(w/2-1, h, 0.5), houseMat); f2.position.set((w/4)+0.5, h/2, d/2); f2.castShadow=true; walls.add(f2);
+        const top = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), houseMat); top.position.set(0, h-0.5, d/2); top.castShadow=true; walls.add(top);
         
-        // Ore Veins
-        const veins = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6), type === 'copper' ? mCopper : mTin);
-        veins.position.y = 1; veins.scale.set(1.05, 0.75, 1.05);
-        // Make veins stick out slightly by using noise or just scaling - simplified here just scaling
-        g.add(veins);
+        houseGroup.add(walls);
 
-        g.position.set(x,0,z);
-        g.userData = { type: 'rock', oreType: type, active: true };
-        scene.add(g); rocks.push(g); interactables.push(veins);
+        // Furniture
+        const furn = new THREE.Group();
+        // Bed
+        const bed = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 2.5), new THREE.MeshStandardMaterial({color:0xc0392b}));
+        bed.position.set(-w/2+1.5, 0.25, -d/2+2); furn.add(bed);
+        const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.2, 0.6), new THREE.MeshStandardMaterial({color:0xffffff}));
+        pillow.position.set(-w/2+1.5, 0.5, -d/2+1); furn.add(pillow);
+        // Table
+        const tTop = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.1, 8), woodMat); tTop.position.set(w/2-1.5, 1, 0);
+        const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1), woodMat); tLeg.position.set(w/2-1.5, 0.5, 0);
+        furn.add(tTop); furn.add(tLeg);
+        houseGroup.add(furn);
+
+        // Roof (Seperate Mesh for Hiding)
+        const roofHeight = 2.5;
+        const roofGeo = new THREE.ConeGeometry(Math.max(w,d)*0.8, roofHeight, 4);
+        const roof = new THREE.Mesh(roofGeo, roofMat);
+        roof.position.y = h + roofHeight/2;
+        roof.rotation.y = Math.PI/4;
+        houseGroup.add(roof);
+
+        scene.add(houseGroup);
+        
+        // Save for collision logic
+        buildings.push({ 
+            bounds: { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2 }, 
+            roof: roof 
+        });
     }
 
-    // Generate World
-    for(let i=0; i<60; i++) spawnTree((Math.random()-0.5)*180, (Math.random()-0.5)*180);
-    for(let i=0; i<15; i++) spawnRock((Math.random()-0.5)*120, (Math.random()-0.5)*120, 'copper');
-    for(let i=0; i<15; i++) spawnRock((Math.random()-0.5)*120, (Math.random()-0.5)*120, 'tin');
-
-    // --- 3. SMITHING AREA ---
-    const smithZone = new THREE.Group();
-    smithZone.position.set(10, 0, -10);
-    scene.add(smithZone);
-
-    // Furnace
-    const furnGeo = new THREE.BoxGeometry(4, 3, 4);
-    const furnMat = new THREE.MeshStandardMaterial({ color: 0x444 });
-    const furnace = new THREE.Mesh(furnGeo, furnMat);
-    furnace.position.set(0, 1.5, 0); furnace.castShadow=true;
-    furnace.userData = { type: 'furnace' };
-    smithZone.add(furnace); interactables.push(furnace);
-    // Fire Light
-    const fireLight = new THREE.PointLight(0xffaa00, 2, 10);
-    fireLight.position.set(0, 2, 2); smithZone.add(fireLight);
-
-    // Anvil
-    const anvilGeo = new THREE.BoxGeometry(2, 1.5, 1);
-    const anvilMat = new THREE.MeshStandardMaterial({ color: 0x222, metalness: 0.8 });
-    const anvil = new THREE.Mesh(anvilGeo, anvilMat);
-    anvil.position.set(5, 0.75, 0); anvil.castShadow=true;
-    anvil.userData = { type: 'anvil' };
-    smithZone.add(anvil); interactables.push(anvil);
-
-    // Bank Chest
-    const chestGeo = new THREE.BoxGeometry(2, 1.5, 1.5);
-    const chestMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
-    const chest = new THREE.Mesh(chestGeo, chestMat);
-    chest.position.set(-5, 0.75, 0); chest.castShadow=true;
-    smithZone.add(chest);
-
-    // --- 4. PLAYER & EQUIPMENT ---
-    const playerGroup = new THREE.Group();
-    scene.add(playerGroup);
-    const charBody = new THREE.Group();
+    // Spawn Town
+    createHouse(-8, 0, 6, 8); // Left House
+    createHouse(8, 0, 6, 8);  // Right House
     
-    // Armors
-    const armorMats = {
-        base: new THREE.MeshStandardMaterial({ color: 0x336699 }),
-        bronze: new THREE.MeshStandardMaterial({ color: 0xcd7f32, metalness: 0.4 }),
-        iron: new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.6 }),
-        dragon: new THREE.MeshStandardMaterial({ color: 0x880000, metalness: 0.5 })
-    };
+    // Shop Stall
+    const shopGroup = new THREE.Group();
+    shopGroup.position.set(0, 0, 5);
+    const sTable = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), woodMat); sTable.position.y=0.5;
+    const sPole1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3, 0.1), woodMat); sPole1.position.set(-1.8, 1.5, 0.8);
+    const sPole2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3, 0.1), woodMat); sPole2.position.set(1.8, 1.5, 0.8);
+    const sCanopy = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.2, 2.2), new THREE.MeshStandardMaterial({color: 0xe74c3c})); sCanopy.position.y=3;
+    shopGroup.add(sTable, sPole1, sPole2, sCanopy);
+    shopGroup.userData = { type: 'shop' };
+    scene.add(shopGroup);
 
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), armorMats.base);
-    torso.position.y = 2.25; torso.castShadow = true; charBody.add(torso);
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({ color: 0xf5cca8 }));
-    head.position.y = 3.3; charBody.add(head);
+    // Furnace (With GLOWING Light)
+    const furnaceGroup = new THREE.Group();
+    furnaceGroup.position.set(-12, 0, -10);
+    const fMesh = new THREE.Mesh(new THREE.BoxGeometry(3,3,3), new THREE.MeshStandardMaterial({color:0x444})); fMesh.position.y=1.5; fMesh.castShadow=true;
+    furnaceGroup.add(fMesh);
+    // THE RED LIGHT
+    const fLight = new THREE.PointLight(0xff4500, 5, 15);
+    fLight.position.set(0, 2, 1);
+    furnaceGroup.add(fLight);
+    furnaceGroup.userData = { type: 'furnace' };
+    scene.add(furnaceGroup);
 
-    // Limbs
-    const limbs = [];
-    function createLimb(x, y, mat) {
-        const p = new THREE.Group(); p.position.set(x, y, 0);
-        const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), mat);
-        m.position.y = -0.6; m.castShadow = true; p.add(m);
-        limbs.push(p); return p;
-    }
-    const lArm = createLimb(-0.7, 2.8, armorMats.base); charBody.add(lArm);
-    const rArm = createLimb(0.7, 2.8, armorMats.base); charBody.add(rArm);
-    const lLeg = createLimb(-0.3, 1.5, new THREE.MeshStandardMaterial({color:0x555})); charBody.add(lLeg);
-    const rLeg = createLimb(0.3, 1.5, new THREE.MeshStandardMaterial({color:0x555})); charBody.add(rLeg);
-    playerGroup.add(charBody);
+    // --- 3. MOBS (Dragons, NPCs) ---
+    const mobs = [];
+    const interactables = [shopGroup, furnaceGroup];
 
-    // Pickaxe Model (Hidden default)
-    const pickGroup = new THREE.Group();
-    const pickHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.1), new THREE.MeshStandardMaterial({color: 0x555}));
-    const pickHandle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 0.1), new THREE.MeshStandardMaterial({color: 0x654321}));
-    pickHandle.position.y = -0.3; pickGroup.add(pickHead); pickGroup.add(pickHandle);
-    pickGroup.position.set(0, -1, 0.5); pickGroup.rotation.x = Math.PI/2;
-    rArm.children[0].add(pickGroup);
-    pickGroup.visible = false;
+    function createMob(type, x, z) {
+        const group = new THREE.Group();
+        group.position.set(x, 0, z);
+        let mesh;
 
-    // --- 5. INVENTORY SYSTEM ---
-    const inventory = [];
-    const MAX_SLOTS = 28;
-    const invContainer = document.getElementById('inventory-container');
-    
-    // Create UI Grid
-    for(let i=0; i<MAX_SLOTS; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'inv-slot';
-        slot.id = `inv-${i}`;
-        invContainer.appendChild(slot);
-    }
-
-    function toggleInventory() {
-        invContainer.style.display = invContainer.style.display === 'grid' ? 'none' : 'grid';
-    }
-    document.getElementById('bag-btn').addEventListener('click', toggleInventory);
-
-    function addItem(type) {
-        if(inventory.length >= MAX_SLOTS) { spawnFloatText(playerGroup.position, "Inventory Full!", "red"); return false; }
-        inventory.push(type);
-        updateInvUI();
-        return true;
-    }
-    
-    function removeItem(type) {
-        const idx = inventory.indexOf(type);
-        if(idx > -1) { inventory.splice(idx, 1); updateInvUI(); return true; }
-        return false;
-    }
-
-    function hasItem(type) { return inventory.includes(type); }
-
-    function updateInvUI() {
-        for(let i=0; i<MAX_SLOTS; i++) {
-            const slot = document.getElementById(`inv-${i}`);
-            slot.innerHTML = '';
-            if(inventory[i]) {
-                const img = document.createElement('div');
-                img.className = `inv-item item-${inventory[i]}`;
-                slot.appendChild(img);
-            }
+        if (type === 'dragon') {
+            const mat = new THREE.MeshStandardMaterial({ color: 0x2ecc71 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 3), mat); body.position.y=1.5;
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1.5), mat); head.position.set(0, 2.5, 2);
+            const lWing = new THREE.Mesh(new THREE.BoxGeometry(3, 0.1, 1.5), mat); lWing.position.set(-2, 2.5, 0);
+            const rWing = new THREE.Mesh(new THREE.BoxGeometry(3, 0.1, 1.5), mat); rWing.position.set(2, 2.5, 0);
+            group.add(body, head, lWing, rWing);
+            group.userData = { type: 'dragon', hp: 50, maxHp: 50, state: 'patrol', target: null };
+            
+            // HP Bar
+            const barBg = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.2), new THREE.MeshBasicMaterial({color:0x000}));
+            barBg.position.set(0, 4, 0);
+            const barFg = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.2), new THREE.MeshBasicMaterial({color:0x00ff00}));
+            barFg.position.set(0, 4, 0.01);
+            group.add(barBg, barFg);
+            group.barFg = barFg; // Ref for updating
+        } else if (type === 'villager') {
+            const mat = new THREE.MeshStandardMaterial({ color: 0xf1c40f }); // Yellow Shirt
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), mat); body.position.y=0.75;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshStandardMaterial({color:0xffccaa})); head.position.y=1.7;
+            group.add(body, head);
+            group.userData = { type: 'npc', name: 'Villager' };
         }
+        
+        scene.add(group);
+        mobs.push(group);
+        interactables.push(group.children[0]); // Raycast hit body
+        return group;
     }
 
-    // --- 6. GAME LOGIC & INTERACTION ---
+    // Spawn Mobs
+    createMob('villager', 2, 2);
+    createMob('villager', -2, 6);
+    for(let i=0; i<5; i++) createMob('dragon', (Math.random()-0.5)*100, -30 - Math.random()*50);
+
+    // --- 4. PLAYER & LOGIC ---
+    const player = new THREE.Group();
+    scene.add(player);
+    
+    // Player Model
+    const pBody = new THREE.Group();
+    const armorMat = new THREE.MeshStandardMaterial({ color: 0x336699 });
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), armorMat); torso.position.y=1.8; pBody.add(torso);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color:0xf5cca8})); head.position.y=2.6; pBody.add(head);
+    // Limbs (Simple)
+    const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1, 0.25), armorMat); lArm.position.set(-0.5, 1.8, 0); pBody.add(lArm);
+    const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1, 0.25), armorMat); rArm.position.set(0.5, 1.8, 0); pBody.add(rArm);
+    player.add(pBody);
+
+    // Target Marker
+    const targetRing = new THREE.Mesh(new THREE.RingGeometry(1, 1.2, 16), new THREE.MeshBasicMaterial({color:0xe74c3c, side:THREE.DoubleSide}));
+    targetRing.rotation.x = -Math.PI/2; targetRing.visible = false;
+    scene.add(targetRing);
+
+    // Game State
+    let hp = 100;
+    let mana = 100;
+    let coins = 0;
+    let currentTarget = null;
+    let inventory = [];
+    const projectiles = [];
+    const particles = [];
+
+    // --- 5. INTERACTION & SPELLS ---
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let miningTimer = 0;
-    let isMining = false;
 
-    // Input Interaction
-    window.addEventListener('pointerdown', (event) => {
-        // Ignore clicks on UI
-        if(event.target.closest('#ui-layer') || event.target.closest('#joystick-zone')) return;
-
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    window.addEventListener('pointerdown', e => {
+        if(e.target.closest('#ui-layer') || e.target.closest('#joystick-zone')) return;
+        mouse.x = (e.clientX/window.innerWidth)*2-1;
+        mouse.y = -(e.clientY/window.innerHeight)*2+1;
         raycaster.setFromCamera(mouse, camera);
-
-        const intersects = raycaster.intersectObjects(interactables);
-        if(intersects.length > 0) {
-            handleInteraction(intersects[0].object);
-        }
-    });
-
-    function handleInteraction(obj) {
-        // Find parent group for logic
-        let target = obj;
-        while(target.parent && !target.userData.type) target = target.parent;
         
-        const type = target.userData.type;
-
-        // Distance Check
-        if(playerGroup.position.distanceTo(target.position) > 5) {
-            spawnFloatText(target.position, "Too far!", "white");
+        // Check Mobs first (Combat)
+        const hitMobs = raycaster.intersectObjects(mobs.map(m=>m.children).flat());
+        if(hitMobs.length>0) {
+            const mobGroup = hitMobs[0].object.parent;
+            if(mobGroup.userData.type === 'dragon') {
+                targetEnemy(mobGroup);
+                castLightning(mobGroup);
+            }
             return;
         }
 
-        if(type === 'rock' && target.userData.active) {
-            startMining(target);
-        } else if (type === 'furnace') {
-            smeltOre();
-        } else if (type === 'anvil') {
-            smithArmor();
+        // Check World Objs
+        const hitWorld = raycaster.intersectObjects(interactables.map(i=> i.type==='Group'?i.children:i).flat());
+        if(hitWorld.length>0) {
+            let obj = hitWorld[0].object;
+            while(obj.parent && !obj.userData.type) obj = obj.parent; // Find root
+            if(obj.userData.type === 'shop') sellAll();
         }
+    });
+
+    function targetEnemy(mob) {
+        currentTarget = mob;
+        targetRing.visible = true;
+        document.getElementById('target-info').style.display = 'block';
     }
 
-    function startMining(rock) {
-        if(isMining) return;
-        isMining = true;
-        pickGroup.visible = true;
-        spawnFloatText(playerGroup.position, "Mining...", "yellow");
+    function castLightning(target) {
+        if(mana < 10) { spawnText(player.position, "No Mana!", "#aaa"); return; }
+        mana -= 10;
         
-        // Face Rock
-        playerGroup.lookAt(rock.position.x, playerGroup.position.y, rock.position.z);
-
-        setTimeout(() => {
-            if(addItem(rock.userData.oreType)) {
-                spawnFloatText(rock.position, `+1 ${rock.userData.oreType}`, "#e67e22");
-                spawnXP(rock.position, "+35 XP");
-                rock.children[1].visible = false; // Hide veins
-                rock.userData.active = false;
-                
-                // Respawn
-                setTimeout(() => {
-                    rock.children[1].visible = true;
-                    rock.userData.active = true;
-                }, 5000);
+        // 1. Visual: Jagged Line
+        const pts = [];
+        const start = player.position.clone().add(new THREE.Vector3(0,2,0));
+        const end = target.position.clone().add(new THREE.Vector3(0,1.5,0));
+        let curr = start.clone();
+        const dist = start.distanceTo(end);
+        const steps = 10;
+        
+        for(let i=0; i<=steps; i++) {
+            pts.push(curr.clone());
+            const alpha = i/steps;
+            curr.lerp(end, 1/steps);
+            if(i<steps) {
+                curr.x += (Math.random()-0.5)*1.5;
+                curr.y += (Math.random()-0.5)*1.5;
+                curr.z += (Math.random()-0.5)*1.5;
             }
-            isMining = false;
-            pickGroup.visible = false;
-        }, 1500);
-    }
-
-    function smeltOre() {
-        if(hasItem('copper') && hasItem('tin')) {
-            spawnFloatText(playerGroup.position, "Smelting...", "orange");
-            setTimeout(() => {
-                removeItem('copper');
-                removeItem('tin');
-                addItem('bar');
-                spawnFloatText(playerGroup.position, "+1 Bronze Bar", "#cd7f32");
-                spawnXP(playerGroup.position, "+15 XP");
-            }, 1000);
-        } else {
-            spawnFloatText(playerGroup.position, "Need Copper & Tin!", "red");
         }
-    }
-
-    function smithArmor() {
-        if(hasItem('bar')) {
-            spawnFloatText(playerGroup.position, "Smithing...", "white");
-            // Particle Sparks
-            for(let i=0; i<5; i++) spawnSpark(playerGroup.position);
-            
-            setTimeout(() => {
-                removeItem('bar');
-                // Change Armor Appearance
-                torso.material = armorMats.bronze;
-                lArm.children[0].material = armorMats.bronze;
-                rArm.children[0].material = armorMats.bronze;
-                spawnFloatText(playerGroup.position, "Bronze Armor Crafted!", "#cd7f32");
-                spawnLevelUp();
-            }, 1000);
-        } else {
-            spawnFloatText(playerGroup.position, "Need Bronze Bar!", "red");
-        }
-    }
-
-    // --- 7. EFFECTS & PARTICLES ---
-    function spawnFloatText(pos, msg, color) {
-        const div = document.createElement('div');
-        div.className = 'float-text';
-        div.textContent = msg;
-        div.style.color = color;
-        document.body.appendChild(div);
         
-        const v = pos.clone().project(camera);
-        const x = (v.x * .5 + .5) * window.innerWidth;
-        const y = (-(v.y * .5) + .5) * window.innerHeight;
-        div.style.left = x + 'px'; div.style.top = y + 'px';
-        setTimeout(() => div.remove(), 1400);
-    }
-    
-    function spawnXP(pos, msg) { spawnFloatText(pos, msg, "#fb1"); }
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 3 });
+        const line = new THREE.Line(geo, mat);
+        scene.add(line);
+        setTimeout(()=>scene.remove(line), 150); // Flash
 
-    const particles = [];
-    function spawnSpark(pos) {
-        const p = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshBasicMaterial({color:0xffff00}));
-        p.position.copy(pos).add(new THREE.Vector3(0,1,0));
-        const vel = new THREE.Vector3((Math.random()-.5), 1, (Math.random()-.5)).multiplyScalar(0.2);
-        scene.add(p); particles.push({mesh:p, vel:vel, life:30});
-    }
+        // 2. Damage Logic
+        const dmg = Math.floor(Math.random()*8) + 5;
+        target.userData.hp -= dmg;
+        spawnText(target.position, `-${dmg}`, "#e74c3c");
+        spawnText(player.position, "+12 Magic XP", "#3498db");
 
-    function spawnLevelUp() {
-        // Golden Cylinder flash
-        const g = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 4, 8), new THREE.MeshBasicMaterial({color: 0xffd700, transparent: true, opacity: 0.5}));
-        g.position.copy(playerGroup.position);
-        scene.add(g);
-        const anim = setInterval(() => {
-            g.position.y += 0.1; g.material.opacity -= 0.05;
-            if(g.material.opacity <= 0) { clearInterval(anim); scene.remove(g); }
-        }, 30);
+        // Update HP Bar
+        const pct = Math.max(0, target.userData.hp / target.userData.maxHp);
+        target.barFg.scale.x = pct;
+
+        // Death
+        if(target.userData.hp <= 0) killMob(target);
     }
 
-    // --- 8. MOVEMENT & ANIMATION ---
+    function killMob(mob) {
+        spawnText(mob.position, "Dead!", "#e74c3c");
+        // Drop Loot
+        lootDrop('bones', mob.position);
+        lootDrop('hide', mob.position);
+        // Reset Mob
+        mob.position.y = -100; // Hide
+        targetRing.visible = false;
+        currentTarget = null;
+        document.getElementById('target-info').style.display = 'none';
+        
+        // Respawn Timer
+        setTimeout(() => {
+            mob.userData.hp = mob.userData.maxHp;
+            mob.barFg.scale.x = 1;
+            mob.position.set((Math.random()-0.5)*100, 0, -30-Math.random()*50);
+        }, 8000);
+    }
+
+    // --- 6. LOOT & INVENTORY ---
+    function lootDrop(type, pos) {
+        // Visual drop
+        spawnText(pos, type === 'bones' ? "Bones" : "Green Hide", "#fff");
+        if(inventory.length < 20) inventory.push(type);
+        updateInv();
+    }
+
+    function updateInv() {
+        const c = document.getElementById('inventory-container');
+        c.innerHTML = '';
+        inventory.forEach((item, idx) => {
+            const d = document.createElement('div');
+            d.className = `inv-slot`;
+            d.innerHTML = `<div class="inv-item item-${item}"></div>`;
+            d.onclick = () => useItem(idx);
+            c.appendChild(d);
+        });
+        document.getElementById('bag-btn').onclick = () => {
+            c.style.display = c.style.display==='grid'?'none':'grid';
+        };
+    }
+
+    function useItem(idx) {
+        const item = inventory[idx];
+        if(item === 'bones') {
+            inventory.splice(idx, 1);
+            spawnText(player.position, "+4.5 Prayer XP", "#f1c40f");
+            // Golden particles
+            for(let i=0;i<10;i++) spawnParticle(player.position, 0xffd700);
+        }
+        updateInv();
+    }
+
+    function sellAll() {
+        let val = 0;
+        inventory = inventory.filter(i => {
+            if(i==='hide') { val+=50; return false; }
+            if(i==='bones') { val+=10; return false; }
+            return true;
+        });
+        if(val > 0) {
+            coins += val;
+            spawnText(player.position, `Sold for ${val} gp`, "#f1c40f");
+            document.getElementById('coin-pouch').innerText = coins;
+            updateInv();
+        } else {
+            spawnText(player.position, "Nothing to sell!", "#fff");
+        }
+    }
+
+    // --- 7. UTILS (Text, Particles) ---
+    function spawnText(pos, msg, color) {
+        const div = document.createElement('div');
+        div.className = 'float-text'; div.textContent = msg; div.style.color = color;
+        document.body.appendChild(div);
+        const v = pos.clone().add(new THREE.Vector3(0,2,0)).project(camera);
+        const x = (v.x*.5+.5)*window.innerWidth;
+        const y = (-(v.y*.5)+.5)*window.innerHeight;
+        div.style.left=x+'px'; div.style.top=y+'px';
+        setTimeout(()=>div.remove(), 1200);
+    }
+
+    function spawnParticle(pos, col) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshBasicMaterial({color:col}));
+        m.position.copy(pos).add(new THREE.Vector3(0,1,0));
+        scene.add(m);
+        particles.push({mesh:m, vel:new THREE.Vector3((Math.random()-.5)*0.2, 0.2, (Math.random()-.5)*0.2), life:40});
+    }
+
+    // --- 8. MOVEMENT & LOOP ---
     const joyZone = document.getElementById('joystick-zone');
     const joyNip = document.getElementById('joystick-nipple');
-    const moveVector = new THREE.Vector2(0,0);
+    const moveVec = new THREE.Vector2(0,0);
     let joyId = null;
 
     joyZone.addEventListener('touchstart', e=>{ e.preventDefault(); if(joyId!==null)return; joyId=e.changedTouches[0].identifier; handleJoy(e.changedTouches[0]); });
     joyZone.addEventListener('touchmove', e=>{ e.preventDefault(); for(let t of e.changedTouches) if(t.identifier===joyId) handleJoy(t); });
-    const endJoy = ()=>{ joyId=null; moveVector.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
+    const endJoy=()=>{ joyId=null; moveVec.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
     joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
 
     function handleJoy(t) {
@@ -461,29 +501,10 @@
         let dx=t.clientX-cx, dy=t.clientY-cy; const d=Math.min(Math.sqrt(dx*dx+dy*dy), 50);
         const a=Math.atan2(dy,dx); dx=Math.cos(a)*d; dy=Math.sin(a)*d;
         joyNip.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        moveVector.x=dx/50; moveVector.y=dy/50;
+        moveVec.x=dx/50; moveVec.y=dy/50;
     }
 
-    document.getElementById('home-btn').addEventListener('click', () => {
-        playerGroup.position.set(0,0,0);
-        spawnLevelUp(); // Just for visual flair
-    });
-
-    // Minimap
-    const ctx = document.getElementById('minimap-canvas').getContext('2d');
-    function drawMinimap() {
-        ctx.fillStyle = '#111'; ctx.fillRect(0,0,100,100);
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(50,50,3,0,Math.PI*2); ctx.fill();
-        const s = 1.5;
-        function dot(obj,c){
-            const dx=(obj.position.x-playerGroup.position.x)*s; const dz=(obj.position.z-playerGroup.position.z)*s;
-            if(dx*dx+dz*dz < 2400) { ctx.fillStyle=c; ctx.beginPath(); ctx.arc(50+dx, 50+dz, 2, 0, Math.PI*2); ctx.fill(); }
-        }
-        trees.forEach(t=>dot(t,'#2ecc71'));
-        rocks.forEach(r=>dot(r,'#7f8c8d'));
-        dot(smithZone, '#e67e22');
-    }
-
+    // Main Loop
     const clock = new THREE.Clock();
     let timeOfDay = 0;
 
@@ -492,43 +513,82 @@
         const dt = clock.getDelta();
         const time = clock.getElapsedTime();
 
-        // Day/Night Logic
-        timeOfDay += dt * 0.05; // Slow cycle
-        const dayIntensity = Math.sin(timeOfDay) * 0.5 + 0.5;
-        scene.background.lerpColors(nightColor, skyColor, dayIntensity);
-        scene.fog.color.copy(scene.background);
-        sun.intensity = dayIntensity * 1.5;
+        // 1. Day/Night
+        timeOfDay += dt*0.05;
+        const intensity = Math.sin(timeOfDay)*0.5 + 0.5;
+        scene.background.lerpColors(nightColor, skyColor, intensity);
+        sun.intensity = intensity;
 
-        // Player Move
-        if(moveVector.lengthSq() > 0.01 && !isMining) {
+        // 2. Regen
+        if(mana < 100) mana += dt * 5;
+        document.getElementById('hp-fill').style.width = hp + '%';
+        document.getElementById('mana-fill').style.width = mana + '%';
+
+        // 3. Player Move
+        if(moveVec.lengthSq() > 0.01) {
             const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir); camDir.y=0; camDir.normalize();
             const camRight = new THREE.Vector3().crossVectors(camDir, new THREE.Object3D().up).normalize();
-            const m = new THREE.Vector3().addScaledVector(camDir, -moveVector.y).addScaledVector(camRight, moveVector.x);
+            const m = new THREE.Vector3().addScaledVector(camDir, -moveVec.y).addScaledVector(camRight, moveVec.x);
             if(m.lengthSq()>0) {
-                m.normalize(); playerGroup.position.add(m.multiplyScalar(10*dt));
-                playerGroup.rotation.y = Math.atan2(m.x, m.z);
-                lArm.rotation.x = Math.sin(time*15)*0.8; rArm.rotation.x = Math.sin(time*15+Math.PI)*0.8;
-                lLeg.rotation.x = Math.sin(time*15+Math.PI)*0.8; rLeg.rotation.x = Math.sin(time*15)*0.8;
+                m.normalize(); player.position.add(m.multiplyScalar(10*dt));
+                player.children[0].rotation.y = Math.atan2(m.x, m.z);
             }
-        } else if (isMining) {
-             // Mining Animation (Chop arm)
-             rArm.rotation.x = Math.sin(time*20) * 1.5 - 1; 
-        } else {
-             lArm.rotation.x=rArm.rotation.x=lLeg.rotation.x=rLeg.rotation.x=0;
         }
 
-        // Particles
+        // 4. Roof Culling (See Inside)
+        buildings.forEach(b => {
+            const p = player.position;
+            const inside = (p.x > b.bounds.xMin && p.x < b.bounds.xMax && p.z > b.bounds.zMin && p.z < b.bounds.zMax);
+            b.roof.visible = !inside;
+        });
+
+        // 5. Target Ring Follow
+        if(currentTarget) {
+            targetRing.position.copy(currentTarget.position).add(new THREE.Vector3(0,0.1,0));
+            // Dragon AI (Simple Chase)
+            if(currentTarget.userData.hp > 0) {
+                const dist = player.position.distanceTo(currentTarget.position);
+                if(dist < 15 && dist > 2) {
+                    const dir = new THREE.Vector3().subVectors(player.position, currentTarget.position).normalize();
+                    currentTarget.position.add(dir.multiplyScalar(4*dt));
+                    currentTarget.lookAt(player.position);
+                } else if (dist <= 2) {
+                    // Attack Player
+                    if(Math.random() < 0.05) {
+                        hp -= 5;
+                        spawnText(player.position, "-5", "red");
+                        if(hp <= 0) { 
+                            hp=100; player.position.set(0,0,0); spawnText(player.position, "Respawned!", "white"); 
+                        }
+                    }
+                }
+            }
+        }
+
+        // 6. Particles
         for(let i=particles.length-1; i>=0; i--) {
-            particles[i].mesh.position.add(particles[i].vel); particles[i].life--;
+            particles[i].mesh.position.add(particles[i].vel);
+            particles[i].life--;
             if(particles[i].life<=0) { scene.remove(particles[i].mesh); particles.splice(i,1); }
         }
 
-        controls.target.copy(playerGroup.position); controls.target.y=1; controls.update();
-        drawMinimap();
+        // Minimap
+        const ctx = document.getElementById('minimap-canvas').getContext('2d');
+        ctx.fillStyle='#000'; ctx.fillRect(0,0,110,110);
+        // Player
+        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(55,55,3,0,Math.PI*2); ctx.fill();
+        const s = 1.5;
+        const drawDot = (obj, col) => {
+            const dx=(obj.position.x-player.position.x)*s; const dz=(obj.position.z-player.position.z)*s;
+            if(dx*dx+dz*dz<2500) { ctx.fillStyle=col; ctx.beginPath(); ctx.arc(55+dx, 55+dz, 2,0,Math.PI*2); ctx.fill(); }
+        };
+        mobs.forEach(m => drawDot(m, m.userData.type==='dragon'?'#e74c3c':'#f1c40f'));
+        
+        controls.target.copy(player.position); controls.target.y=1; controls.update();
         renderer.render(scene, camera);
     }
 
-    window.addEventListener('resize', () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    window.addEventListener('resize', ()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
     animate();
 </script>
 </body>
