@@ -3,121 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dragon Wilds Mobile</title>
+    <title>Dragon Wilds RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Cinzel', serif; touch-action: none; /* Disables browser scrolling */ }
-        canvas { display: block; }
-
-        /* --- REGION UI --- */
-        #ui-layer {
+        body { margin: 0; overflow: hidden; font-family: 'Roboto', sans-serif; user-select: none; }
+        
+        /* --- HUD CONTAINER --- */
+        #hud {
             position: absolute;
-            top: 15%; /* Higher up to clear center screen */
-            width: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Let clicks pass through to game */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* TOP SECTION */
+        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+        
+        /* Hotbar (Top Left) */
+        .hotbar { display: flex; gap: 5px; }
+        .slot {
+            width: 40px; height: 40px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #555;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            position: relative;
+        }
+        .slot span { position: absolute; top: 2px; left: 2px; color: #ccc; font-size: 8px; }
+
+        /* Compass (Top Center) */
+        .compass-container {
+            flex-grow: 1;
             display: flex;
             justify-content: center;
+            position: absolute;
+            width: 100%;
+            top: 20px;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 1s ease-in;
-            z-index: 10;
         }
-        
-        #region-box {
-            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8), transparent);
-            padding: 10px 20px;
-            border-top: 1px solid #d4af37;
-            border-bottom: 1px solid #d4af37;
-            color: white;
-            text-align: center;
-            transform: scale(0.8);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            width: 80%; /* Don't span full width on desktop, but wide on mobile */
-            max-width: 400px;
-        }
-
-        h1 { margin: 0; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: #bbb; }
-        h2 { margin: 2px 0 0 0; font-size: 1.5rem; color: #d4af37; text-shadow: 0 0 5px #d4af37; }
-        
-        .visible { opacity: 1 !important; }
-        .pop-in { transform: scale(1) !important; }
-
-        /* --- MOBILE CONTROLS (D-PAD) --- */
-        #controls-layer {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
-            z-index: 20;
-            /* Only show on touch devices or small screens if preferred, 
-               but keeping visible here for desktop testing too */
-        }
-
-        .d-pad-btn {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            backdrop-filter: blur(4px);
+        .compass {
+            width: 300px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, white, transparent);
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+        }
+        .compass-marker {
+            background: black;
             color: white;
-            user-select: none;
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-        
-        .d-pad-btn:active, .d-pad-btn.active { background: rgba(212, 175, 55, 0.5); }
-
-        /* D-Pad Positioning */
-        #btn-up { top: 0; left: 50px; }
-        #btn-down { bottom: 0; left: 50px; }
-        #btn-left { top: 50px; left: 0; }
-        #btn-right { top: 50px; right: 0; }
-
-        /* PC hint hidden on small screens */
-        #pc-hint {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: rgba(255,255,255,0.5);
+            padding: 2px 8px;
+            border: 1px solid white;
+            font-family: 'Cinzel', serif;
             font-size: 12px;
-            font-family: sans-serif;
-            pointer-events: none;
         }
+
+        /* BOTTOM SECTION */
+        .hud-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        /* Status Icons (Bottom Left) */
+        .status-icons { display: flex; gap: 10px; margin-bottom: 10px; }
+        .circle-stat {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        .stat-blue { border-color: #00bcd4; color: #00bcd4; } /* Water */
+        .stat-orange { border-color: #ff9800; color: #ff9800; } /* Food */
+
+        /* Bars (Bottom Center) */
+        .bars-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            margin-bottom: 10px;
+        }
+        .bar-frame {
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #444;
+            margin-bottom: 4px;
+            position: relative;
+            height: 12px;
+        }
+        .bar-fill { height: 100%; transition: width 0.2s; }
+        .hp-fill { width: 80%; background: #d32f2f; } /* Red */
+        .stamina-fill { width: 60%; background: #fbc02d; } /* Yellow */
+        .bar-text {
+            position: absolute;
+            width: 100%; text-align: center;
+            font-size: 10px; color: white;
+            top: 0; line-height: 12px; text-shadow: 1px 1px 0 #000;
+        }
+
+        /* Menu Icons (Bottom Right) */
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .menu-icon {
+            width: 30px; height: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #666;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px;
+        }
+
+        /* --- TOUCH CONTROLS --- */
+        #controls-layer {
+            position: absolute; bottom: 80px; left: 20px;
+            width: 120px; height: 120px; pointer-events: auto;
+            z-index: 100;
+        }
+        .d-pad-btn {
+            position: absolute; width: 40px; height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: white; user-select: none;
+        }
+        .d-pad-btn:active { background: rgba(212, 175, 55, 0.5); }
+        #btn-up { top: 0; left: 40px; }
+        #btn-down { bottom: 0; left: 40px; }
+        #btn-left { top: 40px; left: 0; }
+        #btn-right { top: 40px; right: 0; }
+
+        /* Hide specific elements on very small screens */
         @media (max-width: 600px) {
-            #pc-hint { display: none; }
-            h2 { font-size: 1.2rem; }
+            .hotbar .slot:nth-child(n+5) { display: none; } /* Show fewer slots */
+            .bars-container { width: 200px; }
+            .compass { width: 150px; }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div id="ui-layer">
-    <div id="region-box">
-        <h1>Region Discovered</h1>
-        <h2>TEMPLE WOODS</h2>
+<div id="hud">
+    <div class="hud-top">
+        <div class="hotbar">
+            <div class="slot"><span>1</span>🗡️</div>
+            <div class="slot"><span>2</span>🍎</div>
+            <div class="slot"><span>3</span>🪵</div>
+            <div class="slot"><span>4</span>🧵</div>
+            <div class="slot"><span>5</span></div>
+            <div class="slot"><span>6</span></div>
+        </div>
+    </div>
+
+    <div class="compass-container">
+        <div class="compass">
+            <div class="compass-marker">N</div>
+        </div>
+    </div>
+
+    <div class="hud-bottom">
+        
+        <div class="status-icons">
+            <div class="circle-stat stat-blue">💧</div>
+            <div class="circle-stat stat-orange">🍖</div>
+        </div>
+
+        <div class="bars-container">
+            <div class="bar-frame"><div class="bar-fill hp-fill"></div><div class="bar-text">100/100</div></div>
+            <div class="bar-frame" style="height: 6px;"><div class="bar-fill stamina-fill"></div></div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-icon">🎒</div>
+            <div class="menu-icon">🗺️</div>
+            <div class="menu-icon">⚔️</div>
+            <div class="menu-icon">⚙️</div>
+        </div>
     </div>
 </div>
 
 <div id="controls-layer">
-    <div class="d-pad-btn" id="btn-up" data-key="w">▲</div>
-    <div class="d-pad-btn" id="btn-left" data-key="a">◀</div>
-    <div class="d-pad-btn" id="btn-right" data-key="d">▶</div>
-    <div class="d-pad-btn" id="btn-down" data-key="s">▼</div>
+    <div class="d-pad-btn" id="btn-up">▲</div>
+    <div class="d-pad-btn" id="btn-left">◀</div>
+    <div class="d-pad-btn" id="btn-right">▶</div>
+    <div class="d-pad-btn" id="btn-down">▼</div>
 </div>
-
-<div id="pc-hint">WASD / ARROWS also work</div>
 
 <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
     }
   }
 </script>
@@ -125,167 +213,160 @@
 <script type="module">
     import * as THREE from 'three';
 
-    // --- 1. SETUP ---
+    // --- SETUP ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB); 
-    scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+    scene.fog = new THREE.Fog(0x87CEEB, 15, 60);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize performance for mobile
     document.body.appendChild(renderer.domElement);
 
-    // --- 2. LIGHTING ---
+    // --- LIGHTING ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
-
     const dirLight = new THREE.DirectionalLight(0xffdfba, 1.5);
     dirLight.position.set(10, 20, 10);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024; // Lower res shadows for mobile perf
-    dirLight.shadow.mapSize.height = 1024;
     scene.add(dirLight);
 
-    // --- 3. ENVIRONMENT ---
-    const planeGeo = new THREE.PlaneGeometry(200, 200);
-    const planeMat = new THREE.MeshStandardMaterial({ color: 0x55aa55 });
-    const ground = new THREE.Mesh(planeGeo, planeMat);
+    // --- ENVIRONMENT ---
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x55aa55 }));
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
 
+    // --- HUMAN CHARACTER BUILDER ---
+    function createHuman() {
+        const group = new THREE.Group();
+
+        // Materials
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0x8d5524 }); // Skin
+        const shirtMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 }); // Gold/Yellow Shirt
+        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 }); // Dark Pants
+        const hairMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a }); // Black Hair
+
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.25), shirtMat);
+        torso.position.y = 1.1;
+        torso.castShadow = true;
+        group.add(torso);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.3, 0.25), skinMat);
+        head.position.y = 1.65;
+        head.castShadow = true;
+        group.add(head);
+
+        // Hair (Slightly larger box on top)
+        const hair = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.1, 0.27), hairMat);
+        hair.position.y = 1.8;
+        group.add(hair);
+
+        // Arms
+        const armGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
+        const leftArm = new THREE.Mesh(armGeo, skinMat);
+        leftArm.position.set(-0.35, 1.1, 0);
+        group.add(leftArm);
+        const rightArm = new THREE.Mesh(armGeo, skinMat);
+        rightArm.position.set(0.35, 1.1, 0);
+        group.add(rightArm);
+
+        // Legs
+        const legGeo = new THREE.BoxGeometry(0.18, 0.75, 0.2);
+        const leftLeg = new THREE.Mesh(legGeo, pantsMat);
+        leftLeg.position.set(-0.15, 0.4, 0);
+        group.add(leftLeg);
+        const rightLeg = new THREE.Mesh(legGeo, pantsMat);
+        rightLeg.position.set(0.15, 0.4, 0);
+        group.add(rightLeg);
+
+        return group;
+    }
+
+    const player = createHuman();
+    player.position.set(0, 0, -5);
+    scene.add(player);
+
+    // --- DECORATION (Trees/Castle) ---
     // Simple Castle Arch
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const wallGeo = new THREE.BoxGeometry(4, 6, 1);
     const leftWall = new THREE.Mesh(wallGeo, wallMat);
-    leftWall.position.set(-3, 3, 0);
-    leftWall.castShadow = true;
-    scene.add(leftWall);
-
+    leftWall.position.set(-3, 3, 0); leftWall.castShadow = true; scene.add(leftWall);
     const rightWall = new THREE.Mesh(wallGeo, wallMat);
-    rightWall.position.set(3, 3, 0);
-    rightWall.castShadow = true;
-    scene.add(rightWall);
-
+    rightWall.position.set(3, 3, 0); rightWall.castShadow = true; scene.add(rightWall);
     const topWall = new THREE.Mesh(new THREE.BoxGeometry(10, 2, 1), wallMat);
-    topWall.position.set(0, 7, 0);
-    topWall.castShadow = true;
-    scene.add(topWall);
+    topWall.position.set(0, 7, 0); topWall.castShadow = true; scene.add(topWall);
+    const tunnel = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 10), new THREE.MeshStandardMaterial({ color: 0x222222, side: THREE.DoubleSide }));
+    tunnel.position.set(0, 4, -5.5); scene.add(tunnel);
 
-    const tunnel = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 10), new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
-    tunnel.position.set(0, 4, -5.5);
-    tunnel.receiveShadow = true;
-    scene.add(tunnel);
-
+    // Trees
     function addTree(x, z) {
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 2), new THREE.MeshStandardMaterial({color: 0x8B4513}));
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, 2), new THREE.MeshStandardMaterial({color: 0x5D4037}));
         trunk.position.set(x, 1, z);
-        
-        const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 6, 8), new THREE.MeshStandardMaterial({color: 0x228b22}));
-        leaves.position.set(x, 4, z);
-        
-        scene.add(trunk);
-        scene.add(leaves);
+        const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 5, 8), new THREE.MeshStandardMaterial({color: 0x2E7D32}));
+        leaves.position.set(x, 3.5, z);
+        scene.add(trunk); scene.add(leaves);
     }
-    for(let i=0; i<15; i++) addTree(-20 + Math.random()*40, 10 + Math.random()*40);
+    for(let i=0; i<30; i++) addTree(-40 + Math.random()*80, 5 + Math.random()*60);
 
-    // --- 4. PLAYER ---
-    const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
-    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
-    const player = new THREE.Mesh(playerGeo, playerMat);
-    player.position.set(0, 1, -8);
-    player.castShadow = true;
-    scene.add(player);
-
-    // --- 5. DRAGON ---
+    // Dragon
     const dragonGroup = new THREE.Group();
-    const dBody = new THREE.Mesh(new THREE.ConeGeometry(0.5, 3, 4), new THREE.MeshStandardMaterial({color: 0xff0000}));
+    const dBody = new THREE.Mesh(new THREE.ConeGeometry(0.5, 3, 4), new THREE.MeshStandardMaterial({color: 0xB71C1C}));
     dBody.rotation.x = Math.PI / 2;
-    const dWing = new THREE.Mesh(new THREE.BoxGeometry(4, 0.1, 1), new THREE.MeshStandardMaterial({color: 0xaa0000}));
+    const dWing = new THREE.Mesh(new THREE.BoxGeometry(4, 0.1, 1), new THREE.MeshStandardMaterial({color: 0x880E4F}));
     dragonGroup.add(dBody, dWing);
     dragonGroup.position.set(0, 15, 20);
     scene.add(dragonGroup);
 
-    // --- 6. CONTROLS SYSTEM ---
+    // --- CONTROLS ---
     const keys = { w: false, a: false, s: false, d: false };
-    
-    // Keyboard Listeners
     window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-
-    // Touch Listeners (D-Pad)
-    const dpadButtons = document.querySelectorAll('.d-pad-btn');
     
-    dpadButtons.forEach(btn => {
-        // Handle Touch Start
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Stop scrolling/zooming on touch
-            keys[btn.dataset.key] = true;
-            btn.classList.add('active');
-        }, { passive: false });
-
-        // Handle Touch End
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keys[btn.dataset.key] = false;
-            btn.classList.remove('active');
-        }, { passive: false });
-
-        // Mouse fallbacks for testing on PC with mouse clicks
-        btn.addEventListener('mousedown', () => { keys[btn.dataset.key] = true; });
-        btn.addEventListener('mouseup', () => { keys[btn.dataset.key] = false; });
-        btn.addEventListener('mouseleave', () => { keys[btn.dataset.key] = false; });
+    // Touch D-Pad
+    const btns = document.querySelectorAll('.d-pad-btn');
+    const keyMap = { 'btn-up': 'w', 'btn-down': 's', 'btn-left': 'a', 'btn-right': 'd' };
+    btns.forEach(btn => {
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyMap[btn.id]] = true; btn.style.background = 'rgba(212, 175, 55, 0.5)'; });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyMap[btn.id]] = false; btn.style.background = 'rgba(255, 255, 255, 0.1)'; });
+        btn.addEventListener('mousedown', () => keys[keyMap[btn.id]] = true); // PC test
+        btn.addEventListener('mouseup', () => keys[keyMap[btn.id]] = false);
     });
 
-    // --- 7. ANIMATION LOOP ---
-    let regionDiscovered = false;
+    // --- ANIMATION LOOP ---
     const playerSpeed = 0.15;
-
     function animate() {
         requestAnimationFrame(animate);
 
-        // Movement Logic
+        // Move
         if (keys['w'] || keys['arrowup']) player.position.z += playerSpeed;
         if (keys['s'] || keys['arrowdown']) player.position.z -= playerSpeed;
         if (keys['a'] || keys['arrowleft']) player.position.x += playerSpeed;
         if (keys['d'] || keys['arrowright']) player.position.x -= playerSpeed;
 
-        // Camera Follow
-        const targetPos = player.position.clone();
-        targetPos.add(new THREE.Vector3(0, 6, -10)); // Higher and further back for mobile visibility
-        camera.position.lerp(targetPos, 0.1);
-        camera.lookAt(player.position);
-
-        // Dragon Animation
-        const time = Date.now() * 0.001;
-        dragonGroup.position.x = Math.sin(time) * 20;
-        dragonGroup.position.z = 20 + Math.cos(time) * 10;
-        dragonGroup.rotation.y = -time;
-
-        // Trigger Event
-        if (player.position.z > 2 && !regionDiscovered) {
-            regionDiscovered = true;
-            triggerUI();
+        // Animate Legs (Simple bobbing when moving)
+        if (keys['w'] || keys['s'] || keys['a'] || keys['d']) {
+            player.position.y = Math.abs(Math.sin(Date.now() * 0.01)) * 0.1;
         }
+
+        // Camera Follow
+        const targetPos = player.position.clone().add(new THREE.Vector3(0, 5, -8));
+        camera.position.lerp(targetPos, 0.1);
+        camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 1, 0)));
+
+        // Dragon Fly
+        const time = Date.now() * 0.001;
+        dragonGroup.position.x = Math.sin(time) * 25;
+        dragonGroup.position.z = 25 + Math.cos(time) * 15;
+        dragonGroup.rotation.y = -time;
 
         renderer.render(scene, camera);
     }
-
-    function triggerUI() {
-        const ui = document.getElementById('ui-layer');
-        const box = document.getElementById('region-box');
-        
-        ui.classList.add('visible');
-        setTimeout(() => box.classList.add('pop-in'), 100);
-        setTimeout(() => {
-            ui.classList.remove('visible');
-            box.classList.remove('pop-in');
-        }, 4000);
-    }
-
-    // Resize Handler
+    
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
