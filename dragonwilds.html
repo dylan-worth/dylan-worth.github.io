@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS Style: Forest Start</title>
+    <title>RS Style: Magic Axe Update</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Courier New', Courier, monospace; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Courier New', Courier, monospace; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         /* UI Layer */
         #ui-layer {
             position: absolute;
             top: 10px;
             left: 10px;
-            color: #ffff00; /* RS Gold Text */
+            color: #ffff00;
             text-shadow: 1px 1px #000;
             pointer-events: none;
             z-index: 10;
         }
-        #health-bar {
-            width: 150px;
-            height: 15px;
-            background: #500;
-            border: 2px solid #333;
-            margin-top: 5px;
-        }
-        #health-fill { width: 100%; height: 100%; background: #0f0; }
 
-        /* Mobile Joystick UI */
-        #joystick-zone {
+        /* Controls Container */
+        #controls-container {
             position: absolute;
             bottom: 20px;
             left: 20px;
+            right: 20px;
+            height: 150px;
+            pointer-events: none; /* Let clicks pass through empty space */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        /* Joystick */
+        #joystick-zone {
             width: 120px;
             height: 120px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.4);
-            z-index: 20;
-            touch-action: none; /* Important for preventing scrolling */
+            pointer-events: auto;
+            position: relative;
         }
         #joystick-nipple {
             position: absolute;
@@ -48,21 +50,54 @@
             background: rgba(255, 255, 255, 0.6);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            pointer-events: none; /* Let touches pass through to the zone */
         }
+
+        /* Action Buttons */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+            padding-bottom: 10px;
+        }
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #ccc;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            active: scale(0.9);
+            cursor: pointer;
+        }
+        #btn-axe { background: linear-gradient(135deg, #4b0082, #800080); border-color: #d8bfd8; }
+        #btn-jump { background: linear-gradient(135deg, #228b22, #32cd32); border-color: #90ee90; }
+
     </style>
 </head>
 <body>
 
 <div id="ui-layer">
-    <h3 style="margin: 0;">Lumby Forest</h3>
-    <div id="health-bar"><div id="health-fill"></div></div>
+    <h3 style="margin: 0;">Magic Woods</h3>
+    <div>Tap "Throw Axe" to cut trees</div>
 </div>
 
-<div id="joystick-zone">
-    <div id="joystick-nipple"></div>
+<div id="controls-container">
+    <div id="joystick-zone">
+        <div id="joystick-nipple"></div>
+    </div>
+    
+    <div class="btn-group">
+        <div id="btn-axe" class="action-btn">THROW<br>AXE</div>
+        <div id="btn-jump" class="action-btn">JUMP</div>
+    </div>
 </div>
-
 
 <script type="importmap">
   {
@@ -79,229 +114,342 @@
 
     // --- 1. SETUP ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky Blue
-    scene.fog = new THREE.Fog(0x87CEEB, 30, 100); // Light distant haze
+    scene.background = new THREE.Color(0x87CEEB); 
+    scene.fog = new THREE.Fog(0x87CEEB, 20, 80);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 12, 15); // Higher angle for mobile view
+    camera.position.set(0, 15, 20);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
-    // Controls (Orbit camera)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
-    controls.enableDamping = true;
-    controls.maxPolarAngle = Math.PI / 2.1;
-    controls.minDistance = 5;
-    controls.maxDistance = 30;
+    controls.enableZoom = false; // Lock zoom for mobile feel
+    controls.maxPolarAngle = Math.PI / 2.2;
 
-    // --- 2. BEAUTIFUL FOREST ENVIRONMENT ---
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
-
-    const sunLight = new THREE.DirectionalLight(0xfff0dd, 1.5); // Warm sun
-    sunLight.position.set(50, 100, -50);
+    const sunLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
+    sunLight.position.set(30, 50, 20);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 500;
-    sunLight.shadow.camera.left = -100; sunLight.shadow.camera.right = 100;
-    sunLight.shadow.camera.top = 100; sunLight.shadow.camera.bottom = -100;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     scene.add(sunLight);
 
-    // Ground (Lush Grass)
-    const groundGeo = new THREE.PlaneGeometry(200, 200);
-    const groundMat = new THREE.MeshStandardMaterial({ 
-        color: 0x2d5e1e, // Forest Green
-        roughness: 0.8,
-        metalness: 0.1
-    }); 
-    const ground = new THREE.Mesh(groundGeo, groundMat);
+    // Ground
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(200, 200),
+        new THREE.MeshStandardMaterial({ color: 0x3a7e2c, roughness: 1 })
+    );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Forest Scenery (Procedural low-poly trees)
-    function createForest() {
-        const trunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 2, 6);
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4d3319 }); // Brown
-        const leavesGeo = new THREE.ConeGeometry(2.5, 5, 7);
-        const leavesMat = new THREE.MeshStandardMaterial({ color: 0x1e6b22 }); // Dark Green
+    // --- 2. GAME OBJECTS ---
 
-        for (let i = 0; i < 60; i++) {
-            const treeGroup = new THREE.Group();
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.y = 1;
-            trunk.castShadow = true;
-            treeGroup.add(trunk);
+    // Array to store tree objects for collision detection
+    const trees = [];
+    const projectiles = [];
 
-            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.y = 4;
-            leaves.castShadow = true;
-            treeGroup.add(leaves);
+    // Create Trees
+    const treeGeo = new THREE.ConeGeometry(2, 6, 8);
+    const trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 2, 6);
+    const treeMat = new THREE.MeshStandardMaterial({ color: 0x1e6b22 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
 
-            let x = (Math.random() - 0.5) * 180;
-            let z = (Math.random() - 0.5) * 180;
-            // Keep center relatively clear
-            if(Math.abs(x) < 10 && Math.abs(z) < 10) { x+=20; z+=20; }
+    function spawnTree(x, z) {
+        const group = new THREE.Group();
+        
+        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+        trunk.position.y = 1;
+        trunk.castShadow = true;
+        group.add(trunk);
 
-            treeGroup.position.set(x, 0, z);
-            treeGroup.scale.setScalar(Math.random() * 0.5 + 0.8);
-            scene.add(treeGroup);
+        const leaves = new THREE.Mesh(treeGeo, treeMat);
+        leaves.position.y = 4;
+        leaves.castShadow = true;
+        group.add(leaves);
+
+        group.position.set(x, 0, z);
+        
+        // Add random scale variety
+        const s = 0.8 + Math.random() * 0.5;
+        group.scale.set(s,s,s);
+        
+        // Tag it for game logic
+        group.userData = { type: 'tree', hp: 1 };
+        
+        scene.add(group);
+        trees.push(group);
+    }
+
+    // Populate Forest
+    for(let i=0; i<40; i++) {
+        const x = (Math.random() - 0.5) * 150;
+        const z = (Math.random() - 0.5) * 150;
+        if (Math.abs(x) > 5 || Math.abs(z) > 5) spawnTree(x, z);
+    }
+
+    // --- 3. ANIMATED CHARACTER ---
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    // Body Parts (Saved to variables so we can animate them)
+    const charBody = new THREE.Group();
+    
+    // Torso
+    const torsoMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1.5, 0.6),
+        new THREE.MeshStandardMaterial({ color: 0x336699 }) // Blue Platebody
+    );
+    torsoMesh.position.y = 2.25;
+    torsoMesh.castShadow = true;
+    charBody.add(torsoMesh);
+
+    // Head
+    const headMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.6, 0.6, 0.6),
+        new THREE.MeshStandardMaterial({ color: 0xf5cca8 })
+    );
+    headMesh.position.y = 3.3;
+    charBody.add(headMesh);
+
+    // Pivot points for limbs are important for rotation
+    function createLimb(w, h, d, color, x, y, z) {
+        const pivot = new THREE.Group();
+        pivot.position.set(x, y, z);
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(w, h, d),
+            new THREE.MeshStandardMaterial({ color: color })
+        );
+        mesh.position.y = -h / 2; // Offset geometry so pivot is at top
+        mesh.castShadow = true;
+        pivot.add(mesh);
+        return pivot;
+    }
+
+    const leftArm = createLimb(0.3, 1.2, 0.3, 0x336699, -0.7, 2.8, 0);
+    const rightArm = createLimb(0.3, 1.2, 0.3, 0x336699, 0.7, 2.8, 0);
+    const leftLeg = createLimb(0.35, 1.5, 0.4, 0x555555, -0.3, 1.5, 0);
+    const rightLeg = createLimb(0.35, 1.5, 0.4, 0x555555, 0.3, 1.5, 0);
+
+    charBody.add(leftArm);
+    charBody.add(rightArm);
+    charBody.add(leftLeg);
+    charBody.add(rightLeg);
+    
+    playerGroup.add(charBody);
+
+
+    // --- 4. GAME MECHANICS: AXE & JUMP ---
+    
+    // Throw Axe Logic
+    document.getElementById('btn-axe').addEventListener('pointerdown', (e) => {
+        e.preventDefault(); 
+        spawnAxe();
+    });
+    
+    // Jump Logic
+    let verticalVelocity = 0;
+    let isJumping = false;
+    document.getElementById('btn-jump').addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (!isJumping) {
+            verticalVelocity = 0.4;
+            isJumping = true;
         }
-    }
-    createForest();
+    });
 
+    function spawnAxe() {
+        const axeGroup = new THREE.Group();
+        
+        // Axe Handle
+        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.1), new THREE.MeshStandardMaterial({color: 0x654321}));
+        axeGroup.add(handle);
+        
+        // Axe Blade
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.1), new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 0.8, emissive: 0x00ffff, emissiveIntensity: 0.5}));
+        blade.position.set(0, 0.5, 0);
+        axeGroup.add(blade);
 
-    // --- 3. CHARACTER (Not a box anymore!) ---
-    // We build a simple low-poly humanoid entirely in code so no external files needed.
-    function createCharacter() {
-        const charGroup = new THREE.Group();
+        // Start position: slightly in front of player
+        axeGroup.position.copy(playerGroup.position);
+        axeGroup.position.y += 2.5; 
+        
+        // Direction: Player's current forward direction
+        const direction = new THREE.Vector3(0, 0, 1);
+        direction.applyQuaternion(playerGroup.quaternion);
+        
+        // Magic Trail (PointLight)
+        const light = new THREE.PointLight(0x00ffff, 1, 5);
+        axeGroup.add(light);
 
-        // Head
-        const headGeo = new THREE.SphereGeometry(0.4, 8, 8);
-        const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5cca8 }); // Peach
-        const head = new THREE.Mesh(headGeo, skinMat);
-        head.position.y = 2.6;
-        charGroup.add(head);
-
-        // Body (Torso / Armor)
-        const bodyGeo = new THREE.CylinderGeometry(0.6, 0.5, 1.2, 6);
-        const armorMat = new THREE.MeshStandardMaterial({ color: 0x336699, metalness: 0.4 }); // Blue armor
-        const body = new THREE.Mesh(bodyGeo, armorMat);
-        body.position.y = 1.6;
-        body.castShadow = true;
-        charGroup.add(body);
-
-        // Legs (Simple block for now to represent legs)
-        const legsGeo = new THREE.BoxGeometry(0.7, 1, 0.5);
-        const legsMat = new THREE.MeshStandardMaterial({ color: 0x222222 }); // Dark grey pants
-        const legs = new THREE.Mesh(legsGeo, legsMat);
-        legs.position.y = 0.5;
-        legs.castShadow = true;
-        charGroup.add(legs);
-
-        return charGroup;
+        scene.add(axeGroup);
+        
+        // Add to projectiles array
+        projectiles.push({ mesh: axeGroup, dir: direction, life: 100 });
     }
 
-    const player = createCharacter();
-    scene.add(player);
-
-
-    // --- 4. MOBILE JOYSTICK LOGIC ---
+    // --- 5. JOYSTICK LOGIC ---
     const joystickZone = document.getElementById('joystick-zone');
     const joystickNipple = document.getElementById('joystick-nipple');
-    const moveVector = new THREE.Vector2(0, 0); // Stores X and Y movement intention (-1 to 1)
+    let moveVector = new THREE.Vector2(0, 0);
     let joystickTouchId = null;
-    const maxRadius = 50; // Max distance nipple moves from center
 
-    joystickZone.addEventListener('touchstart', function(e) {
+    joystickZone.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (joystickTouchId !== null) return; // Already touching
+        if (joystickTouchId !== null) return;
         const touch = e.changedTouches[0];
         joystickTouchId = touch.identifier;
-        handleJoystickMove(touch.clientX, touch.clientY);
-    }, { passive: false });
+        updateJoystick(touch.clientX, touch.clientY);
+    });
 
-    joystickZone.addEventListener('touchmove', function(e) {
+    joystickZone.addEventListener('touchmove', (e) => {
         e.preventDefault();
         for (let i = 0; i < e.changedTouches.length; i++) {
             if (e.changedTouches[i].identifier === joystickTouchId) {
-                handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-                break;
+                updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
             }
         }
-    }, { passive: false });
-
-    ['touchend', 'touchcancel'].forEach(evt => {
-        joystickZone.addEventListener(evt, function(e) {
-             e.preventDefault();
-             for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === joystickTouchId) {
-                    resetJoystick();
-                    break;
-                }
-            }
-        });
     });
 
-    function handleJoystickMove(touchX, touchY) {
+    const resetJoy = () => { joystickTouchId = null; moveVector.set(0,0); joystickNipple.style.transform = `translate(-50%,-50%)`; };
+    joystickZone.addEventListener('touchend', resetJoy);
+    joystickZone.addEventListener('touchcancel', resetJoy);
+
+    function updateJoystick(x, y) {
         const rect = joystickZone.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
+        
+        let dx = x - centerX;
+        let dy = y - centerY;
+        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60); // Cap radius
+        const angle = Math.atan2(dy, dx);
+        
+        dx = Math.cos(angle) * dist;
+        dy = Math.sin(angle) * dist;
 
-        let deltaX = touchX - centerX;
-        let deltaY = touchY - centerY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-        // Clamp distance to maxRadius
-        if (distance > maxRadius) {
-            const ratio = maxRadius / distance;
-            deltaX *= ratio;
-            deltaY *= ratio;
-        }
-
-        // Move UI element relative to center
-        joystickNipple.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
-
-        // Normalize vector for movement (-1 to 1 range)
-        moveVector.x = deltaX / maxRadius;
-        moveVector.y = -deltaY / maxRadius; // Invert Y because screen Y is opposite 3D world Z
+        joystickNipple.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        
+        // Map to -1 to 1. In screen space, -Y is Up. 
+        moveVector.x = dx / 60; 
+        moveVector.y = dy / 60; 
     }
 
-    function resetJoystick() {
-        joystickTouchId = null;
-        moveVector.set(0, 0);
-        joystickNipple.style.transform = `translate(-50%, -50%)`;
-    }
-
-
-    // --- 5. GAME LOOP ---
-    let playerSpeed = 0.15;
-    let playerHealth = 100;
-
-    function updatePlayerInteraction() {
-        if(playerHealth <= 0) return;
-
-        // Movement based on joystick vector
-        if (moveVector.lengthSq() > 0.01) {
-             // Calculate movement direction relative to camera angle
-             const angleYCameraDirection = Math.atan2(
-                 (camera.position.x - player.position.x),
-                 (camera.position.z - player.position.z)
-             );
-             const diagonalOffset = Math.atan2(moveVector.x, moveVector.y);
-             
-             const moveAngle = angleYCameraDirection + diagonalOffset;
-             
-             player.position.x -= Math.sin(moveAngle) * playerSpeed * moveVector.length();
-             player.position.z -= Math.cos(moveAngle) * playerSpeed * moveVector.length();
-
-             // Rotate character to face movement direction
-             player.rotation.y = moveAngle + Math.PI;
-        }
-
-        // Simple Camera Follow
-        camera.position.x += (player.position.x - camera.position.x) * 0.08;
-        camera.position.z += (player.position.z + 15 - camera.position.z) * 0.08;
-        controls.target.copy(player.position);
-        controls.target.y = 1; // Look at body height
-        controls.update();
-    }
-
+    // --- 6. GAME LOOP ---
+    const clock = new THREE.Clock();
+    
     function animate() {
         requestAnimationFrame(animate);
-        updatePlayerInteraction();
+        const delta = clock.getDelta();
+        const time = clock.getElapsedTime();
+
+        // 1. Player Movement & Animation
+        if (moveVector.lengthSq() > 0.01) {
+            // Calculate direction relative to camera
+            // Camera looks at player. We want "Up" on joystick to move AWAY from camera.
+            
+            // Get camera Y rotation
+            const camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            const camAngle = Math.atan2(camDir.x, camDir.z); // Angle in radians
+
+            // Joystick Angle (Inverted Y because screen Y+ is Down)
+            // Screen X+ is Right, Screen Y+ is Down. 
+            // 3D X+ is Right, 3D Z+ is Back (Toward Camera).
+            const joyAngle = Math.atan2(moveVector.x, moveVector.y);
+            
+            // Combine angles.
+            const moveDirection = joyAngle + camAngle; 
+
+            // Move Player
+            const speed = 10 * delta;
+            playerGroup.position.x += Math.sin(moveDirection) * speed;
+            playerGroup.position.z += Math.cos(moveDirection) * speed;
+            
+            // Rotate Player to face movement
+            playerGroup.rotation.y = moveDirection;
+
+            // Run Animation (Sine wave on limbs)
+            const freq = 15;
+            leftLeg.rotation.x = Math.sin(time * freq) * 0.8;
+            rightLeg.rotation.x = Math.sin(time * freq + Math.PI) * 0.8;
+            leftArm.rotation.x = Math.sin(time * freq + Math.PI) * 0.8;
+            rightArm.rotation.x = Math.sin(time * freq) * 0.8;
+
+        } else {
+            // Idle Pose
+            leftLeg.rotation.x = 0;
+            rightLeg.rotation.x = 0;
+            leftArm.rotation.x = 0;
+            rightArm.rotation.x = 0;
+        }
+
+        // 2. Jump Physics
+        if (isJumping || playerGroup.position.y > 0) {
+            playerGroup.position.y += verticalVelocity;
+            verticalVelocity -= 0.02; // Gravity
+
+            if (playerGroup.position.y <= 0) {
+                playerGroup.position.y = 0;
+                isJumping = false;
+                verticalVelocity = 0;
+            }
+        }
+
+        // 3. Projectiles & Tree Cutting
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            const p = projectiles[i];
+            p.mesh.position.add(p.dir.clone().multiplyScalar(0.5)); // Speed
+            p.mesh.rotation.z -= 0.5; // Spin animation
+            p.life--;
+
+            let hit = false;
+            // Collision Check
+            for (let j = trees.length - 1; j >= 0; j--) {
+                if (trees[j].userData.hp > 0 && p.mesh.position.distanceTo(trees[j].position) < 3) {
+                    // Tree Hit!
+                    trees[j].userData.hp = 0;
+                    
+                    // Fall animation (using GSAP style manual tween)
+                    const tree = trees[j];
+                    const fallInterval = setInterval(() => {
+                         tree.rotation.x += 0.05;
+                         tree.position.y -= 0.1;
+                         tree.scale.multiplyScalar(0.95);
+                         if(tree.scale.x < 0.1) {
+                             clearInterval(fallInterval);
+                             scene.remove(tree);
+                         }
+                    }, 16);
+
+                    hit = true;
+                    break;
+                }
+            }
+
+            if (p.life <= 0 || hit) {
+                scene.remove(p.mesh);
+                projectiles.splice(i, 1);
+            }
+        }
+
+        // 4. Camera Follow
+        const targetX = playerGroup.position.x;
+        const targetZ = playerGroup.position.z + 15; // Camera sits behind
+        camera.position.x += (targetX - camera.position.x) * 0.1;
+        camera.position.z += (targetZ - camera.position.z) * 0.1;
+        camera.lookAt(playerGroup.position.x, playerGroup.position.y + 2, playerGroup.position.z);
+
         renderer.render(scene, camera);
     }
 
-    // Handle Resize
+    // Resize
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
