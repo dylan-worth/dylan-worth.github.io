@@ -2,110 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Wilds: RPG Edition</title>
+    <title>Dragon Wilds Recreated</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Verdana', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; font-family: 'Cinzel', serif; }
+        canvas { display: block; }
+
+        /* UI Overlay for "Region Discovered" */
+        #ui-layer {
+            position: absolute;
+            top: 20%;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
         
-        /* UI LAYOUT */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
-        /* MINIMAP */
-        #minimap-container {
-            position: absolute; top: 10px; right: 10px;
-            width: 110px; height: 110px;
-            background: rgba(0,0,0,0.6); border: 2px solid #5d5d5d; border-radius: 50%; overflow: hidden; pointer-events: auto;
+        #region-box {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px 40px;
+            border-top: 2px solid #d4af37; /* Gold border */
+            border-bottom: 2px solid #d4af37;
+            color: white;
+            transform: scale(0.8);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* STATS */
-        #stats-panel { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .stat-bar { width: 140px; height: 18px; background: #333; border: 1px solid #000; position: relative; border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.2s; }
-        #hp-fill { background: #d63031; width: 100%; }
-        #mana-fill { background: #0984e3; width: 100%; } /* Mana/Run Energy */
-        .stat-text { position: absolute; top: 0; left: 5px; font-size: 11px; color: #fff; text-shadow: 1px 1px 0 #000; line-height: 18px; font-weight: bold; }
-
-        /* COIN POUCH */
-        #coin-pouch {
-            position: absolute; top: 60px; left: 10px;
-            color: #f1c40f; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 0 #000;
-            display: flex; align-items: center; gap: 5px;
-        }
-        #coin-pouch::before { content: '💰'; }
-
-        /* INVENTORY */
-        #inventory-container {
-            position: absolute; bottom: 90px; right: 10px;
-            width: 190px; background: #3c3c3c; border: 2px solid #5e4c35;
-            display: none; 
-            grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 5px;
-            pointer-events: auto; border-radius: 4px;
-        }
-        .inv-slot {
-            width: 40px; height: 36px; background: #2b2b2b; border: 1px inset #555;
-            display: flex; justify-content: center; align-items: center; position: relative;
-        }
-        .inv-item { width: 28px; height: 28px; border-radius: 2px; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-size: 18px; line-height: 28px; text-align: center; cursor: pointer; }
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; color: #ddd; }
+        h2 { margin: 5px 0 0 0; font-size: 3rem; color: #d4af37; text-shadow: 0 0 10px #d4af37; }
         
-        /* Item Styles (Emoji/Color based) */
-        .item-bones { background: #eee; } .item-bones::after { content: '🦴'; }
-        .item-hide { background: #2ecc71; border: 1px solid #27ae60; } 
-        .item-log { background: #654321; }
-        .item-ore { background: #7f8c8d; border: 1px solid #95a5a6; }
+        .visible { opacity: 1 !important; }
+        .pop-in { transform: scale(1) !important; }
 
-        #bag-btn {
-            position: absolute; bottom: 20px; right: 20px;
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #5d4037; border: 2px solid #a1887f;
-            display: flex; justify-content: center; align-items: center;
-            color: white; font-size: 24px; pointer-events: auto; cursor: pointer; box-shadow: 0 4px 5px rgba(0,0,0,0.5);
-        }
-
-        /* TEXT POPS */
-        .float-text {
-            position: absolute; font-weight: bold; font-size: 14px;
-            text-shadow: 1px 1px 0 #000; pointer-events: none;
-            animation: floatUp 1.2s forwards; white-space: nowrap;
-        }
-        .dmg-text { color: #e74c3c; font-size: 18px; }
-        .xp-text { color: #f1c40f; }
-        @keyframes floatUp { 0% {transform: translateY(0); opacity: 1;} 100% {transform: translateY(-40px); opacity: 0;} }
-
-        /* JOYSTICK */
-        #joystick-zone {
-            position: absolute; bottom: 20px; left: 20px;
-            width: 120px; height: 120px;
-            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
-            pointer-events: auto;
-        }
-        #joystick-nipple {
-            position: absolute; top: 50%; left: 50%;
-            width: 50px; height: 50px; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%);
-        }
-
-        /* TARGET INFO */
-        #target-info {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 15px; border: 1px solid #e74c3c;
-            color: white; font-weight: bold; display: none;
+        /* Controls hint */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-family: sans-serif;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="ui-layer">
-    <div id="stats-panel">
-        <div class="stat-bar"><div id="hp-fill" class="bar-fill"></div><span class="stat-text">HP</span></div>
-        <div class="stat-bar"><div id="mana-fill" class="bar-fill"></div><span class="stat-text">MANA</span></div>
+    <div id="region-box">
+        <h1>Region Discovered</h1>
+        <h2>TEMPLE WOODS</h2>
     </div>
-    <div id="coin-pouch">0</div>
-    <div id="target-info">Target: Green Dragon</div>
-    <div id="minimap-container"><canvas id="minimap-canvas" width="110" height="110"></canvas></div>
-    <div id="inventory-container"></div>
-    <div id="bag-btn">🎒</div>
 </div>
 
-<div id="joystick-zone"><div id="joystick-nipple"></div></div>
+<div id="controls">WASD / Arrows to Move</div>
 
 <script type="importmap">
   {
@@ -118,477 +71,165 @@
 
 <script type="module">
     import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // --- 1. CORE SETUP ---
+    // --- 1. SETUP ---
     const scene = new THREE.Scene();
-    const skyColor = new THREE.Color(0x87CEEB);
-    const nightColor = new THREE.Color(0x0a0a1a);
-    scene.background = skyColor.clone();
-    scene.fog = new THREE.Fog(scene.background, 20, 80);
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    scene.fog = new THREE.Fog(0x87CEEB, 10, 50);  // Distance fog for depth
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 18, 22);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false; controls.minDistance = 5; controls.maxDistance = 35; controls.maxPolarAngle = Math.PI/2.1;
+    // --- 2. LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambient);
-    const sun = new THREE.DirectionalLight(0xfff0dd, 1.2);
-    sun.position.set(50, 80, 50);
-    sun.castShadow = true;
-    sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
-    scene.add(sun);
+    const dirLight = new THREE.DirectionalLight(0xffdfba, 1.5); // Warm sunlight
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.bottom = -20; // Increase shadow area
+    dirLight.shadow.camera.top = 20;
+    dirLight.shadow.camera.left = -20;
+    dirLight.shadow.camera.right = 20;
+    scene.add(dirLight);
 
-    // Ground & Path
-    const groundGroup = new THREE.Group();
-    const grassMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 1 });
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), grassMat);
-    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
-    groundGroup.add(ground);
+    // --- 3. ENVIRONMENT ---
+    // Ground (The Woods)
+    const planeGeo = new THREE.PlaneGeometry(200, 200);
+    const planeMat = new THREE.MeshStandardMaterial({ color: 0x55aa55 });
+    const ground = new THREE.Mesh(planeGeo, planeMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // The "Castle" Archway (represented by simple blocks)
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const wallGeo = new THREE.BoxGeometry(4, 6, 1);
     
-    // Dirt Path (Town Center to Wilds)
-    const pathMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
-    const path = new THREE.Mesh(new THREE.PlaneGeometry(10, 80), pathMat);
-    path.rotation.x = -Math.PI / 2; path.position.set(0, 0.01, -30); path.receiveShadow = true;
-    groundGroup.add(path);
-    scene.add(groundGroup);
+    const leftWall = new THREE.Mesh(wallGeo, wallMat);
+    leftWall.position.set(-3, 3, 0);
+    leftWall.castShadow = true;
+    scene.add(leftWall);
 
+    const rightWall = new THREE.Mesh(wallGeo, wallMat);
+    rightWall.position.set(3, 3, 0);
+    rightWall.castShadow = true;
+    scene.add(rightWall);
 
-    // --- 2. TOWN GENERATION (House Hiding & Furniture) ---
-    const buildings = []; // Store houses to check player position
-    const houseMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6 }); // Stone walls
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x8e44ad }); // Purple/Slate roof
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+    const topWall = new THREE.Mesh(new THREE.BoxGeometry(10, 2, 1), wallMat);
+    topWall.position.set(0, 7, 0);
+    topWall.castShadow = true;
+    scene.add(topWall);
 
-    function createHouse(x, z, w, d) {
-        const houseGroup = new THREE.Group();
-        houseGroup.position.set(x, 0, z);
+    // Roof/Tunnel to make it dark inside
+    const tunnelGeo = new THREE.BoxGeometry(10, 8, 10);
+    const tunnel = new THREE.Mesh(tunnelGeo, new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide }));
+    tunnel.position.set(0, 4, -5.5);
+    tunnel.receiveShadow = true;
+    scene.add(tunnel);
 
-        // Walls (constructed so we can walk in)
-        const h = 4;
-        const walls = new THREE.Group();
-        // Back
-        const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.5), houseMat); b.position.set(0, h/2, -d/2); b.castShadow=true; walls.add(b);
-        // Sides
-        const l = new THREE.Mesh(new THREE.BoxGeometry(0.5, h, d), houseMat); l.position.set(-w/2, h/2, 0); l.castShadow=true; walls.add(l);
-        const r = new THREE.Mesh(new THREE.BoxGeometry(0.5, h, d), houseMat); r.position.set(w/2, h/2, 0); r.castShadow=true; walls.add(r);
-        // Front (Doorway)
-        const f1 = new THREE.Mesh(new THREE.BoxGeometry(w/2-1, h, 0.5), houseMat); f1.position.set(-(w/4)-0.5, h/2, d/2); f1.castShadow=true; walls.add(f1);
-        const f2 = new THREE.Mesh(new THREE.BoxGeometry(w/2-1, h, 0.5), houseMat); f2.position.set((w/4)+0.5, h/2, d/2); f2.castShadow=true; walls.add(f2);
-        const top = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), houseMat); top.position.set(0, h-0.5, d/2); top.castShadow=true; walls.add(top);
+    // Trees (Simple Cones)
+    function addTree(x, z) {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 2), new THREE.MeshStandardMaterial({color: 0x8B4513}));
+        trunk.position.set(x, 1, z);
+        trunk.castShadow = true;
         
-        houseGroup.add(walls);
-
-        // Furniture
-        const furn = new THREE.Group();
-        // Bed
-        const bed = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 2.5), new THREE.MeshStandardMaterial({color:0xc0392b}));
-        bed.position.set(-w/2+1.5, 0.25, -d/2+2); furn.add(bed);
-        const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.2, 0.6), new THREE.MeshStandardMaterial({color:0xffffff}));
-        pillow.position.set(-w/2+1.5, 0.5, -d/2+1); furn.add(pillow);
-        // Table
-        const tTop = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.1, 8), woodMat); tTop.position.set(w/2-1.5, 1, 0);
-        const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1), woodMat); tLeg.position.set(w/2-1.5, 0.5, 0);
-        furn.add(tTop); furn.add(tLeg);
-        houseGroup.add(furn);
-
-        // Roof (Seperate Mesh for Hiding)
-        const roofHeight = 2.5;
-        const roofGeo = new THREE.ConeGeometry(Math.max(w,d)*0.8, roofHeight, 4);
-        const roof = new THREE.Mesh(roofGeo, roofMat);
-        roof.position.y = h + roofHeight/2;
-        roof.rotation.y = Math.PI/4;
-        houseGroup.add(roof);
-
-        scene.add(houseGroup);
+        const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 6, 8), new THREE.MeshStandardMaterial({color: 0x228b22}));
+        leaves.position.set(x, 4, z);
+        leaves.castShadow = true;
         
-        // Save for collision logic
-        buildings.push({ 
-            bounds: { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2 }, 
-            roof: roof 
-        });
+        scene.add(trunk);
+        scene.add(leaves);
+    }
+    // Add some random trees outside
+    for(let i=0; i<20; i++) {
+        addTree(-20 + Math.random()*40, 10 + Math.random()*40);
     }
 
-    // Spawn Town
-    createHouse(-8, 0, 6, 8); // Left House
-    createHouse(8, 0, 6, 8);  // Right House
-    
-    // Shop Stall
-    const shopGroup = new THREE.Group();
-    shopGroup.position.set(0, 0, 5);
-    const sTable = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), woodMat); sTable.position.y=0.5;
-    const sPole1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3, 0.1), woodMat); sPole1.position.set(-1.8, 1.5, 0.8);
-    const sPole2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3, 0.1), woodMat); sPole2.position.set(1.8, 1.5, 0.8);
-    const sCanopy = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.2, 2.2), new THREE.MeshStandardMaterial({color: 0xe74c3c})); sCanopy.position.y=3;
-    shopGroup.add(sTable, sPole1, sPole2, sCanopy);
-    shopGroup.userData = { type: 'shop' };
-    scene.add(shopGroup);
-
-    // Furnace (With GLOWING Light)
-    const furnaceGroup = new THREE.Group();
-    furnaceGroup.position.set(-12, 0, -10);
-    const fMesh = new THREE.Mesh(new THREE.BoxGeometry(3,3,3), new THREE.MeshStandardMaterial({color:0x444})); fMesh.position.y=1.5; fMesh.castShadow=true;
-    furnaceGroup.add(fMesh);
-    // THE RED LIGHT
-    const fLight = new THREE.PointLight(0xff4500, 5, 15);
-    fLight.position.set(0, 2, 1);
-    furnaceGroup.add(fLight);
-    furnaceGroup.userData = { type: 'furnace' };
-    scene.add(furnaceGroup);
-
-    // --- 3. MOBS (Dragons, NPCs) ---
-    const mobs = [];
-    const interactables = [shopGroup, furnaceGroup];
-
-    function createMob(type, x, z) {
-        const group = new THREE.Group();
-        group.position.set(x, 0, z);
-        let mesh;
-
-        if (type === 'dragon') {
-            const mat = new THREE.MeshStandardMaterial({ color: 0x2ecc71 });
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 3), mat); body.position.y=1.5;
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1.5), mat); head.position.set(0, 2.5, 2);
-            const lWing = new THREE.Mesh(new THREE.BoxGeometry(3, 0.1, 1.5), mat); lWing.position.set(-2, 2.5, 0);
-            const rWing = new THREE.Mesh(new THREE.BoxGeometry(3, 0.1, 1.5), mat); rWing.position.set(2, 2.5, 0);
-            group.add(body, head, lWing, rWing);
-            group.userData = { type: 'dragon', hp: 50, maxHp: 50, state: 'patrol', target: null };
-            
-            // HP Bar
-            const barBg = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.2), new THREE.MeshBasicMaterial({color:0x000}));
-            barBg.position.set(0, 4, 0);
-            const barFg = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.2), new THREE.MeshBasicMaterial({color:0x00ff00}));
-            barFg.position.set(0, 4, 0.01);
-            group.add(barBg, barFg);
-            group.barFg = barFg; // Ref for updating
-        } else if (type === 'villager') {
-            const mat = new THREE.MeshStandardMaterial({ color: 0xf1c40f }); // Yellow Shirt
-            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), mat); body.position.y=0.75;
-            const head = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshStandardMaterial({color:0xffccaa})); head.position.y=1.7;
-            group.add(body, head);
-            group.userData = { type: 'npc', name: 'Villager' };
-        }
-        
-        scene.add(group);
-        mobs.push(group);
-        interactables.push(group.children[0]); // Raycast hit body
-        return group;
-    }
-
-    // Spawn Mobs
-    createMob('villager', 2, 2);
-    createMob('villager', -2, 6);
-    for(let i=0; i<5; i++) createMob('dragon', (Math.random()-0.5)*100, -30 - Math.random()*50);
-
-    // --- 4. PLAYER & LOGIC ---
-    const player = new THREE.Group();
+    // --- 4. PLAYER ---
+    const playerGeo = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
+    const playerMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 }); // Gold shirt like video
+    const player = new THREE.Mesh(playerGeo, playerMat);
+    player.position.set(0, 1, -8); // Start inside the tunnel
+    player.castShadow = true;
     scene.add(player);
-    
-    // Player Model
-    const pBody = new THREE.Group();
-    const armorMat = new THREE.MeshStandardMaterial({ color: 0x336699 });
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), armorMat); torso.position.y=1.8; pBody.add(torso);
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color:0xf5cca8})); head.position.y=2.6; pBody.add(head);
-    // Limbs (Simple)
-    const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1, 0.25), armorMat); lArm.position.set(-0.5, 1.8, 0); pBody.add(lArm);
-    const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1, 0.25), armorMat); rArm.position.set(0.5, 1.8, 0); pBody.add(rArm);
-    player.add(pBody);
 
-    // Target Marker
-    const targetRing = new THREE.Mesh(new THREE.RingGeometry(1, 1.2, 16), new THREE.MeshBasicMaterial({color:0xe74c3c, side:THREE.DoubleSide}));
-    targetRing.rotation.x = -Math.PI/2; targetRing.visible = false;
-    scene.add(targetRing);
+    // --- 5. DRAGON (Simplified) ---
+    const dragonGroup = new THREE.Group();
+    // Body
+    const dBody = new THREE.Mesh(new THREE.ConeGeometry(0.5, 3, 4), new THREE.MeshStandardMaterial({color: 0xff0000}));
+    dBody.rotation.x = Math.PI / 2;
+    // Wings
+    const dWing = new THREE.Mesh(new THREE.BoxGeometry(4, 0.1, 1), new THREE.MeshStandardMaterial({color: 0xaa0000}));
+    dragonGroup.add(dBody, dWing);
+    dragonGroup.position.set(0, 15, 20); // High up in the sky
+    scene.add(dragonGroup);
 
-    // Game State
-    let hp = 100;
-    let mana = 100;
-    let coins = 0;
-    let currentTarget = null;
-    let inventory = [];
-    const projectiles = [];
-    const particles = [];
+    // --- 6. LOGIC & CONTROLS ---
+    const keys = { w: false, a: false, s: false, d: false };
+    window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true); // Using 'we' implies group effort!
+    window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
 
-    // --- 5. INTERACTION & SPELLS ---
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    window.addEventListener('pointerdown', e => {
-        if(e.target.closest('#ui-layer') || e.target.closest('#joystick-zone')) return;
-        mouse.x = (e.clientX/window.innerWidth)*2-1;
-        mouse.y = -(e.clientY/window.innerHeight)*2+1;
-        raycaster.setFromCamera(mouse, camera);
-        
-        // Check Mobs first (Combat)
-        const hitMobs = raycaster.intersectObjects(mobs.map(m=>m.children).flat());
-        if(hitMobs.length>0) {
-            const mobGroup = hitMobs[0].object.parent;
-            if(mobGroup.userData.type === 'dragon') {
-                targetEnemy(mobGroup);
-                castLightning(mobGroup);
-            }
-            return;
-        }
-
-        // Check World Objs
-        const hitWorld = raycaster.intersectObjects(interactables.map(i=> i.type==='Group'?i.children:i).flat());
-        if(hitWorld.length>0) {
-            let obj = hitWorld[0].object;
-            while(obj.parent && !obj.userData.type) obj = obj.parent; // Find root
-            if(obj.userData.type === 'shop') sellAll();
-        }
-    });
-
-    function targetEnemy(mob) {
-        currentTarget = mob;
-        targetRing.visible = true;
-        document.getElementById('target-info').style.display = 'block';
-    }
-
-    function castLightning(target) {
-        if(mana < 10) { spawnText(player.position, "No Mana!", "#aaa"); return; }
-        mana -= 10;
-        
-        // 1. Visual: Jagged Line
-        const pts = [];
-        const start = player.position.clone().add(new THREE.Vector3(0,2,0));
-        const end = target.position.clone().add(new THREE.Vector3(0,1.5,0));
-        let curr = start.clone();
-        const dist = start.distanceTo(end);
-        const steps = 10;
-        
-        for(let i=0; i<=steps; i++) {
-            pts.push(curr.clone());
-            const alpha = i/steps;
-            curr.lerp(end, 1/steps);
-            if(i<steps) {
-                curr.x += (Math.random()-0.5)*1.5;
-                curr.y += (Math.random()-0.5)*1.5;
-                curr.z += (Math.random()-0.5)*1.5;
-            }
-        }
-        
-        const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 3 });
-        const line = new THREE.Line(geo, mat);
-        scene.add(line);
-        setTimeout(()=>scene.remove(line), 150); // Flash
-
-        // 2. Damage Logic
-        const dmg = Math.floor(Math.random()*8) + 5;
-        target.userData.hp -= dmg;
-        spawnText(target.position, `-${dmg}`, "#e74c3c");
-        spawnText(player.position, "+12 Magic XP", "#3498db");
-
-        // Update HP Bar
-        const pct = Math.max(0, target.userData.hp / target.userData.maxHp);
-        target.barFg.scale.x = pct;
-
-        // Death
-        if(target.userData.hp <= 0) killMob(target);
-    }
-
-    function killMob(mob) {
-        spawnText(mob.position, "Dead!", "#e74c3c");
-        // Drop Loot
-        lootDrop('bones', mob.position);
-        lootDrop('hide', mob.position);
-        // Reset Mob
-        mob.position.y = -100; // Hide
-        targetRing.visible = false;
-        currentTarget = null;
-        document.getElementById('target-info').style.display = 'none';
-        
-        // Respawn Timer
-        setTimeout(() => {
-            mob.userData.hp = mob.userData.maxHp;
-            mob.barFg.scale.x = 1;
-            mob.position.set((Math.random()-0.5)*100, 0, -30-Math.random()*50);
-        }, 8000);
-    }
-
-    // --- 6. LOOT & INVENTORY ---
-    function lootDrop(type, pos) {
-        // Visual drop
-        spawnText(pos, type === 'bones' ? "Bones" : "Green Hide", "#fff");
-        if(inventory.length < 20) inventory.push(type);
-        updateInv();
-    }
-
-    function updateInv() {
-        const c = document.getElementById('inventory-container');
-        c.innerHTML = '';
-        inventory.forEach((item, idx) => {
-            const d = document.createElement('div');
-            d.className = `inv-slot`;
-            d.innerHTML = `<div class="inv-item item-${item}"></div>`;
-            d.onclick = () => useItem(idx);
-            c.appendChild(d);
-        });
-        document.getElementById('bag-btn').onclick = () => {
-            c.style.display = c.style.display==='grid'?'none':'grid';
-        };
-    }
-
-    function useItem(idx) {
-        const item = inventory[idx];
-        if(item === 'bones') {
-            inventory.splice(idx, 1);
-            spawnText(player.position, "+4.5 Prayer XP", "#f1c40f");
-            // Golden particles
-            for(let i=0;i<10;i++) spawnParticle(player.position, 0xffd700);
-        }
-        updateInv();
-    }
-
-    function sellAll() {
-        let val = 0;
-        inventory = inventory.filter(i => {
-            if(i==='hide') { val+=50; return false; }
-            if(i==='bones') { val+=10; return false; }
-            return true;
-        });
-        if(val > 0) {
-            coins += val;
-            spawnText(player.position, `Sold for ${val} gp`, "#f1c40f");
-            document.getElementById('coin-pouch').innerText = coins;
-            updateInv();
-        } else {
-            spawnText(player.position, "Nothing to sell!", "#fff");
-        }
-    }
-
-    // --- 7. UTILS (Text, Particles) ---
-    function spawnText(pos, msg, color) {
-        const div = document.createElement('div');
-        div.className = 'float-text'; div.textContent = msg; div.style.color = color;
-        document.body.appendChild(div);
-        const v = pos.clone().add(new THREE.Vector3(0,2,0)).project(camera);
-        const x = (v.x*.5+.5)*window.innerWidth;
-        const y = (-(v.y*.5)+.5)*window.innerHeight;
-        div.style.left=x+'px'; div.style.top=y+'px';
-        setTimeout(()=>div.remove(), 1200);
-    }
-
-    function spawnParticle(pos, col) {
-        const m = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshBasicMaterial({color:col}));
-        m.position.copy(pos).add(new THREE.Vector3(0,1,0));
-        scene.add(m);
-        particles.push({mesh:m, vel:new THREE.Vector3((Math.random()-.5)*0.2, 0.2, (Math.random()-.5)*0.2), life:40});
-    }
-
-    // --- 8. MOVEMENT & LOOP ---
-    const joyZone = document.getElementById('joystick-zone');
-    const joyNip = document.getElementById('joystick-nipple');
-    const moveVec = new THREE.Vector2(0,0);
-    let joyId = null;
-
-    joyZone.addEventListener('touchstart', e=>{ e.preventDefault(); if(joyId!==null)return; joyId=e.changedTouches[0].identifier; handleJoy(e.changedTouches[0]); });
-    joyZone.addEventListener('touchmove', e=>{ e.preventDefault(); for(let t of e.changedTouches) if(t.identifier===joyId) handleJoy(t); });
-    const endJoy=()=>{ joyId=null; moveVec.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
-    joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
-
-    function handleJoy(t) {
-        const r=joyZone.getBoundingClientRect(); const cx=r.left+r.width/2; const cy=r.top+r.height/2;
-        let dx=t.clientX-cx, dy=t.clientY-cy; const d=Math.min(Math.sqrt(dx*dx+dy*dy), 50);
-        const a=Math.atan2(dy,dx); dx=Math.cos(a)*d; dy=Math.sin(a)*d;
-        joyNip.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        moveVec.x=dx/50; moveVec.y=dy/50;
-    }
-
-    // Main Loop
-    const clock = new THREE.Clock();
-    let timeOfDay = 0;
+    let regionDiscovered = false;
+    const playerSpeed = 0.1;
+    const cameraOffset = new THREE.Vector3(0, 3, -5); // Behind the player
 
     function animate() {
         requestAnimationFrame(animate);
-        const dt = clock.getDelta();
-        const time = clock.getElapsedTime();
 
-        // 1. Day/Night
-        timeOfDay += dt*0.05;
-        const intensity = Math.sin(timeOfDay)*0.5 + 0.5;
-        scene.background.lerpColors(nightColor, skyColor, intensity);
-        sun.intensity = intensity;
+        // Player Movement
+        if (keys['w'] || keys['arrowup']) player.position.z += playerSpeed;
+        if (keys['s'] || keys['arrowdown']) player.position.z -= playerSpeed;
+        if (keys['a'] || keys['arrowleft']) player.position.x += playerSpeed;
+        if (keys['d'] || keys['arrowright']) player.position.x -= playerSpeed;
 
-        // 2. Regen
-        if(mana < 100) mana += dt * 5;
-        document.getElementById('hp-fill').style.width = hp + '%';
-        document.getElementById('mana-fill').style.width = mana + '%';
+        // Camera Follow
+        const targetPos = player.position.clone();
+        targetPos.add(new THREE.Vector3(0, 5, -8)); // Offset camera
+        camera.position.lerp(targetPos, 0.1); // Smooth follow
+        camera.lookAt(player.position);
 
-        // 3. Player Move
-        if(moveVec.lengthSq() > 0.01) {
-            const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir); camDir.y=0; camDir.normalize();
-            const camRight = new THREE.Vector3().crossVectors(camDir, new THREE.Object3D().up).normalize();
-            const m = new THREE.Vector3().addScaledVector(camDir, -moveVec.y).addScaledVector(camRight, moveVec.x);
-            if(m.lengthSq()>0) {
-                m.normalize(); player.position.add(m.multiplyScalar(10*dt));
-                player.children[0].rotation.y = Math.atan2(m.x, m.z);
-            }
+        // Dragon Animation (Circle around)
+        const time = Date.now() * 0.001;
+        dragonGroup.position.x = Math.sin(time) * 20;
+        dragonGroup.position.z = 20 + Math.cos(time) * 10;
+        dragonGroup.rotation.y = -time; // Spin
+
+        // Trigger Event: Exiting the Castle (Z > 0)
+        if (player.position.z > 2 && !regionDiscovered) {
+            regionDiscovered = true;
+            triggerUI();
         }
 
-        // 4. Roof Culling (See Inside)
-        buildings.forEach(b => {
-            const p = player.position;
-            const inside = (p.x > b.bounds.xMin && p.x < b.bounds.xMax && p.z > b.bounds.zMin && p.z < b.bounds.zMax);
-            b.roof.visible = !inside;
-        });
-
-        // 5. Target Ring Follow
-        if(currentTarget) {
-            targetRing.position.copy(currentTarget.position).add(new THREE.Vector3(0,0.1,0));
-            // Dragon AI (Simple Chase)
-            if(currentTarget.userData.hp > 0) {
-                const dist = player.position.distanceTo(currentTarget.position);
-                if(dist < 15 && dist > 2) {
-                    const dir = new THREE.Vector3().subVectors(player.position, currentTarget.position).normalize();
-                    currentTarget.position.add(dir.multiplyScalar(4*dt));
-                    currentTarget.lookAt(player.position);
-                } else if (dist <= 2) {
-                    // Attack Player
-                    if(Math.random() < 0.05) {
-                        hp -= 5;
-                        spawnText(player.position, "-5", "red");
-                        if(hp <= 0) { 
-                            hp=100; player.position.set(0,0,0); spawnText(player.position, "Respawned!", "white"); 
-                        }
-                    }
-                }
-            }
-        }
-
-        // 6. Particles
-        for(let i=particles.length-1; i>=0; i--) {
-            particles[i].mesh.position.add(particles[i].vel);
-            particles[i].life--;
-            if(particles[i].life<=0) { scene.remove(particles[i].mesh); particles.splice(i,1); }
-        }
-
-        // Minimap
-        const ctx = document.getElementById('minimap-canvas').getContext('2d');
-        ctx.fillStyle='#000'; ctx.fillRect(0,0,110,110);
-        // Player
-        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(55,55,3,0,Math.PI*2); ctx.fill();
-        const s = 1.5;
-        const drawDot = (obj, col) => {
-            const dx=(obj.position.x-player.position.x)*s; const dz=(obj.position.z-player.position.z)*s;
-            if(dx*dx+dz*dz<2500) { ctx.fillStyle=col; ctx.beginPath(); ctx.arc(55+dx, 55+dz, 2,0,Math.PI*2); ctx.fill(); }
-        };
-        mobs.forEach(m => drawDot(m, m.userData.type==='dragon'?'#e74c3c':'#f1c40f'));
-        
-        controls.target.copy(player.position); controls.target.y=1; controls.update();
         renderer.render(scene, camera);
     }
 
-    window.addEventListener('resize', ()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
+    function triggerUI() {
+        const ui = document.getElementById('ui-layer');
+        const box = document.getElementById('region-box');
+        
+        ui.classList.add('visible');
+        setTimeout(() => {
+            box.classList.add('pop-in');
+        }, 100);
+
+        // Hide after a few seconds
+        setTimeout(() => {
+            ui.classList.remove('visible');
+            box.classList.remove('pop-in');
+        }, 4000);
+    }
+
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
     animate();
 </script>
 </body>
