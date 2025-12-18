@@ -7,15 +7,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <script src="99nightsui.js"></script>
-
-    <style>
+    <script src="roblox-cam.js"></script> <style>
         body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         #game-container { position: relative; width: 100%; height: 100vh; }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
         
         /* UI LAYOUT */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        #touch-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+        #touch-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; } /* Camera touches here */
 
         /* HUD */
         .hud-top { position: absolute; top: 10px; width: 100%; text-align: center; color: white; text-shadow: 1px 1px 2px black; pointer-events: none; }
@@ -23,7 +22,7 @@
         #xp-bar-fill { height: 100%; width: 0%; background: #00b06f; transition: width 0.2s; }
 
         /* MINIMAP */
-        #minimap-container { position: absolute; top: 20px; right: 20px; width: 100px; height: 100px; background: rgba(0,0,0,0.5); border: 2px solid #777; border-radius: 50%; overflow: hidden; display: none; }
+        #minimap-container { position: absolute; top: 20px; right: 20px; width: 100px; height: 100px; background: rgba(0,0,0,0.5); border: 2px solid #777; border-radius: 50%; overflow: hidden; display: none; pointer-events: auto; }
         #minimap-canvas { width: 100%; height: 100%; }
 
         /* INVENTORY */
@@ -47,7 +46,7 @@
         #joystick-knob { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.8); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 
         /* CRAFT MENU */
-        #craft-menu { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px; color: white; display: none; pointer-events: auto; text-align: center; border-radius: 10px; width: 250px; z-index: 20; }
+        #craft-menu { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px; color: white; display: none; pointer-events: auto; text-align: center; border-radius: 10px; width: 250px; z-index: 30; }
         .craft-btn { background: #333; color: white; border: 1px solid #555; padding: 10px; width: 100%; margin-bottom: 5px; cursor: pointer; }
         .exit-btn { position: absolute; top: 10px; left: 10px; pointer-events: auto; background: rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; }
     </style>
@@ -91,7 +90,7 @@
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
-        scene.fog = new THREE.Fog(0x87CEEB, 5, 25); // Initial Fog
+        scene.fog = new THREE.Fog(0x87CEEB, 5, 25);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -100,10 +99,9 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.insertBefore(renderer.domElement, document.getElementById('touch-layer'));
 
-        // Camera Vars
-        let camRadius = 12; 
-        let camTheta = Math.PI; 
-        let camPhi = Math.PI / 3;
+        // *** INIT ROBLOX CAMERA ***
+        // Passing the 'touch-layer' so controls don't overlap UI buttons
+        const rCam = new RobloxCamera(camera, document.getElementById('touch-layer'));
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -125,7 +123,6 @@
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd})); head.position.y = 2.3;
         const sack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.5), new THREE.MeshStandardMaterial({color: 0x8d6e63})); sack.position.set(0, 1.5, -0.4);
         
-        // Axe Visuals
         const axePivot = new THREE.Group(); axePivot.position.set(0.6, 1.8, 0);
         const axeGroup = new THREE.Group();
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2), new THREE.MeshStandardMaterial({color: 0x5d4037})); handle.position.y = 0.6;
@@ -171,7 +168,7 @@
 
         const droppedLogs = [];
         
-        // --- TAP TO PICKUP (Raycast) ---
+        // Raycaster for Picking Up Logs
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         window.gameCheckTap = function(clientX, clientY) {
@@ -182,16 +179,13 @@
             if (intersects.length > 0) {
                 const log = intersects[0].object;
                 if (playerGroup.position.distanceTo(log.position) < 6) {
-                    // Logic to pick up
                     if (Inventory.addWood(1)) {
                         scene.remove(log);
                         const idx = droppedLogs.indexOf(log);
                         if (idx > -1) droppedLogs.splice(idx, 1);
                         UI.showToast("+1 Wood");
-                        UI.updateHUD(); // Refresh Sack UI
-                    } else {
-                        UI.showToast("Sack is Full!");
-                    }
+                        UI.updateHUD(); 
+                    } else UI.showToast("Sack is Full!");
                 } else UI.showToast("Too far!");
             }
         };
@@ -202,13 +196,10 @@
             requestAnimationFrame(animate);
             let dt = clock.getDelta();
 
-            // Sync with UI State
-            scene.fog.far = gameState.fogDist; // Fog expansion
-            
-            // Environment (Time)
+            scene.fog.far = gameState.fogDist; 
             gameState.time += dt / 180;
             if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
-            UI.updateHUD(); // Update time display
+            UI.updateHUD();
 
             const sunAngle = (gameState.time - 0.25) * Math.PI * 2;
             sunLight.position.x = Math.cos(sunAngle) * 50; sunLight.position.y = Math.sin(sunAngle) * 50;
@@ -218,32 +209,30 @@
             scene.background.setHSL(0.6, 0.5, intensity * 0.5); scene.fog.color.copy(scene.background);
             fireLight.intensity = (1 - intensity) * (2 + gameState.campLevel);
 
-            // Inputs
+            // *** CAMERA RELATIVE MOVEMENT ***
             const spd = 0.15;
-            const fX = Math.sin(camTheta); const fZ = Math.cos(camTheta);
-            const rX = Math.sin(camTheta + Math.PI/2); const rZ = Math.cos(camTheta + Math.PI/2);
+            // Get camera Horizontal Angle from rCam
+            const camAngle = rCam.theta; 
+            
+            const fX = Math.sin(camAngle);
+            const fZ = Math.cos(camAngle);
+            const rX = Math.sin(camAngle + Math.PI/2);
+            const rZ = Math.cos(camAngle + Math.PI/2);
             
             if (gameState.moveX !== 0 || gameState.moveY !== 0) {
+                // Joystick Y is "Forward", so we use Forward Vectors
                 const wx = (rX * gameState.moveX) + (fX * gameState.moveY);
                 const wz = (rZ * gameState.moveX) + (fZ * gameState.moveY);
                 playerGroup.position.x += wx * spd; playerGroup.position.z += wz * spd;
                 playerGroup.rotation.y = Math.atan2(wx, wz);
             }
 
-            // Camera Look
-            camTheta -= gameState.lookDeltaX * 0.005;
-            camPhi -= gameState.lookDeltaY * 0.005;
-            camPhi = Math.max(0.1, Math.min(Math.PI/2-0.1, camPhi));
+            // *** UPDATE CAMERA ***
+            rCam.update(playerGroup.position);
             
             // Physics
             gameState.velocityY -= 0.015; playerGroup.position.y += gameState.velocityY;
             if (playerGroup.position.y <= 0) { playerGroup.position.y = 0; gameState.velocityY = 0; gameState.isGrounded = true; }
-
-            // Camera Follow
-            camera.position.x = playerGroup.position.x + camRadius * Math.sin(camTheta) * Math.sin(camPhi);
-            camera.position.z = playerGroup.position.z + camRadius * Math.cos(camTheta) * Math.sin(camPhi);
-            camera.position.y = playerGroup.position.y + camRadius * Math.cos(camPhi);
-            camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
 
             // Mobs
             mobs.forEach(mob => {
@@ -251,7 +240,7 @@
                 if(mob.userData.type === 'bunny') {
                     if(mob.userData.tm > 2) { mob.rotation.y = Math.random()*Math.PI*2; mob.userData.tm=0; }
                     mob.position.z += Math.cos(mob.rotation.y)*0.03; mob.position.x += Math.sin(mob.rotation.y)*0.03;
-                } else { // Wolf
+                } else {
                     const d = playerGroup.position.distanceTo(mob.position);
                     if(d < 15 && d > 1) {
                         mob.lookAt(playerGroup.position);
@@ -264,47 +253,33 @@
             if(gameState.isSwinging) {
                 axePivot.rotation.x -= 0.2;
                 if(axePivot.rotation.x < -2) { axePivot.rotation.x = 0; gameState.isSwinging = false; }
-                
-                // Hitting Logic
                 if (axePivot.rotation.x < -1 && gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
                     const t = gameState.nearbyObject.obj;
                     t.userData.hp--; t.rotation.z = 0.1; setTimeout(()=>t.rotation.z=0, 50);
                     if(t.userData.hp <= 0) {
-                        // Spawn Log
                         const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
                         log.rotation.z = Math.PI/2; log.rotation.y = Math.random()*Math.PI;
                         log.position.set(t.position.x, 0.2, t.position.z); log.castShadow=true;
                         scene.add(log); droppedLogs.push(log);
-                        
                         scene.remove(t); trees.splice(trees.indexOf(t),1); gameState.nearbyObject=null;
                     }
-                    gameState.nearbyObject = null; // Prevent double hit
+                    gameState.nearbyObject = null;
                 }
             }
 
-            // Sack Visual
-            const sScale = 1 + (gameState.wood * 0.05);
-            sack.scale.set(sScale, sScale, sScale);
+            // Sack Scale
+            const sScale = 1 + (gameState.wood * 0.05); sack.scale.set(sScale, sScale, sScale);
 
-            // Interactions Check
+            // Proximity UI
             const pPos = playerGroup.position;
-            gameState.nearbyObject = null;
-            let showAction = false; let actionIcon = '';
-            
+            gameState.nearbyObject = null; let showAction = false; let actionIcon = '';
             if (pPos.distanceTo(fireGroup.position) < 3.5) { gameState.nearbyObject = {type:'fire'}; showAction=true; actionIcon='🔥'; }
             else if (pPos.distanceTo(bench.position) < 3) { gameState.nearbyObject = {type:'bench'}; showAction=true; actionIcon='🛠️'; }
-            else {
-                for(let t of trees) {
-                    if (pPos.distanceTo(t.position) < 2.5) { gameState.nearbyObject = {type:'tree', obj:t}; showAction=true; actionIcon='🪓'; break; }
-                }
-            }
+            else { for(let t of trees) { if (pPos.distanceTo(t.position) < 2.5) { gameState.nearbyObject = {type:'tree', obj:t}; showAction=true; actionIcon='🪓'; break; } } }
             UI.toggleActionBtn(showAction, actionIcon);
 
             // Map
-            UI.drawMinimap(playerGroup.position, [
-                {pos: fireGroup.position, color: 'orange'},
-                {pos: bench.position, color: 'brown'}
-            ]);
+            UI.drawMinimap(playerGroup.position, [{pos: fireGroup.position, color: 'orange'}, {pos: bench.position, color: 'brown'}]);
 
             renderer.render(scene, camera);
         }
