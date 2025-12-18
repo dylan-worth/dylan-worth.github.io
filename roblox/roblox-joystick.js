@@ -1,111 +1,70 @@
-/* roblox-joystick.js - UPDATED VERSION */
-class Joystick {
-    constructor() {
-        this.active = false;
-        this.data = { x: 0, y: 0 };
-        this.origin = { x: 0, y: 0 };
-        this.element = null;
-        this.stick = null;
-        
-        // Initialize immediately
-        this.init();
+/* roblox-joystick.js - Universal Controller */
+
+// Global State that games can read
+window.joystick = { x: 0, y: 0, active: false };
+
+document.addEventListener('DOMContentLoaded', () => {
+    const zone = document.getElementById('joystick-zone');
+    const knob = document.getElementById('joystick-knob');
+
+    if (!zone || !knob) {
+        console.warn("Joystick elements not found in HTML.");
+        return;
     }
 
-    init() {
-        // 1. Inject CSS for the joystick
-        const style = document.createElement('style');
-        style.innerHTML = `
-            #virtual-joystick-zone {
-                position: absolute;
-                width: 120px;
-                height: 120px;
-                background: rgba(255, 255, 255, 0.1);
-                border: 2px solid rgba(255, 255, 255, 0.4);
-                border-radius: 50%;
-                z-index: 9999;
-                display: none; /* Hidden until clicked */
-                pointer-events: none; /* Let events pass through */
-            }
-            #virtual-stick {
-                position: absolute;
-                top: 50%; left: 50%;
-                width: 50px; height: 50px;
-                background: rgba(255, 255, 255, 0.9);
-                border-radius: 50%;
-                transform: translate(-50%, -50%);
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            }
-        `;
-        document.head.appendChild(style);
-
-        // 2. Create DOM Elements
-        this.element = document.createElement('div');
-        this.element.id = 'virtual-joystick-zone';
-        this.stick = document.createElement('div');
-        this.stick.id = 'virtual-stick';
-        this.element.appendChild(this.stick);
-        document.body.appendChild(this.element);
-
-        // 3. Add Event Listeners (Touch AND Mouse)
-        // Touch
-        document.addEventListener('touchstart', e => this.start(e.touches[0].clientX, e.touches[0].clientY), {passive:false});
-        document.addEventListener('touchmove', e => this.move(e.touches[0].clientX, e.touches[0].clientY), {passive:false});
-        document.addEventListener('touchend', () => this.end());
-        
-        // Mouse (For desktop testing)
-        document.addEventListener('mousedown', e => this.start(e.clientX, e.clientY));
-        document.addEventListener('mousemove', e => this.move(e.clientX, e.clientY));
-        document.addEventListener('mouseup', () => this.end());
-    }
-
-    start(x, y) {
-        // Only activate on Left Side of screen
-        if (x < window.innerWidth / 2) {
-            this.active = true;
-            this.origin = { x, y };
-            
-            this.element.style.display = 'block';
-            this.element.style.left = (x - 60) + 'px';
-            this.element.style.top = (y - 60) + 'px';
-            this.stick.style.transform = `translate(-50%, -50%)`;
-            
-            this.data = { x: 0, y: 0 };
+    // Input Handling
+    function handleInput(clientX, clientY, isEnd) {
+        if (isEnd) {
+            window.joystick.x = 0;
+            window.joystick.y = 0;
+            window.joystick.active = false;
+            knob.style.transform = `translate(-50%, -50%)`;
+            return;
         }
-    }
 
-    move(x, y) {
-        if (!this.active) return;
+        const rect = zone.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-        let dx = x - this.origin.x;
-        let dy = y - this.origin.y;
-
-        // Cap distance at 60px
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const maxDist = 60;
+        let dx = clientX - centerX;
+        let dy = clientY - centerY;
         
-        if (dist > maxDist) {
-            const ratio = maxDist / dist;
+        // Distance Cap (keep knob inside circle)
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        const maxDist = rect.width / 2; // Dynamic based on size
+
+        if (distance > maxDist) {
+            const ratio = maxDist / distance;
             dx *= ratio;
             dy *= ratio;
         }
 
-        // Normalize output (-1 to 1)
-        this.data.x = dx / maxDist;
-        this.data.y = dy / maxDist;
+        // Move Knob Visual
+        knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 
-        // Visual update
-        this.stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        // Update Global State (-1 to 1)
+        window.joystick.x = dx / maxDist;
+        window.joystick.y = dy / maxDist;
+        window.joystick.active = true;
     }
 
-    end() {
-        this.active = false;
-        this.data = { x: 0, y: 0 };
-        this.element.style.display = 'none';
-    }
+    // Touch Events
+    zone.addEventListener('touchstart', (e) => {
+        handleInput(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 
-    getX() { return this.data.x; }
-    getY() { return this.data.y; }
-}
+    zone.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Stop scroll
+        handleInput(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 
-// Start the joystick
-window.joystick = new Joystick();
+    zone.addEventListener('touchend', () => {
+        handleInput(0, 0, true);
+    });
+
+    // Mouse Events (For PC Testing)
+    let dragging = false;
+    zone.addEventListener('mousedown', (e) => { dragging = true; handleInput(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', (e) => { if(dragging) handleInput(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', () => { if(dragging) { dragging = false; handleInput(0,0,true); } });
+});
