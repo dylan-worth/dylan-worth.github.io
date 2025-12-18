@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rainbow Friends</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html">Exit Game</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>Rainbow Friends: Chapter 1</h2>
+        <p>Collect 5 Boxes. Avoid Blue.</p>
+        <h3 id="status" style="color:orange;">Boxes: 0/5</h3>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let player = { x: 50, y: 50, size: 20, color: "lime" };
+        let blue = { x: 700, y: 400, size: 40, color: "blue", speed: 1.5 };
+        let boxes = [{x: 200, y:100}, {x:600, y:100}, {x:400, y:250}, {x:100, y:400}, {x:700, y:50}];
+        let collected = 0;
+        let keys = {};
+        let gameOver = false;
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        function update() {
+            if(gameOver) return;
+
+            // Player Move
+            if(keys['w']) player.y -= 3;
+            if(keys['s']) player.y += 3;
+            if(keys['a']) player.x -= 3;
+            if(keys['d']) player.x += 3;
+
+            // Blue AI (Chase)
+            let dx = player.x - blue.x;
+            let dy = player.y - blue.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if(dist > 0) {
+                blue.x += (dx/dist) * blue.speed;
+                blue.y += (dy/dist) * blue.speed;
+            }
+
+            // Collision with Blue
+            if(dist < 30) {
+                gameOver = true;
+                alert("JUMPSCARE! Blue caught you.");
+                location.reload();
+            }
+
+            // Collision with Boxes
+            for(let i=0; i<boxes.length; i++) {
+                let b = boxes[i];
+                let bdx = player.x - b.x;
+                let bdy = player.y - b.y;
+                if(Math.sqrt(bdx*bdx + bdy*bdy) < 30) {
+                    boxes.splice(i, 1);
+                    collected++;
+                    document.getElementById('status').innerText = `Boxes: ${collected}/5`;
+                    if(collected === 5) {
+                        alert("You survived the night!");
+                        location.href = "roblox.html";
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0,0,800,500);
+            
+            // Draw Blue
+            ctx.fillStyle = blue.color;
+            ctx.fillRect(blue.x - 20, blue.y - 40, 40, 80); // Tall body
+            ctx.fillStyle = "white";
+            ctx.beginPath(); ctx.arc(blue.x - 10, blue.y - 30, 5, 0, Math.PI*2); ctx.fill(); // Eye
+            ctx.beginPath(); ctx.arc(blue.x + 10, blue.y - 30, 5, 0, Math.PI*2); ctx.fill(); // Eye
+            
+            // Draw Boxes
+            ctx.fillStyle = "orange";
+            boxes.forEach(b => ctx.fillRect(b.x, b.y, 20, 20));
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, 20, 20);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>
