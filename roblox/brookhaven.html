@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brookhaven RP</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #rp-ui { display: flex; gap: 10px; margin-top: 10px; }
+        .chat-box { height: 100px; background: rgba(0,0,0,0.5); overflow-y: scroll; padding: 10px; font-size: 12px; margin-top: 10px; border: 1px solid #555; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html">Exit Game</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>Brookhaven RP</h2>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div id="rp-ui">
+            <button class="btn" onclick="spawn('car')">🚗 Spawn Car</button>
+            <button class="btn" onclick="spawn('house')">🏡 Claim House</button>
+            <button class="btn" onclick="emote('wave')">👋 Wave</button>
+        </div>
+        
+        <input type="text" id="chat-input" placeholder="Say something..." style="width:100%; padding:10px; margin-top:10px;">
+        <div class="chat-box" id="chat">
+            <div>[System]: Welcome to Brookhaven!</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let hasCar = false;
+        let hasHouse = false;
+        let playerX = 50;
+
+        function draw() {
+            // Sky
+            ctx.fillStyle = "#74b9ff";
+            ctx.fillRect(0,0,800,400);
+            // Grass
+            ctx.fillStyle = "#55efc4";
+            ctx.fillRect(0,300,800,100);
+            // Road
+            ctx.fillStyle = "#636e72";
+            ctx.fillRect(0,330,800,40);
+
+            // House
+            if(hasHouse) {
+                ctx.fillStyle = "#fab1a0";
+                ctx.fillRect(400, 200, 150, 100);
+                ctx.fillStyle = "#d63031"; // Roof
+                ctx.beginPath();
+                ctx.moveTo(390, 200); ctx.lineTo(475, 130); ctx.lineTo(560, 200);
+                ctx.fill();
+            }
+
+            // Player
+            ctx.fillStyle = localStorage.getItem('av-torso') || "yellow";
+            ctx.fillRect(playerX, 290, 20, 40);
+
+            // Car
+            if(hasCar) {
+                ctx.fillStyle = "red";
+                ctx.fillRect(playerX - 10, 310, 60, 20);
+                ctx.fillStyle = "black";
+                ctx.beginPath(); ctx.arc(playerX, 330, 10, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(playerX+40, 330, 10, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        function spawn(item) {
+            if(item === 'car') hasCar = !hasCar;
+            if(item === 'house') hasHouse = true;
+            draw();
+        }
+
+        document.getElementById('chat-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                let div = document.createElement('div');
+                div.textContent = "[Player]: " + this.value;
+                document.getElementById('chat').appendChild(div);
+                this.value = '';
+            }
+        });
+
+        // Simple loop for walking
+        setInterval(() => {
+            playerX += 1;
+            if(playerX > 800) playerX = -50;
+            draw();
+        }, 50);
+        
+        draw();
+    </script>
+</body>
+</html>
