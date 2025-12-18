@@ -3,132 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rainbow Friends</title>
+    <title>Rainbow Friends 3D</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { overflow: hidden; }
+        #game-container { position: relative; width: 100%; height: 80vh; background: #000; }
+        .hud { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 20px; font-weight: bold; pointer-events: none; }
+        #mobile-controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; }
+    </style>
 </head>
 <body>
     <nav>
         <h1>BLOX</h1>
         <div class="nav-links"><a href="roblox.html">Exit</a></div>
     </nav>
-    <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Rainbow Friends</h2>
-            <h3 id="status" style="color:orange;">Boxes: 0/5</h3>
-        </div>
+    
+    <div id="game-container">
+        <div class="hud">Collect Cubes: <span id="score">0</span>/5</div>
         
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-
         <div id="mobile-controls">
-            <div></div>
-            <div class="d-btn" ontouchstart="press('w')" ontouchend="release('w')">▲</div>
-            <div></div>
-            <div class="d-btn" ontouchstart="press('a')" ontouchend="release('a')">◀</div>
-            <div class="d-btn" ontouchstart="press('s')" ontouchend="release('s')">▼</div>
-            <div class="d-btn" ontouchstart="press('d')" ontouchend="release('d')">▶</div>
+             <div style="display:grid; grid-template-columns: 60px 60px 60px; gap:5px;">
+                <div></div>
+                <div class="d-btn" ontouchstart="press('w')" ontouchend="release('w')">▲</div>
+                <div></div>
+                <div class="d-btn" ontouchstart="press('a')" ontouchend="release('a')">◀</div>
+                <div class="d-btn" ontouchstart="press('s')" ontouchend="release('s')">▼</div>
+                <div class="d-btn" ontouchstart="press('d')" ontouchend="release('d')">▶</div>
+            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        function resize() {
-            if(window.innerWidth < 800) {
-                canvas.style.width = '100%';
-                canvas.style.height = (window.innerWidth * 0.625) + 'px';
-            }
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        const container = document.getElementById('game-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x2d3436);
 
-        let player = { x: 50, y: 50, size: 20, color: "lime" };
-        let blue = { x: 700, y: 400, size: 40, color: "blue", speed: 1.5 };
-        let boxes = [{x: 200, y:100}, {x:600, y:100}, {x:400, y:250}, {x:100, y:400}, {x:700, y:50}];
-        let collected = 0;
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // Lighting
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(0, 10, 0);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // Floor
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x636e72 }));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // Player
+        const player = { x: 0, z: 0, speed: 0.3 };
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
+
+        // Blue (The Monster)
+        const blueGeo = new THREE.CylinderGeometry(1, 1, 4, 12);
+        const blueMat = new THREE.MeshStandardMaterial({ color: 0x0984e3 });
+        const blue = new THREE.Mesh(blueGeo, blueMat);
+        blue.position.set(20, 2, -20);
+        // Add Eyes
+        const eyeGeo = new THREE.SphereGeometry(0.3);
+        const eyeMat = new THREE.MeshBasicMaterial({color:0xffffff});
+        const eye1 = new THREE.Mesh(eyeGeo, eyeMat); eye1.position.set(0.4, 1, 0.8);
+        const eye2 = new THREE.Mesh(eyeGeo, eyeMat); eye2.position.set(-0.4, 1, 0.8);
+        blue.add(eye1); blue.add(eye2);
+        scene.add(blue);
+
+        // Boxes to collect
+        let boxes = [];
+        for(let i=0; i<5; i++) {
+            const b = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({color: 0xffaa00}));
+            b.position.set((Math.random()-0.5)*50, 0.5, (Math.random()-0.5)*50);
+            scene.add(b);
+            boxes.push(b);
+        }
+
         let keys = {};
+        let collected = 0;
         let gameOver = false;
 
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
-
-        // Mobile Hooks
         window.press = (k) => keys[k] = true;
         window.release = (k) => keys[k] = false;
 
-        function update() {
+        function checkCollision(p1, p2, dist) {
+            const dx = p1.x - p2.position.x;
+            const dz = p1.z - p2.position.z;
+            return Math.sqrt(dx*dx + dz*dz) < dist;
+        }
+
+        function animate() {
             if(gameOver) return;
+            requestAnimationFrame(animate);
 
-            // Player Move
-            if(keys['w']) player.y -= 3;
-            if(keys['s']) player.y += 3;
-            if(keys['a']) player.x -= 3;
-            if(keys['d']) player.x += 3;
+            // Player Movement
+            if(keys['w']) player.z -= player.speed;
+            if(keys['s']) player.z += player.speed;
+            if(keys['a']) player.x -= player.speed;
+            if(keys['d']) player.x += player.speed;
 
-            // Boundaries
-            if(player.x < 0) player.x = 0;
-            if(player.x > 780) player.x = 780;
-            if(player.y < 0) player.y = 0;
-            if(player.y > 480) player.y = 480;
+            // Camera follow player
+            camera.position.x = player.x;
+            camera.position.z = player.z + 10;
 
-            // Blue AI
-            let dx = player.x - blue.x;
-            let dy = player.y - blue.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
+            // Update Blue (Simple Chase AI)
+            blue.lookAt(player.x, 2, player.z);
+            const dx = player.x - blue.position.x;
+            const dz = player.z - blue.position.z;
+            const dist = Math.sqrt(dx*dx + dz*dz);
             
-            if(dist > 0) {
-                blue.x += (dx/dist) * blue.speed;
-                blue.y += (dy/dist) * blue.speed;
+            if(dist > 1) {
+                blue.position.x += (dx/dist) * 0.15;
+                blue.position.z += (dz/dist) * 0.15;
             }
 
-            if(dist < 30) {
+            // Jumpscare Check
+            if(dist < 2) {
                 gameOver = true;
-                alert("JUMPSCARE! Blue caught you.");
+                alert("CAUGHT BY BLUE!");
                 location.reload();
             }
 
-            // Box Collision
-            for(let i=0; i<boxes.length; i++) {
-                let b = boxes[i];
-                let bdx = player.x - b.x;
-                let bdy = player.y - b.y;
-                if(Math.sqrt(bdx*bdx + bdy*bdy) < 30) {
+            // Box Collection
+            for(let i=boxes.length-1; i>=0; i--) {
+                if(checkCollision(player, boxes[i], 2)) {
+                    scene.remove(boxes[i]);
                     boxes.splice(i, 1);
                     collected++;
-                    document.getElementById('status').innerText = `Boxes: ${collected}/5`;
+                    document.getElementById('score').innerText = collected;
                     if(collected === 5) {
-                        alert("You survived!");
+                        gameOver = true;
+                        alert("YOU SURVIVED!");
                         location.href = "roblox.html";
                     }
+                } else {
+                    boxes[i].rotation.y += 0.05; // Spin effect
                 }
             }
+
+            renderer.render(scene, camera);
         }
 
-        function draw() {
-            ctx.clearRect(0,0,800,500);
-            
-            // Blue
-            ctx.fillStyle = blue.color;
-            ctx.fillRect(blue.x - 20, blue.y - 40, 40, 80);
-            ctx.fillStyle = "white";
-            ctx.beginPath(); ctx.arc(blue.x - 10, blue.y - 30, 5, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(blue.x + 10, blue.y - 30, 5, 0, Math.PI*2); ctx.fill();
-            
-            // Boxes
-            ctx.fillStyle = "orange";
-            boxes.forEach(b => ctx.fillRect(b.x, b.y, 20, 20));
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
 
-            // Player
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, 20, 20);
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-        loop();
+        animate();
     </script>
 </body>
 </html>
