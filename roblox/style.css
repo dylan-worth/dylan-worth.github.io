@@ -1,130 +1,129 @@
 /* style.css */
 :root {
-    --bg-dark: #232527;
-    --bg-light: #393b3d;
-    --primary: #00b06f;
-    --text: #ffffff;
-    --nav-bg: #191b1d;
+    --bg-app: #121212;         /* App Background */
+    --bg-card: #2b2d31;        /* Game Card */
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --nav-bg: #1a1c1e;         /* Bottom Bar */
+    --accent: #fff;
 }
 
 body {
     margin: 0;
-    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-    background-color: var(--bg-dark);
-    color: var(--text);
-    /* Prevent pull-to-refresh on mobile */
-    overscroll-behavior: none;
+    font-family: 'Gotham', 'Segoe UI', Helvetica, sans-serif; /* Roblox font feel */
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    padding-bottom: 70px; /* Space for bottom nav */
 }
 
-/* Navigation Bar */
-nav {
-    background-color: var(--nav-bg);
-    padding: 10px 20px;
+/* --- TOP HEADER --- */
+header {
+    background: linear-gradient(180deg, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0) 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.user-pill {
+    background: rgba(255,255,255,0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
     display: flex;
     align-items: center;
-    flex-wrap: wrap; /* Allows wrapping on mobile */
-    border-bottom: 2px solid #000;
+    gap: 5px;
 }
 
-nav h1 { margin: 0; margin-right: 20px; font-size: 1.5rem; }
+.robux-icon {
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 10px;
+}
 
-.nav-links {
+/* --- HOME PAGE SECTIONS --- */
+.section { padding: 0 15px; margin-bottom: 25px; }
+.section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
+
+/* Horizontal Scroll (Continue Playing) */
+.scroller {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: none;
 }
+.scroller::-webkit-scrollbar { display: none; }
 
-.nav-links a {
-    color: #bdbdbd;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.nav-links a:hover { color: white; }
-
-.currency-display {
-    margin-left: auto;
-    background: #000;
-    padding: 5px 15px;
-    border-radius: 20px;
-    color: var(--primary);
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-/* Container */
-.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-
-/* Cards & Grids */
-.game-grid {
+/* Grid Layout (Recommended) */
+.grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller min-width for mobile */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
 }
 
-.card {
-    background-color: var(--bg-light);
-    border-radius: 8px;
+/* --- GAME CARD STYLES --- */
+.game-card {
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.1s;
+    width: 150px; /* Fixed width for scroller */
+    flex-shrink: 0;
+}
+.grid .game-card { width: 100%; } /* Full width in grid */
+
+.thumb-container {
+    width: 100%;
+    aspect-ratio: 1/1; /* Square icons like Roblox */
+    border-radius: 12px;
+    background: #393b3d;
     overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s;
+    position: relative;
+    margin-bottom: 8px;
 }
 
-.card-img { height: 100px; background: #555; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-.card-content { padding: 10px; }
-.card h3 { margin: 0 0 5px 0; font-size: 16px; }
-
-/* Buttons */
-.btn {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px 24px; /* Larger touch target */
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1rem;
+.thumb-img {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 50px;
 }
 
-/* Canvas Responsive */
-canvas {
-    background: #000;
-    display: block;
-    margin: 0 auto;
-    border: 2px solid #555;
-    width: 100%;       /* Full width of container */
-    max-width: 800px;  /* But don't get too huge */
-    height: auto;      /* Maintain aspect ratio */
+.game-title { font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.game-stats { color: var(--text-secondary); font-size: 12px; display: flex; align-items: center; gap: 5px; }
+
+/* --- BOTTOM NAVIGATION (Mobile Style) --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: var(--nav-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
 }
 
-/* --- MOBILE SPECIFIC --- */
-@media (max-width: 600px) {
-    nav { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .currency-display { position: absolute; top: 15px; right: 20px; margin: 0; }
-    .nav-links { width: 100%; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; }
-    
-    /* On-Screen D-Pad Styles */
-    #mobile-controls {
-        display: grid !important; /* Force show on mobile */
-        grid-template-columns: 60px 60px 60px;
-        gap: 10px;
-        justify-content: center;
-        margin-top: 20px;
-        user-select: none;
-    }
-    .d-btn {
-        width: 60px; height: 60px;
-        background: rgba(255,255,255,0.2);
-        border: 2px solid rgba(255,255,255,0.5);
-        border-radius: 50%;
-        color: white;
-        font-size: 24px;
-        display: flex; align-items: center; justify-content: center;
-        touch-action: manipulation; /* Improves touch response */
-    }
-    .d-btn:active { background: rgba(0, 176, 111, 0.5); }
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 10px;
+    gap: 4px;
 }
-
-/* Hide mobile controls on desktop */
-#mobile-controls { display: none; }
+.nav-item.active { color: white; }
+.nav-icon { font-size: 24px; }
