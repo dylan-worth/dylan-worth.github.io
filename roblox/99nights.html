@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>99 Nights</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #gameCanvas { background: #1a1a1a; }
+        .hud { text-align: center; color: #ff5e57; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html">Exit Game</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>99 Nights</h2>
+        <div class="hud">Nights Survived: <span id="night-count">0</span> | Battery: <span id="battery">100</span>%</div>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <p>Controls: WASD to move. Mouse to aim Flashlight.</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let player = {x: 400, y: 250, size: 20};
+        let mouse = {x: 0, y: 0};
+        let battery = 100;
+        let night = 0;
+        let darkness = 0.95;
+
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        function gameLoop() {
+            // Logic
+            if(battery > 0) battery -= 0.05;
+            else darkness = 1; // Total black
+
+            // Draw Forest Floor
+            ctx.fillStyle = "#1e272e";
+            ctx.fillRect(0,0,800,500);
+
+            // Trees (randomly placed for effect, static here)
+            ctx.fillStyle = "#0c1012";
+            ctx.fillRect(100, 100, 40, 40);
+            ctx.fillRect(600, 300, 50, 50);
+
+            // Player
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
+            ctx.fill();
+
+            // Darkness Overlay (Flashlight mechanic)
+            ctx.fillStyle = `rgba(0,0,0,${darkness})`;
+            ctx.fillRect(0,0,800,500);
+
+            // Flashlight Cutout
+            if(battery > 0) {
+                ctx.save();
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.arc(player.x, player.y, 200, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            document.getElementById('battery').innerText = Math.floor(battery);
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>
+</body>
+</html>
