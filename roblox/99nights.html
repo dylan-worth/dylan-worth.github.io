@@ -2,115 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Avatar Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>99 Nights</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .editor-container { 
-            display: flex; 
-            gap: 20px; 
-            flex-wrap: wrap; /* Stack on mobile */
-            justify-content: center; 
-        }
-        .preview-area { 
-            width: 100%; 
-            max-width: 300px; 
-            height: 350px; 
-            background: #555; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            border-radius: 10px;
-        }
-        .avatar { display: flex; flex-direction: column; align-items: center; transform: scale(0.8); }
-        .head { width: 60px; height: 60px; background: #ffeaa7; margin-bottom: 5px; border-radius: 10px; }
-        .torso { width: 100px; height: 100px; background: #0984e3; margin-bottom: 5px; }
-        .legs { display: flex; gap: 10px; }
-        .leg { width: 45px; height: 100px; background: #2d3436; }
-        .items-list { flex: 1; min-width: 300px; }
-        .item-row { display: flex; justify-content: space-between; background: var(--bg-light); padding: 15px; margin-bottom: 10px; align-items: center; border-radius: 8px; }
+        #gameCanvas { background: #1a1a1a; touch-action: none; } /* Prevents scrolling while playing */
+        .hud { text-align: center; color: #ff5e57; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <nav>
         <h1>BLOX</h1>
-        <div class="nav-links">
-            <a href="roblox.html">Games</a>
-            <a href="roblox-char.html" style="color:white;">Avatar</a>
-            <a href="roblox-bucs.html">Store</a>
-        </div>
-        <div class="currency-display">R$ <span id="r-amount">0</span></div>
+        <div class="nav-links"><a href="roblox.html">Exit</a></div>
     </nav>
-
     <div class="container">
-        <h2>Avatar Editor</h2>
-        <div class="editor-container">
-            <div class="preview-area">
-                <div class="avatar">
-                    <div class="head" id="av-head"></div>
-                    <div class="torso" id="av-torso"></div>
-                    <div class="legs">
-                        <div class="leg" id="av-leg-l"></div>
-                        <div class="leg" id="av-leg-r"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="items-list">
-                <h3>Shirt Shop</h3>
-                <div class="item-row">
-                    <span>Red Plaid</span>
-                    <button class="btn" onclick="buyItem('torso', '#d63031', 50)">R$50</button>
-                </div>
-                <div class="item-row">
-                    <span>Gold Tux</span>
-                    <button class="btn" onclick="buyItem('torso', '#fdcb6e', 1000)">R$1000</button>
-                </div>
-
-                <h3>Pants Shop</h3>
-                <div class="item-row">
-                    <span>Jeans</span>
-                    <button class="btn" onclick="buyItem('leg', '#0984e3', 25)">R$25</button>
-                </div>
-                <div class="item-row">
-                    <span>Camo</span>
-                    <button class="btn" onclick="buyItem('leg', '#55efc4', 75)">R$75</button>
-                </div>
-            </div>
+        <div class="hud">Nights: <span id="night-count">0</span> | Battery: <span id="battery">100</span>%</div>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        
+        <div id="mobile-controls">
+            <div></div>
+            <div class="d-btn" ontouchstart="press('w')" ontouchend="release('w')">▲</div>
+            <div></div>
+            <div class="d-btn" ontouchstart="press('a')" ontouchend="release('a')">◀</div>
+            <div class="d-btn" ontouchstart="press('s')" ontouchend="release('s')">▼</div>
+            <div class="d-btn" ontouchstart="press('d')" ontouchend="release('d')">▶</div>
         </div>
+        
+        <p style="text-align:center; color:#777; font-size:12px;">Desktop: WASD + Mouse | Mobile: D-Pad + Tap to Aim</p>
     </div>
 
     <script>
-        function updateDisplay() {
-            let bucs = parseInt(localStorage.getItem('robux') || 0);
-            document.getElementById('r-amount').innerText = bucs;
-            
-            if(localStorage.getItem('av-torso')) document.getElementById('av-torso').style.background = localStorage.getItem('av-torso');
-            if(localStorage.getItem('av-leg')) {
-                document.getElementById('av-leg-l').style.background = localStorage.getItem('av-leg');
-                document.getElementById('av-leg-r').style.background = localStorage.getItem('av-leg');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Resize canvas for mobile screens
+        function resize() {
+            if(window.innerWidth < 800) {
+                canvas.style.width = '100%';
+                canvas.style.height = (window.innerWidth * 0.625) + 'px';
             }
         }
+        window.addEventListener('resize', resize);
+        resize();
 
-        function buyItem(part, color, cost) {
-            let bucs = parseInt(localStorage.getItem('robux') || 0);
-            if (bucs >= cost) {
-                bucs -= cost;
-                localStorage.setItem('robux', bucs);
-                
-                if (part === 'torso') {
-                    document.getElementById('av-torso').style.background = color;
-                    localStorage.setItem('av-torso', color);
-                } else {
-                    document.getElementById('av-leg-l').style.background = color;
-                    document.getElementById('av-leg-r').style.background = color;
-                    localStorage.setItem('av-leg', color);
-                }
-                updateDisplay();
-            } else {
-                alert("Not enough Robux!");
+        let player = {x: 400, y: 250, size: 20};
+        let mouse = {x: 400, y: 250}; // Default aim
+        let battery = 100;
+        let darkness = 0.95;
+        let keys = {};
+
+        // Desktop Input
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouse.x = (e.clientX - rect.left) * scaleX;
+            mouse.y = (e.clientY - rect.top) * scaleY;
+        });
+
+        // Mobile Input Hooks
+        window.press = (k) => keys[k] = true;
+        window.release = (k) => keys[k] = false;
+        
+        // Mobile Touch Aim
+        canvas.addEventListener('touchstart', e => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouse.x = (e.touches[0].clientX - rect.left) * scaleX;
+            mouse.y = (e.touches[0].clientY - rect.top) * scaleY;
+        });
+
+        function gameLoop() {
+            // Movement Logic
+            if(keys['w']) player.y -= 2;
+            if(keys['s']) player.y += 2;
+            if(keys['a']) player.x -= 2;
+            if(keys['d']) player.x += 2;
+
+            if(battery > 0) battery -= 0.05;
+            else darkness = 1;
+
+            ctx.fillStyle = "#1e272e";
+            ctx.fillRect(0,0,800,500);
+
+            // Trees
+            ctx.fillStyle = "#0c1012";
+            ctx.fillRect(100, 100, 40, 40);
+            ctx.fillRect(600, 300, 50, 50);
+
+            // Player
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
+            ctx.fill();
+
+            // Darkness
+            ctx.fillStyle = `rgba(0,0,0,${darkness})`;
+            ctx.fillRect(0,0,800,500);
+
+            // Flashlight Cutout (Aims at last mouse/touch position)
+            if(battery > 0) {
+                ctx.save();
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                // Simple circle light around player
+                ctx.arc(player.x, player.y, 150, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
             }
+
+            document.getElementById('battery').innerText = Math.floor(battery);
+            requestAnimationFrame(gameLoop);
         }
-        updateDisplay();
+        gameLoop();
     </script>
 </body>
 </html>
