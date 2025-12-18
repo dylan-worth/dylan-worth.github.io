@@ -3,183 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99 Nights (3D)</title>
+    <title>99 Nights - Survival</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; }
         #game-container { position: relative; width: 100%; height: 100vh; }
         canvas { display: block; width: 100%; height: 100%; }
         
-        .hud { 
-            position: absolute; top: 10px; left: 0; width: 100%; 
-            text-align: center; color: #ff5e57; font-weight: bold; font-family: sans-serif; 
-            pointer-events: none; z-index: 10; 
+        /* UI OVERLAY */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
         }
+
+        .hud-top {
+            position: absolute; top: 10px; width: 100%; text-align: center;
+            color: white; text-shadow: 1px 1px 2px black;
+        }
+
+        .xp-bar-container {
+            width: 200px; height: 10px; background: #333; margin: 5px auto;
+            border: 1px solid #555; border-radius: 5px; overflow: hidden;
+        }
+        #xp-bar-fill { height: 100%; width: 0%; background: #00b06f; transition: width 0.2s; }
+
+        .inv-slot {
+            display: inline-block; background: rgba(0,0,0,0.5); 
+            border: 1px solid #777; padding: 5px; margin: 0 2px; font-size: 12px;
+        }
+
+        /* CRAFTING MENU */
+        #craft-menu {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px;
+            color: white; display: none; pointer-events: auto; text-align: center;
+            border-radius: 10px; width: 250px;
+        }
+        .craft-btn {
+            background: #333; color: white; border: 1px solid #555;
+            padding: 10px; width: 100%; margin-bottom: 5px; cursor: pointer;
+        }
+        .craft-btn:hover { background: #555; border-color: #00b06f; }
+        
+        /* INTERACT BUTTON */
+        #interact-btn {
+            position: absolute; bottom: 120px; right: 20px;
+            width: 60px; height: 60px; background: rgba(255,255,255,0.2);
+            border: 2px solid white; border-radius: 50%; color: white;
+            font-weight: bold; font-size: 24px; display: none; pointer-events: auto;
+            justify-content: center; align-items: center;
+        }
+        #interact-btn:active { background: #00b06f; }
 
         .exit-btn {
-            position: absolute; top: 10px; left: 10px; z-index: 20;
+            position: absolute; top: 10px; left: 10px; pointer-events: auto;
             background: rgba(255,255,255,0.2); color: white;
-            padding: 8px 15px; border-radius: 5px; text-decoration: none; font-family: sans-serif;
+            padding: 5px 10px; border-radius: 5px; text-decoration: none;
         }
 
-        /* --- JOYSTICK CSS --- */
+        /* SMALLER JOYSTICK */
         #joystick-zone {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.15); /* Visible Circle */
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            z-index: 9999;
-            touch-action: none; /* Prevents scroll */
+            position: absolute; bottom: 30px; left: 30px;
+            width: 80px; height: 80px; /* Smaller */
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; pointer-events: auto; touch-action: none;
         }
-        
         #joystick-knob {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 50px; height: 50px;
+            position: absolute; top: 50%; left: 50%;
+            width: 30px; height: 30px; /* Smaller */
             background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
+            border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <a href="roblox.html" class="exit-btn">⬅ Exit</a>
-    
     <div id="game-container">
-        <div class="hud">Nights: <span id="night-count">0</span> | Battery: <span id="battery">100</span>%</div>
-        
-        <div id="joystick-zone">
-            <div id="joystick-knob"></div>
+        <div id="ui-layer">
+            <a href="roblox.html" class="exit-btn">⬅ Exit</a>
+            
+            <div class="hud-top">
+                <div style="font-size: 18px; font-weight: bold;">Campfire Lv <span id="camp-lvl">1</span></div>
+                <div class="xp-bar-container"><div id="xp-bar-fill"></div></div>
+                <div><span id="time-display">Day 1 - 12:00 PM</span></div>
+                <div style="margin-top:10px;">
+                    <span class="inv-slot">🪓 Axe</span>
+                    <span class="inv-slot">💰 Sack (<span id="wood-count">0</span> Wood)</span>
+                </div>
+            </div>
+
+            <div id="interact-btn" onclick="interact()">👋</div>
+
+            <div id="craft-menu">
+                <h3>Workbench</h3>
+                <button class="craft-btn" onclick="craft('map')">🗺️ Craft Map (5 Wood)</button>
+                <button class="craft-btn" onclick="craft('bed')">🛏️ Craft Bed (10 Wood)</button>
+                <button class="craft-btn" onclick="craft('upgrade_bench')">🛠️ Upgrade Bench (20 Wood)</button>
+                <button class="craft-btn" onclick="closeCraft()">Close</button>
+            </div>
         </div>
+
+        <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
-    
+
     <script>
-        // --- 1. JOYSTICK LOGIC (EMBEDDED) ---
+        // --- GAME VARIABLES ---
+        const gameState = {
+            wood: 0,
+            xp: 0,
+            xpToNextLevel: 100, // XP needed for Campfire Level 2
+            campLevel: 1,
+            time: 0.5, // 0 to 1 (0.5 is noon)
+            day: 1,
+            nearbyObject: null // 'tree', 'fire', 'bench', 'grinder'
+        };
+
+        // XP Scaling Logic (Runescape style-ish)
+        function getXpForLevel(level) {
+            return Math.floor(100 * Math.pow(1.5, level - 1));
+        }
+
+        function addXp(amount) {
+            gameState.xp += amount;
+            // Visual Update
+            const pct = Math.min(100, (gameState.xp / gameState.xpToNextLevel) * 100);
+            document.getElementById('xp-bar-fill').style.width = pct + '%';
+        }
+
+        function levelUpCampfire() {
+            if (gameState.xp >= gameState.xpToNextLevel) {
+                gameState.xp = 0;
+                gameState.campLevel++;
+                gameState.xpToNextLevel = getXpForLevel(gameState.campLevel);
+                
+                // Update UI
+                document.getElementById('camp-lvl').innerText = gameState.campLevel;
+                document.getElementById('xp-bar-fill').style.width = '0%';
+                
+                // Visual Effect
+                fireLight.intensity += 0.5;
+                fireLight.distance += 5;
+                alert(`Campfire Leveled Up to ${gameState.campLevel}! Radius increased.`);
+            } else {
+                alert(`Need ${gameState.xpToNextLevel - gameState.xp} more XP! Add wood to fire.`);
+            }
+        }
+
+        // --- 3D SCENE SETUP ---
+        const container = document.getElementById('game-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue start
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.insertBefore(renderer.domElement, document.getElementById('ui-layer'));
+
+        // LIGHTING (Day/Night)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffaa33, 1);
+        sunLight.position.set(50, 50, 0);
+        sunLight.castShadow = true;
+        scene.add(sunLight);
+
+        // GROUND
+        const groundGeo = new THREE.PlaneGeometry(200, 200);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2f3628 }); // Forest Green
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // --- OBJECTS ---
+        
+        // 1. PLAYER (3rd Person Mesh)
+        const playerGroup = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshStandardMaterial({color: 0xd35400}));
+        body.position.y = 1;
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd}));
+        head.position.y = 2.3;
+        
+        // Axe (Visible on back)
+        const axeHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5), new THREE.MeshStandardMaterial({color: 0x5d4037}));
+        axeHandle.rotation.z = 0.5;
+        axeHandle.position.set(0.3, 1.5, -0.3);
+        const axeHead = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.05), new THREE.MeshStandardMaterial({color: 0x95a5a6}));
+        axeHead.position.set(0.5, 1.8, -0.3);
+        axeHandle.add(axeHead);
+
+        playerGroup.add(body);
+        playerGroup.add(head);
+        playerGroup.add(axeHandle);
+        playerGroup.castShadow = true;
+        scene.add(playerGroup);
+
+        // 2. CAMPFIRE (The Hub)
+        const fireGroup = new THREE.Group();
+        // Logs
+        const log1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
+        log1.rotation.z = Math.PI / 2;
+        log1.position.y = 0.1;
+        const log2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
+        log2.rotation.x = Math.PI / 2;
+        log2.position.y = 0.1;
+        fireGroup.add(log1); fireGroup.add(log2);
+        
+        // Fire Light
+        const fireLight = new THREE.PointLight(0xff4500, 2, 10);
+        fireLight.position.y = 1;
+        fireLight.castShadow = true;
+        fireGroup.add(fireLight);
+        
+        // Fire Particles (Simple Red Cubes)
+        const particleGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const particleMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+        for(let i=0; i<5; i++) {
+            const p = new THREE.Mesh(particleGeo, particleMat);
+            p.position.set((Math.random()-0.5), Math.random(), (Math.random()-0.5));
+            fireGroup.add(p);
+        }
+        fireGroup.position.set(0, 0, 0); // Center
+        scene.add(fireGroup);
+
+        // 3. WORKBENCH
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), new THREE.MeshStandardMaterial({color: 0x795548}));
+        bench.position.set(5, 0.5, 5);
+        scene.add(bench);
+
+        // 4. GRINDER
+        const grinder = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1.5, 8), new THREE.MeshStandardMaterial({color: 0x7f8c8d}));
+        grinder.position.set(-5, 0.75, 5);
+        scene.add(grinder);
+
+        // 5. TREES (Procedural)
+        const trees = [];
+        const treeGeo = new THREE.ConeGeometry(1.5, 6, 6);
+        const treeMat = new THREE.MeshStandardMaterial({color: 0x145a32});
+        const trunkGeo = new THREE.CylinderGeometry(0.4, 0.4, 2);
+        const trunkMat = new THREE.MeshStandardMaterial({color: 0x4e342e});
+
+        for(let i=0; i<30; i++) {
+            const tGroup = new THREE.Group();
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 1;
+            const leaves = new THREE.Mesh(treeGeo, treeMat);
+            leaves.position.y = 4;
+            tGroup.add(trunk); tGroup.add(leaves);
+            
+            // Random Pos away from center
+            let tx = (Math.random() - 0.5) * 80;
+            let tz = (Math.random() - 0.5) * 80;
+            if(Math.abs(tx) < 10 && Math.abs(tz) < 10) tx += 20; // Clear spawn
+
+            tGroup.position.set(tx, 0, tz);
+            tGroup.castShadow = true;
+            scene.add(tGroup);
+            trees.push(tGroup);
+        }
+
+        // --- CONTROLS (JOYSTICK) ---
         const joyZone = document.getElementById('joystick-zone');
         const joyKnob = document.getElementById('joystick-knob');
-        let moveX = 0, moveY = 0; // Global movement variables
+        let moveX = 0, moveY = 0;
 
         function handleJoystick(x, y, isEnd) {
             if (isEnd) {
                 joyKnob.style.transform = `translate(-50%, -50%)`;
-                moveX = 0; moveY = 0;
-                return;
+                moveX = 0; moveY = 0; return;
             }
-
             const rect = joyZone.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            let dx = x - centerX;
-            let dy = y - centerY;
-            
-            // Limit distance
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            let dx = x - cx; let dy = y - cy;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            const maxDist = 60;
-            
-            if (dist > maxDist) {
-                const ratio = maxDist / dist;
-                dx *= ratio;
-                dy *= ratio;
-            }
-
-            // Move visual knob
+            const maxDist = 40; // Smaller radius
+            if (dist > maxDist) { dx *= maxDist / dist; dy *= maxDist / dist; }
             joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-
-            // Normalize for game (-1 to 1)
-            moveX = dx / maxDist;
-            moveY = dy / maxDist;
+            moveX = dx / maxDist; moveY = dy / maxDist;
         }
 
-        // Touch Events
         joyZone.addEventListener('touchstart', e => handleJoystick(e.touches[0].clientX, e.touches[0].clientY));
         joyZone.addEventListener('touchmove', e => { e.preventDefault(); handleJoystick(e.touches[0].clientX, e.touches[0].clientY); });
-        joyZone.addEventListener('touchend', () => handleJoystick(0, 0, true));
+        joyZone.addEventListener('touchend', () => handleJoystick(0,0,true));
+
+        // --- INTERACTION LOGIC ---
+        window.interact = function() {
+            if (gameState.nearbyObject === 'tree') {
+                // Chop Tree
+                gameState.wood++;
+                addXp(10); // XP for gathering
+                document.getElementById('wood-count').innerText = gameState.wood;
+                
+                // Simple animation
+                playerGroup.rotation.y += 6; 
+                alert("+1 Wood. XP Gained.");
+            }
+            else if (gameState.nearbyObject === 'fire') {
+                // Add Fuel to Fire
+                if (gameState.wood > 0) {
+                    gameState.wood--;
+                    document.getElementById('wood-count').innerText = gameState.wood;
+                    addXp(20); // XP for maintaining fire
+                    alert("Added wood to fire. XP Gained.");
+                    
+                    // Check for level up
+                    levelUpCampfire();
+                } else {
+                    alert("No wood to add!");
+                }
+            }
+            else if (gameState.nearbyObject === 'bench') {
+                document.getElementById('craft-menu').style.display = 'block';
+            }
+        };
+
+        window.craft = function(item) {
+            if(item === 'map') {
+                if(gameState.wood >= 5) {
+                    gameState.wood -= 5;
+                    alert("Crafted a Map!");
+                } else alert("Need 5 Wood");
+            }
+            if(item === 'bed') {
+                if(gameState.wood >= 10) {
+                    gameState.wood -= 10;
+                    alert("Crafted a Bed (Spawn Set)!");
+                } else alert("Need 10 Wood");
+            }
+            document.getElementById('wood-count').innerText = gameState.wood;
+        };
+
+        window.closeCraft = function() {
+            document.getElementById('craft-menu').style.display = 'none';
+        };
+
+        // --- MAIN LOOP ---
+        const clock = new THREE.Clock();
         
-        // Mouse Events (For PC testing)
-        let isDragging = false;
-        joyZone.addEventListener('mousedown', () => isDragging = true);
-        window.addEventListener('mousemove', e => { if(isDragging) handleJoystick(e.clientX, e.clientY); });
-        window.addEventListener('mouseup', () => { isDragging = false; handleJoystick(0, 0, true); });
-
-
-        // --- 2. GAME LOGIC ---
-        const container = document.getElementById('game-container');
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x111111, 0.03);
-        scene.background = new THREE.Color(0x111111);
-
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.insertBefore(renderer.domElement, joyZone); // Put canvas behind joystick
-
-        // Ground
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x1e272e }));
-        plane.rotation.x = -Math.PI / 2;
-        scene.add(plane);
-
-        // Trees
-        const treeGeo = new THREE.CylinderGeometry(0.5, 1, 10, 8);
-        const treeMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a });
-        for(let i=0; i<60; i++) {
-            const tree = new THREE.Mesh(treeGeo, treeMat);
-            tree.position.set((Math.random()-0.5)*100, 5, (Math.random()-0.5)*100);
-            scene.add(tree);
-        }
-
-        camera.position.set(0, 2, 10);
-        
-        // Flashlight
-        const light = new THREE.SpotLight(0xffffff, 1.2, 60, 0.6, 0.5, 1);
-        scene.add(light);
-        scene.add(light.target);
-
-        let keys = {};
-        let battery = 100;
-        let speed = 0.15;
-
-        window.addEventListener('keydown', e => keys[e.key] = true);
-        window.addEventListener('keyup', e => keys[e.key] = false);
-
         function animate() {
             requestAnimationFrame(animate);
+            const dt = clock.getDelta();
 
-            // KEYBOARD Input
-            if(keys['w']) camera.translateZ(-speed);
-            if(keys['s']) camera.translateZ(speed);
-            if(keys['a']) camera.translateX(-speed);
-            if(keys['d']) camera.translateX(speed);
+            // 1. Day/Night Cycle
+            gameState.time += dt * 0.01; // Speed of day
+            if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
+            
+            // Calculate Sun Position
+            const angle = gameState.time * Math.PI * 2;
+            sunLight.position.x = Math.cos(angle) * 100;
+            sunLight.position.y = Math.sin(angle) * 100;
+            
+            // Sky Color
+            const isNight = gameState.time > 0.5 && gameState.time < 1;
+            scene.background.setHSL(0.6, 0.5, isNight ? 0.05 : 0.5);
+            scene.fog.color.setHSL(0.6, 0.5, isNight ? 0.05 : 0.5);
+            ambientLight.intensity = isNight ? 0.05 : 0.3;
 
-            // JOYSTICK Input (moveX, moveY from above)
-            // In ThreeJS, Y is usually forward/back (Z axis) for camera
-            if (Math.abs(moveY) > 0.1) camera.translateZ(moveY * speed);
-            if (Math.abs(moveX) > 0.1) camera.translateX(moveX * speed);
+            // Update Time UI
+            const hour = Math.floor(gameState.time * 24);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            document.getElementById('time-display').innerText = `Day ${gameState.day} - ${hour%12||12}:00 ${ampm}`;
 
-            // Flashlight follows camera
-            light.position.copy(camera.position);
-            const dir = new THREE.Vector3();
-            camera.getWorldDirection(dir);
-            light.target.position.copy(camera.position).add(dir);
+            // 2. Player Movement
+            const speed = 0.15;
+            if (moveX !== 0 || moveY !== 0) {
+                playerGroup.position.x += moveX * speed;
+                playerGroup.position.z += moveY * speed;
+                playerGroup.lookAt(playerGroup.position.x + moveX, playerGroup.position.y, playerGroup.position.z + moveY);
+            }
 
-            if(battery > 0) {
-                battery -= 0.03;
-                document.getElementById('battery').innerText = Math.floor(battery);
-            } else {
-                light.intensity = 0; // Lights out
+            // 3. Camera Follow (Third Person)
+            camera.position.x = playerGroup.position.x;
+            camera.position.z = playerGroup.position.z + 10;
+            camera.position.y = 8;
+            camera.lookAt(playerGroup.position);
+
+            // 4. Proximity Check
+            const pPos = playerGroup.position;
+            const btn = document.getElementById('interact-btn');
+            gameState.nearbyObject = null;
+            btn.style.display = 'none';
+
+            // Check Fire
+            if (pPos.distanceTo(fireGroup.position) < 4) {
+                gameState.nearbyObject = 'fire';
+                btn.innerText = '🔥';
+                btn.style.display = 'flex';
+            }
+            // Check Bench
+            else if (pPos.distanceTo(bench.position) < 3) {
+                gameState.nearbyObject = 'bench';
+                btn.innerText = '🛠️';
+                btn.style.display = 'flex';
+            }
+            // Check Trees
+            else {
+                for(let t of trees) {
+                    if (pPos.distanceTo(t.position) < 3) {
+                        gameState.nearbyObject = 'tree';
+                        btn.innerText = '🪓';
+                        btn.style.display = 'flex';
+                        break;
+                    }
+                }
             }
 
             renderer.render(scene, camera);
         }
         animate();
 
-        // Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
