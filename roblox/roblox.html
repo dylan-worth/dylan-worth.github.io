@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BloxHome - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html" style="color:white;">Games</a>
+            <a href="roblox-char.html">Avatar</a>
+            <a href="roblox-bucs.html">Store</a>
+            <a href="roblox-mov.html">Movement Lab</a>
+        </div>
+        <div class="currency-display">R$ <span id="r-amount">0</span></div>
+    </nav>
+
+    <div class="container">
+        <h2>Recommended For You</h2>
+        <div class="game-grid">
+            <div class="card" onclick="window.location.href='99nights.html'">
+                <div class="card-img" style="background:#2d3436;">🌲</div>
+                <div class="card-content">
+                    <h3>99 Nights</h3>
+                    <p>Survival Horror</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="window.location.href='brookhaven.html'">
+                <div class="card-img" style="background:#0984e3;">🏡</div>
+                <div class="card-content">
+                    <h3>Brookhaven RP</h3>
+                    <p>Town & City</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="window.location.href='rainbowfriends.html'">
+                <div class="card-img" style="background:#6c5ce7;">📦</div>
+                <div class="card-content">
+                    <h3>Rainbow Friends</h3>
+                    <p>Horror Puzzle</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load Currency on every page
+        let bucs = localStorage.getItem('robux') || 0;
+        document.getElementById('r-amount').innerText = bucs;
+    </script>
+</body>
+</html>
