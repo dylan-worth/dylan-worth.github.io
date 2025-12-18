@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movement Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html">Games</a>
+            <a href="roblox-char.html">Avatar</a>
+            <a href="roblox-bucs.html">Store</a>
+            <a href="roblox-mov.html" style="color:white;">Movement Lab</a>
+        </div>
+        <div class="currency-display">R$ <span id="r-amount">0</span></div>
+    </nav>
+
+    <div class="container">
+        <h2>Physics Sandbox</h2>
+        <p>Use WASD to Move. Space to Jump. Shift to Sprint.</p>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+    </div>
+
+    <script>
+        document.getElementById('r-amount').innerText = localStorage.getItem('robux') || 0;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let player = { x: 400, y: 250, w: 30, h: 30, vx: 0, vy: 0, speed: 4 };
+        let keys = {};
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        function update() {
+            // Speed Modifier
+            let s = keys['Shift'] ? player.speed * 2 : player.speed;
+
+            // Friction
+            player.vx *= 0.8; 
+            player.vy *= 0.8;
+
+            if (keys['w']) player.vy -= 1;
+            if (keys['s']) player.vy += 1;
+            if (keys['a']) player.vx -= 1;
+            if (keys['d']) player.vx += 1;
+            
+            // Space Jump (fake 2d top down jump effect)
+            if (keys[' ']) { 
+                ctx.shadowBlur = 20; 
+                ctx.shadowColor = "black";
+            } else {
+                ctx.shadowBlur = 0;
+            }
+
+            player.x += player.vx * s * 0.1;
+            player.y += player.vy * s * 0.1;
+
+            // Boundaries
+            if(player.x < 0) player.x = 0;
+            if(player.x > 770) player.x = 770;
+            if(player.y < 0) player.y = 0;
+            if(player.y > 470) player.y = 470;
+        }
+
+        function draw() {
+            ctx.clearRect(0,0,800,500);
+            
+            // Grid floor
+            ctx.strokeStyle = "#444";
+            for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,500); ctx.stroke(); }
+            for(let i=0; i<500; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(800,i); ctx.stroke(); }
+
+            // Player
+            ctx.fillStyle = localStorage.getItem('av-torso') || "#0984e3";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            
+            // Physics Info
+            ctx.fillStyle = "white";
+            ctx.font = "16px monospace";
+            ctx.fillText(`Velocity X: ${player.vx.toFixed(2)}`, 10, 20);
+            ctx.fillText(`Velocity Y: ${player.vy.toFixed(2)}`, 10, 40);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>
