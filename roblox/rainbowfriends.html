@@ -3,56 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rainbow Friends 3D</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Rainbow Friends</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="roblox-joystick.js"></script>
-    <script src="roblox-cam.js"></script> <style>
-        body { overflow: hidden; background: #000; }
+    <script src="roblox-cam.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; }
         #game-container { position: relative; width: 100%; height: 100vh; }
-        #touch-layer { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5; }
-        .hud { position: absolute; top: 20px; width: 100%; text-align: center; color: white; font-size: 24px; font-weight: bold; pointer-events: none; z-index: 10; }
-        .exit-link { position:absolute; top:10px; left:10px; z-index:20; color:white; background:rgba(255,255,255,0.1); padding:5px 10px; text-decoration:none; border-radius:5px; }
+        
+        #touch-layer { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 10; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+
+        .hud {
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: white; font-size: 24px; font-weight: bold;
+            text-shadow: 0 0 10px #000;
+        }
+
+        .exit-btn {
+            position: absolute; top: 10px; left: 10px; pointer-events: auto;
+            background: rgba(255,255,255,0.2); color: white; padding: 8px 12px;
+            border-radius: 8px; text-decoration: none; font-weight: bold;
+        }
+
+        /* JOYSTICK */
+        #joystick-zone {
+            position: absolute; bottom: 80px; left: 40px;
+            width: 100px; height: 100px;
+            background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; pointer-events: auto; z-index: 30;
+        }
+        #joystick-knob {
+            position: absolute; top: 50%; left: 50%;
+            width: 40px; height: 40px;
+            background: rgba(255, 255, 255, 0.8); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
+        }
     </style>
 </head>
 <body>
+
     <div id="game-container">
         <div id="touch-layer"></div>
-        <a href="roblox.html" class="exit-link">Exit</a>
-        <div class="hud">Cubes: <span id="score">0</span>/5</div>
+        
+        <div id="ui-layer">
+            <a href="roblox.html" class="exit-btn">Exit</a>
+            <div class="hud">Collect Boxes: <span id="score">0</span>/5</div>
+        </div>
+
+        <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
 
     <script>
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x2d3436);
+        scene.background = new THREE.Color(0x111111);
+        scene.fog = new THREE.Fog(0x111111, 10, 50);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         container.insertBefore(renderer.domElement, document.getElementById('touch-layer'));
 
-        // *** INIT CAMERA ***
+        // *** INIT ROBLOX CAMERA ***
         const rCam = new RobloxCamera(camera, document.getElementById('touch-layer'));
 
+        // Environment
         const light = new THREE.PointLight(0xffffff, 1, 100);
         light.position.set(0, 20, 0); scene.add(light);
         scene.add(new THREE.AmbientLight(0x404040));
 
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x636e72 }));
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x333333 }));
         floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-        const player = { x: 0, z: 0, speed: 0.3 };
-        const playerMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
-        playerMesh.position.y = 1; scene.add(playerMesh);
+        // Player Box
+        const player = new THREE.Group();
+        const pMesh = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3, 1.5), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
+        pMesh.position.y = 1.5;
+        player.add(pMesh);
+        scene.add(player);
 
-        const blue = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 5, 12), new THREE.MeshStandardMaterial({ color: 0x0984e3 }));
-        blue.position.set(20, 2.5, -20); scene.add(blue);
+        // BLUE (Monster)
+        const blue = new THREE.Group();
+        const bBody = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 6, 12), new THREE.MeshStandardMaterial({ color: 0x0984e3 }));
+        bBody.position.y = 3;
+        const bEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({color:0xffffff})); bEyeL.position.set(1, 5, 1.5);
+        const bEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({color:0xffffff})); bEyeR.position.set(-1, 5, 1.5);
+        blue.add(bBody); blue.add(bEyeL); blue.add(bEyeR);
+        blue.position.set(30, 0, -30);
+        scene.add(blue);
 
+        // Boxes
         let boxes = [];
         for(let i=0; i<5; i++) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({color: 0xff9f43}));
-            b.position.set((Math.random()-0.5)*60, 0.75, (Math.random()-0.5)*60);
+            const b = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff9f43}));
+            b.position.set((Math.random()-0.5)*80, 1, (Math.random()-0.5)*80);
             scene.add(b); boxes.push(b);
         }
 
@@ -61,7 +108,7 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Movement (Camera Relative)
+            // Movement
             if (window.joystick && window.joystick.active) {
                 const moveX = window.joystick.getX(); const moveY = window.joystick.getY();
                 const angle = rCam.theta;
@@ -71,34 +118,39 @@
                 const dx = (rX * moveX) + (fX * moveY);
                 const dz = (rZ * moveX) + (fZ * moveY);
                 
-                player.x += dx * player.speed;
-                player.z += dz * player.speed;
-                playerMesh.position.set(player.x, 1, player.z);
-                playerMesh.rotation.y = Math.atan2(dx, dz);
+                player.position.x += dx * 0.3;
+                player.position.z += dz * 0.3;
+                player.rotation.y = Math.atan2(dx, dz);
             }
 
-            // Update Camera
-            rCam.update(playerMesh.position);
+            rCam.update(player.position);
 
-            // Monster Logic
-            const dist = Math.sqrt((player.x - blue.position.x)**2 + (player.z - blue.position.z)**2);
-            if(dist > 1.5) {
-                blue.position.x += (player.x - blue.position.x) * 0.015;
-                blue.position.z += (player.z - blue.position.z) * 0.015;
-            } else { alert("CAUGHT!"); location.reload(); }
+            // Blue AI (Simple Chase)
+            const dist = player.position.distanceTo(blue.position);
+            if(dist > 3) {
+                blue.lookAt(player.position);
+                blue.position.z += Math.cos(blue.rotation.y) * 0.12;
+                blue.position.x += Math.sin(blue.rotation.y) * 0.12;
+            } else {
+                alert("JUMPSCARE! Blue caught you.");
+                location.reload();
+            }
 
-            // Box Logic
+            // Box Collection
             for(let i=boxes.length-1; i>=0; i--) {
-                const bDist = Math.sqrt((player.x - boxes[i].position.x)**2 + (player.z - boxes[i].position.z)**2);
-                if(bDist < 2) {
+                const bDist = player.position.distanceTo(boxes[i].position);
+                if(bDist < 3) {
                     scene.remove(boxes[i]); boxes.splice(i, 1); collected++;
                     document.getElementById('score').innerText = collected;
-                    if(collected === 5) { alert("YOU WON!"); location.href="roblox.html"; }
+                    if(collected === 5) { alert("YOU SURVIVED!"); location.href="roblox.html"; }
                 }
+                boxes[i].rotation.y += 0.05;
             }
+            
             renderer.render(scene, camera);
         }
         animate();
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     </script>
 </body>
 </html>
