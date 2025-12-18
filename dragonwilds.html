@@ -3,95 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS: Dragon Wilds Survival</title>
+    <title>Dragon Wilds: Smithing Update</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Verdana', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
-        /* --- UI LAYOUT --- */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
-        }
+        /* UI LAYOUT */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-        /* 1. MINIMAP */
+        /* MINIMAP */
         #minimap-container {
             position: absolute; top: 10px; right: 10px;
-            width: 120px; height: 120px;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #5d5d5d;
-            border-radius: 50%;
-            overflow: hidden;
+            width: 100px; height: 100px;
+            background: rgba(0,0,0,0.5); border: 2px solid #5d5d5d; border-radius: 50%; overflow: hidden; pointer-events: auto;
         }
-        #minimap-canvas { width: 100%; height: 100%; }
 
-        /* 2. SURVIVAL HUD */
-        #stats-panel {
-            position: absolute; top: 10px; left: 10px;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        .stat-bar {
-            width: 150px; height: 18px;
-            background: #333; border: 1px solid #000;
-            position: relative;
-        }
+        /* STATS */
+        #stats-panel { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .stat-bar { width: 140px; height: 16px; background: #333; border: 1px solid #000; position: relative; }
         .bar-fill { height: 100%; transition: width 0.2s; }
         #hp-fill { background: #d63031; width: 100%; }
         #run-fill { background: #fdcb6e; width: 100%; }
-        .stat-icon {
-            position: absolute; top: 0; left: 4px; font-size: 12px; color: #fff; line-height: 18px; text-shadow: 1px 1px 0 #000;
-        }
+        .stat-icon { position: absolute; top: -1px; left: 4px; font-size: 10px; color: #fff; text-shadow: 1px 1px 0 #000; }
 
-        /* 3. INVENTORY */
-        #inventory {
-            position: absolute; bottom: 180px; right: 10px;
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;
+        /* INVENTORY (RS Style 28 Slots) */
+        #inventory-container {
+            position: absolute; bottom: 100px; right: 10px;
+            width: 180px; background: #3c3c3c; border: 2px solid #1a1a1a;
+            display: none; /* Hidden by default */
+            grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 5px;
+            pointer-events: auto;
         }
         .inv-slot {
-            width: 40px; height: 40px;
-            background: #3e3e3e; border: 2px inset #5a5a5a;
-            display: flex; justify-content: center; align-items: center;
+            width: 40px; height: 36px; background: #2b2b2b; border: 1px inset #555;
+            display: flex; justify-content: center; align-items: center; position: relative;
         }
-        .inv-item { width: 30px; height: 30px; border-radius: 4px; }
-        .log-item { background: #654321; box-shadow: inset 2px 2px #8b5a2b; }
+        .inv-item { width: 24px; height: 24px; border-radius: 2px; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        /* Item Colors */
+        .item-log { background: #654321; }
+        .item-copper { background: #e67e22; border: 1px solid #d35400; }
+        .item-tin { background: #95a5a6; border: 1px solid #7f8c8d; }
+        .item-bar { background: #cd7f32; border: 1px solid #fff; } /* Bronze Bar */
 
-        /* XP DROPS */
-        .xp-drop {
-            position: absolute; color: #fb1; font-weight: bold; font-size: 18px;
+        #bag-btn {
+            position: absolute; bottom: 20px; right: 20px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #5d4037; border: 2px solid #a1887f;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 24px; pointer-events: auto; cursor: pointer;
+        }
+
+        /* TELEPORT BTN */
+        #home-btn {
+            position: absolute; top: 60px; left: 10px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #6c5ce7; border: 2px solid #a29bfe;
+            color: white; font-size: 10px; display: flex; justify-content: center; align-items: center;
+            pointer-events: auto; font-weight: bold;
+        }
+
+        /* TEXT POPS */
+        .float-text {
+            position: absolute; font-weight: bold; font-size: 16px;
             text-shadow: 1px 1px 0 #000; pointer-events: none;
             animation: floatUp 1.5s forwards;
         }
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
+        @keyframes floatUp { 0% {transform: translateY(0); opacity: 1;} 100% {transform: translateY(-50px); opacity: 0;} }
 
         /* CONTROLS */
-        #controls-container {
-            position: absolute; bottom: 20px; left: 20px; right: 20px; height: 150px;
-            pointer-events: none; display: flex; justify-content: space-between; align-items: flex-end;
-        }
         #joystick-zone {
+            position: absolute; bottom: 20px; left: 20px;
             width: 120px; height: 120px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
-            pointer-events: auto; position: relative;
+            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            pointer-events: auto;
         }
         #joystick-nipple {
             position: absolute; top: 50%; left: 50%;
-            width: 50px; height: 50px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%);
         }
-        .btn-group { display: flex; gap: 15px; pointer-events: auto; padding-bottom: 10px; }
-        .action-btn {
-            width: 70px; height: 70px; border-radius: 50%;
-            border: 3px solid #777; background: rgba(0,0,0,0.6);
-            color: white; font-weight: bold; font-size: 12px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; cursor: pointer;
-        }
-        #btn-axe { border-color: #a29bfe; }
-        #btn-jump { border-color: #55efc4; }
-
     </style>
 </head>
 <body>
@@ -101,26 +89,16 @@
         <div class="stat-bar"><div id="hp-fill" class="bar-fill"></div><span class="stat-icon">HP</span></div>
         <div class="stat-bar"><div id="run-fill" class="bar-fill"></div><span class="stat-icon">RUN</span></div>
     </div>
+    <div id="home-btn">HOME</div>
+    
+    <div id="minimap-container"><canvas id="minimap-canvas" width="100" height="100"></canvas></div>
 
-    <div id="minimap-container">
-        <canvas id="minimap-canvas" width="120" height="120"></canvas>
-    </div>
-
-    <div id="inventory">
-        <div class="inv-slot" id="slot-0"></div>
-        <div class="inv-slot" id="slot-1"></div>
-        <div class="inv-slot" id="slot-2"></div>
-        <div class="inv-slot" id="slot-3"></div>
-    </div>
+    <div id="inventory-container">
+        </div>
+    <div id="bag-btn">🎒</div>
 </div>
 
-<div id="controls-container">
-    <div id="joystick-zone"><div id="joystick-nipple"></div></div>
-    <div class="btn-group">
-        <div id="btn-axe" class="action-btn"><span>THROW</span><span>AXE</span></div>
-        <div id="btn-jump" class="action-btn"><span>JUMP</span></div>
-    </div>
-</div>
+<div id="joystick-zone"><div id="joystick-nipple"></div></div>
 
 <script type="importmap">
   {
@@ -135,10 +113,12 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // --- 1. SETUP & ENVIRONMENT ---
+    // --- 1. SETUP & DAY/NIGHT ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB);
-    scene.fog = new THREE.Fog(0x87CEEB, 20, 90);
+    const skyColor = new THREE.Color(0x87CEEB);
+    const nightColor = new THREE.Color(0x050510);
+    scene.background = skyColor.clone();
+    scene.fog = new THREE.Fog(scene.background, 20, 90);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 15, 20);
@@ -149,14 +129,10 @@
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false;
-    controls.enableDamping = true;
-    controls.minDistance = 5;
-    controls.maxDistance = 30;
-    controls.maxPolarAngle = Math.PI / 2.1;
+    controls.enablePan = false; controls.minDistance = 5; controls.maxDistance = 35; controls.maxPolarAngle = Math.PI/2.1;
 
     // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambient);
     const sun = new THREE.DirectionalLight(0xfff0dd, 1.2);
     sun.position.set(50, 80, 50);
@@ -165,351 +141,394 @@
     scene.add(sun);
 
     // Ground
-    const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(300, 300),
-        new THREE.MeshStandardMaterial({ color: 0x2e8b57 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
 
-    // --- 2. OBJECTS (Trees, Player, Fox, Dragon) ---
-    
-    // Trees
+    // --- 2. GAME OBJECTS ---
+    const interactables = []; // Raycast targets
     const trees = [];
-    const treeGeo = new THREE.ConeGeometry(2.5, 7, 7);
-    const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 2, 6);
-    const treeMat = new THREE.MeshStandardMaterial({ color: 0x155e19 }); // Darker Green
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+    const rocks = [];
 
+    // Materials
+    const mTree = new THREE.MeshStandardMaterial({ color: 0x155e19 });
+    const mTrunk = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+    const mRock = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.9 });
+    const mCopper = new THREE.MeshStandardMaterial({ color: 0xd35400 });
+    const mTin = new THREE.MeshStandardMaterial({ color: 0xbdc3c7 });
+
+    // Spawn Tree
     function spawnTree(x, z) {
-        const grp = new THREE.Group();
-        const t = new THREE.Mesh(trunkGeo, trunkMat); t.position.y=1; t.castShadow=true; grp.add(t);
-        const l = new THREE.Mesh(treeGeo, treeMat); l.position.y=4.5; l.castShadow=true; grp.add(l);
-        grp.position.set(x, 0, z);
-        grp.scale.setScalar(0.8 + Math.random()*0.5);
-        grp.userData = { hp: 1 };
-        scene.add(grp);
-        trees.push(grp);
+        const g = new THREE.Group();
+        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.8,2,6), mTrunk); t.position.y=1; t.castShadow=true; g.add(t);
+        const l = new THREE.Mesh(new THREE.ConeGeometry(2.5,7,7), mTree); l.position.y=4.5; l.castShadow=true; g.add(l);
+        g.position.set(x,0,z); g.userData = { type: 'tree', hp: 3, maxHp: 3 };
+        scene.add(g); trees.push(g); interactables.push(l);
     }
 
-    for(let i=0; i<100; i++) {
-        const x = (Math.random()-0.5)*200; 
-        const z = (Math.random()-0.5)*200;
-        if(Math.abs(x)>10 || Math.abs(z)>10) spawnTree(x, z);
+    // Spawn Ore Rock
+    function spawnRock(x, z, type) {
+        const g = new THREE.Group();
+        const r = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5), mRock);
+        r.position.y = 1; r.castShadow=true; r.scale.set(1, 0.7, 1); g.add(r);
+        
+        // Ore Veins
+        const veins = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6), type === 'copper' ? mCopper : mTin);
+        veins.position.y = 1; veins.scale.set(1.05, 0.75, 1.05);
+        // Make veins stick out slightly by using noise or just scaling - simplified here just scaling
+        g.add(veins);
+
+        g.position.set(x,0,z);
+        g.userData = { type: 'rock', oreType: type, active: true };
+        scene.add(g); rocks.push(g); interactables.push(veins);
     }
 
-    // Player
+    // Generate World
+    for(let i=0; i<60; i++) spawnTree((Math.random()-0.5)*180, (Math.random()-0.5)*180);
+    for(let i=0; i<15; i++) spawnRock((Math.random()-0.5)*120, (Math.random()-0.5)*120, 'copper');
+    for(let i=0; i<15; i++) spawnRock((Math.random()-0.5)*120, (Math.random()-0.5)*120, 'tin');
+
+    // --- 3. SMITHING AREA ---
+    const smithZone = new THREE.Group();
+    smithZone.position.set(10, 0, -10);
+    scene.add(smithZone);
+
+    // Furnace
+    const furnGeo = new THREE.BoxGeometry(4, 3, 4);
+    const furnMat = new THREE.MeshStandardMaterial({ color: 0x444 });
+    const furnace = new THREE.Mesh(furnGeo, furnMat);
+    furnace.position.set(0, 1.5, 0); furnace.castShadow=true;
+    furnace.userData = { type: 'furnace' };
+    smithZone.add(furnace); interactables.push(furnace);
+    // Fire Light
+    const fireLight = new THREE.PointLight(0xffaa00, 2, 10);
+    fireLight.position.set(0, 2, 2); smithZone.add(fireLight);
+
+    // Anvil
+    const anvilGeo = new THREE.BoxGeometry(2, 1.5, 1);
+    const anvilMat = new THREE.MeshStandardMaterial({ color: 0x222, metalness: 0.8 });
+    const anvil = new THREE.Mesh(anvilGeo, anvilMat);
+    anvil.position.set(5, 0.75, 0); anvil.castShadow=true;
+    anvil.userData = { type: 'anvil' };
+    smithZone.add(anvil); interactables.push(anvil);
+
+    // Bank Chest
+    const chestGeo = new THREE.BoxGeometry(2, 1.5, 1.5);
+    const chestMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
+    const chest = new THREE.Mesh(chestGeo, chestMat);
+    chest.position.set(-5, 0.75, 0); chest.castShadow=true;
+    smithZone.add(chest);
+
+    // --- 4. PLAYER & EQUIPMENT ---
     const playerGroup = new THREE.Group();
     scene.add(playerGroup);
     const charBody = new THREE.Group();
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x336699 }));
+    
+    // Armors
+    const armorMats = {
+        base: new THREE.MeshStandardMaterial({ color: 0x336699 }),
+        bronze: new THREE.MeshStandardMaterial({ color: 0xcd7f32, metalness: 0.4 }),
+        iron: new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.6 }),
+        dragon: new THREE.MeshStandardMaterial({ color: 0x880000, metalness: 0.5 })
+    };
+
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), armorMats.base);
     torso.position.y = 2.25; torso.castShadow = true; charBody.add(torso);
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({ color: 0xf5cca8 }));
     head.position.y = 3.3; charBody.add(head);
-    function createLimb(x, y, color) {
+
+    // Limbs
+    const limbs = [];
+    function createLimb(x, y, mat) {
         const p = new THREE.Group(); p.position.set(x, y, 0);
-        const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), new THREE.MeshStandardMaterial({ color: color }));
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), mat);
         m.position.y = -0.6; m.castShadow = true; p.add(m);
-        return p;
+        limbs.push(p); return p;
     }
-    const lArm = createLimb(-0.7, 2.8, 0x336699); charBody.add(lArm);
-    const rArm = createLimb(0.7, 2.8, 0x336699); charBody.add(rArm);
-    const lLeg = createLimb(-0.3, 1.5, 0x555555); charBody.add(lLeg);
-    const rLeg = createLimb(0.3, 1.5, 0x555555); charBody.add(rLeg);
+    const lArm = createLimb(-0.7, 2.8, armorMats.base); charBody.add(lArm);
+    const rArm = createLimb(0.7, 2.8, armorMats.base); charBody.add(rArm);
+    const lLeg = createLimb(-0.3, 1.5, new THREE.MeshStandardMaterial({color:0x555})); charBody.add(lLeg);
+    const rLeg = createLimb(0.3, 1.5, new THREE.MeshStandardMaterial({color:0x555})); charBody.add(rLeg);
     playerGroup.add(charBody);
 
-    // Fox
-    const foxGroup = new THREE.Group();
-    foxGroup.position.set(5, 0, 5);
-    scene.add(foxGroup);
-    const fMat = new THREE.MeshStandardMaterial({ color: 0xd9580d });
-    const fWht = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const fBlk = new THREE.MeshStandardMaterial({ color: 0x221100 });
-    const fBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 2.5), fMat); fBody.position.y=1; foxGroup.add(fBody);
-    const fHead = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.8, 1), fMat); fHead.position.set(0,1.6,1.3); foxGroup.add(fHead);
-    const fNose = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.6), fWht); fNose.position.set(0,1.5,2.0); foxGroup.add(fNose);
-    const fTail = new THREE.Group(); fTail.position.set(0,1.2,-1.2); 
-    fTail.add(new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.25,1.2), fMat));
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.35), fWht); tip.position.y=0.8; fTail.add(tip);
-    fTail.rotation.x = -0.8; foxGroup.add(fTail);
-    const fLegs = [];
-    [[-0.4,1], [0.4,1], [-0.4,-1], [0.4,-1]].forEach(p=>{
-        const l=new THREE.Mesh(new THREE.BoxGeometry(0.25,1,0.25), fBlk); l.position.set(p[0],0.5,p[1]); foxGroup.add(l); fLegs.push(l);
-    });
+    // Pickaxe Model (Hidden default)
+    const pickGroup = new THREE.Group();
+    const pickHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.1), new THREE.MeshStandardMaterial({color: 0x555}));
+    const pickHandle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 0.1), new THREE.MeshStandardMaterial({color: 0x654321}));
+    pickHandle.position.y = -0.3; pickGroup.add(pickHead); pickGroup.add(pickHandle);
+    pickGroup.position.set(0, -1, 0.5); pickGroup.rotation.x = Math.PI/2;
+    rArm.children[0].add(pickGroup);
+    pickGroup.visible = false;
 
-    // --- NEW FEATURE 1: GREEN DRAGON ---
-    const dragonGroup = new THREE.Group();
-    dragonGroup.position.set(-20, 0, -20);
-    scene.add(dragonGroup);
+    // --- 5. INVENTORY SYSTEM ---
+    const inventory = [];
+    const MAX_SLOTS = 28;
+    const invContainer = document.getElementById('inventory-container');
     
-    // Dragon Geometry
-    const dSkin = new THREE.MeshStandardMaterial({ color: 0x2ecc71 }); // Dragon Green
-    const dBelly = new THREE.MeshStandardMaterial({ color: 0xf1c40f }); // Yellow
-    // Body
-    const dBody = new THREE.Mesh(new THREE.BoxGeometry(2, 2.5, 5), dSkin);
-    dBody.position.y = 2.5; dragonGroup.add(dBody);
-    // Head
-    const dHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 2.5), dSkin);
-    dHead.position.set(0, 4.5, 3.5); dragonGroup.add(dHead);
-    // Wings
-    const dWingL = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 3), dSkin); dWingL.position.set(-3.5, 4, 1); dragonGroup.add(dWingL);
-    const dWingR = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 3), dSkin); dWingR.position.set(3.5, 4, 1); dragonGroup.add(dWingR);
-    // Tail
-    const dTail = new THREE.Mesh(new THREE.ConeGeometry(1, 6, 4), dSkin); 
-    dTail.rotation.x = -1.2; dTail.position.set(0, 2, -4); dragonGroup.add(dTail);
-
-    // --- 3. GAME STATE & LOGIC ---
-    let hp = 100;
-    let runEnergy = 100;
-    let inventory = 0;
-    const projectiles = [];
-    const particles = [];
-
-    // --- UI UPDATES ---
-    function updateHUD() {
-        document.getElementById('hp-fill').style.width = hp + '%';
-        document.getElementById('run-fill').style.width = runEnergy + '%';
+    // Create UI Grid
+    for(let i=0; i<MAX_SLOTS; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'inv-slot';
+        slot.id = `inv-${i}`;
+        invContainer.appendChild(slot);
     }
 
-    function addInventoryItem() {
-        if(inventory < 4) {
-            const slot = document.getElementById('slot-' + inventory);
-            const item = document.createElement('div');
-            item.className = 'inv-item log-item';
-            slot.appendChild(item);
-            inventory++;
-        }
+    function toggleInventory() {
+        invContainer.style.display = invContainer.style.display === 'grid' ? 'none' : 'grid';
+    }
+    document.getElementById('bag-btn').addEventListener('click', toggleInventory);
+
+    function addItem(type) {
+        if(inventory.length >= MAX_SLOTS) { spawnFloatText(playerGroup.position, "Inventory Full!", "red"); return false; }
+        inventory.push(type);
+        updateInvUI();
+        return true;
+    }
+    
+    function removeItem(type) {
+        const idx = inventory.indexOf(type);
+        if(idx > -1) { inventory.splice(idx, 1); updateInvUI(); return true; }
+        return false;
     }
 
-    function spawnXP(x, y, z) {
-        const div = document.createElement('div');
-        div.className = 'xp-drop';
-        div.textContent = "+25 XP";
-        document.body.appendChild(div);
+    function hasItem(type) { return inventory.includes(type); }
 
-        // Project 3D pos to 2D screen
-        const v = new THREE.Vector3(x, y+2, z);
-        v.project(camera);
-        const sx = (v.x * .5 + .5) * window.innerWidth;
-        const sy = (-(v.y * .5) + .5) * window.innerHeight;
-        div.style.left = sx + 'px';
-        div.style.top = sy + 'px';
-
-        setTimeout(() => div.remove(), 1400);
-    }
-
-    // --- MINIMAP LOGIC ---
-    const ctx = document.getElementById('minimap-canvas').getContext('2d');
-    function drawMinimap() {
-        ctx.fillStyle = '#222'; ctx.fillRect(0,0,120,120);
-        
-        // Draw Player (Center)
-        ctx.fillStyle = '#fff'; 
-        ctx.beginPath(); ctx.arc(60,60,3,0,Math.PI*2); ctx.fill();
-
-        // Helper to map world pos to minimap
-        const mapScale = 2; // Zoom level
-        function drawDot(obj, color, size) {
-            const dx = obj.position.x - playerGroup.position.x;
-            const dz = obj.position.z - playerGroup.position.z;
-            const mx = 60 + dx * mapScale;
-            const mz = 60 + dz * mapScale; // Z is Y on 2D map usually
-            
-            // Clamp to circle
-            const dist = Math.sqrt((mx-60)**2 + (mz-60)**2);
-            if(dist < 58) {
-                ctx.fillStyle = color;
-                ctx.beginPath(); ctx.arc(mx,mz,size,0,Math.PI*2); ctx.fill();
+    function updateInvUI() {
+        for(let i=0; i<MAX_SLOTS; i++) {
+            const slot = document.getElementById(`inv-${i}`);
+            slot.innerHTML = '';
+            if(inventory[i]) {
+                const img = document.createElement('div');
+                img.className = `inv-item item-${inventory[i]}`;
+                slot.appendChild(img);
             }
         }
-
-        // Draw Dragon
-        drawDot(dragonGroup, '#d63031', 4);
-        // Draw Fox
-        drawDot(foxGroup, '#e67e22', 2);
-        // Draw Trees
-        trees.forEach(t => drawDot(t, '#2ecc71', 1.5));
     }
 
+    // --- 6. GAME LOGIC & INTERACTION ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let miningTimer = 0;
+    let isMining = false;
 
-    // --- CONTROLS ---
+    // Input Interaction
+    window.addEventListener('pointerdown', (event) => {
+        // Ignore clicks on UI
+        if(event.target.closest('#ui-layer') || event.target.closest('#joystick-zone')) return;
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        const intersects = raycaster.intersectObjects(interactables);
+        if(intersects.length > 0) {
+            handleInteraction(intersects[0].object);
+        }
+    });
+
+    function handleInteraction(obj) {
+        // Find parent group for logic
+        let target = obj;
+        while(target.parent && !target.userData.type) target = target.parent;
+        
+        const type = target.userData.type;
+
+        // Distance Check
+        if(playerGroup.position.distanceTo(target.position) > 5) {
+            spawnFloatText(target.position, "Too far!", "white");
+            return;
+        }
+
+        if(type === 'rock' && target.userData.active) {
+            startMining(target);
+        } else if (type === 'furnace') {
+            smeltOre();
+        } else if (type === 'anvil') {
+            smithArmor();
+        }
+    }
+
+    function startMining(rock) {
+        if(isMining) return;
+        isMining = true;
+        pickGroup.visible = true;
+        spawnFloatText(playerGroup.position, "Mining...", "yellow");
+        
+        // Face Rock
+        playerGroup.lookAt(rock.position.x, playerGroup.position.y, rock.position.z);
+
+        setTimeout(() => {
+            if(addItem(rock.userData.oreType)) {
+                spawnFloatText(rock.position, `+1 ${rock.userData.oreType}`, "#e67e22");
+                spawnXP(rock.position, "+35 XP");
+                rock.children[1].visible = false; // Hide veins
+                rock.userData.active = false;
+                
+                // Respawn
+                setTimeout(() => {
+                    rock.children[1].visible = true;
+                    rock.userData.active = true;
+                }, 5000);
+            }
+            isMining = false;
+            pickGroup.visible = false;
+        }, 1500);
+    }
+
+    function smeltOre() {
+        if(hasItem('copper') && hasItem('tin')) {
+            spawnFloatText(playerGroup.position, "Smelting...", "orange");
+            setTimeout(() => {
+                removeItem('copper');
+                removeItem('tin');
+                addItem('bar');
+                spawnFloatText(playerGroup.position, "+1 Bronze Bar", "#cd7f32");
+                spawnXP(playerGroup.position, "+15 XP");
+            }, 1000);
+        } else {
+            spawnFloatText(playerGroup.position, "Need Copper & Tin!", "red");
+        }
+    }
+
+    function smithArmor() {
+        if(hasItem('bar')) {
+            spawnFloatText(playerGroup.position, "Smithing...", "white");
+            // Particle Sparks
+            for(let i=0; i<5; i++) spawnSpark(playerGroup.position);
+            
+            setTimeout(() => {
+                removeItem('bar');
+                // Change Armor Appearance
+                torso.material = armorMats.bronze;
+                lArm.children[0].material = armorMats.bronze;
+                rArm.children[0].material = armorMats.bronze;
+                spawnFloatText(playerGroup.position, "Bronze Armor Crafted!", "#cd7f32");
+                spawnLevelUp();
+            }, 1000);
+        } else {
+            spawnFloatText(playerGroup.position, "Need Bronze Bar!", "red");
+        }
+    }
+
+    // --- 7. EFFECTS & PARTICLES ---
+    function spawnFloatText(pos, msg, color) {
+        const div = document.createElement('div');
+        div.className = 'float-text';
+        div.textContent = msg;
+        div.style.color = color;
+        document.body.appendChild(div);
+        
+        const v = pos.clone().project(camera);
+        const x = (v.x * .5 + .5) * window.innerWidth;
+        const y = (-(v.y * .5) + .5) * window.innerHeight;
+        div.style.left = x + 'px'; div.style.top = y + 'px';
+        setTimeout(() => div.remove(), 1400);
+    }
+    
+    function spawnXP(pos, msg) { spawnFloatText(pos, msg, "#fb1"); }
+
+    const particles = [];
+    function spawnSpark(pos) {
+        const p = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshBasicMaterial({color:0xffff00}));
+        p.position.copy(pos).add(new THREE.Vector3(0,1,0));
+        const vel = new THREE.Vector3((Math.random()-.5), 1, (Math.random()-.5)).multiplyScalar(0.2);
+        scene.add(p); particles.push({mesh:p, vel:vel, life:30});
+    }
+
+    function spawnLevelUp() {
+        // Golden Cylinder flash
+        const g = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 4, 8), new THREE.MeshBasicMaterial({color: 0xffd700, transparent: true, opacity: 0.5}));
+        g.position.copy(playerGroup.position);
+        scene.add(g);
+        const anim = setInterval(() => {
+            g.position.y += 0.1; g.material.opacity -= 0.05;
+            if(g.material.opacity <= 0) { clearInterval(anim); scene.remove(g); }
+        }, 30);
+    }
+
+    // --- 8. MOVEMENT & ANIMATION ---
     const joyZone = document.getElementById('joystick-zone');
     const joyNip = document.getElementById('joystick-nipple');
     const moveVector = new THREE.Vector2(0,0);
     let joyId = null;
 
-    joyZone.addEventListener('touchstart', e => {
-        e.preventDefault(); if(joyId!==null) return;
-        joyId=e.changedTouches[0].identifier; handleJoy(e.changedTouches[0]);
-    });
-    joyZone.addEventListener('touchmove', e => {
-        e.preventDefault(); for(let t of e.changedTouches) if(t.identifier===joyId) handleJoy(t);
-    });
-    const endJoy = () => { joyId=null; moveVector.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
+    joyZone.addEventListener('touchstart', e=>{ e.preventDefault(); if(joyId!==null)return; joyId=e.changedTouches[0].identifier; handleJoy(e.changedTouches[0]); });
+    joyZone.addEventListener('touchmove', e=>{ e.preventDefault(); for(let t of e.changedTouches) if(t.identifier===joyId) handleJoy(t); });
+    const endJoy = ()=>{ joyId=null; moveVector.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
     joyZone.addEventListener('touchend', endJoy); joyZone.addEventListener('touchcancel', endJoy);
 
-    function handleJoy(touch) {
-        const r = joyZone.getBoundingClientRect();
-        const cx = r.left+r.width/2, cy = r.top+r.height/2;
-        let dx = touch.clientX - cx, dy = touch.clientY - cy;
-        const d = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
-        const a = Math.atan2(dy, dx);
-        dx = Math.cos(a)*d; dy = Math.sin(a)*d;
-        joyNip.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        moveVector.x = dx/50; moveVector.y = dy/50;
+    function handleJoy(t) {
+        const r=joyZone.getBoundingClientRect(); const cx=r.left+r.width/2; const cy=r.top+r.height/2;
+        let dx=t.clientX-cx, dy=t.clientY-cy; const d=Math.min(Math.sqrt(dx*dx+dy*dy), 50);
+        const a=Math.atan2(dy,dx); dx=Math.cos(a)*d; dy=Math.sin(a)*d;
+        joyNip.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        moveVector.x=dx/50; moveVector.y=dy/50;
     }
 
-    let jumpVel = 0;
-    document.getElementById('btn-jump').addEventListener('pointerdown', e=>{ e.preventDefault(); if(playerGroup.position.y<=0) jumpVel=0.4; });
-    document.getElementById('btn-axe').addEventListener('pointerdown', e=>{ e.preventDefault(); spawnAxe(); });
+    document.getElementById('home-btn').addEventListener('click', () => {
+        playerGroup.position.set(0,0,0);
+        spawnLevelUp(); // Just for visual flair
+    });
 
-    function spawnAxe() {
-        const g = new THREE.Group();
-        const h = new THREE.Mesh(new THREE.BoxGeometry(0.1,1.5,0.1), new THREE.MeshStandardMaterial({color:0x654321}));
-        const b = new THREE.Mesh(new THREE.BoxGeometry(0.8,0.6,0.1), new THREE.MeshStandardMaterial({color:0xaaa, emissive:0x0ff, emissiveIntensity:0.5}));
-        b.position.y=0.5; g.add(h); g.add(b);
-        g.position.copy(playerGroup.position); g.position.y+=2.5;
-        const dir = new THREE.Vector3(0,0,1).applyQuaternion(playerGroup.quaternion);
-        projectiles.push({mesh:g, dir:dir, life:80});
-        scene.add(g);
+    // Minimap
+    const ctx = document.getElementById('minimap-canvas').getContext('2d');
+    function drawMinimap() {
+        ctx.fillStyle = '#111'; ctx.fillRect(0,0,100,100);
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(50,50,3,0,Math.PI*2); ctx.fill();
+        const s = 1.5;
+        function dot(obj,c){
+            const dx=(obj.position.x-playerGroup.position.x)*s; const dz=(obj.position.z-playerGroup.position.z)*s;
+            if(dx*dx+dz*dz < 2400) { ctx.fillStyle=c; ctx.beginPath(); ctx.arc(50+dx, 50+dz, 2, 0, Math.PI*2); ctx.fill(); }
+        }
+        trees.forEach(t=>dot(t,'#2ecc71'));
+        rocks.forEach(r=>dot(r,'#7f8c8d'));
+        dot(smithZone, '#e67e22');
     }
 
-    // --- ANIMATION LOOP ---
     const clock = new THREE.Clock();
-    let foxTimer = 0; let foxState="wander"; let foxTarget=new THREE.Vector3(5,0,5);
-    let dragonTimer = 0; let dragonTarget=new THREE.Vector3(-20,0,-20);
+    let timeOfDay = 0;
 
     function animate() {
         requestAnimationFrame(animate);
         const dt = clock.getDelta();
         const time = clock.getElapsedTime();
 
-        // 1. PLAYER MOVE
-        if(moveVector.lengthSq() > 0.01) {
+        // Day/Night Logic
+        timeOfDay += dt * 0.05; // Slow cycle
+        const dayIntensity = Math.sin(timeOfDay) * 0.5 + 0.5;
+        scene.background.lerpColors(nightColor, skyColor, dayIntensity);
+        scene.fog.color.copy(scene.background);
+        sun.intensity = dayIntensity * 1.5;
+
+        // Player Move
+        if(moveVector.lengthSq() > 0.01 && !isMining) {
             const camDir = new THREE.Vector3(); camera.getWorldDirection(camDir); camDir.y=0; camDir.normalize();
             const camRight = new THREE.Vector3().crossVectors(camDir, new THREE.Object3D().up).normalize();
-            
-            // Invert Y: Screen Up (Neg) -> World Forward (Pos)
-            const move = new THREE.Vector3().addScaledVector(camDir, -moveVector.y).addScaledVector(camRight, moveVector.x);
-            
-            if(move.lengthSq()>0) {
-                move.normalize();
-                const speed = 12 * dt;
-                playerGroup.position.add(move.multiplyScalar(speed));
-                playerGroup.rotation.y = Math.atan2(move.x, move.z);
-                
-                // Run Energy
-                runEnergy = Math.max(0, runEnergy - 5*dt);
-                
-                // Anim
-                lLeg.rotation.x = Math.sin(time*15)*0.8; rLeg.rotation.x = Math.sin(time*15+Math.PI)*0.8;
-                lArm.rotation.x = Math.sin(time*15+Math.PI)*0.8; rArm.rotation.x = Math.sin(time*15)*0.8;
+            const m = new THREE.Vector3().addScaledVector(camDir, -moveVector.y).addScaledVector(camRight, moveVector.x);
+            if(m.lengthSq()>0) {
+                m.normalize(); playerGroup.position.add(m.multiplyScalar(10*dt));
+                playerGroup.rotation.y = Math.atan2(m.x, m.z);
+                lArm.rotation.x = Math.sin(time*15)*0.8; rArm.rotation.x = Math.sin(time*15+Math.PI)*0.8;
+                lLeg.rotation.x = Math.sin(time*15+Math.PI)*0.8; rLeg.rotation.x = Math.sin(time*15)*0.8;
             }
+        } else if (isMining) {
+             // Mining Animation (Chop arm)
+             rArm.rotation.x = Math.sin(time*20) * 1.5 - 1; 
         } else {
-            // Idle / Regen
-            runEnergy = Math.min(100, runEnergy + 2*dt);
-            lLeg.rotation.x=rLeg.rotation.x=lArm.rotation.x=rArm.rotation.x=0;
-        }
-        updateHUD();
-
-        // Jump
-        if(jumpVel>0 || playerGroup.position.y>0) {
-            playerGroup.position.y+=jumpVel; jumpVel-=0.02;
-            if(playerGroup.position.y<0){ playerGroup.position.y=0; jumpVel=0; }
-        }
-
-        // 2. PROJECTILES & TREE LOGIC
-        for(let i=projectiles.length-1; i>=0; i--) {
-            const p = projectiles[i];
-            p.mesh.position.add(p.dir.clone().multiplyScalar(0.7));
-            p.mesh.rotation.z -= 0.6;
-            p.life--;
-            let hit=false;
-            for(let j=trees.length-1; j>=0; j--) {
-                const t = trees[j];
-                if(t.userData.hp>0 && p.mesh.position.distanceTo(t.position)<3) {
-                    t.userData.hp=0; hit=true;
-                    // XP Drop
-                    spawnXP(t.position.x, t.position.y, t.position.z);
-                    // Loot
-                    addInventoryItem();
-                    // Fall
-                    let fall=0;
-                    const anim=setInterval(()=>{
-                        t.rotation.x+=0.05; t.position.y-=0.1;
-                        if(++fall>20) { clearInterval(anim); scene.remove(t); }
-                    }, 20);
-                }
-            }
-            if(p.life<=0 || hit) { scene.remove(p.mesh); projectiles.splice(i,1); }
-        }
-
-        // 3. FOX AI (Wander & Dig)
-        foxTimer-=dt;
-        if(foxState==="wander") {
-            foxGroup.rotation.x=0;
-            if(foxTimer<0) {
-                foxTarget.set((Math.random()-0.5)*80, 0, (Math.random()-0.5)*80);
-                foxTimer=3+Math.random()*3;
-                if(Math.random()>0.7) foxState="dig";
-            }
-            const d = new THREE.Vector3().subVectors(foxTarget, foxGroup.position);
-            if(d.length()>1) {
-                d.normalize(); foxGroup.position.add(d.multiplyScalar(6*dt));
-                foxGroup.lookAt(foxTarget);
-                fLegs.forEach((l,k) => l.rotation.x = Math.sin(time*20 + (k%2)*Math.PI)*0.5);
-            }
-        } else {
-            // Dig
-            foxGroup.rotation.x=0.4;
-            fLegs[0].rotation.x = Math.sin(time*40)*1.0; fLegs[1].rotation.x = Math.cos(time*40)*1.0;
-            if(Math.random()>0.85) {
-                // Dirt particle
-                const p=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.3,0.3), new THREE.MeshBasicMaterial({color:0x3e2723}));
-                p.position.copy(foxGroup.position).add(new THREE.Vector3(0,0,1.5).applyQuaternion(foxGroup.quaternion));
-                scene.add(p); particles.push({mesh:p, vel:new THREE.Vector3((Math.random()-.5), 1, (Math.random()-.5)).multiplyScalar(0.2), life:30});
-            }
-            if(foxTimer<=0) { foxState="wander"; foxTimer=2; }
-        }
-
-        // 4. DRAGON AI (Patrol)
-        dragonTimer-=dt;
-        if(dragonTimer<0) {
-            dragonTarget.set((Math.random()-0.5)*150, 0, (Math.random()-0.5)*150);
-            dragonTimer=5+Math.random()*5;
-        }
-        const dragDir = new THREE.Vector3().subVectors(dragonTarget, dragonGroup.position);
-        if(dragDir.length()>1) {
-            dragDir.normalize(); dragonGroup.position.add(dragDir.multiplyScalar(5*dt));
-            dragonGroup.lookAt(dragonTarget);
-            dWingL.rotation.z = Math.sin(time*5)*0.5;
-            dWingR.rotation.z = -Math.sin(time*5)*0.5;
+             lArm.rotation.x=rArm.rotation.x=lLeg.rotation.x=rLeg.rotation.x=0;
         }
 
         // Particles
         for(let i=particles.length-1; i>=0; i--) {
-            particles[i].mesh.position.add(particles[i].vel);
-            particles[i].vel.y-=0.01; particles[i].life--;
-            if(particles[i].life<=0){ scene.remove(particles[i].mesh); particles.splice(i,1); }
+            particles[i].mesh.position.add(particles[i].vel); particles[i].life--;
+            if(particles[i].life<=0) { scene.remove(particles[i].mesh); particles.splice(i,1); }
         }
 
-        // Camera
-        controls.target.copy(playerGroup.position);
-        controls.target.y = 1;
-        controls.update();
-        
-        // Minimap
+        controls.target.copy(playerGroup.position); controls.target.y=1; controls.update();
         drawMinimap();
-
         renderer.render(scene, camera);
     }
 
-    window.addEventListener('resize', () => {
-        camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
+    window.addEventListener('resize', () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     animate();
 </script>
 </body>
