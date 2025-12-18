@@ -11,11 +11,11 @@
         canvas { display: block; width: 100%; height: 100%; outline: none; }
         
         /* UI OVERLAY */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
         .hud-top {
             position: absolute; top: 10px; width: 100%; text-align: center;
-            color: white; text-shadow: 1px 1px 2px black;
+            color: white; text-shadow: 1px 1px 2px black; pointer-events: none;
         }
 
         .xp-bar-container {
@@ -29,27 +29,41 @@
             border: 1px solid #777; padding: 5px; margin: 0 2px; font-size: 12px;
         }
 
-        /* ZOOM SLIDER */
-        #zoom-container {
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            height: 150px; width: 30px; pointer-events: auto;
+        /* BUTTONS (Pointer events auto to allow clicking) */
+        
+        /* JUMP BUTTON */
+        #jump-btn {
+            position: absolute; bottom: 40px; right: 20px;
+            width: 70px; height: 70px; background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; color: white;
+            font-weight: bold; font-size: 14px; display: flex; pointer-events: auto;
+            justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(2px);
         }
-        input[type=range][orient=vertical] {
-            writing-mode: bt-lr; /* IE */
-            -webkit-appearance: slider-vertical; /* WebKit */
-            width: 8px; height: 100%; padding: 0 5px;
-        }
+        #jump-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.95); }
 
-        /* ACTION BUTTON (Context) */
+        /* ACTION / CHOP BUTTON */
         #action-btn {
-            position: absolute; bottom: 120px; right: 30px;
-            width: 70px; height: 70px; background: rgba(255,255,255,0.2);
-            border: 3px solid white; border-radius: 50%; color: white;
+            position: absolute; bottom: 120px; right: 40px;
+            width: 80px; height: 80px; background: rgba(0, 176, 111, 0.3);
+            border: 3px solid #00b06f; border-radius: 50%; color: white;
             font-weight: bold; font-size: 30px; display: none; pointer-events: auto;
             justify-content: center; align-items: center; cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
         #action-btn:active { background: #00b06f; transform: scale(0.95); }
+
+        /* CRAFTING MENU */
+        #craft-menu {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px;
+            color: white; display: none; pointer-events: auto; text-align: center;
+            border-radius: 10px; width: 250px; z-index: 20;
+        }
+        .craft-btn {
+            background: #333; color: white; border: 1px solid #555;
+            padding: 10px; width: 100%; margin-bottom: 5px; cursor: pointer;
+        }
 
         .exit-btn {
             position: absolute; top: 10px; left: 10px; pointer-events: auto;
@@ -57,13 +71,13 @@
             padding: 5px 10px; border-radius: 5px; text-decoration: none;
         }
 
-        /* JOYSTICK */
+        /* JOYSTICK (Always Visible) */
         #joystick-zone {
             position: absolute; bottom: 40px; left: 40px;
             width: 100px; height: 100px; 
             background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%; pointer-events: auto;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%; pointer-events: auto; z-index: 15;
         }
         #joystick-knob {
             position: absolute; top: 50%; left: 50%;
@@ -72,17 +86,14 @@
             border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
         }
 
-        /* Look Zone (Right side of screen) */
-        #look-zone {
-            position: absolute; top: 0; right: 0;
-            width: 50%; height: 100%;
-            z-index: 5; /* Above canvas, below UI buttons */
-            pointer-events: auto; touch-action: none;
+        /* TOUCH ZONES */
+        #touch-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; /* Above canvas, below UI */
         }
 
-        /* Notification Toast */
         #toast {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.7); color: white; padding: 10px 20px;
             border-radius: 20px; opacity: 0; transition: opacity 0.5s;
             pointer-events: none; font-size: 14px;
@@ -93,7 +104,7 @@
 
     <div id="game-container">
         
-        <div id="look-zone"></div>
+        <div id="touch-layer"></div>
 
         <div id="ui-layer">
             <a href="roblox.html" class="exit-btn">⬅ Exit</a>
@@ -108,13 +119,18 @@
                 </div>
             </div>
 
-            <div id="zoom-container">
-                <input type="range" orient="vertical" min="5" max="20" value="10" id="zoom-slider" oninput="updateZoom(this.value)">
-            </div>
-
-            <div id="action-btn" onclick="performAction()">👋</div>
+            <div id="jump-btn" ontouchstart="jump(event)">JUMP</div>
+            <div id="action-btn" ontouchstart="performAction(event)">👋</div>
             
             <div id="toast">Message</div>
+
+            <div id="craft-menu">
+                <h3>Workbench</h3>
+                <button class="craft-btn" onclick="craft('map')">🗺️ Craft Map (5 Wood)</button>
+                <button class="craft-btn" onclick="craft('bed')">🛏️ Craft Bed (10 Wood)</button>
+                <button class="craft-btn" onclick="craft('upgrade_bench')">🛠️ Upgrade Bench (20 Wood)</button>
+                <button class="craft-btn" onclick="closeCraft()">Close</button>
+            </div>
         </div>
 
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
@@ -131,7 +147,10 @@
             day: 1,
             dayDuration: 180, 
             nearbyObject: null,
-            isSwinging: false
+            isSwinging: false,
+            // Physics
+            velocityY: 0,
+            isGrounded: true
         };
 
         const droppedLogs = [];
@@ -147,28 +166,21 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.insertBefore(renderer.domElement, document.getElementById('look-zone')); // Canvas is bottom layer
+        container.insertBefore(renderer.domElement, document.getElementById('touch-layer')); // Canvas at bottom
 
         // --- CAMERA CONTROL VARIABLES ---
-        let camRadius = 10;
-        let camTheta = Math.PI; // Horizontal angle (radians)
-        let camPhi = Math.PI / 3; // Vertical angle (radians)
+        let camRadius = 12; // Initial Zoom
+        let camTheta = Math.PI; // Horizontal
+        let camPhi = Math.PI / 3; // Vertical
         let targetCamPhi = camPhi;
         let targetCamTheta = camTheta;
-
-        function updateZoom(val) {
-            camRadius = parseFloat(val);
-        }
 
         // --- LIGHTING ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
-        
         const sunLight = new THREE.DirectionalLight(0xffaa33, 1.2);
         sunLight.position.set(50, 50, 0);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
         scene.add(sunLight);
 
         // GROUND
@@ -180,11 +192,12 @@
 
         // --- PLAYER ---
         const playerGroup = new THREE.Group();
+        // Body
         const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshStandardMaterial({color: 0xd35400}));
         body.position.y = 1;
+        // Head
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd}));
         head.position.y = 2.3;
-        
         // Sack
         const sackGeo = new THREE.BoxGeometry(0.8, 0.8, 0.5);
         const sackMat = new THREE.MeshStandardMaterial({color: 0x8d6e63});
@@ -192,7 +205,7 @@
         sack.position.set(0, 1.5, -0.4);
         playerGroup.add(sack);
 
-        // Axe
+        // Axe Pivot
         const axePivot = new THREE.Group();
         axePivot.position.set(0.6, 1.8, 0);
         const axeGroup = new THREE.Group();
@@ -210,6 +223,7 @@
         scene.add(playerGroup);
 
         // --- OBJECTS ---
+        // Fire
         const fireGroup = new THREE.Group();
         const fireLight = new THREE.PointLight(0xff4500, 0, 15);
         fireLight.position.y = 1;
@@ -225,6 +239,11 @@
             fireGroup.add(p);
         }
         scene.add(fireGroup);
+
+        // Workbench
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), new THREE.MeshStandardMaterial({color: 0x795548}));
+        bench.position.set(6, 0.5, 6);
+        scene.add(bench);
 
         // Trees
         const trees = [];
@@ -246,14 +265,13 @@
             scene.add(tGroup);
             trees.push(tGroup);
         }
-
         for(let i=0; i<40; i++) {
             let tx = (Math.random() - 0.5) * 90;
             let tz = (Math.random() - 0.5) * 90;
             if(Math.abs(tx) > 8 || Math.abs(tz) > 8) spawnTree(tx, tz);
         }
 
-        // --- CONTROLS: JOYSTICK (LEFT) ---
+        // --- INPUT: JOYSTICK (Bottom Left) ---
         const joyZone = document.getElementById('joystick-zone');
         const joyKnob = document.getElementById('joystick-knob');
         let moveX = 0, moveY = 0;
@@ -278,95 +296,75 @@
         joyZone.addEventListener('touchmove', e => { e.preventDefault(); handleJoystick(e.touches[0].clientX, e.touches[0].clientY); });
         joyZone.addEventListener('touchend', () => handleJoystick(0,0,true));
 
-        // --- CONTROLS: LOOK (RIGHT) ---
-        const lookZone = document.getElementById('look-zone');
-        let lastLookX = 0; let lastLookY = 0;
+        // --- INPUT: LOOK / ZOOM / TAP (Touch Layer) ---
+        const touchLayer = document.getElementById('touch-layer');
+        let lastTouchX = 0; let lastTouchY = 0;
+        let pinchStartDist = 0;
+        let startRadius = 12;
 
-        lookZone.addEventListener('touchstart', e => {
-            lastLookX = e.touches[0].clientX;
-            lastLookY = e.touches[0].clientY;
+        touchLayer.addEventListener('touchstart', e => {
+            // Tap Logic (Raycasting)
+            if (e.touches.length === 1) {
+                checkTap(e.touches[0].clientX, e.touches[0].clientY);
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }
+            // Zoom Logic (Pinch Start)
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                pinchStartDist = Math.sqrt(dx*dx + dy*dy);
+                startRadius = camRadius;
+            }
         });
 
-        lookZone.addEventListener('touchmove', e => {
-            e.preventDefault(); // Prevent scrolling
-            const x = e.touches[0].clientX;
-            const y = e.touches[0].clientY;
+        touchLayer.addEventListener('touchmove', e => {
+            e.preventDefault();
             
-            const dx = x - lastLookX;
-            const dy = y - lastLookY;
-
-            // Rotate Camera
-            targetCamTheta -= dx * 0.005; // Horizontal sensitivity
-            targetCamPhi -= dy * 0.005;   // Vertical sensitivity
-
-            // Clamp vertical
-            targetCamPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, targetCamPhi));
-
-            lastLookX = x;
-            lastLookY = y;
+            // Look Logic (1 finger)
+            if (e.touches.length === 1) {
+                const x = e.touches[0].clientX;
+                const y = e.touches[0].clientY;
+                const dx = x - lastTouchX;
+                const dy = y - lastTouchY;
+                
+                targetCamTheta -= dx * 0.005; 
+                targetCamPhi -= dy * 0.005;
+                targetCamPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, targetCamPhi));
+                
+                lastTouchX = x; lastTouchY = y;
+            }
+            
+            // Zoom Logic (2 fingers)
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                // Pinch Ratio
+                const ratio = pinchStartDist / dist;
+                camRadius = Math.max(5, Math.min(30, startRadius * ratio));
+            }
         });
 
-        // --- ACTIONS ---
-        function swingAxe() {
-            if(gameState.isSwinging) return;
-            gameState.isSwinging = true;
-            let swingDuration = 400; let startTime = Date.now();
-            let interval = setInterval(() => {
-                let progress = (Date.now() - startTime) / swingDuration;
-                if (progress >= 1) {
-                    axePivot.rotation.x = 0;
-                    gameState.isSwinging = false;
-                    clearInterval(interval);
-                } else {
-                    axePivot.rotation.x = Math.sin(progress * Math.PI) * 2;
-                }
-            }, 16);
-        }
-
-        function spawnLog(x, z) {
-            // Create Log
-            const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
-            log.rotation.z = Math.PI / 2;
-            log.rotation.y = Math.random() * Math.PI;
-            log.position.set(x, 0.2, z);
-            log.castShadow = true;
-            log.userData = { type: 'log' }; // Tag for raycasting
-            scene.add(log);
-            droppedLogs.push(log);
-        }
-
-        // Tap on ground logic (Raycasting)
+        // --- LOGIC: RAYCASTING (TAP) ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        renderer.domElement.addEventListener('touchstart', onTouchTap);
-
-        function onTouchTap(event) {
-            // Calculate touch position
-            const x = event.changedTouches[0].clientX;
-            const y = event.changedTouches[0].clientY;
-
-            // Normalize
-            mouse.x = (x / window.innerWidth) * 2 - 1;
-            mouse.y = -(y / window.innerHeight) * 2 + 1;
-
+        function checkTap(clientX, clientY) {
+            // Normalized Coordinates
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
 
-            // Check intersections with logs
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            
-            for (let i = 0; i < intersects.length; i++) {
-                const obj = intersects[i].object;
-                
-                // If we tapped a log
-                if (obj.userData.type === 'log') {
-                    // Check distance
-                    if (playerGroup.position.distanceTo(obj.position) < 4) {
-                        pickupLog(obj);
-                    } else {
-                        showToast("Too far away!");
-                    }
-                    return; // Stop checking
+            // Intersect logs
+            const intersects = raycaster.intersectObjects(droppedLogs, true);
+            if (intersects.length > 0) {
+                const log = intersects[0].object;
+                if (playerGroup.position.distanceTo(log.position) < 5) {
+                    pickupLog(log);
+                } else {
+                    showToast("Too far!");
                 }
             }
         }
@@ -382,10 +380,44 @@
             showToast("+1 Wood");
         }
 
-        window.performAction = function() {
-            // Swing Animation
-            swingAxe();
+        // --- LOGIC: ACTIONS ---
+        function spawnLog(x, z) {
+            const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
+            log.rotation.z = Math.PI / 2;
+            log.rotation.y = Math.random() * Math.PI;
+            log.position.set(x, 0.2, z);
+            log.castShadow = true;
+            scene.add(log);
+            droppedLogs.push(log);
+        }
 
+        window.jump = function(e) {
+            if(e) e.stopPropagation();
+            if (gameState.isGrounded) {
+                gameState.velocityY = 0.3; // Jump force
+                gameState.isGrounded = false;
+            }
+        };
+
+        window.performAction = function(e) {
+            if(e) e.stopPropagation();
+            // Swing Animation
+            if(!gameState.isSwinging) {
+                gameState.isSwinging = true;
+                let swingDuration = 400; let startTime = Date.now();
+                let interval = setInterval(() => {
+                    let progress = (Date.now() - startTime) / swingDuration;
+                    if (progress >= 1) {
+                        axePivot.rotation.x = 0;
+                        gameState.isSwinging = false;
+                        clearInterval(interval);
+                    } else {
+                        axePivot.rotation.x = Math.sin(progress * Math.PI) * 2;
+                    }
+                }, 16);
+            }
+
+            // Tree Logic
             if (gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
                 const tree = gameState.nearbyObject.obj;
                 setTimeout(() => {
@@ -402,6 +434,7 @@
                     }
                 }, 200);
             }
+            // Fire Logic
             else if (gameState.nearbyObject && gameState.nearbyObject.type === 'fire') {
                  if (gameState.wood > 0) {
                     gameState.wood--;
@@ -413,8 +446,13 @@
                      showToast("No wood!");
                  }
             }
+             // Bench Logic
+            else if (gameState.nearbyObject && gameState.nearbyObject.type === 'bench') {
+                document.getElementById('craft-menu').style.display = 'block';
+            }
         };
 
+        // --- HUD HELPERS ---
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
@@ -441,6 +479,9 @@
                 showToast("Campfire Level Up!");
             }
         }
+        
+        window.craft = (i) => { showToast("Crafted " + i); document.getElementById('craft-menu').style.display='none'; };
+        window.closeCraft = () => document.getElementById('craft-menu').style.display='none';
 
         // --- MAIN LOOP ---
         const clock = new THREE.Clock();
@@ -456,7 +497,6 @@
             let ampm = hour >= 12 ? 'PM' : 'AM';
             document.getElementById('time-display').innerText = `Day ${gameState.day} - ${hour%12||12}:00 ${ampm}`;
 
-            // Lighting
             const sunAngle = (gameState.time - 0.25) * Math.PI * 2; 
             sunLight.position.x = Math.cos(sunAngle) * 50;
             sunLight.position.y = Math.sin(sunAngle) * 50;
@@ -468,40 +508,43 @@
             scene.fog.color.copy(scene.background);
             fireLight.intensity = (1 - intensity) * (2 + gameState.campLevel);
 
-            // 2. Camera Rotation Physics (Smooth)
+            // 2. Physics (Jump/Gravity)
+            gameState.velocityY -= 0.015; // Gravity
+            playerGroup.position.y += gameState.velocityY;
+            
+            // Ground Check
+            if (playerGroup.position.y <= 0) {
+                playerGroup.position.y = 0;
+                gameState.velocityY = 0;
+                gameState.isGrounded = true;
+            }
+
+            // 3. Camera Smooth
             camTheta += (targetCamTheta - camTheta) * 0.1;
             camPhi += (targetCamPhi - camPhi) * 0.1;
 
-            // 3. Player Movement (Camera Relative)
-            // Camera Forward Vector (Projected on XZ plane)
+            // 4. Movement (Camera Relative)
             const forwardX = Math.sin(camTheta);
             const forwardZ = Math.cos(camTheta);
             const rightX = Math.sin(camTheta + Math.PI/2);
             const rightZ = Math.cos(camTheta + Math.PI/2);
 
             if (moveX !== 0 || moveY !== 0) {
-                // Combine Joystick X (Strafe) and Y (Forward/Back) with Camera Vectors
-                // Note: Joystick Y is typically -1 for up, 1 for down. 
-                // We want "Up" (neg Y) to move in direction of camera view (neg Z local)
-                
                 const speed = 0.15;
                 const worldMoveX = (rightX * moveX) + (forwardX * moveY);
                 const worldMoveZ = (rightZ * moveX) + (forwardZ * moveY);
-
                 playerGroup.position.x += worldMoveX * speed;
                 playerGroup.position.z += worldMoveZ * speed;
-
-                // Rotate player to face movement direction
                 playerGroup.rotation.y = Math.atan2(worldMoveX, worldMoveZ);
             }
 
-            // 4. Update Camera Position (Orbit)
+            // 5. Update Camera Position
             camera.position.x = playerGroup.position.x + camRadius * Math.sin(camTheta) * Math.sin(camPhi);
             camera.position.z = playerGroup.position.z + camRadius * Math.cos(camTheta) * Math.sin(camPhi);
             camera.position.y = playerGroup.position.y + camRadius * Math.cos(camPhi);
             camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
 
-            // 5. Interaction Check
+            // 6. Proximity Check (For Action Button)
             const pPos = playerGroup.position;
             const btn = document.getElementById('action-btn');
             gameState.nearbyObject = null;
@@ -510,6 +553,10 @@
             if (pPos.distanceTo(fireGroup.position) < 3.5) {
                 gameState.nearbyObject = { type: 'fire' };
                 btn.innerText = '🔥';
+                btn.style.display = 'flex';
+            } else if (pPos.distanceTo(bench.position) < 3) {
+                 gameState.nearbyObject = { type: 'bench' };
+                btn.innerText = '🛠️';
                 btn.style.display = 'flex';
             } else {
                 for(let t of trees) {
