@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS Style: Magic Axe Update</title>
+    <title>Runescape Style: Fox Update</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Courier New', Courier, monospace; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
         
-        /* UI Layer */
         #ui-layer {
             position: absolute;
             top: 10px;
@@ -18,20 +17,18 @@
             z-index: 10;
         }
 
-        /* Controls Container */
         #controls-container {
             position: absolute;
             bottom: 20px;
             left: 20px;
             right: 20px;
             height: 150px;
-            pointer-events: none; /* Let clicks pass through empty space */
+            pointer-events: none;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
         }
 
-        /* Joystick */
         #joystick-zone {
             width: 120px;
             height: 120px;
@@ -52,51 +49,33 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Action Buttons */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            pointer-events: auto;
-            padding-bottom: 10px;
-        }
         .action-btn {
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            border: 3px solid #ccc;
             background: rgba(0,0,0,0.5);
             color: white;
-            font-weight: bold;
-            font-size: 14px;
+            border: 3px solid #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            active: scale(0.9);
+            font-weight: bold;
+            pointer-events: auto;
             cursor: pointer;
         }
-        #btn-axe { background: linear-gradient(135deg, #4b0082, #800080); border-color: #d8bfd8; }
-        #btn-jump { background: linear-gradient(135deg, #228b22, #32cd32); border-color: #90ee90; }
-
+        #btn-jump { background: linear-gradient(135deg, #228b22, #32cd32); }
     </style>
 </head>
 <body>
 
 <div id="ui-layer">
-    <h3 style="margin: 0;">Magic Woods</h3>
-    <div>Tap "Throw Axe" to cut trees</div>
+    <h3 style="margin: 0;">Wild Woods</h3>
+    <div>Zoom enabled • Watch the Fox dig!</div>
 </div>
 
 <div id="controls-container">
-    <div id="joystick-zone">
-        <div id="joystick-nipple"></div>
-    </div>
-    
-    <div class="btn-group">
-        <div id="btn-axe" class="action-btn">THROW<br>AXE</div>
-        <div id="btn-jump" class="action-btn">JUMP</div>
-    </div>
+    <div id="joystick-zone"><div id="joystick-nipple"></div></div>
+    <div id="btn-jump" class="action-btn">JUMP</div>
 </div>
 
 <script type="importmap">
@@ -112,10 +91,10 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // --- 1. SETUP ---
+    // --- 1. SCENE SETUP ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); 
-    scene.fog = new THREE.Fog(0x87CEEB, 20, 80);
+    scene.background = new THREE.Color(0x87CEEB);
+    scene.fog = new THREE.Fog(0x87CEEB, 20, 90);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 15, 20);
@@ -125,333 +104,302 @@
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
+    // Controls - Enable Zoom
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
-    controls.enableZoom = false; // Lock zoom for mobile feel
-    controls.maxPolarAngle = Math.PI / 2.2;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.1;
+    controls.minDistance = 5;  // Minimum zoom
+    controls.maxDistance = 40; // Maximum zoom
+    controls.maxPolarAngle = Math.PI / 2.1; // Prevent going under ground
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-    scene.add(ambientLight);
-    const sunLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
-    sunLight.position.set(30, 50, 20);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    scene.add(sunLight);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+    const sun = new THREE.DirectionalLight(0xfff0dd, 1.2);
+    sun.position.set(30, 50, 20);
+    sun.castShadow = true;
+    scene.add(sun);
 
     // Ground
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(200, 200),
-        new THREE.MeshStandardMaterial({ color: 0x3a7e2c, roughness: 1 })
+        new THREE.MeshStandardMaterial({ color: 0x3a7e2c })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // --- 2. GAME OBJECTS ---
-
-    // Array to store tree objects for collision detection
-    const trees = [];
-    const projectiles = [];
-
-    // Create Trees
+    // Scenery
     const treeGeo = new THREE.ConeGeometry(2, 6, 8);
     const trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 2, 6);
     const treeMat = new THREE.MeshStandardMaterial({ color: 0x1e6b22 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
 
-    function spawnTree(x, z) {
-        const group = new THREE.Group();
-        
-        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-        trunk.position.y = 1;
-        trunk.castShadow = true;
-        group.add(trunk);
-
-        const leaves = new THREE.Mesh(treeGeo, treeMat);
-        leaves.position.y = 4;
-        leaves.castShadow = true;
-        group.add(leaves);
-
-        group.position.set(x, 0, z);
-        
-        // Add random scale variety
-        const s = 0.8 + Math.random() * 0.5;
-        group.scale.set(s,s,s);
-        
-        // Tag it for game logic
-        group.userData = { type: 'tree', hp: 1 };
-        
-        scene.add(group);
-        trees.push(group);
+    for(let i=0; i<30; i++) {
+        const x = (Math.random()-0.5)*150; 
+        const z = (Math.random()-0.5)*150;
+        if(Math.abs(x)>5 || Math.abs(z)>5) {
+            const grp = new THREE.Group();
+            const t = new THREE.Mesh(trunkGeo,trunkMat); t.position.y=1; t.castShadow=true; grp.add(t);
+            const l = new THREE.Mesh(treeGeo,treeMat); l.position.y=4; l.castShadow=true; grp.add(l);
+            grp.position.set(x,0,z);
+            scene.add(grp);
+        }
     }
 
-    // Populate Forest
-    for(let i=0; i<40; i++) {
-        const x = (Math.random() - 0.5) * 150;
-        const z = (Math.random() - 0.5) * 150;
-        if (Math.abs(x) > 5 || Math.abs(z) > 5) spawnTree(x, z);
-    }
-
-    // --- 3. ANIMATED CHARACTER ---
+    // --- 2. PLAYER (Constructed) ---
     const playerGroup = new THREE.Group();
     scene.add(playerGroup);
 
-    // Body Parts (Saved to variables so we can animate them)
     const charBody = new THREE.Group();
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x336699 }));
+    torso.position.y = 2.25; torso.castShadow = true; charBody.add(torso);
     
-    // Torso
-    const torsoMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1.5, 0.6),
-        new THREE.MeshStandardMaterial({ color: 0x336699 }) // Blue Platebody
-    );
-    torsoMesh.position.y = 2.25;
-    torsoMesh.castShadow = true;
-    charBody.add(torsoMesh);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({ color: 0xf5cca8 }));
+    head.position.y = 3.3; charBody.add(head);
 
-    // Head
-    const headMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 0.6, 0.6),
-        new THREE.MeshStandardMaterial({ color: 0xf5cca8 })
-    );
-    headMesh.position.y = 3.3;
-    charBody.add(headMesh);
-
-    // Pivot points for limbs are important for rotation
-    function createLimb(w, h, d, color, x, y, z) {
-        const pivot = new THREE.Group();
-        pivot.position.set(x, y, z);
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(w, h, d),
-            new THREE.MeshStandardMaterial({ color: color })
-        );
-        mesh.position.y = -h / 2; // Offset geometry so pivot is at top
-        mesh.castShadow = true;
-        pivot.add(mesh);
-        return pivot;
+    function createLimb(x, y, color) {
+        const p = new THREE.Group(); p.position.set(x, y, 0);
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), new THREE.MeshStandardMaterial({ color: color }));
+        m.position.y = -0.6; m.castShadow = true; p.add(m);
+        return p;
     }
-
-    const leftArm = createLimb(0.3, 1.2, 0.3, 0x336699, -0.7, 2.8, 0);
-    const rightArm = createLimb(0.3, 1.2, 0.3, 0x336699, 0.7, 2.8, 0);
-    const leftLeg = createLimb(0.35, 1.5, 0.4, 0x555555, -0.3, 1.5, 0);
-    const rightLeg = createLimb(0.35, 1.5, 0.4, 0x555555, 0.3, 1.5, 0);
-
-    charBody.add(leftArm);
-    charBody.add(rightArm);
-    charBody.add(leftLeg);
-    charBody.add(rightLeg);
-    
+    const lArm = createLimb(-0.7, 2.8, 0x336699); charBody.add(lArm);
+    const rArm = createLimb(0.7, 2.8, 0x336699); charBody.add(rArm);
+    const lLeg = createLimb(-0.3, 1.5, 0x555555); charBody.add(lLeg);
+    const rLeg = createLimb(0.3, 1.5, 0x555555); charBody.add(rLeg);
     playerGroup.add(charBody);
 
+    // --- 3. THE FOX (Geometric) ---
+    const foxGroup = new THREE.Group();
+    foxGroup.position.set(10, 0, 10);
+    scene.add(foxGroup);
 
-    // --- 4. GAME MECHANICS: AXE & JUMP ---
-    
-    // Throw Axe Logic
-    document.getElementById('btn-axe').addEventListener('pointerdown', (e) => {
-        e.preventDefault(); 
-        spawnAxe();
-    });
-    
-    // Jump Logic
-    let verticalVelocity = 0;
-    let isJumping = false;
-    document.getElementById('btn-jump').addEventListener('pointerdown', (e) => {
+    // Fox Body
+    const fBodyMat = new THREE.MeshStandardMaterial({ color: 0xd9580d }); // Orange
+    const fWhiteMat = new THREE.MeshStandardMaterial({ color: 0xdddddd }); // White tips
+    const fDarkMat = new THREE.MeshStandardMaterial({ color: 0x221100 }); // Paws/Ears
+
+    const fBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 2.5), fBodyMat);
+    fBody.position.y = 1; 
+    fBody.castShadow = true;
+    foxGroup.add(fBody);
+
+    // Fox Head
+    const fHeadGroup = new THREE.Group();
+    fHeadGroup.position.set(0, 1.6, 1.3);
+    const fHeadMain = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.8, 1), fBodyMat);
+    fHeadGroup.add(fHeadMain);
+    // Snout
+    const fSnout = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 4), fWhiteMat);
+    fSnout.rotation.x = Math.PI/2;
+    fSnout.rotation.y = Math.PI/4;
+    fSnout.position.z = 0.8;
+    fHeadGroup.add(fSnout);
+    // Ears
+    const earGeo = new THREE.ConeGeometry(0.15, 0.4, 4);
+    const lEar = new THREE.Mesh(earGeo, fDarkMat); lEar.position.set(-0.3, 0.6, 0); lEar.rotation.y = -0.2;
+    const rEar = new THREE.Mesh(earGeo, fDarkMat); rEar.position.set(0.3, 0.6, 0); rEar.rotation.y = 0.2;
+    fHeadGroup.add(lEar); fHeadGroup.add(rEar);
+    foxGroup.add(fHeadGroup);
+
+    // Fox Tail
+    const fTail = new THREE.Group();
+    fTail.position.set(0, 1.2, -1.2);
+    const tailMain = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, 1.5), fBodyMat);
+    tailMain.rotation.x = -Math.PI/4; tailMain.position.y = 0.5; tailMain.position.z = -0.5;
+    fTail.add(tailMain);
+    const tailTip = new THREE.Mesh(new THREE.SphereGeometry(0.3), fWhiteMat);
+    tailTip.position.set(0, 1.0, -1.0);
+    fTail.add(tailTip);
+    foxGroup.add(fTail);
+
+    // Fox Legs
+    const fLegs = [];
+    function createFoxLeg(x, z) {
+        const l = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1, 0.25), fDarkMat);
+        l.position.set(x, 0.5, z);
+        foxGroup.add(l);
+        fLegs.push(l);
+    }
+    createFoxLeg(-0.4, 1); // Front L
+    createFoxLeg(0.4, 1);  // Front R
+    createFoxLeg(-0.4, -1); // Back L
+    createFoxLeg(0.4, -1);  // Back R
+
+
+    // --- 4. JOYSTICK LOGIC (FIXED) ---
+    const joyZone = document.getElementById('joystick-zone');
+    const joyNip = document.getElementById('joystick-nipple');
+    let moveVector = new THREE.Vector2(0,0);
+    let joyId = null;
+
+    joyZone.addEventListener('touchstart', e => {
         e.preventDefault();
-        if (!isJumping) {
-            verticalVelocity = 0.4;
-            isJumping = true;
-        }
+        if(joyId !== null) return;
+        joyId = e.changedTouches[0].identifier;
+        handleJoy(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     });
 
-    function spawnAxe() {
-        const axeGroup = new THREE.Group();
-        
-        // Axe Handle
-        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.1), new THREE.MeshStandardMaterial({color: 0x654321}));
-        axeGroup.add(handle);
-        
-        // Axe Blade
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.1), new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 0.8, emissive: 0x00ffff, emissiveIntensity: 0.5}));
-        blade.position.set(0, 0.5, 0);
-        axeGroup.add(blade);
+    joyZone.addEventListener('touchmove', e => {
+        e.preventDefault();
+        for(let t of e.changedTouches) if(t.identifier === joyId) handleJoy(t.clientX, t.clientY);
+    });
 
-        // Start position: slightly in front of player
-        axeGroup.position.copy(playerGroup.position);
-        axeGroup.position.y += 2.5; 
-        
-        // Direction: Player's current forward direction
-        const direction = new THREE.Vector3(0, 0, 1);
-        direction.applyQuaternion(playerGroup.quaternion);
-        
-        // Magic Trail (PointLight)
-        const light = new THREE.PointLight(0x00ffff, 1, 5);
-        axeGroup.add(light);
+    const endJoy = () => { joyId=null; moveVector.set(0,0); joyNip.style.transform=`translate(-50%,-50%)`; };
+    joyZone.addEventListener('touchend', endJoy); 
+    joyZone.addEventListener('touchcancel', endJoy);
 
-        scene.add(axeGroup);
+    function handleJoy(x, y) {
+        const rect = joyZone.getBoundingClientRect();
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        let dx = x - cx, dy = y - cy;
+        const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
+        const ang = Math.atan2(dy, dx);
+        dx = Math.cos(ang)*dist; dy = Math.sin(ang)*dist;
+        joyNip.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
         
-        // Add to projectiles array
-        projectiles.push({ mesh: axeGroup, dir: direction, life: 100 });
+        // FIX: Invert Y here. -1 is Up (Forward), 1 is Down (Back)
+        moveVector.x = dx/50; 
+        moveVector.y = dy/50; 
     }
 
-    // --- 5. JOYSTICK LOGIC ---
-    const joystickZone = document.getElementById('joystick-zone');
-    const joystickNipple = document.getElementById('joystick-nipple');
-    let moveVector = new THREE.Vector2(0, 0);
-    let joystickTouchId = null;
+    // --- 5. GAME LOGIC ---
+    let jumpVel = 0;
+    document.getElementById('btn-jump').addEventListener('pointerdown', () => { if(playerGroup.position.y<=0) jumpVel = 0.4; });
 
-    joystickZone.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (joystickTouchId !== null) return;
-        const touch = e.changedTouches[0];
-        joystickTouchId = touch.identifier;
-        updateJoystick(touch.clientX, touch.clientY);
-    });
+    // Fox AI Variables
+    let foxState = "wander"; // wander, dig
+    let foxTimer = 0;
+    let foxTarget = new THREE.Vector3();
+    const particles = [];
 
-    joystickZone.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            if (e.changedTouches[i].identifier === joystickTouchId) {
-                updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+    function updateFox(delta, time) {
+        foxTimer -= delta;
+
+        if (foxState === "wander") {
+            // Restore rotation from dig
+            foxGroup.rotation.x = THREE.MathUtils.lerp(foxGroup.rotation.x, 0, 0.1);
+
+            // Move
+            if (foxTimer < 0) {
+                // Pick new spot
+                foxTarget.set((Math.random()-0.5)*40, 0, (Math.random()-0.5)*40);
+                foxTimer = 3 + Math.random()*4;
+                if(Math.random() > 0.6) foxState = "dig"; // Chance to dig
+            }
+            
+            // Walk to target
+            const dir = new THREE.Vector3().subVectors(foxTarget, foxGroup.position);
+            if(dir.length() > 1) {
+                dir.normalize();
+                foxGroup.position.add(dir.multiplyScalar(4 * delta)); // Speed
+                foxGroup.lookAt(foxTarget);
+                
+                // Leg Animation
+                const legSpeed = 15;
+                fLegs[0].rotation.x = Math.sin(time*legSpeed)*0.4;
+                fLegs[1].rotation.x = Math.sin(time*legSpeed + Math.PI)*0.4;
+                fLegs[2].rotation.x = Math.sin(time*legSpeed + Math.PI)*0.4;
+                fLegs[3].rotation.x = Math.sin(time*legSpeed)*0.4;
+            } else {
+                // Idle
+                fLegs.forEach(l => l.rotation.x = 0);
+            }
+
+        } else if (foxState === "dig") {
+            if(foxTimer <= 0) { foxState = "wander"; foxTimer = 2; return; }
+
+            // Dig Animation
+            foxGroup.rotation.x = THREE.MathUtils.lerp(foxGroup.rotation.x, 0.5, 0.1); // Tilt down
+            
+            // Frantic leg movement
+            const digSpeed = 30;
+            fLegs[0].rotation.x = Math.sin(time*digSpeed)*0.8;
+            fLegs[1].rotation.x = Math.cos(time*digSpeed)*0.8;
+
+            // Spawn Particles
+            if(Math.random() > 0.8) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2), new THREE.MeshBasicMaterial({color: 0x3d2817}));
+                // Spawn at paws
+                const offset = new THREE.Vector3(0, 0, 1.5).applyQuaternion(foxGroup.quaternion);
+                p.position.copy(foxGroup.position).add(offset);
+                
+                // Velocity
+                const vel = new THREE.Vector3((Math.random()-0.5), 1, (Math.random()-0.5)).normalize().multiplyScalar(0.2);
+                particles.push({mesh:p, vel:vel, life: 30});
+                scene.add(p);
             }
         }
-    });
-
-    const resetJoy = () => { joystickTouchId = null; moveVector.set(0,0); joystickNipple.style.transform = `translate(-50%,-50%)`; };
-    joystickZone.addEventListener('touchend', resetJoy);
-    joystickZone.addEventListener('touchcancel', resetJoy);
-
-    function updateJoystick(x, y) {
-        const rect = joystickZone.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        let dx = x - centerX;
-        let dy = y - centerY;
-        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60); // Cap radius
-        const angle = Math.atan2(dy, dx);
-        
-        dx = Math.cos(angle) * dist;
-        dy = Math.sin(angle) * dist;
-
-        joystickNipple.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        
-        // Map to -1 to 1. In screen space, -Y is Up. 
-        moveVector.x = dx / 60; 
-        moveVector.y = dy / 60; 
     }
 
-    // --- 6. GAME LOOP ---
     const clock = new THREE.Clock();
-    
+
     function animate() {
         requestAnimationFrame(animate);
         const delta = clock.getDelta();
         const time = clock.getElapsedTime();
 
-        // 1. Player Movement & Animation
-        if (moveVector.lengthSq() > 0.01) {
-            // Calculate direction relative to camera
-            // Camera looks at player. We want "Up" on joystick to move AWAY from camera.
-            
-            // Get camera Y rotation
+        // 1. Player Move
+        if(moveVector.lengthSq() > 0.01) {
+            // Camera Direction
             const camDir = new THREE.Vector3();
             camera.getWorldDirection(camDir);
-            const camAngle = Math.atan2(camDir.x, camDir.z); // Angle in radians
-
-            // Joystick Angle (Inverted Y because screen Y+ is Down)
-            // Screen X+ is Right, Screen Y+ is Down. 
-            // 3D X+ is Right, 3D Z+ is Back (Toward Camera).
+            const camAngle = Math.atan2(camDir.x, camDir.z);
+            
+            // Joy Angle: "Up" (Neg Y) means Go Forward (0 deg relative)
+            // So we need to flip Y for the calculation or subtract PI/2. 
+            // Simple method: Joy X is right/left. Joy Y is Back/Forward.
+            // Screen Y+ is Down. So JoyY > 0 is Back. JoyY < 0 is Forward.
+            // atan2(y, x). 
+            
             const joyAngle = Math.atan2(moveVector.x, moveVector.y);
-            
-            // Combine angles.
-            const moveDirection = joyAngle + camAngle; 
+            const moveDir = joyAngle + camAngle;
 
-            // Move Player
-            const speed = 10 * delta;
-            playerGroup.position.x += Math.sin(moveDirection) * speed;
-            playerGroup.position.z += Math.cos(moveDirection) * speed;
-            
-            // Rotate Player to face movement
-            playerGroup.rotation.y = moveDirection;
+            const speed = 8 * delta;
+            playerGroup.position.x += Math.sin(moveDir) * speed;
+            playerGroup.position.z += Math.cos(moveDir) * speed;
+            playerGroup.rotation.y = moveDir;
 
-            // Run Animation (Sine wave on limbs)
-            const freq = 15;
-            leftLeg.rotation.x = Math.sin(time * freq) * 0.8;
-            rightLeg.rotation.x = Math.sin(time * freq + Math.PI) * 0.8;
-            leftArm.rotation.x = Math.sin(time * freq + Math.PI) * 0.8;
-            rightArm.rotation.x = Math.sin(time * freq) * 0.8;
-
+            // Run Anim
+            const f = 12; 
+            lLeg.rotation.x = Math.sin(time*f)*0.8; rLeg.rotation.x = Math.sin(time*f + Math.PI)*0.8;
+            lArm.rotation.x = Math.sin(time*f + Math.PI)*0.8; rArm.rotation.x = Math.sin(time*f)*0.8;
         } else {
-            // Idle Pose
-            leftLeg.rotation.x = 0;
-            rightLeg.rotation.x = 0;
-            leftArm.rotation.x = 0;
-            rightArm.rotation.x = 0;
+            lLeg.rotation.x = rLeg.rotation.x = lArm.rotation.x = rArm.rotation.x = 0;
         }
 
-        // 2. Jump Physics
-        if (isJumping || playerGroup.position.y > 0) {
-            playerGroup.position.y += verticalVelocity;
-            verticalVelocity -= 0.02; // Gravity
-
-            if (playerGroup.position.y <= 0) {
-                playerGroup.position.y = 0;
-                isJumping = false;
-                verticalVelocity = 0;
-            }
+        // Jump
+        if(jumpVel > 0 || playerGroup.position.y > 0) {
+            playerGroup.position.y += jumpVel;
+            jumpVel -= 0.02;
+            if(playerGroup.position.y < 0) { playerGroup.position.y = 0; jumpVel = 0; }
         }
 
-        // 3. Projectiles & Tree Cutting
-        for (let i = projectiles.length - 1; i >= 0; i--) {
-            const p = projectiles[i];
-            p.mesh.position.add(p.dir.clone().multiplyScalar(0.5)); // Speed
-            p.mesh.rotation.z -= 0.5; // Spin animation
+        // 2. Fox Logic
+        updateFox(delta, time);
+
+        // 3. Particles
+        for(let i=particles.length-1; i>=0; i--) {
+            const p = particles[i];
+            p.mesh.position.add(p.vel);
+            p.vel.y -= 0.01; // Gravity
             p.life--;
-
-            let hit = false;
-            // Collision Check
-            for (let j = trees.length - 1; j >= 0; j--) {
-                if (trees[j].userData.hp > 0 && p.mesh.position.distanceTo(trees[j].position) < 3) {
-                    // Tree Hit!
-                    trees[j].userData.hp = 0;
-                    
-                    // Fall animation (using GSAP style manual tween)
-                    const tree = trees[j];
-                    const fallInterval = setInterval(() => {
-                         tree.rotation.x += 0.05;
-                         tree.position.y -= 0.1;
-                         tree.scale.multiplyScalar(0.95);
-                         if(tree.scale.x < 0.1) {
-                             clearInterval(fallInterval);
-                             scene.remove(tree);
-                         }
-                    }, 16);
-
-                    hit = true;
-                    break;
-                }
-            }
-
-            if (p.life <= 0 || hit) {
-                scene.remove(p.mesh);
-                projectiles.splice(i, 1);
-            }
+            if(p.life<=0) { scene.remove(p.mesh); particles.splice(i,1); }
         }
 
-        // 4. Camera Follow
-        const targetX = playerGroup.position.x;
-        const targetZ = playerGroup.position.z + 15; // Camera sits behind
-        camera.position.x += (targetX - camera.position.x) * 0.1;
-        camera.position.z += (targetZ - camera.position.z) * 0.1;
-        camera.lookAt(playerGroup.position.x, playerGroup.position.y + 2, playerGroup.position.z);
+        // 4. Camera Follows Player (But allows zoom)
+        controls.target.copy(playerGroup.position);
+        controls.target.y = 1; // Look at center of body
+        controls.update();
 
         renderer.render(scene, camera);
     }
 
-    // Resize
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = window.innerWidth/window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
