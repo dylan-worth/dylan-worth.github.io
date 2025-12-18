@@ -6,15 +6,12 @@
     <title>99 Nights - Survival</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         #game-container { position: relative; width: 100%; height: 100vh; }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; outline: none; }
         
         /* UI OVERLAY */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-        }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
         .hud-top {
             position: absolute; top: 10px; width: 100%; text-align: center;
@@ -32,29 +29,27 @@
             border: 1px solid #777; padding: 5px; margin: 0 2px; font-size: 12px;
         }
 
-        /* CRAFTING MENU */
-        #craft-menu {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px;
-            color: white; display: none; pointer-events: auto; text-align: center;
-            border-radius: 10px; width: 250px;
+        /* ZOOM SLIDER */
+        #zoom-container {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            height: 150px; width: 30px; pointer-events: auto;
         }
-        .craft-btn {
-            background: #333; color: white; border: 1px solid #555;
-            padding: 10px; width: 100%; margin-bottom: 5px; cursor: pointer;
+        input[type=range][orient=vertical] {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+            width: 8px; height: 100%; padding: 0 5px;
         }
-        .craft-btn:hover { background: #555; border-color: #00b06f; }
-        
-        /* INTERACT BUTTON */
-        #interact-btn {
-            position: absolute; bottom: 120px; right: 20px;
+
+        /* ACTION BUTTON (Context) */
+        #action-btn {
+            position: absolute; bottom: 120px; right: 30px;
             width: 70px; height: 70px; background: rgba(255,255,255,0.2);
             border: 3px solid white; border-radius: 50%; color: white;
             font-weight: bold; font-size: 30px; display: none; pointer-events: auto;
             justify-content: center; align-items: center; cursor: pointer;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        #interact-btn:active { background: #00b06f; transform: scale(0.95); }
+        #action-btn:active { background: #00b06f; transform: scale(0.95); }
 
         .exit-btn {
             position: absolute; top: 10px; left: 10px; pointer-events: auto;
@@ -62,25 +57,44 @@
             padding: 5px 10px; border-radius: 5px; text-decoration: none;
         }
 
-        /* SMALLER JOYSTICK */
+        /* JOYSTICK */
         #joystick-zone {
-            position: absolute; bottom: 30px; left: 30px;
-            width: 80px; height: 80px; 
+            position: absolute; bottom: 40px; left: 40px;
+            width: 100px; height: 100px; 
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%; pointer-events: auto; touch-action: none;
+            border-radius: 50%; pointer-events: auto;
         }
         #joystick-knob {
             position: absolute; top: 50%; left: 50%;
-            width: 30px; height: 30px; 
+            width: 40px; height: 40px; 
             background: rgba(255, 255, 255, 0.8);
             border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
+        }
+
+        /* Look Zone (Right side of screen) */
+        #look-zone {
+            position: absolute; top: 0; right: 0;
+            width: 50%; height: 100%;
+            z-index: 5; /* Above canvas, below UI buttons */
+            pointer-events: auto; touch-action: none;
+        }
+
+        /* Notification Toast */
+        #toast {
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); color: white; padding: 10px 20px;
+            border-radius: 20px; opacity: 0; transition: opacity 0.5s;
+            pointer-events: none; font-size: 14px;
         }
     </style>
 </head>
 <body>
 
     <div id="game-container">
+        
+        <div id="look-zone"></div>
+
         <div id="ui-layer">
             <a href="roblox.html" class="exit-btn">⬅ Exit</a>
             
@@ -94,38 +108,35 @@
                 </div>
             </div>
 
-            <div id="interact-btn" onclick="interact()">👋</div>
-
-            <div id="craft-menu">
-                <h3>Workbench</h3>
-                <button class="craft-btn" onclick="craft('map')">🗺️ Craft Map (5 Wood)</button>
-                <button class="craft-btn" onclick="craft('bed')">🛏️ Craft Bed (10 Wood)</button>
-                <button class="craft-btn" onclick="craft('upgrade_bench')">🛠️ Upgrade Bench (20 Wood)</button>
-                <button class="craft-btn" onclick="closeCraft()">Close</button>
+            <div id="zoom-container">
+                <input type="range" orient="vertical" min="5" max="20" value="10" id="zoom-slider" oninput="updateZoom(this.value)">
             </div>
+
+            <div id="action-btn" onclick="performAction()">👋</div>
+            
+            <div id="toast">Message</div>
         </div>
 
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
 
     <script>
-        // --- GAME VARIABLES ---
+        // --- GAME STATE ---
         const gameState = {
             wood: 0,
             xp: 0,
             xpToNextLevel: 100,
             campLevel: 1,
-            // Time: 0.25 (Morning), 0.5 (Noon), 0.75 (Sunset), 0.9 (Night)
             time: 0.25, 
             day: 1,
-            dayDuration: 180, // Seconds per full day cycle
+            dayDuration: 180, 
             nearbyObject: null,
             isSwinging: false
         };
 
-        const droppedLogs = []; // Array to store logs on the ground
+        const droppedLogs = [];
 
-        // --- 3D SCENE SETUP ---
+        // --- 3D SETUP ---
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
@@ -136,9 +147,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.insertBefore(renderer.domElement, document.getElementById('ui-layer'));
+        container.insertBefore(renderer.domElement, document.getElementById('look-zone')); // Canvas is bottom layer
 
-        // LIGHTING
+        // --- CAMERA CONTROL VARIABLES ---
+        let camRadius = 10;
+        let camTheta = Math.PI; // Horizontal angle (radians)
+        let camPhi = Math.PI / 3; // Vertical angle (radians)
+        let targetCamPhi = camPhi;
+        let targetCamTheta = camTheta;
+
+        function updateZoom(val) {
+            camRadius = parseFloat(val);
+        }
+
+        // --- LIGHTING ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
         
@@ -153,75 +175,56 @@
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x2f3628 }));
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
+        ground.userData = { isGround: true };
         scene.add(ground);
 
-        // --- PLAYER & EQUIPMENT ---
+        // --- PLAYER ---
         const playerGroup = new THREE.Group();
-        
-        // Body
         const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshStandardMaterial({color: 0xd35400}));
         body.position.y = 1;
-        
-        // Head
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd}));
         head.position.y = 2.3;
-
-        // Sack (On Back)
+        
+        // Sack
         const sackGeo = new THREE.BoxGeometry(0.8, 0.8, 0.5);
         const sackMat = new THREE.MeshStandardMaterial({color: 0x8d6e63});
         const sack = new THREE.Mesh(sackGeo, sackMat);
         sack.position.set(0, 1.5, -0.4);
         playerGroup.add(sack);
 
-        // Axe Pivot (Shoulder)
+        // Axe
         const axePivot = new THREE.Group();
-        axePivot.position.set(0.6, 1.8, 0); // Right shoulder position
-        
-        // Axe Mesh
+        axePivot.position.set(0.6, 1.8, 0);
         const axeGroup = new THREE.Group();
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2), new THREE.MeshStandardMaterial({color: 0x5d4037}));
         handle.position.y = 0.6;
         const blade = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.05), new THREE.MeshStandardMaterial({color: 0x95a5a6}));
         blade.position.set(0.15, 1.1, 0);
         axeGroup.add(handle); axeGroup.add(blade);
-        
-        // Initial Axe Position (Holding it)
-        axeGroup.rotation.x = Math.PI / 2; // Pointing forward
+        axeGroup.rotation.x = Math.PI / 2;
         axeGroup.rotation.z = -0.2;
         axePivot.add(axeGroup);
 
-        playerGroup.add(body);
-        playerGroup.add(head);
-        playerGroup.add(axePivot);
+        playerGroup.add(body); playerGroup.add(head); playerGroup.add(axePivot);
         playerGroup.castShadow = true;
         scene.add(playerGroup);
 
-        // --- WORLD OBJECTS ---
-        
-        // Fire
+        // --- OBJECTS ---
         const fireGroup = new THREE.Group();
         const fireLight = new THREE.PointLight(0xff4500, 0, 15);
         fireLight.position.y = 1;
         fireGroup.add(fireLight);
-        // Fire visuals
         const log1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
         log1.rotation.z = Math.PI/2; log1.position.y = 0.1;
         const log2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723}));
         log2.rotation.x = Math.PI/2; log2.position.y = 0.1;
         fireGroup.add(log1); fireGroup.add(log2);
-        // Particles
         for(let i=0; i<8; i++) {
             const p = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.15,0.15), new THREE.MeshBasicMaterial({color: 0xffaa00}));
             p.position.set((Math.random()-0.5), Math.random()*1.5, (Math.random()-0.5));
             fireGroup.add(p);
         }
         scene.add(fireGroup);
-
-        // Workbench
-        const bench = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), new THREE.MeshStandardMaterial({color: 0x795548}));
-        bench.position.set(6, 0.5, 6);
-        bench.castShadow = true;
-        scene.add(bench);
 
         // Trees
         const trees = [];
@@ -239,7 +242,7 @@
             tGroup.add(trunk); tGroup.add(leaves);
             tGroup.position.set(x, 0, z);
             tGroup.castShadow = true;
-            tGroup.userData = { hp: 3 }; // Trees take 3 hits
+            tGroup.userData = { hp: 3, type: 'tree' }; 
             scene.add(tGroup);
             trees.push(tGroup);
         }
@@ -250,132 +253,7 @@
             if(Math.abs(tx) > 8 || Math.abs(tz) > 8) spawnTree(tx, tz);
         }
 
-        // --- ACTIONS ---
-
-        function swingAxe() {
-            if(gameState.isSwinging) return;
-            gameState.isSwinging = true;
-            
-            // Animation logic handled in animate loop via interpolation
-            let swingDuration = 400; // ms
-            let startTime = Date.now();
-
-            let interval = setInterval(() => {
-                let elapsed = Date.now() - startTime;
-                let progress = elapsed / swingDuration;
-
-                if (progress >= 1) {
-                    // Reset
-                    axePivot.rotation.x = 0;
-                    gameState.isSwinging = false;
-                    clearInterval(interval);
-                } else {
-                    // Simple swing arc: 0 -> 2 -> 0
-                    let angle = Math.sin(progress * Math.PI) * 2;
-                    axePivot.rotation.x = angle; // Rotate arm down
-                }
-            }, 16);
-        }
-
-        function spawnLog(x, z) {
-            const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
-            log.rotation.z = Math.PI / 2;
-            log.rotation.y = Math.random() * Math.PI;
-            log.position.set(x, 0.2, z);
-            log.castShadow = true;
-            scene.add(log);
-            droppedLogs.push(log);
-        }
-
-        window.interact = function() {
-            // 1. Swing Animation regardless of target
-            swingAxe();
-
-            // 2. Logic based on target
-            if (gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
-                const tree = gameState.nearbyObject.obj;
-                
-                // Hit Logic delay to match swing
-                setTimeout(() => {
-                    tree.userData.hp--;
-                    // Shake tree
-                    tree.rotation.z = 0.2;
-                    setTimeout(() => tree.rotation.z = 0, 100);
-
-                    if(tree.userData.hp <= 0) {
-                        // Tree fell
-                        spawnLog(tree.position.x, tree.position.z);
-                        // Respawn visual (simple hack: remove tree)
-                        scene.remove(tree);
-                        trees.splice(trees.indexOf(tree), 1);
-                        gameState.nearbyObject = null;
-                        document.getElementById('interact-btn').style.display = 'none';
-                    }
-                }, 200);
-            }
-            else if (gameState.nearbyObject && gameState.nearbyObject.type === 'fire') {
-                 if (gameState.wood > 0) {
-                    gameState.wood--;
-                    gameState.xp += 20;
-                    updateHUD();
-                    alert("Fire fueled! +20 XP");
-                    checkLevelUp();
-                 } else {
-                     alert("No logs in sack!");
-                 }
-            }
-            else if (gameState.nearbyObject && gameState.nearbyObject.type === 'bench') {
-                document.getElementById('craft-menu').style.display = 'block';
-            }
-        };
-
-        // --- LOG COLLECTION LOGIC ---
-        function collectLogs() {
-            const pickupRadius = 2.5;
-            for(let i=droppedLogs.length-1; i>=0; i--) {
-                const log = droppedLogs[i];
-                const dist = playerGroup.position.distanceTo(log.position);
-                
-                if (dist < pickupRadius) {
-                    // Move log towards player (Magnet effect)
-                    log.position.lerp(playerGroup.position, 0.2);
-                    
-                    if (dist < 1) {
-                        // Collected
-                        scene.remove(log);
-                        droppedLogs.splice(i, 1);
-                        gameState.wood++;
-                        gameState.xp += 5;
-                        updateHUD();
-                    }
-                }
-            }
-        }
-
-        function updateHUD() {
-            document.getElementById('wood-count').innerText = gameState.wood;
-            const xpPct = (gameState.xp / gameState.xpToNextLevel) * 100;
-            document.getElementById('xp-bar-fill').style.width = Math.min(100, xpPct) + '%';
-            
-            // Sack visual growth
-            let sScale = 1 + (gameState.wood * 0.05);
-            sack.scale.set(sScale, sScale, sScale);
-        }
-
-        function checkLevelUp() {
-            if(gameState.xp >= gameState.xpToNextLevel) {
-                gameState.campLevel++;
-                gameState.xp = 0;
-                gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5);
-                document.getElementById('camp-lvl').innerText = gameState.campLevel;
-                updateHUD();
-                fireLight.distance += 5;
-                fireLight.intensity += 1;
-                alert("Campfire Level Up!");
-            }
-        }
-
-        // --- JOYSTICK ---
+        // --- CONTROLS: JOYSTICK (LEFT) ---
         const joyZone = document.getElementById('joystick-zone');
         const joyKnob = document.getElementById('joystick-knob');
         let moveX = 0, moveY = 0;
@@ -390,14 +268,179 @@
             const cy = rect.top + rect.height / 2;
             let dx = x - cx; let dy = y - cy;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            const maxDist = 40;
+            const maxDist = 50;
             if (dist > maxDist) { dx *= maxDist / dist; dy *= maxDist / dist; }
             joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
             moveX = dx / maxDist; moveY = dy / maxDist;
         }
+
         joyZone.addEventListener('touchstart', e => handleJoystick(e.touches[0].clientX, e.touches[0].clientY));
         joyZone.addEventListener('touchmove', e => { e.preventDefault(); handleJoystick(e.touches[0].clientX, e.touches[0].clientY); });
         joyZone.addEventListener('touchend', () => handleJoystick(0,0,true));
+
+        // --- CONTROLS: LOOK (RIGHT) ---
+        const lookZone = document.getElementById('look-zone');
+        let lastLookX = 0; let lastLookY = 0;
+
+        lookZone.addEventListener('touchstart', e => {
+            lastLookX = e.touches[0].clientX;
+            lastLookY = e.touches[0].clientY;
+        });
+
+        lookZone.addEventListener('touchmove', e => {
+            e.preventDefault(); // Prevent scrolling
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            
+            const dx = x - lastLookX;
+            const dy = y - lastLookY;
+
+            // Rotate Camera
+            targetCamTheta -= dx * 0.005; // Horizontal sensitivity
+            targetCamPhi -= dy * 0.005;   // Vertical sensitivity
+
+            // Clamp vertical
+            targetCamPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, targetCamPhi));
+
+            lastLookX = x;
+            lastLookY = y;
+        });
+
+        // --- ACTIONS ---
+        function swingAxe() {
+            if(gameState.isSwinging) return;
+            gameState.isSwinging = true;
+            let swingDuration = 400; let startTime = Date.now();
+            let interval = setInterval(() => {
+                let progress = (Date.now() - startTime) / swingDuration;
+                if (progress >= 1) {
+                    axePivot.rotation.x = 0;
+                    gameState.isSwinging = false;
+                    clearInterval(interval);
+                } else {
+                    axePivot.rotation.x = Math.sin(progress * Math.PI) * 2;
+                }
+            }, 16);
+        }
+
+        function spawnLog(x, z) {
+            // Create Log
+            const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
+            log.rotation.z = Math.PI / 2;
+            log.rotation.y = Math.random() * Math.PI;
+            log.position.set(x, 0.2, z);
+            log.castShadow = true;
+            log.userData = { type: 'log' }; // Tag for raycasting
+            scene.add(log);
+            droppedLogs.push(log);
+        }
+
+        // Tap on ground logic (Raycasting)
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        renderer.domElement.addEventListener('touchstart', onTouchTap);
+
+        function onTouchTap(event) {
+            // Calculate touch position
+            const x = event.changedTouches[0].clientX;
+            const y = event.changedTouches[0].clientY;
+
+            // Normalize
+            mouse.x = (x / window.innerWidth) * 2 - 1;
+            mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            // Check intersections with logs
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            for (let i = 0; i < intersects.length; i++) {
+                const obj = intersects[i].object;
+                
+                // If we tapped a log
+                if (obj.userData.type === 'log') {
+                    // Check distance
+                    if (playerGroup.position.distanceTo(obj.position) < 4) {
+                        pickupLog(obj);
+                    } else {
+                        showToast("Too far away!");
+                    }
+                    return; // Stop checking
+                }
+            }
+        }
+
+        function pickupLog(logObj) {
+            scene.remove(logObj);
+            const index = droppedLogs.indexOf(logObj);
+            if (index > -1) droppedLogs.splice(index, 1);
+            
+            gameState.wood++;
+            gameState.xp += 5;
+            updateHUD();
+            showToast("+1 Wood");
+        }
+
+        window.performAction = function() {
+            // Swing Animation
+            swingAxe();
+
+            if (gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
+                const tree = gameState.nearbyObject.obj;
+                setTimeout(() => {
+                    tree.userData.hp--;
+                    tree.rotation.z = 0.2;
+                    setTimeout(() => tree.rotation.z = 0, 100);
+
+                    if(tree.userData.hp <= 0) {
+                        spawnLog(tree.position.x, tree.position.z);
+                        scene.remove(tree);
+                        trees.splice(trees.indexOf(tree), 1);
+                        gameState.nearbyObject = null;
+                        document.getElementById('action-btn').style.display = 'none';
+                    }
+                }, 200);
+            }
+            else if (gameState.nearbyObject && gameState.nearbyObject.type === 'fire') {
+                 if (gameState.wood > 0) {
+                    gameState.wood--;
+                    gameState.xp += 20;
+                    updateHUD();
+                    showToast("Fire fueled! +20 XP");
+                    checkLevelUp();
+                 } else {
+                     showToast("No wood!");
+                 }
+            }
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = 1;
+            setTimeout(() => t.style.opacity = 0, 2000);
+        }
+
+        function updateHUD() {
+            document.getElementById('wood-count').innerText = gameState.wood;
+            const xpPct = (gameState.xp / gameState.xpToNextLevel) * 100;
+            document.getElementById('xp-bar-fill').style.width = Math.min(100, xpPct) + '%';
+            let sScale = 1 + (gameState.wood * 0.05);
+            sack.scale.set(sScale, sScale, sScale);
+        }
+
+        function checkLevelUp() {
+            if(gameState.xp >= gameState.xpToNextLevel) {
+                gameState.campLevel++;
+                gameState.xp = 0;
+                gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5);
+                document.getElementById('camp-lvl').innerText = gameState.campLevel;
+                updateHUD();
+                fireLight.distance += 5; fireLight.intensity += 1;
+                showToast("Campfire Level Up!");
+            }
+        }
 
         // --- MAIN LOOP ---
         const clock = new THREE.Clock();
@@ -406,71 +449,69 @@
             requestAnimationFrame(animate);
             const dt = clock.getDelta();
 
-            // 1. Day/Night Cycle (3 mins = 180s)
+            // 1. Day Cycle
             gameState.time += dt / gameState.dayDuration;
             if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
-            
-            // Time UI
             let hour = Math.floor(gameState.time * 24);
-            let mins = Math.floor((gameState.time * 24 * 60) % 60);
             let ampm = hour >= 12 ? 'PM' : 'AM';
-            let dHour = hour % 12 || 12;
-            let minStr = mins < 10 ? '0'+mins : mins;
-            document.getElementById('time-display').innerText = `Day ${gameState.day} - ${dHour}:${minStr} ${ampm}`;
+            document.getElementById('time-display').innerText = `Day ${gameState.day} - ${hour%12||12}:00 ${ampm}`;
 
-            // Lighting Logic
-            // 0.25 (6am) -> 0.75 (6pm) is light
+            // Lighting
             const sunAngle = (gameState.time - 0.25) * Math.PI * 2; 
             sunLight.position.x = Math.cos(sunAngle) * 50;
             sunLight.position.y = Math.sin(sunAngle) * 50;
-            
-            let intensity = Math.max(0, Math.sin(sunAngle)); // Simple day/night fade
-            if(gameState.time > 0.75 || gameState.time < 0.25) intensity = 0; // Night
-            
+            let intensity = Math.max(0, Math.sin(sunAngle)); 
+            if(gameState.time > 0.75 || gameState.time < 0.25) intensity = 0; 
             sunLight.intensity = intensity;
             ambientLight.intensity = 0.1 + (intensity * 0.4);
             scene.background.setHSL(0.6, 0.5, intensity * 0.5);
             scene.fog.color.copy(scene.background);
-            
-            // Fire light logic (brighter at night)
             fireLight.intensity = (1 - intensity) * (2 + gameState.campLevel);
 
-            // 2. Movement
+            // 2. Camera Rotation Physics (Smooth)
+            camTheta += (targetCamTheta - camTheta) * 0.1;
+            camPhi += (targetCamPhi - camPhi) * 0.1;
+
+            // 3. Player Movement (Camera Relative)
+            // Camera Forward Vector (Projected on XZ plane)
+            const forwardX = Math.sin(camTheta);
+            const forwardZ = Math.cos(camTheta);
+            const rightX = Math.sin(camTheta + Math.PI/2);
+            const rightZ = Math.cos(camTheta + Math.PI/2);
+
             if (moveX !== 0 || moveY !== 0) {
-                playerGroup.position.x += moveX * 0.15;
-                playerGroup.position.z += moveY * 0.15;
-                playerGroup.rotation.y = Math.atan2(-moveX, -moveY); // Face direction
+                // Combine Joystick X (Strafe) and Y (Forward/Back) with Camera Vectors
+                // Note: Joystick Y is typically -1 for up, 1 for down. 
+                // We want "Up" (neg Y) to move in direction of camera view (neg Z local)
+                
+                const speed = 0.15;
+                const worldMoveX = (rightX * moveX) + (forwardX * moveY);
+                const worldMoveZ = (rightZ * moveX) + (forwardZ * moveY);
+
+                playerGroup.position.x += worldMoveX * speed;
+                playerGroup.position.z += worldMoveZ * speed;
+
+                // Rotate player to face movement direction
+                playerGroup.rotation.y = Math.atan2(worldMoveX, worldMoveZ);
             }
 
-            // 3. Camera
-            camera.position.x = playerGroup.position.x;
-            camera.position.z = playerGroup.position.z + 8;
-            camera.position.y = 6;
-            camera.lookAt(playerGroup.position);
-
-            // 4. Log Magnet
-            collectLogs();
+            // 4. Update Camera Position (Orbit)
+            camera.position.x = playerGroup.position.x + camRadius * Math.sin(camTheta) * Math.sin(camPhi);
+            camera.position.z = playerGroup.position.z + camRadius * Math.cos(camTheta) * Math.sin(camPhi);
+            camera.position.y = playerGroup.position.y + camRadius * Math.cos(camPhi);
+            camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
 
             // 5. Interaction Check
             const pPos = playerGroup.position;
-            const btn = document.getElementById('interact-btn');
+            const btn = document.getElementById('action-btn');
             gameState.nearbyObject = null;
             btn.style.display = 'none';
 
-            // Check Fire
             if (pPos.distanceTo(fireGroup.position) < 3.5) {
                 gameState.nearbyObject = { type: 'fire' };
                 btn.innerText = '🔥';
                 btn.style.display = 'flex';
-            } 
-            // Check Bench
-            else if (pPos.distanceTo(bench.position) < 3) {
-                gameState.nearbyObject = { type: 'bench' };
-                btn.innerText = '🛠️';
-                btn.style.display = 'flex';
-            }
-            // Check Trees
-            else {
+            } else {
                 for(let t of trees) {
                     if (pPos.distanceTo(t.position) < 2.5) {
                         gameState.nearbyObject = { type: 'tree', obj: t };
@@ -485,8 +526,6 @@
         }
         animate();
 
-        window.craft = (i) => { alert("Crafted " + i); document.getElementById('wood-count').innerText = gameState.wood; };
-        window.closeCraft = () => document.getElementById('craft-menu').style.display = 'none';
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
