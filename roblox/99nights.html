@@ -4,26 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>99 Nights (3D)</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="roblox-joystick.js"></script> <style>
-        body { overflow: hidden; }
-        #game-container { position: relative; width: 100%; height: 100vh; background: #000; }
-        canvas { width: 100%; height: 100%; display: block; }
-        .hud { position: absolute; top: 10px; left: 0; width: 100%; text-align: center; color: #ff5e57; font-weight: bold; pointer-events: none; z-index: 10; }
-        /* No visual D-pad needed anymore */
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; user-select: none; }
+        #game-container { position: relative; width: 100%; height: 100vh; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .hud { 
+            position: absolute; top: 10px; left: 0; width: 100%; 
+            text-align: center; color: #ff5e57; font-weight: bold; font-family: sans-serif; 
+            pointer-events: none; z-index: 10; 
+        }
+
+        .exit-btn {
+            position: absolute; top: 10px; left: 10px; z-index: 20;
+            background: rgba(255,255,255,0.2); color: white;
+            padding: 8px 15px; border-radius: 5px; text-decoration: none; font-family: sans-serif;
+        }
+
+        /* --- JOYSTICK CSS --- */
+        #joystick-zone {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15); /* Visible Circle */
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            z-index: 9999;
+            touch-action: none; /* Prevents scroll */
+        }
+        
+        #joystick-knob {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
-    <nav style="position:absolute; top:0; z-index:20; background:transparent; border:none;">
-        <div class="nav-links"><a href="roblox.html" style="background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:5px;">Exit</a></div>
-    </nav>
+
+    <a href="roblox.html" class="exit-btn">⬅ Exit</a>
     
     <div id="game-container">
         <div class="hud">Nights: <span id="night-count">0</span> | Battery: <span id="battery">100</span>%</div>
+        
+        <div id="joystick-zone">
+            <div id="joystick-knob"></div>
+        </div>
     </div>
     
     <script>
+        // --- 1. JOYSTICK LOGIC (EMBEDDED) ---
+        const joyZone = document.getElementById('joystick-zone');
+        const joyKnob = document.getElementById('joystick-knob');
+        let moveX = 0, moveY = 0; // Global movement variables
+
+        function handleJoystick(x, y, isEnd) {
+            if (isEnd) {
+                joyKnob.style.transform = `translate(-50%, -50%)`;
+                moveX = 0; moveY = 0;
+                return;
+            }
+
+            const rect = joyZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            let dx = x - centerX;
+            let dy = y - centerY;
+            
+            // Limit distance
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const maxDist = 60;
+            
+            if (dist > maxDist) {
+                const ratio = maxDist / dist;
+                dx *= ratio;
+                dy *= ratio;
+            }
+
+            // Move visual knob
+            joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+            // Normalize for game (-1 to 1)
+            moveX = dx / maxDist;
+            moveY = dy / maxDist;
+        }
+
+        // Touch Events
+        joyZone.addEventListener('touchstart', e => handleJoystick(e.touches[0].clientX, e.touches[0].clientY));
+        joyZone.addEventListener('touchmove', e => { e.preventDefault(); handleJoystick(e.touches[0].clientX, e.touches[0].clientY); });
+        joyZone.addEventListener('touchend', () => handleJoystick(0, 0, true));
+        
+        // Mouse Events (For PC testing)
+        let isDragging = false;
+        joyZone.addEventListener('mousedown', () => isDragging = true);
+        window.addEventListener('mousemove', e => { if(isDragging) handleJoystick(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', () => { isDragging = false; handleJoystick(0, 0, true); });
+
+
+        // --- 2. GAME LOGIC ---
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x111111, 0.03);
@@ -32,7 +118,7 @@
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
+        container.insertBefore(renderer.domElement, joyZone); // Put canvas behind joystick
 
         // Ground
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x1e272e }));
@@ -49,6 +135,8 @@
         }
 
         camera.position.set(0, 2, 10);
+        
+        // Flashlight
         const light = new THREE.SpotLight(0xffffff, 1.2, 60, 0.6, 0.5, 1);
         scene.add(light);
         scene.add(light.target);
@@ -63,20 +151,18 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // KEYBOARD
+            // KEYBOARD Input
             if(keys['w']) camera.translateZ(-speed);
             if(keys['s']) camera.translateZ(speed);
             if(keys['a']) camera.translateX(-speed);
             if(keys['d']) camera.translateX(speed);
 
-            // JOYSTICK (Connected here)
-            // joystick.getY() returns -1 (up) to 1 (down), so we flip logic or sign as needed
-            if (window.joystick && window.joystick.active) {
-                camera.translateZ(window.joystick.getY() * speed); 
-                camera.translateX(window.joystick.getX() * speed);
-            }
+            // JOYSTICK Input (moveX, moveY from above)
+            // In ThreeJS, Y is usually forward/back (Z axis) for camera
+            if (Math.abs(moveY) > 0.1) camera.translateZ(moveY * speed);
+            if (Math.abs(moveX) > 0.1) camera.translateX(moveX * speed);
 
-            // Flashlight Logic
+            // Flashlight follows camera
             light.position.copy(camera.position);
             const dir = new THREE.Vector3();
             camera.getWorldDirection(dir);
@@ -86,12 +172,19 @@
                 battery -= 0.03;
                 document.getElementById('battery').innerText = Math.floor(battery);
             } else {
-                light.intensity = 0;
+                light.intensity = 0; // Lights out
             }
 
             renderer.render(scene, camera);
         }
         animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
