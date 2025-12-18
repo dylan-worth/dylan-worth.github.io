@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dental Procedure Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', sans-serif;
+            user-select: none;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100vh;
+            display: block;
+            background: radial-gradient(circle at center, #ffffff 0%, #dde1e7 100%);
+            cursor: crosshair;
+        }
+
+        /* UI Overlay - Moved to avoid blocking view */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Moved to right */
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        
+        #ui-layer.collapsed {
+            transform: translateX(120%);
+        }
+
+        #toggle-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 11;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            display: none; /* Only show on mobile or if needed */
+        }
+
+        h2 { margin: 0 0 10px 0; font-size: 1.2rem; color: #2c3e50; }
+        .legend-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: #555; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; border: 1px solid #ccc; }
+
+        /* Toolbar at bottom */
+        #toolbar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            z-index: 20;
+        }
+
+        .tool-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .tool-btn span { font-size: 1.2rem; margin-bottom: 2px; }
+
+        .tool-btn:hover { background: #ecf0f1; color: #2c3e50; }
+        
+        .tool-btn.active {
+            background: #2c3e50;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(44, 62, 80, 0.3);
+        }
+
+        .tool-btn.active.decay { background: #c0392b; }
+        .tool-btn.active.root { background: #8e44ad; }
+
+        /* Tooltip */
+        #tooltip {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        #status-msg {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 0.85rem;
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+    </style>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <button id="toggle-info" onclick="toggleLegend()">i</button>
+
+    <div id="ui-layer">
+        <h2>Dental Chart</h2>
+        <div class="legend-row"><div class="dot" style="background:#FFFFF0;"></div> Incisor (Cutting)</div>
+        <div class="legend-row"><div class="dot" style="background:#FFFDD0;"></div> Canine (Tearing)</div>
+        <div class="legend-row"><div class="dot" style="background:#EEE8AA;"></div> Molar (Grinding)</div>
+        <div class="legend-row"><div class="dot" style="background:#e74c3c;"></div> Nerve / Pulp</div>
+        <div class="legend-row"><div class="dot" style="background:#ff69b4;"></div> Gutta Percha</div>
+        <div class="legend-row"><div class="dot" style="background:#2c3e50;"></div> Cavity</div>
+        <div id="status-msg">Select a tool below to begin.</div>
+    </div>
+
+    <div id="tooltip">Tooth #8</div>
+
+    <div id="toolbar">
+        <button class="tool-btn active" id="btn-view" onclick="setTool('view')">
+            <span>👁️</span> Inspect
+        </button>
+        <button class="tool-btn" id="btn-decay" onclick="setTool('decay')">
+            <span>🦠</span> Cavity
+        </button>
+        <button class="tool-btn" id="btn-root" onclick="setTool('root')">
+            <span>⚡</span> Root Canal
+        </button>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        // --- System State ---
+        let currentTool = 'view';
+        let hoveredTooth = null;
+        let isDragging = false;
+        let prevMouse = { x: 0, y: 0 };
+        let rotationTarget = { x: 0, y: 0 };
+        let mouse = new THREE.Vector2();
+        
+        // --- Three.js Globals ---
+        let scene, camera, renderer, raycaster;
+        let teethGroup = new THREE.Group();
+        let gumGroup = new THREE.Group();
+
+        // --- Data Definitions ---
+        const TOOTH_PROPS = {
+            incisor: { w: 0.65, h: 1.1, d: 0.4, color: 0xFFFFF0, name: "Incisor" },
+            canine:  { w: 0.7, h: 1.2, d: 0.6, color: 0xFFFDD0, shape: 'pointy', name: "Canine" },
+            premolar:{ w: 0.75, h: 1.0, d: 0.75, color: 0xF5F5DC, name: "Premolar" },
+            molar:   { w: 1.0, h: 0.9, d: 1.0, color: 0xEEE8AA, name: "Molar" }
+        };
+
+        const ARCH_CONFIG = [
+            // Upper Arch (1-16)
+            {id:1, t:'molar'}, {id:2, t:'molar'}, {id:3, t:'molar'}, {id:4, t:'premolar'}, 
+            {id:5, t:'premolar'}, {id:6, t:'canine'}, {id:7, t:'incisor'}, {id:8, t:'incisor'},
+            {id:9, t:'incisor'}, {id:10, t:'incisor'}, {id:11, t:'canine'}, {id:12, t:'premolar'},
+            {id:13, t:'premolar'}, {id:14, t:'molar'}, {id:15, t:'molar'}, {id:16, t:'molar'},
+            // Lower Arch (17-32)
+            {id:17, t:'molar'}, {id:18, t:'molar'}, {id:19, t:'molar'}, {id:20, t:'premolar'},
+            {id:21, t:'premolar'}, {id:22, t:'canine'}, {id:23, t:'incisor'}, {id:24, t:'incisor'},
+            {id:25, t:'incisor'}, {id:26, t:'incisor'}, {id:27, t:'canine'}, {id:28, t:'premolar'},
+            {id:29, t:'premolar'}, {id:30, t:'molar'}, {id:31, t:'molar'}, {id:32, t:'molar'}
+        ];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // 1. Scene
+            scene = new THREE.Scene();
+            
+            // 2. Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 3, 14); // Zoomed out slightly to ensure UI doesn't block
+            camera.lookAt(0, -1, 0);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 4. Lights
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambient);
+            
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            keyLight.position.set(5, 10, 10);
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 2048;
+            keyLight.shadow.mapSize.height = 2048;
+            scene.add(keyLight);
+            
+            const fillLight = new THREE.DirectionalLight(0xb0c4de, 0.4);
+            fillLight.position.set(-5, 2, 5);
+            scene.add(fillLight);
+
+            // 5. Build Model
+            buildMouth();
+            scene.add(teethGroup);
+
+            // 6. Interaction
+            raycaster = new THREE.Raycaster();
+            
+            window.addEventListener('resize', onResize);
+            container.addEventListener('mousemove', onMouseMove);
+            container.addEventListener('mousedown', onMouseDown);
+            container.addEventListener('mouseup', onMouseUp);
+            container.addEventListener('click', onClick);
+            
+            // Touch support for rotation
+            container.addEventListener('touchstart', onTouchStart, {passive: false});
+            container.addEventListener('touchmove', onTouchMove, {passive: false});
+            container.addEventListener('touchend', () => isDragging = false);
+
+            animate();
+        }
+
+        // --- Model Generation ---
+
+        function createTooth(data, index) {
+            const specs = TOOTH_PROPS[data.t];
+            const group = new THREE.Group();
+            
+            // 1. Crown Geometry (The visible tooth)
+            // Use BoxGeometry but manipulate vertices for organic look
+            const geo = new THREE.BoxGeometry(specs.w, specs.h, specs.d, 4, 4, 4);
+            const pos = geo.attributes.position;
+            
+            for(let i=0; i<pos.count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                const z = pos.getZ(i);
+                
+                // Tapering
+                if(y > 0) { // Top part
+                    let taper = 0.8;
+                    if(specs.shape === 'pointy') taper = 0.4; // Canine
+                    
+                    pos.setX(i, x * taper);
+                    pos.setZ(i, z * taper);
+                } else {
+                    // Slight rounding at bottom
+                    pos.setX(i, x * 0.9);
+                    pos.setZ(i, z * 0.9);
+                }
+            }
+            geo.computeVertexNormals();
+
+            const mat = new THREE.MeshStandardMaterial({
+                color: specs.color,
+                roughness: 0.3,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 1
+            });
+
+            const crown = new THREE.Mesh(geo, mat);
+            crown.castShadow = true;
+            crown.receiveShadow = true;
+            crown.userData = { id: data.id, type: 'crown', parentGroup: group };
+            group.add(crown);
+
+            // 2. Root Geometry (Hidden usually, visible in Xray/Root Canal)
+            // A visual cone going down
+            const rootGeo = new THREE.ConeGeometry(specs.w * 0.4, 1.8, 8);
+            const rootMat = new THREE.MeshStandardMaterial({ color: 0xe6e6fa, opacity: 0.5, transparent: true });
+            const rootMesh = new THREE.Mesh(rootGeo, rootMat);
+            rootMesh.position.y = -specs.h/2 - 0.8;
+            rootMesh.rotation.x = Math.PI; // Point down
+            rootMesh.visible = false; // Hidden by default
+            group.add(rootMesh);
+
+            // 3. Nerve (The pulp inside the root)
+            // Thin cylinder inside the root
+            const nerveGeo = new THREE.CylinderGeometry(0.08, 0.02, 1.6, 8);
+            const nerveMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red = Inflamed
+            const nerve = new THREE.Mesh(nerveGeo, nerveMat);
+            nerve.position.y = 0; // Inside root
+            nerve.visible = false;
+            rootMesh.add(nerve); // Child of root
+            
+            // Attach references for game logic
+            group.userData = { 
+                id: data.id, 
+                name: specs.name, 
+                health: 'healthy', // healthy, decayed, root_canal_step1, root_canal_step2, root_canal_done
+                parts: { crown, root: rootMesh, nerve }
+            };
+
+            // 4. Number Label (Sprite)
+            const label = createLabel(data.id);
+            label.position.set(0, specs.h + 0.5, 0);
+            group.add(label);
+
+            return group;
+        }
+
+        function buildMouth() {
+            const width = 3.5;
+            const depth = 4.2;
+
+            ARCH_CONFIG.forEach((data, i) => {
+                const tooth = createTooth(data, i);
+                const isUpper = data.id <= 16;
+                const indexInArch = isUpper ? i : i - 16;
+                
+                // Arch curve math
+                // Map index 0-15 to -2.5 to 2.5 radians roughly
+                const centeredIndex = indexInArch - 7.5; 
+                const angle = centeredIndex * 0.28;
+                
+                let x = Math.sin(angle) * width;
+                let z = Math.cos(angle) * depth - (depth * 0.6);
+                let y = isUpper ? 1.5 : -1.5;
+
+                // Adjust for lower jaw logic (flip X)
+                if (!isUpper) {
+                    x = -x; 
+                    tooth.rotation.x = Math.PI; // Flip upside down
+                    tooth.rotation.y = -angle;  // Follow curve
+                    
+                    // Fix label pos
+                    const label = tooth.children.find(c => c.type === 'Sprite');
+                    if(label) label.position.y = 2.5; // Push label "down" visually (local up)
+                } else {
+                    tooth.rotation.y = angle;
+                }
+
+                tooth.position.set(x, y, -Math.abs(z));
+                teethGroup.add(tooth);
+
+                // Add Gums
+                const gumGeo = new THREE.SphereGeometry(0.7, 16, 16);
+                const gumMat = new THREE.MeshPhongMaterial({ color: 0xcc6666, shininess: 20 });
+                const gum = new THREE.Mesh(gumGeo, gumMat);
+                gum.position.set(x, isUpper ? 2.5 : -2.5, -Math.abs(z));
+                gum.scale.set(1.4, 0.8, 1.4);
+                gumGroup.add(gum);
+            });
+            teethGroup.add(gumGroup);
+        }
+
+        function createLabel(num) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath(); ctx.arc(32,32,26,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 34px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(num, 32, 34);
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
+            sprite.scale.set(0.5, 0.5, 1);
+            return sprite;
+        }
+
+        // --- Tool Logic ---
+
+        function setTool(tool) {
+            currentTool = tool;
+            // UI Updates
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active', 'decay', 'root'));
+            const btn = document.getElementById('btn-' + tool);
+            btn.classList.add('active');
+            if(tool === 'decay') btn.classList.add('decay');
+            if(tool === 'root') btn.classList.add('root');
+
+            const msg = document.getElementById('status-msg');
+            if(tool === 'view') msg.innerText = "Drag to rotate. Hover to inspect.";
+            if(tool === 'decay') msg.innerText = "Click on a tooth surface to cause a cavity.";
+            if(tool === 'root') msg.innerText = "Click a tooth to start Root Canal therapy.";
+        }
+
+        function onClick(event) {
+            if(isDragging) return; // Don't trigger click if we just dragged
+            
+            // Raycast check
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(teethGroup.children, true);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                let obj = hit.object;
+                
+                // Traverse up to find the tooth group wrapper
+                let toothGroup = null;
+                // If we hit a part of a tooth
+                if(obj.userData.parentGroup) {
+                    toothGroup = obj.userData.parentGroup;
+                } else if(obj.parent && obj.parent.userData.id) {
+                    toothGroup = obj.parent;
+                }
+
+                if(!toothGroup) return;
+
+                const data = toothGroup.userData;
+
+                if (currentTool === 'decay') {
+                    applyDecay(hit.point, hit.object);
+                } 
+                else if (currentTool === 'root') {
+                    performRootCanal(toothGroup);
+                }
+            }
+        }
+
+        function applyDecay(point, object) {
+            // We want to add a decal-like sphere at the hit point
+            // Create a small black sphere
+            const decayGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const decayMat = new THREE.MeshStandardMaterial({ 
+                color: 0x111111, 
+                roughness: 1,
+                name: "decay"
+            });
+            const decaySpot = new THREE.Mesh(decayGeo, decayMat);
+            
+            // Convert world point to object local space is tricky with rotation
+            // Easier: Add to scene, position at world point, then attach to object?
+            // Actually, simplest is to add to the clicked object (crown)
+            // and convert point to local.
+            
+            object.worldToLocal(point);
+            decaySpot.position.copy(point);
+            object.add(decaySpot);
+        }
+
+        function performRootCanal(group) {
+            const { crown, root, nerve } = group.userData.parts;
+            
+            // State Machine for Root Canal
+            if (group.userData.health === 'healthy' || group.userData.health === 'decayed') {
+                // Step 1: Open Access (Transparency) & Show Nerve
+                group.userData.health = 'rc_step1';
+                
+                crown.material.transparent = true;
+                crown.material.opacity = 0.3;
+                crown.material.color.setHex(0xFFFFFF); // White shell
+                
+                root.visible = true; // Show root structure
+                nerve.visible = true; // Show inflamed nerve
+                nerve.material.color.setHex(0xff0000); // Red
+                
+            } else if (group.userData.health === 'rc_step1') {
+                // Step 2: Remove Pulp & Fill (Gutta Percha)
+                group.userData.health = 'rc_step2';
+                
+                nerve.material.color.setHex(0xff69b4); // Pink
+                
+            } else if (group.userData.health === 'rc_step2') {
+                // Step 3: Crown (Gold Cap)
+                group.userData.health = 'rc_done';
+                
+                crown.material.opacity = 1.0;
+                crown.material.color.setHex(0xFFD700); // Gold
+                crown.material.metalness = 0.8;
+                crown.material.roughness = 0.2;
+                
+                // Hide internals again
+                root.visible = false;
+            }
+        }
+
+        // --- Interaction Boilerplate ---
+
+        function onMouseDown(e) {
+            isDragging = true;
+            prevMouse = { x: e.clientX, y: e.clientY };
+        }
+        function onMouseUp() {
+            // Small delay to prevent click triggering if we dragged
+            setTimeout(() => isDragging = false, 50);
+        }
+        function onMouseMove(e) {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+
+            if(isDragging) {
+                const dx = e.clientX - prevMouse.x;
+                const dy = e.clientY - prevMouse.y;
+                rotationTarget.y += dx * 0.005;
+                rotationTarget.x += dy * 0.005;
+                prevMouse = { x: e.clientX, y: e.clientY };
+                return;
+            }
+
+            // Hover Logic
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(teethGroup.children, true);
+            let hit = null;
+            if(intersects.length > 0) {
+                // Find parent group
+                let obj = intersects[0].object;
+                while(obj.parent && obj.parent !== teethGroup && !obj.userData.parentGroup) {
+                    obj = obj.parent;
+                }
+                // Check if we found a valid tooth part
+                if(obj.userData.parentGroup) hit = obj.userData.parentGroup;
+                else if(obj.userData.id) hit = obj; // if it was the group itself
+            }
+
+            if(hit && hit.userData.id) {
+                if(hoveredTooth !== hit) {
+                    if(hoveredTooth) resetHighlight(hoveredTooth);
+                    hoveredTooth = hit;
+                    highlightTooth(hoveredTooth);
+                    
+                    tooltip.style.opacity = 1;
+                    tooltip.innerHTML = `<strong>#${hit.userData.id} ${hit.userData.name}</strong>`;
+                }
+            } else {
+                if(hoveredTooth) {
+                    resetHighlight(hoveredTooth);
+                    hoveredTooth = null;
+                    tooltip.style.opacity = 0;
+                }
+            }
+        }
+        
+        // Touch Handlers for Mobile Rotation
+        function onTouchStart(e) {
+            isDragging = true;
+            prevMouse.x = e.touches[0].clientX;
+            prevMouse.y = e.touches[0].clientY;
+        }
+        function onTouchMove(e) {
+            if(isDragging) {
+                const dx = e.touches[0].clientX - prevMouse.x;
+                const dy = e.touches[0].clientY - prevMouse.y;
+                rotationTarget.y += dx * 0.008;
+                rotationTarget.x += dy * 0.008;
+                prevMouse.x = e.touches[0].clientX;
+                prevMouse.y = e.touches[0].clientY;
+            }
+        }
+
+        function highlightTooth(group) {
+            const crown = group.userData.parts.crown;
+            if(group.userData.health !== 'rc_done') {
+                crown.material.emissive.setHex(0x333333);
+            } else {
+                crown.material.emissive.setHex(0x222200);
+            }
+        }
+
+        function resetHighlight(group) {
+            const crown = group.userData.parts.crown;
+            crown.material.emissive.setHex(0x000000);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function toggleLegend() {
+            document.getElementById('ui-layer').classList.toggle('collapsed');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Smooth rotation
+            teethGroup.rotation.y += (rotationTarget.y - teethGroup.rotation.y) * 0.1;
+            teethGroup.rotation.x += (rotationTarget.x - teethGroup.rotation.x) * 0.1;
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
+
