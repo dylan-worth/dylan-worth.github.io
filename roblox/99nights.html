@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99 Nights</title>
+    <title>99 Nights (3D)</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        #gameCanvas { background: #1a1a1a; touch-action: none; } /* Prevents scrolling while playing */
-        .hud { text-align: center; color: #ff5e57; font-weight: bold; margin-bottom: 10px; }
+        body { overflow: hidden; }
+        #game-container { position: relative; width: 100%; height: 80vh; background: #000; }
+        canvas { width: 100%; height: 100%; display: block; }
+        .hud { position: absolute; top: 10px; left: 0; width: 100%; text-align: center; color: #ff5e57; font-weight: bold; pointer-events: none; }
+        #mobile-controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; }
     </style>
 </head>
 <body>
@@ -15,10 +19,9 @@
         <h1>BLOX</h1>
         <div class="nav-links"><a href="roblox.html">Exit</a></div>
     </nav>
-    <div class="container">
+    
+    <div id="game-container">
         <div class="hud">Nights: <span id="night-count">0</span> | Battery: <span id="battery">100</span>%</div>
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        
         <div id="mobile-controls">
             <div></div>
             <div class="d-btn" ontouchstart="press('w')" ontouchend="release('w')">▲</div>
@@ -27,97 +30,103 @@
             <div class="d-btn" ontouchstart="press('s')" ontouchend="release('s')">▼</div>
             <div class="d-btn" ontouchstart="press('d')" ontouchend="release('d')">▶</div>
         </div>
-        
-        <p style="text-align:center; color:#777; font-size:12px;">Desktop: WASD + Mouse | Mobile: D-Pad + Tap to Aim</p>
     </div>
-
+    
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // --- 3D SETUP ---
+        const container = document.getElementById('game-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x111111, 0.02); // Scary fog
+        scene.background = new THREE.Color(0x111111);
+
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // Ground
+        const planeGeo = new THREE.PlaneGeometry(200, 200);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x1e272e });
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2;
+        scene.add(plane);
+
+        // Trees (Random Cylinders)
+        const treeGeo = new THREE.CylinderGeometry(0.5, 1, 10, 8);
+        const treeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
         
-        // Resize canvas for mobile screens
-        function resize() {
-            if(window.innerWidth < 800) {
-                canvas.style.width = '100%';
-                canvas.style.height = (window.innerWidth * 0.625) + 'px';
-            }
+        for(let i=0; i<50; i++) {
+            const tree = new THREE.Mesh(treeGeo, treeMat);
+            tree.position.x = (Math.random() - 0.5) * 100;
+            tree.position.z = (Math.random() - 0.5) * 100;
+            tree.position.y = 5;
+            scene.add(tree);
         }
-        window.addEventListener('resize', resize);
-        resize();
 
-        let player = {x: 400, y: 250, size: 20};
-        let mouse = {x: 400, y: 250}; // Default aim
-        let battery = 100;
-        let darkness = 0.95;
+        // Player (Invisible representation for camera)
+        const player = { x: 0, z: 10, speed: 0.2 };
+        camera.position.set(0, 2, 10);
+
+        // Flashlight (Spotlight attached to camera)
+        const light = new THREE.SpotLight(0xffffff, 1);
+        light.position.set(0, 2, 10);
+        light.angle = 0.5;
+        light.penumbra = 0.5;
+        light.decay = 2;
+        light.distance = 50;
+        light.castShadow = true;
+        scene.add(light);
+        scene.add(light.target);
+
+        // Ambient light (very dim)
+        const ambient = new THREE.AmbientLight(0x404040, 0.1); 
+        scene.add(ambient);
+
+        // --- GAME LOGIC ---
         let keys = {};
-
-        // Desktop Input
+        let battery = 100;
+        
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
-        canvas.addEventListener('mousemove', e => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            mouse.x = (e.clientX - rect.left) * scaleX;
-            mouse.y = (e.clientY - rect.top) * scaleY;
-        });
-
-        // Mobile Input Hooks
         window.press = (k) => keys[k] = true;
         window.release = (k) => keys[k] = false;
-        
-        // Mobile Touch Aim
-        canvas.addEventListener('touchstart', e => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            mouse.x = (e.touches[0].clientX - rect.left) * scaleX;
-            mouse.y = (e.touches[0].clientY - rect.top) * scaleY;
-        });
 
-        function gameLoop() {
-            // Movement Logic
-            if(keys['w']) player.y -= 2;
-            if(keys['s']) player.y += 2;
-            if(keys['a']) player.x -= 2;
-            if(keys['d']) player.x += 2;
+        function animate() {
+            requestAnimationFrame(animate);
 
-            if(battery > 0) battery -= 0.05;
-            else darkness = 1;
+            // Movement
+            if(keys['w']) camera.translateZ(-player.speed);
+            if(keys['s']) camera.translateZ(player.speed);
+            if(keys['a']) camera.translateX(-player.speed);
+            if(keys['d']) camera.translateX(player.speed);
 
-            ctx.fillStyle = "#1e272e";
-            ctx.fillRect(0,0,800,500);
+            // Flashlight follows camera
+            light.position.copy(camera.position);
+            
+            // Flashlight target logic (aim slightly ahead)
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            light.target.position.copy(camera.position).add(dir);
 
-            // Trees
-            ctx.fillStyle = "#0c1012";
-            ctx.fillRect(100, 100, 40, 40);
-            ctx.fillRect(600, 300, 50, 50);
-
-            // Player
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
-            ctx.fill();
-
-            // Darkness
-            ctx.fillStyle = `rgba(0,0,0,${darkness})`;
-            ctx.fillRect(0,0,800,500);
-
-            // Flashlight Cutout (Aims at last mouse/touch position)
+            // Battery drain
             if(battery > 0) {
-                ctx.save();
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.beginPath();
-                // Simple circle light around player
-                ctx.arc(player.x, player.y, 150, 0, Math.PI*2);
-                ctx.fill();
-                ctx.restore();
+                battery -= 0.05;
+                document.getElementById('battery').innerText = Math.floor(battery);
+            } else {
+                light.intensity = 0; // Lights out
             }
 
-            document.getElementById('battery').innerText = Math.floor(battery);
-            requestAnimationFrame(gameLoop);
+            renderer.render(scene, camera);
         }
-        gameLoop();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        animate();
     </script>
 </body>
 </html>
