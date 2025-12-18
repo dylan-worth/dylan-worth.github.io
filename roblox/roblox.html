@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Home - Roblox</title>
     <style>
-        /* --- EMBEDDED CSS (Guaranteed to work) --- */
         :root {
             --bg-app: #121212;
-            --bg-card: #2b2d31;
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
             --nav-bg: #1a1c1e;
@@ -19,7 +17,7 @@
             font-family: 'Segoe UI', Helvetica, sans-serif;
             background-color: var(--bg-app);
             color: var(--text-primary);
-            padding-bottom: 80px; /* Space for bottom nav */
+            padding-bottom: 80px;
             user-select: none;
         }
 
@@ -30,9 +28,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
         }
 
         .user-pill {
@@ -41,58 +37,36 @@
             border-radius: 20px;
             font-size: 13px;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .robux-icon {
-            width: 18px; height: 18px;
-            border: 2px solid white;
-            display: flex; justify-content: center; align-items: center;
-            border-radius: 50%;
-            font-size: 10px;
+            display: flex; align-items: center; gap: 6px;
         }
 
         /* SECTIONS */
         .section { padding: 20px; }
         .section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
 
-        /* HORIZONTAL SCROLL */
-        .scroller {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-        
-        /* GRID */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
+        /* SCROLLERS & GRIDS */
+        .scroller { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
-        /* CARDS */
-        .game-card {
-            background: transparent;
-            cursor: pointer;
-            width: 100%;
-            min-width: 140px; /* For scroller */
-        }
+        /* CARDS WITH IMAGES */
+        .game-card { width: 100%; min-width: 140px; cursor: pointer; }
 
         .thumb-container {
             width: 100%;
             aspect-ratio: 1/1;
             border-radius: 12px;
-            background: #333;
-            margin-bottom: 8px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
+            margin-bottom: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: #333; /* Fallback color */
+        }
+
+        /* The Image Styling */
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image fills the square */
+            display: block;
         }
 
         .game-title { font-weight: 700; font-size: 16px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -100,25 +74,12 @@
 
         /* BOTTOM NAV */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%; height: 65px;
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
             background: var(--nav-bg);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #333;
-            z-index: 999;
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid #333; z-index: 999;
         }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #666;
-            text-decoration: none;
-            font-size: 10px;
-            gap: 4px;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #666; text-decoration: none; font-size: 10px; gap: 4px; }
         .nav-item.active { color: white; }
         .nav-icon { font-size: 24px; }
     </style>
@@ -128,7 +89,7 @@
     <header>
         <div style="font-weight:900; font-size:24px;">Home</div>
         <div class="user-pill">
-            <div class="robux-icon">⬡</div>
+            <span style="font-size:16px;">⬡</span>
             <span id="r-amount">0</span>
         </div>
     </header>
@@ -137,17 +98,25 @@
         <div class="section-title">Continue</div>
         <div class="scroller">
             <div class="game-card" onclick="window.location.href='99nights.html'">
-                <div class="thumb-container" style="background: linear-gradient(135deg, #111, #333);">🔦</div>
+                <div class="thumb-container">
+                    <img src="https://placehold.co/400x400/1a1a1a/FFF/png?text=99+Nights" class="thumb-img">
+                </div>
                 <div class="game-title">99 Nights</div>
                 <div class="game-stats">92% Rating</div>
             </div>
+            
             <div class="game-card" onclick="window.location.href='brookhaven.html'">
-                <div class="thumb-container" style="background: linear-gradient(135deg, #74b9ff, #0984e3);">🏡</div>
+                <div class="thumb-container">
+                    <img src="https://placehold.co/400x400/0984e3/FFF/png?text=Brookhaven" class="thumb-img">
+                </div>
                 <div class="game-title">Brookhaven RP</div>
                 <div class="game-stats">96% Rating</div>
             </div>
-             <div class="game-card" onclick="window.location.href='roblox-mov.html'">
-                <div class="thumb-container" style="background: linear-gradient(135deg, #e17055, #d63031);">🏃</div>
+
+            <div class="game-card" onclick="window.location.href='roblox-mov.html'">
+                <div class="thumb-container">
+                    <img src="https://placehold.co/400x400/d63031/FFF/png?text=Move+Lab" class="thumb-img">
+                </div>
                 <div class="game-title">Move Lab</div>
                 <div class="game-stats">Dev Test</div>
             </div>
@@ -158,12 +127,17 @@
         <div class="section-title">Recommended</div>
         <div class="grid">
             <div class="game-card" onclick="window.location.href='rainbowfriends.html'">
-                <div class="thumb-container" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">📦</div>
+                <div class="thumb-container">
+                    <img src="https://placehold.co/400x400/6c5ce7/FFF/png?text=Rainbow" class="thumb-img">
+                </div>
                 <div class="game-title">Rainbow Friends</div>
                 <div class="game-stats">Horror</div>
             </div>
+            
             <div class="game-card" onclick="window.location.href='roblox-char.html'">
-                <div class="thumb-container" style="background: linear-gradient(135deg, #fdcb6e, #ffeaa7);">👕</div>
+                <div class="thumb-container">
+                    <img src="https://placehold.co/400x400/fdcb6e/333/png?text=Avatar" class="thumb-img">
+                </div>
                 <div class="game-title">Avatar Editor</div>
                 <div class="game-stats">Customize</div>
             </div>
