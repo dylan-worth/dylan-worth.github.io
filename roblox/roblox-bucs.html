@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buy Robux</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .offer-card { background: var(--bg-light); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 10px; }
+        .price { font-size: 20px; color: #2ecc71; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>BLOX</h1>
+        <div class="nav-links">
+            <a href="roblox.html">Games</a>
+            <a href="roblox-char.html">Avatar</a>
+            <a href="roblox-bucs.html" style="color:white;">Store</a>
+            <a href="roblox-mov.html">Movement Lab</a>
+        </div>
+        <div class="currency-display">R$ <span id="r-amount">0</span></div>
+    </nav>
+
+    <div class="container">
+        <h2>Buy Robux</h2>
+        <div class="game-grid">
+            <div class="offer-card">
+                <h3>400 Robux</h3>
+                <p class="price">$4.99</p>
+                <button class="btn" onclick="buy(400)">Purchase</button>
+            </div>
+            <div class="offer-card">
+                <h3>800 Robux</h3>
+                <p class="price">$9.99</p>
+                <button class="btn" onclick="buy(800)">Purchase</button>
+            </div>
+            <div class="offer-card">
+                <h3>1,700 Robux</h3>
+                <p class="price">$19.99</p>
+                <button class="btn" onclick="buy(1700)">Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            let bucs = localStorage.getItem('robux') || 0;
+            document.getElementById('r-amount').innerText = bucs;
+        }
+
+        function buy(amount) {
+            let current = parseInt(localStorage.getItem('robux') || 0);
+            let total = current + amount;
+            localStorage.setItem('robux', total);
+            updateDisplay();
+            alert("Payment Successful! +R$" + amount);
+        }
+        updateDisplay();
+    </script>
+</body>
+</html>
