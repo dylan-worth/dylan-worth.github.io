@@ -30,15 +30,20 @@ const RobloxEngine = {
         container.appendChild(this.renderer.domElement);
         
         // Re-add UI layers on top if they were wiped (optional safety)
-        const touchLayer = document.createElement('div');
-        touchLayer.id = touchLayerId;
-        touchLayer.style.position = 'absolute';
-        touchLayer.style.top = '0';
-        touchLayer.style.left = '0';
-        touchLayer.style.width = '100%';
-        touchLayer.style.height = '100%';
-        touchLayer.style.zIndex = '10';
-        container.appendChild(touchLayer);
+        let touchLayer = document.getElementById(touchLayerId);
+        if (!touchLayer) {
+            touchLayer = document.createElement('div');
+            touchLayer.id = touchLayerId;
+            touchLayer.style.position = 'absolute';
+            touchLayer.style.top = '0';
+            touchLayer.style.left = '0';
+            touchLayer.style.width = '100%';
+            touchLayer.style.height = '100%';
+            touchLayer.style.zIndex = '10';
+            container.appendChild(touchLayer);
+        } else {
+            container.appendChild(touchLayer);
+        }
 
         // 2. Setup Camera Control
         // Assumes roblox-cam.js is loaded
