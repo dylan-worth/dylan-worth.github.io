@@ -1,4 +1,4 @@
-/* roblox-engine.js - Core 3D Engine & Safety Loop */
+/* roblox-engine.js - Fixed Core Engine */
 
 const RobloxEngine = {
     scene: null,
@@ -6,81 +6,85 @@ const RobloxEngine = {
     renderer: null,
     camControl: null,
     clock: new THREE.Clock(),
-    
-    // The function your game logic will hook into
     onUpdate: null, 
 
     init: function(containerId, touchLayerId) {
-        console.log("Initializing Engine...");
-        
-        // 1. Setup Three.js
+        console.log("Engine: Initializing...");
         const container = document.getElementById(containerId);
+        
+        if (!container) {
+            console.error("Engine Error: Container '" + containerId + "' not found!");
+            return;
+        }
+
+        // 1. Setup Three.js
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87CEEB); // Default Blue Sky
-        this.scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+        this.scene.background = new THREE.Color(0x87CEEB); 
+        
+        // Lighter Fog (Start at 20, fade out at 100)
+        this.scene.fog = new THREE.Fog(0x87CEEB, 20, 100); 
 
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); // alpha: false prevents transparent black background
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
-        // Clear container and append
+        // Clear and Append
         container.innerHTML = ""; 
         container.appendChild(this.renderer.domElement);
-        
-        // Re-add UI layers on top if they were wiped (optional safety)
+
+        // 2. Re-create Touch Layer (Safe UI Stacking)
         let touchLayer = document.getElementById(touchLayerId);
         if (!touchLayer) {
             touchLayer = document.createElement('div');
             touchLayer.id = touchLayerId;
-            touchLayer.style.position = 'absolute';
-            touchLayer.style.top = '0';
-            touchLayer.style.left = '0';
-            touchLayer.style.width = '100%';
-            touchLayer.style.height = '100%';
-            touchLayer.style.zIndex = '10';
+            touchLayer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;";
             container.appendChild(touchLayer);
         } else {
-            container.appendChild(touchLayer);
+            container.appendChild(touchLayer); // Move existing to top
         }
 
-        // 2. Setup Camera Control
-        // Assumes roblox-cam.js is loaded
+        // 3. Setup Camera Control
         if (typeof RobloxCamera !== 'undefined') {
             this.camControl = new RobloxCamera(this.camera, touchLayer);
-        } else {
-            console.warn("RobloxCamera not found. Camera locked.");
         }
 
-        // 3. Resize Handler
+        // 4. SAFETY LIGHT (Prevents Pitch Black Screens)
+        const safetyLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+        this.scene.add(safetyLight);
+
+        // 5. Resize Handler
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 4. Start Loop
+        // 6. Start Loop
+        console.log("Engine: Starting Loop...");
         this.animate();
     },
 
     animate: function() {
+        // 1. Request Frame FIRST (Ensures loop continues even if logic crashes)
         requestAnimationFrame(() => this.animate());
 
         const dt = this.clock.getDelta();
 
-        // 5. SAFETY TRY-CATCH
-        // If game logic crashes, the game keeps rendering the last frame instead of going black.
+        // 2. Run Game Logic (Safely)
         if (this.onUpdate) {
             try {
                 this.onUpdate(dt);
             } catch (error) {
-                console.error("GAME LOGIC CRASHED:", error);
-                this.onUpdate = null; // Disable logic to save the renderer
-                alert("Game Error! Check Console. (Safety Mode Active)");
+                console.error("GAME CRASH:", error);
+                this.onUpdate = null; // Disable broken logic
             }
         }
 
-        this.renderer.render(this.scene, this.camera);
+        // 3. Render Scene
+        if (this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 };
