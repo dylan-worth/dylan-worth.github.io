@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebGodot v1.0</title>
+    <title>WebGodot v1.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/TransformControls.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -12,7 +12,6 @@
     <style>
         body { margin: 0; display: flex; height: 100vh; background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        /* LAYOUT */
         #layout { display: grid; grid-template-columns: 250px 1fr 300px; grid-template-rows: 40px 1fr 150px 200px; width: 100%; height: 100%; }
         
         #toolbar { grid-column: 1 / 4; background: #2d2d2d; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #111; gap: 10px; }
@@ -28,7 +27,10 @@
         .btn-tool { background: #444; } .btn-tool.active { background: #007acc; }
         .btn-save { background: #e67e22; margin-left: auto; }
         
-        /* TREE & INSPECTOR */
+        /* CREATE NODE MENU */
+        #create-node-area { padding: 10px; border-top: 1px solid #333; background: #1e1e1e; }
+        select { width: 100%; background: #333; color: white; padding: 5px; border: 1px solid #444; margin-bottom: 5px; }
+        
         .tree-item { padding: 4px 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; }
         .tree-item:hover { background: #2a2d2e; } .tree-item.active { background: #37373d; border-left: 3px solid #007acc; }
         
@@ -36,7 +38,6 @@
         input { background: #3c3c3c; border: 1px solid #333; color: white; padding: 4px; border-radius: 2px; }
         textarea { width: 100%; height: 100%; background: #1e1e1e; color: #9cdcfe; border: none; padding: 10px; resize: none; outline: none; }
         
-        /* CONSOLE */
         .log-entry { margin: 2px 0; border-bottom: 1px solid #222; }
         .log-info { color: #ccc; } .log-error { color: #ff5252; } .log-success { color: #69f0ae; }
     </style>
@@ -51,7 +52,6 @@
             <button class="btn btn-tool" onclick="setGizmo('translate')">Move</button>
             <button class="btn btn-tool" onclick="setGizmo('rotate')">Rotate</button>
             <button class="btn btn-tool" onclick="setGizmo('scale')">Scale</button>
-            
             <button class="btn btn-save" onclick="Game.saveScene()">💾 Save</button>
             <button class="btn btn-tool" onclick="Game.loadScene()">📂 Load</button>
         </div>
@@ -59,7 +59,13 @@
         <div id="sidebar-left">
             <div class="panel-header">Scene</div>
             <div id="scene-tree" style="flex-grow:1; padding:5px;"></div>
-            <button class="btn btn-tool" style="width:90%; margin:10px auto;" onclick="spawnCube()">+ Cube</button>
+            
+            <div id="create-node-area">
+                <div class="panel-header" style="background:none; padding-left:0;">Create Node</div>
+                <select id="node-type-select">
+                    </select>
+                <button class="btn btn-tool" style="width:100%; justify-content:center;" onclick="spawnSelectedNode()">+ Add Node</button>
+            </div>
         </div>
 
         <div id="viewport">
@@ -74,57 +80,46 @@
         <div id="sidebar-right">
             <div class="panel-header">Properties</div>
             <div id="inspector-content" style="margin-bottom: 20px;"></div>
-            
             <div class="panel-header">Script</div>
             <textarea id="code-editor" style="height: 300px;" placeholder="// Script..."></textarea>
         </div>
     </div>
 
     <script>
-        // 1. INIT ENGINE
+        // 1. INIT
         const canvasContainer = document.getElementById('game-canvas');
         Game.init(canvasContainer);
 
-        // 2. SETUP TOOLS (Orbit + Gizmo)
+        // 2. TOOLS
         const orbit = new THREE.OrbitControls(Game.camera, Game.renderer.domElement);
         const gizmo = new THREE.TransformControls(Game.camera, Game.renderer.domElement);
         gizmo.setMode('translate');
         Game.scene.add(gizmo);
 
-        // Gizmo Logic: Sync Visuals to Data
         gizmo.addEventListener('change', () => {
             if (selectedNode && selectedNode.sceneObj) {
-                // When dragging gizmo, update the Node's export data
                 const o = selectedNode.sceneObj;
                 selectedNode.export.x = o.position.x;
                 selectedNode.export.y = o.position.y;
                 selectedNode.export.z = o.position.z;
-                
                 selectedNode.export.rx = o.rotation.x;
                 selectedNode.export.ry = o.rotation.y;
                 selectedNode.export.rz = o.rotation.z;
-
                 selectedNode.export.sx = o.scale.x;
                 selectedNode.export.sy = o.scale.y;
                 selectedNode.export.sz = o.scale.z;
-                
-                refreshInspector(); // Update inputs live
+                refreshInspector();
             }
         });
-
-        gizmo.addEventListener('dragging-changed', (e) => {
-            orbit.enabled = !e.value; // Disable orbit while dragging
-        });
+        gizmo.addEventListener('dragging-changed', (e) => orbit.enabled = !e.value);
 
         // 3. EDITOR STATE
         let selectedNode = null;
 
-        // Auto-save script
         document.getElementById('code-editor').addEventListener('input', (e) => {
             if (selectedNode) selectedNode.script = e.target.value;
         });
 
-        // Console Hook
         Game.onLog = (msg, type) => {
             const div = document.createElement('div');
             div.className = `log-entry log-${type}`;
@@ -134,7 +129,47 @@
             logPanel.scrollTop = logPanel.scrollHeight;
         };
 
-        // 4. EDITOR FUNCTIONS
+        // 4. POPULATE NODE TYPES
+        // This list matches the classes you defined in engine.js
+        const nodeTypes = [
+            "Node",
+            "CubeObj", 
+            "LookAtModifier3D", 
+            "SpringBoneSimulator3D", 
+            "RetargetModifier3D",
+            "SkeletonModifier3D"
+        ];
+        
+        const typeSelect = document.getElementById('node-type-select');
+        nodeTypes.forEach(type => {
+            const opt = document.createElement('option');
+            opt.value = type;
+            opt.innerText = type;
+            typeSelect.appendChild(opt);
+        });
+
+        function spawnSelectedNode() {
+            const type = typeSelect.value;
+            let newNode;
+
+            // Simple Factory
+            if (type === "CubeObj") newNode = new CubeObj("Cube");
+            else if (type === "LookAtModifier3D") newNode = new LookAtModifier3D("LookAt");
+            else if (type === "SpringBoneSimulator3D") newNode = new SpringBoneSimulator3D("SpringBone");
+            else if (type === "RetargetModifier3D") newNode = new RetargetModifier3D("Retarget");
+            else if (type === "SkeletonModifier3D") newNode = new SkeletonModifier3D("SkeletonMod");
+            else newNode = new Node("Node");
+
+            // Unique Name
+            newNode.name += "_" + Math.floor(Math.random()*100);
+
+            // Add to selected parent or root
+            const parent = selectedNode || Game.root;
+            parent.add_child(newNode);
+            
+            selectNode(newNode);
+        }
+
         window.Editor = {
             refreshTree: function() {
                 const tree = document.getElementById('scene-tree');
@@ -144,7 +179,13 @@
                     div.className = 'tree-item';
                     if (selectedNode === node) div.classList.add('active');
                     div.style.paddingLeft = (depth * 15 + 10) + "px";
-                    div.innerText = node.name;
+                    
+                    // Icon logic
+                    let icon = "⚪";
+                    if (node.constructor.name.includes("Cube")) icon = "📦";
+                    if (node.constructor.name.includes("Modifier")) icon = "🔧";
+                    
+                    div.innerText = icon + " " + node.name;
                     div.onclick = () => selectNode(node);
                     tree.appendChild(div);
                     node.children.forEach(c => build(c, depth + 1));
@@ -153,71 +194,61 @@
             }
         };
 
-        function spawnCube() {
-            const c = new CubeObj("Cube_" + Math.floor(Math.random()*100));
-            Game.root.add_child(c);
-            selectNode(c);
-        }
-
         function selectNode(node) {
             selectedNode = node;
             window.Editor.refreshTree();
             
-            // Attach Gizmo
-            if (node.sceneObj) {
-                gizmo.attach(node.sceneObj);
-            } else {
-                gizmo.detach();
-            }
+            if (node.sceneObj) gizmo.attach(node.sceneObj);
+            else gizmo.detach();
 
-            // Load Script
             document.getElementById('code-editor').value = node.script || "";
             refreshInspector();
         }
         
-        function setGizmo(mode) {
-            gizmo.setMode(mode);
-        }
+        function setGizmo(mode) { gizmo.setMode(mode); }
 
         function refreshInspector() {
             const insp = document.getElementById('inspector-content');
             insp.innerHTML = "";
             if(!selectedNode) return;
-            
             const node = selectedNode;
 
-            // Helper to make number input
-            const addNum = (label, obj, key) => {
-                const row = document.createElement('div'); row.className = 'prop-row';
-                row.innerHTML = `<span>${label}</span>`;
-                const input = document.createElement('input'); 
-                input.type="number"; input.step="0.1"; input.value = obj[key].toFixed(2);
-                input.onchange = (e) => {
-                    obj[key] = parseFloat(e.target.value);
-                    if(node.sceneObj) {
-                         // Apply update immediately
-                         node._process(0); 
-                    }
-                };
-                row.appendChild(input); insp.appendChild(row);
-            };
+            // Name
+            const nameRow = document.createElement('div'); nameRow.className = 'prop-row';
+            nameRow.innerHTML = "<span>Name</span>";
+            const nameIn = document.createElement('input'); nameIn.type="text"; nameIn.value=node.name;
+            nameIn.onchange=(e)=>{ node.name=e.target.value; window.Editor.refreshTree(); };
+            nameRow.appendChild(nameIn); insp.appendChild(nameRow);
 
-            addNum("Pos X", node.export, 'x');
-            addNum("Pos Y", node.export, 'y');
-            addNum("Pos Z", node.export, 'z');
-            
-            addNum("Scale", node.export, 'sx');
-            
-            // Color Input
-            const row = document.createElement('div'); row.className = 'prop-row';
-            row.innerHTML = `<span>Color</span>`;
-            const col = document.createElement('input'); col.type="color"; 
-            col.value = node.export.color || "#ffffff";
-            col.onchange = (e) => {
-                node.export.color = e.target.value;
-                node._process(0);
-            };
-            row.appendChild(col); insp.appendChild(row);
+            // Generic Properties from 'export'
+            for (const key in node.export) {
+                const val = node.export[key];
+                const row = document.createElement('div'); row.className = 'prop-row';
+                row.innerHTML = `<span>${key}</span>`;
+                
+                let input;
+                if (typeof val === 'boolean') {
+                    input = document.createElement('input'); input.type="checkbox"; input.checked = val;
+                    input.onchange = (e) => { node.export[key] = e.target.checked; updateNodeVisuals(node); };
+                } else if (typeof val === 'string' && val.startsWith("#")) {
+                    input = document.createElement('input'); input.type="color"; input.value = val;
+                    input.onchange = (e) => { node.export[key] = e.target.value; updateNodeVisuals(node); };
+                } else if (typeof val === 'number') {
+                    input = document.createElement('input'); input.type="number"; input.step="0.1"; input.value = val;
+                    input.onchange = (e) => { node.export[key] = parseFloat(e.target.value); updateNodeVisuals(node); };
+                } else {
+                    input = document.createElement('input'); input.type="text"; input.value = val;
+                    input.onchange = (e) => { node.export[key] = e.target.value; updateNodeVisuals(node); };
+                }
+                
+                row.appendChild(input);
+                insp.appendChild(row);
+            }
+        }
+
+        function updateNodeVisuals(node) {
+            // Force a single frame update to see changes immediately in Editor
+            node._process(0);
         }
 
         function togglePlay(play) {
@@ -228,7 +259,6 @@
             } else {
                 if(selectedNode && selectedNode.sceneObj) gizmo.attach(selectedNode.sceneObj);
                 Game.log("Game Stopped.", "info");
-                // Reload scene to reset state
                 Game.loadScene(); 
             }
         }
