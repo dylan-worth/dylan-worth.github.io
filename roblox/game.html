@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Godot-Lite Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="roblox-core.js"></script> <style> body { margin: 0; overflow: hidden; background: #000; } </style>
+</head>
+<body>
+    <div id="game-container" style="width:100vw; height:100vh;"></div>
+
+    <script>
+        // --- DEFINE SCRIPTS (Like creating .gd or .cs files) ---
+
+        // 1. The Player Script
+        class Player extends Node {
+            _ready() {
+                // Create Visuals
+                const geo = new THREE.BoxGeometry(1, 2, 1);
+                const mat = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+                this.sceneObj = new THREE.Mesh(geo, mat);
+                this.sceneObj.castShadow = true;
+                
+                // Variables
+                this.speed = 10;
+                this.sceneObj.position.y = 1;
+            }
+
+            _process(delta) {
+                // Read Inputs from Engine
+                const inputX = R.inputs.x;
+                const inputY = R.inputs.y;
+
+                // Move Character
+                this.sceneObj.position.x += inputX * this.speed * delta;
+                this.sceneObj.position.z += inputY * this.speed * delta;
+
+                // Jump Logic
+                if (R.inputs.jump && this.sceneObj.position.y <= 1) {
+                    this.sceneObj.position.y = 4; // Instant hop
+                }
+                
+                // Gravity
+                if (this.sceneObj.position.y > 1) {
+                    this.sceneObj.position.y -= 10 * delta;
+                } else {
+                    this.sceneObj.position.y = 1;
+                }
+
+                // Camera Follow
+                R.camera.position.x = this.sceneObj.position.x;
+                R.camera.position.z = this.sceneObj.position.z + 10;
+                R.camera.position.y = 10;
+                R.camera.lookAt(this.sceneObj.position);
+            }
+        }
+
+        // 2. A Rotating Cube Script
+        class Spinner extends Node {
+            _ready() {
+                this.sceneObj = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 2, 2),
+                    new THREE.MeshStandardMaterial({ color: 0xff0000 })
+                );
+                this.sceneObj.position.set(5, 1, 0);
+            }
+
+            _process(delta) {
+                this.sceneObj.rotation.x += 2 * delta;
+                this.sceneObj.rotation.y += 2 * delta;
+            }
+        }
+
+        // --- MAIN LEVEL SETUP ---
+        R.init(); // Start Engine
+
+        // Create the Floor (Static, no script needed)
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(100, 100),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        R.scene.add(floor);
+
+        // Spawn Nodes (Instance the classes)
+        const player1 = new Player("Hero");
+        const box1 = new Spinner("EnemyBox");
+
+        // Add to Scene Tree
+        R.root.add_child(player1);
+        R.root.add_child(box1);
+
+    </script>
+</body>
+</html>
