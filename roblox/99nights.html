@@ -4,28 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>99 Nights - Survival</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="roblox-joystick.js"></script>
+    <script src="roblox-cam.js"></script>
     <script src="99nightsui.js"></script>
-    <script src="roblox-cam.js"></script> <style>
+    <script src="99tools.js"></script> <style>
         body { margin: 0; overflow: hidden; background: #000; user-select: none; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         #game-container { position: relative; width: 100%; height: 100vh; }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
         
         /* UI LAYOUT */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
-        #touch-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; } /* Camera touches here */
+        #touch-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
         /* HUD */
         .hud-top { position: absolute; top: 10px; width: 100%; text-align: center; color: white; text-shadow: 1px 1px 2px black; pointer-events: none; }
         .xp-bar-container { width: 200px; height: 10px; background: #333; margin: 5px auto; border: 1px solid #555; border-radius: 5px; overflow: hidden; }
         #xp-bar-fill { height: 100%; width: 0%; background: #00b06f; transition: width 0.2s; }
+        
+        /* BATTERY BAR */
+        .batt-bar-container { width: 150px; height: 8px; background: #222; margin: 2px auto; border: 1px solid #444; border-radius: 4px; overflow: hidden; }
+        #batt-bar-fill { height: 100%; width: 100%; background: #f1c40f; transition: width 0.2s; }
 
-        /* MINIMAP */
+        /* INVENTORY & MAP */
         #minimap-container { position: absolute; top: 20px; right: 20px; width: 100px; height: 100px; background: rgba(0,0,0,0.5); border: 2px solid #777; border-radius: 50%; overflow: hidden; display: none; pointer-events: auto; }
         #minimap-canvas { width: 100%; height: 100%; }
 
-        /* INVENTORY */
         #inventory-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; pointer-events: auto; }
         .inv-slot { width: 50px; height: 50px; background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 5px; position: relative; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; }
         .item-icon { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: grab; }
@@ -33,21 +38,12 @@
 
         /* BUTTONS */
         #jump-btn { position: absolute; bottom: 120px; right: 20px; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; color: white; font-weight: bold; font-size: 12px; display: flex; pointer-events: auto; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(2px); }
-        #jump-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.95); }
-
         #action-btn { position: absolute; bottom: 190px; right: 30px; width: 80px; height: 80px; background: rgba(0, 176, 111, 0.3); border: 3px solid #00b06f; border-radius: 50%; color: white; font-weight: bold; font-size: 30px; display: none; pointer-events: auto; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-        #action-btn:active { background: #00b06f; transform: scale(0.95); }
-
-        /* TOAST */
-        #toast { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.5s; pointer-events: none; font-size: 14px; text-align: center; }
-
-        /* JOYSTICK */
-        #joystick-zone { position: absolute; bottom: 100px; left: 30px; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%; pointer-events: auto; z-index: 15; }
-        #joystick-knob { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.8); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-
-        /* CRAFT MENU */
+        
+        /* MISC */
         #craft-menu { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); border: 2px solid #555; padding: 20px; color: white; display: none; pointer-events: auto; text-align: center; border-radius: 10px; width: 250px; z-index: 30; }
         .craft-btn { background: #333; color: white; border: 1px solid #555; padding: 10px; width: 100%; margin-bottom: 5px; cursor: pointer; }
+        #toast { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.5s; pointer-events: none; font-size: 14px; text-align: center; }
         .exit-btn { position: absolute; top: 10px; left: 10px; pointer-events: auto; background: rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; }
     </style>
 </head>
@@ -55,38 +51,45 @@
 
     <div id="game-container">
         <div id="touch-layer"></div>
-
         <div id="ui-layer">
             <a href="roblox.html" class="exit-btn">⬅ Exit</a>
             
             <div class="hud-top">
                 <div style="font-size: 18px; font-weight: bold;">Campfire Lv <span id="camp-lvl">1</span></div>
                 <div class="xp-bar-container"><div id="xp-bar-fill"></div></div>
+                <div class="batt-bar-container"><div id="batt-bar-fill"></div></div>
                 <div><span id="time-display">Day 1</span></div>
             </div>
 
             <div id="minimap-container"><canvas id="minimap-canvas" width="100" height="100"></canvas></div>
             <div id="toast">Message</div>
 
-            <div id="jump-btn" ontouchstart="jumpAction(event)">JUMP</div>
-            <div id="action-btn" ontouchstart="interactAction(event)">👋</div>
+            <div id="jump-btn" ontouchstart="doJump(event)">JUMP</div>
+            <div id="action-btn" ontouchstart="doInteract(event)">👋</div>
 
-            <div id="inventory-bar"></div>
-
-            <div id="craft-menu">
+            <div id="inventory-bar"></div> <div id="craft-menu">
                 <h3>Workbench</h3>
-                <button class="craft-btn" onclick="craftItem('map')">🗺️ Craft Map (5 Wood)</button>
-                <button class="craft-btn" onclick="craftItem('bed')">🛏️ Craft Bed (10 Wood)</button>
-                <button class="craft-btn" onclick="craftItem('upgrade_bench')">🛠️ Upgrade Bench (20 Wood)</button>
+                <button class="craft-btn" onclick="doCraft('map')">🗺️ Craft Map (5 Wood)</button>
+                <button class="craft-btn" onclick="doCraft('bed')">🛏️ Craft Bed (10 Wood)</button>
                 <button class="craft-btn" onclick="UI.toggleCraftMenu(false)">Close</button>
             </div>
         </div>
-        
-        <div id="joystick-zone"><div id="joystick-knob"></div></div>
     </div>
 
     <script>
-        // --- 3D SCENE SETUP ---
+        // --- GAME STATE ---
+        // Setup initial equipment stats
+        const gameConfig = {
+            currentAxe: 'Old Axe',
+            currentLight: 'Old Flashlight',
+            currentSack: 'Old Sack',
+            battery: 100 // Battery %
+        };
+
+        // Update global max wood capacity based on sack
+        gameState.maxWood = Tools.getCapacity(gameConfig.currentSack);
+
+        // --- THREE.JS INIT ---
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
@@ -99,48 +102,49 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.insertBefore(renderer.domElement, document.getElementById('touch-layer'));
 
-        // *** INIT ROBLOX CAMERA ***
-        // Passing the 'touch-layer' so controls don't overlap UI buttons
         const rCam = new RobloxCamera(camera, document.getElementById('touch-layer'));
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffaa33, 1.2);
-        sunLight.position.set(50, 50, 0);
-        sunLight.castShadow = true;
+        // --- LIGHTING (Flashlight + Sun) ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambientLight);
+        
+        // Sun
+        const sunLight = new THREE.DirectionalLight(0xffaa33, 1.2); 
+        sunLight.position.set(50, 50, 0); 
+        sunLight.castShadow = true; 
         scene.add(sunLight);
 
-        // Ground
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x2f3628 }));
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
+        // Player Flashlight
+        const flashLight = new THREE.SpotLight(0xffaa00, 0, 40, 0.5, 0.5, 1);
+        scene.add(flashLight);
+        scene.add(flashLight.target);
 
-        // Player
+        // Ground
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x2f3628 })); 
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+        // Player Model
         const playerGroup = new THREE.Group();
         const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshStandardMaterial({color: 0xd35400})); body.position.y = 1;
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xffe0bd})); head.position.y = 2.3;
         const sack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.5), new THREE.MeshStandardMaterial({color: 0x8d6e63})); sack.position.set(0, 1.5, -0.4);
         
+        // Axe Visuals
         const axePivot = new THREE.Group(); axePivot.position.set(0.6, 1.8, 0);
         const axeGroup = new THREE.Group();
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2), new THREE.MeshStandardMaterial({color: 0x5d4037})); handle.position.y = 0.6;
         const blade = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.05), new THREE.MeshStandardMaterial({color: 0x95a5a6})); blade.position.set(0.15, 1.1, 0);
         axeGroup.add(handle); axeGroup.add(blade); axeGroup.rotation.x = Math.PI/2; axeGroup.rotation.z = -0.2; axePivot.add(axeGroup);
 
-        playerGroup.add(body); playerGroup.add(head); playerGroup.add(sack); playerGroup.add(axePivot);
-        playerGroup.castShadow = true;
-        scene.add(playerGroup);
+        playerGroup.add(body); playerGroup.add(head); playerGroup.add(sack); playerGroup.add(axePivot); 
+        playerGroup.castShadow = true; scene.add(playerGroup);
 
-        // --- WORLD GENERATION ---
+        // World Objects
         const fireGroup = new THREE.Group();
         const fireLight = new THREE.PointLight(0xff4500, 2, 15); fireLight.position.y = 1; fireGroup.add(fireLight);
         const log1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723})); log1.rotation.z=Math.PI/2; log1.position.y=0.1; fireGroup.add(log1);
         const log2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x3e2723})); log2.rotation.x=Math.PI/2; log2.position.y=0.1; fireGroup.add(log2);
         for(let i=0; i<8; i++){ const p=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.15,0.15), new THREE.MeshBasicMaterial({color: 0xffaa00})); p.position.set((Math.random()-0.5),Math.random()*1.5,(Math.random()-0.5)); fireGroup.add(p); }
         scene.add(fireGroup);
-
         const bench = new THREE.Mesh(new THREE.BoxGeometry(2,1,1), new THREE.MeshStandardMaterial({color:0x795548})); bench.position.set(6,0.5,6); scene.add(bench);
 
         // Trees
@@ -149,46 +153,66 @@
             const t = new THREE.Group();
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2), new THREE.MeshStandardMaterial({color:0x4e342e})); trunk.position.y=1;
             const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5,5,6), new THREE.MeshStandardMaterial({color:0x145a32})); leaves.position.y=3.5;
-            t.add(trunk); t.add(leaves); t.position.set(x,0,z); t.userData={hp:3, type:'tree'};
+            t.add(trunk); t.add(leaves); t.position.set(x,0,z);
+            
+            // Set Tree HP to 15 as requested
+            t.userData={hp:15, maxHp:15, type:'tree'}; 
             scene.add(t); trees.push(t);
         }
         for(let i=0; i<60; i++) { let tx=(Math.random()-0.5)*150; let tz=(Math.random()-0.5)*150; if(Math.abs(tx)>8 || Math.abs(tz)>8) spawnTree(tx,tz); }
-
-        // Mobs
-        const mobs = [];
-        function spawnMob(type,x,z) {
-            const mob = new THREE.Group();
-            let c = type==='wolf'?0x7f8c8d:0xffffff; let s = type==='wolf'?1:0.5;
-            const b = new THREE.Mesh(new THREE.BoxGeometry(s,s/2,s*1.5), new THREE.MeshStandardMaterial({color:c})); b.position.y=s/2;
-            const h = new THREE.Mesh(new THREE.BoxGeometry(s/1.5,s/1.5,s/1.5), new THREE.MeshStandardMaterial({color:c})); h.position.set(0,s,s/1.5);
-            mob.add(b); mob.add(h); mob.position.set(x,0,z); mob.userData={type:type, speed:type==='wolf'?0.08:0.03, tm:0};
-            scene.add(mob); mobs.push(mob);
-        }
-        for(let i=0; i<15; i++) spawnMob(i<5?'wolf':'bunny', (Math.random()-0.5)*80, (Math.random()-0.5)*80);
+        for(let i=0; i<15; i++) Mobs.spawn(scene, i<5?'wolf':'bunny', (Math.random()-0.5)*80, (Math.random()-0.5)*80);
 
         const droppedLogs = [];
+
+        // --- INTERACTIONS ---
+        window.doJump = function(e) { if(e) e.stopPropagation(); if (gameState.isGrounded) { gameState.velocityY = 0.3; gameState.isGrounded = false; } };
         
-        // Raycaster for Picking Up Logs
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        window.gameCheckTap = function(clientX, clientY) {
-            mouse.x = (clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(droppedLogs, true);
-            if (intersects.length > 0) {
-                const log = intersects[0].object;
-                if (playerGroup.position.distanceTo(log.position) < 6) {
-                    if (Inventory.addWood(1)) {
-                        scene.remove(log);
-                        const idx = droppedLogs.indexOf(log);
-                        if (idx > -1) droppedLogs.splice(idx, 1);
-                        UI.showToast("+1 Wood");
-                        UI.updateHUD(); 
-                    } else UI.showToast("Sack is Full!");
-                } else UI.showToast("Too far!");
+        window.doInteract = function(e) {
+            if(e) e.stopPropagation();
+            gameState.isSwinging = true; 
+            
+            if (gameState.nearbyObject) {
+                const obj = gameState.nearbyObject;
+                if (obj.type === 'fire') {
+                    if (gameState.wood > 0) {
+                        gameState.wood--; gameState.xp += 20;
+                        if(gameState.xp >= gameState.xpToNextLevel) { 
+                            gameState.campLevel++; gameState.xp = 0; gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5); gameState.fogDist += 15;
+                            UI.showToast(`Campfire Lv ${gameState.campLevel}!`);
+                        }
+                        UI.updateHUD(); Inventory.render();
+                    } else UI.showToast("Sack empty!");
+                }
+                else if (obj.type === 'bench') UI.toggleCraftMenu(true);
             }
         };
+
+        window.doCraft = function(item) {
+            if (item === 'map' && gameState.wood >= 5) { gameState.wood -= 5; gameState.hasMap = true; document.getElementById('minimap-container').style.display = 'block'; UI.showToast("Map Crafted!"); }
+            else if (item === 'bed' && gameState.wood >= 10) { gameState.wood -= 10; UI.showToast("Bed Crafted!"); }
+            else { UI.showToast("Not enough wood!"); }
+            Inventory.render(); UI.toggleCraftMenu(false);
+        };
+
+        // Raycasting for Log Pickup
+        const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+        document.getElementById('touch-layer').addEventListener('touchstart', (e) => {
+            if(e.touches.length === 1) {
+                mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(droppedLogs, true);
+                if (intersects.length > 0) {
+                    const log = intersects[0].object;
+                    if (playerGroup.position.distanceTo(log.position) < 6) {
+                        if (Inventory.addWood(1)) {
+                            scene.remove(log); droppedLogs.splice(droppedLogs.indexOf(log), 1);
+                            UI.showToast("+1 Wood");
+                        } else UI.showToast("Full!");
+                    } else UI.showToast("Too far!");
+                }
+            }
+        });
 
         // --- MAIN LOOP ---
         const clock = new THREE.Clock();
@@ -196,89 +220,93 @@
             requestAnimationFrame(animate);
             let dt = clock.getDelta();
 
-            scene.fog.far = gameState.fogDist; 
-            gameState.time += dt / 180;
-            if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
+            scene.fog.far = gameState.fogDist;
+            gameState.time += dt / 180; if (gameState.time > 1) { gameState.time = 0; gameState.day++; }
             UI.updateHUD();
 
+            // Lighting (Sun & Flashlight)
             const sunAngle = (gameState.time - 0.25) * Math.PI * 2;
             sunLight.position.x = Math.cos(sunAngle) * 50; sunLight.position.y = Math.sin(sunAngle) * 50;
-            let intensity = Math.max(0, Math.sin(sunAngle));
-            if(gameState.time > 0.75 || gameState.time < 0.25) intensity = 0;
+            let intensity = Math.max(0, Math.sin(sunAngle)); if(gameState.time > 0.75 || gameState.time < 0.25) intensity = 0;
             sunLight.intensity = intensity; ambientLight.intensity = 0.5 + (intensity * 0.4);
             scene.background.setHSL(0.6, 0.5, intensity * 0.5); scene.fog.color.copy(scene.background);
             fireLight.intensity = (1 - intensity) * (2 + gameState.campLevel);
 
-            // *** CAMERA RELATIVE MOVEMENT ***
-            const spd = 0.15;
-            // Get camera Horizontal Angle from rCam
-            const camAngle = rCam.theta; 
+            // Flashlight Logic
+            flashLight.position.copy(camera.position);
+            flashLight.target.position.set(playerGroup.position.x, playerGroup.position.y, playerGroup.position.z);
             
-            const fX = Math.sin(camAngle);
-            const fZ = Math.cos(camAngle);
-            const rX = Math.sin(camAngle + Math.PI/2);
-            const rZ = Math.cos(camAngle + Math.PI/2);
-            
-            if (gameState.moveX !== 0 || gameState.moveY !== 0) {
-                // Joystick Y is "Forward", so we use Forward Vectors
-                const wx = (rX * gameState.moveX) + (fX * gameState.moveY);
-                const wz = (rZ * gameState.moveX) + (fZ * gameState.moveY);
-                playerGroup.position.x += wx * spd; playerGroup.position.z += wz * spd;
-                playerGroup.rotation.y = Math.atan2(wx, wz);
+            // Only drain/show flashlight at night
+            if (intensity < 0.2) {
+                const toolStats = Tools.Flashlights[gameConfig.currentLight];
+                if(gameConfig.battery > 0) {
+                    gameConfig.battery -= dt * Tools.getBatteryDrain(gameConfig.currentLight);
+                    flashLight.intensity = toolStats.intensity;
+                    flashLight.distance = toolStats.range;
+                    flashLight.color.setHex(toolStats.color);
+                } else {
+                    flashLight.intensity = 0;
+                }
+                document.getElementById('batt-bar-fill').style.width = Math.max(0, gameConfig.battery) + '%';
+            } else {
+                flashLight.intensity = 0; // Off during day
             }
 
-            // *** UPDATE CAMERA ***
+            // Movement
+            if (window.joystick && window.joystick.active) {
+                const mx = window.joystick.getX(); const my = window.joystick.getY();
+                const angle = rCam.theta;
+                const fX = Math.sin(angle); const fZ = Math.cos(angle);
+                const rX = Math.sin(angle+Math.PI/2); const rZ = Math.cos(angle+Math.PI/2);
+                const moveX = (rX * mx) + (fX * my); const moveZ = (rZ * mx) + (fZ * my);
+                playerGroup.position.x += moveX * 0.15; playerGroup.position.z += moveZ * 0.15;
+                playerGroup.rotation.y = Math.atan2(moveX, moveZ);
+            }
+
             rCam.update(playerGroup.position);
             
             // Physics
             gameState.velocityY -= 0.015; playerGroup.position.y += gameState.velocityY;
             if (playerGroup.position.y <= 0) { playerGroup.position.y = 0; gameState.velocityY = 0; gameState.isGrounded = true; }
 
-            // Mobs
-            mobs.forEach(mob => {
-                mob.userData.tm += dt;
-                if(mob.userData.type === 'bunny') {
-                    if(mob.userData.tm > 2) { mob.rotation.y = Math.random()*Math.PI*2; mob.userData.tm=0; }
-                    mob.position.z += Math.cos(mob.rotation.y)*0.03; mob.position.x += Math.sin(mob.rotation.y)*0.03;
-                } else {
-                    const d = playerGroup.position.distanceTo(mob.position);
-                    if(d < 15 && d > 1) {
-                        mob.lookAt(playerGroup.position);
-                        mob.position.z += Math.cos(mob.rotation.y)*0.08; mob.position.x += Math.sin(mob.rotation.y)*0.08;
-                    } else if(mob.userData.tm > 3) { mob.rotation.y=Math.random()*Math.PI*2; mob.userData.tm=0; }
-                }
-            });
+            Mobs.update(dt, playerGroup.position);
 
-            // Swing Animation
+            // Swinging & Chopping
             if(gameState.isSwinging) {
                 axePivot.rotation.x -= 0.2;
                 if(axePivot.rotation.x < -2) { axePivot.rotation.x = 0; gameState.isSwinging = false; }
-                if (axePivot.rotation.x < -1 && gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
-                    const t = gameState.nearbyObject.obj;
-                    t.userData.hp--; t.rotation.z = 0.1; setTimeout(()=>t.rotation.z=0, 50);
+                
+                // Hit Check
+                if(axePivot.rotation.x < -1 && gameState.nearbyObject && gameState.nearbyObject.type === 'tree') {
+                    const t = gameState.nearbyObject.obj; 
+                    
+                    // GET DAMAGE FROM TOOLS.JS
+                    const dmg = Tools.getDamage(gameConfig.currentAxe);
+                    t.userData.hp -= dmg;
+                    
+                    // Shake effect
+                    t.rotation.z = 0.1; setTimeout(()=>t.rotation.z=0,50);
+                    
                     if(t.userData.hp <= 0) {
-                        const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x8d6e63}));
-                        log.rotation.z = Math.PI/2; log.rotation.y = Math.random()*Math.PI;
-                        log.position.set(t.position.x, 0.2, t.position.z); log.castShadow=true;
-                        scene.add(log); droppedLogs.push(log);
-                        scene.remove(t); trees.splice(trees.indexOf(t),1); gameState.nearbyObject=null;
+                        const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,1), new THREE.MeshStandardMaterial({color:0x8d6e63}));
+                        log.rotation.z=Math.PI/2; log.rotation.y=Math.random()*Math.PI; log.position.set(t.position.x,0.2,t.position.z);
+                        scene.add(log); droppedLogs.push(log); scene.remove(t); trees.splice(trees.indexOf(t),1); gameState.nearbyObject=null;
                     }
-                    gameState.nearbyObject = null;
+                    gameState.nearbyObject = null; // Prevent multi-hit
                 }
             }
 
-            // Sack Scale
+            // Sack Capacity Update
+            gameState.maxWood = Tools.getCapacity(gameConfig.currentSack);
             const sScale = 1 + (gameState.wood * 0.05); sack.scale.set(sScale, sScale, sScale);
 
             // Proximity UI
-            const pPos = playerGroup.position;
-            gameState.nearbyObject = null; let showAction = false; let actionIcon = '';
+            const pPos = playerGroup.position; gameState.nearbyObject = null; let showAction = false; let actionIcon = '';
             if (pPos.distanceTo(fireGroup.position) < 3.5) { gameState.nearbyObject = {type:'fire'}; showAction=true; actionIcon='🔥'; }
             else if (pPos.distanceTo(bench.position) < 3) { gameState.nearbyObject = {type:'bench'}; showAction=true; actionIcon='🛠️'; }
             else { for(let t of trees) { if (pPos.distanceTo(t.position) < 2.5) { gameState.nearbyObject = {type:'tree', obj:t}; showAction=true; actionIcon='🪓'; break; } } }
             UI.toggleActionBtn(showAction, actionIcon);
 
-            // Map
             UI.drawMinimap(playerGroup.position, [{pos: fireGroup.position, color: 'orange'}, {pos: bench.position, color: 'brown'}]);
 
             renderer.render(scene, camera);
