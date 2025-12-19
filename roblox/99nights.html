@@ -81,7 +81,8 @@
             </div>
         </div>
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
-    </div>
+        
+        </div>
 
     <script>
         // --- 1. CONFIG & STARTUP ---
@@ -145,7 +146,7 @@
         scene.add(fireGroup);
         const bench = new THREE.Mesh(new THREE.BoxGeometry(2,1,1), new THREE.MeshStandardMaterial({color:0x795548})); bench.position.set(6,0.5,6); scene.add(bench);
 
-        // Trees
+        // Trees & Mobs
         const trees = [];
         function spawnTree(x,z) {
             const t = new THREE.Group();
