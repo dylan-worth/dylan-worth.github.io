@@ -12,7 +12,7 @@
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; user-select: none; }
         #game-container { position: relative; width: 100%; height: 100vh; }
         
-        /* TOUCH & UI LAYERS */
+        /* LAYERS */
         #touch-layer { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 10; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 
@@ -31,7 +31,7 @@
         }
         #box-btn:active { transform: translateY(5px); box-shadow: none; }
 
-        /* JOYSTICK (Visual only, logic in roblox-joystick.js) */
+        /* JOYSTICK */
         #joystick-zone { position: absolute; bottom: 80px; left: 40px; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; pointer-events: auto; z-index: 30; }
         #joystick-knob { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.8); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 
@@ -41,10 +41,10 @@
             width: 80%; background: rgba(0,0,0,0.8); color: white;
             padding: 20px; border-radius: 10px; text-align: center;
             font-size: 18px; border: 2px solid #c0392b;
-            display: none; z-index: 50;
+            display: block; z-index: 50; /* Visible by default */
         }
 
-        /* GAME OVER SCREEN */
+        /* GAME OVER */
         #game-over {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 60;
@@ -69,7 +69,7 @@
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
 
         <div id="cutscene-overlay">
-            <div id="cutscene-text">...</div>
+            <div id="cutscene-text">Loading...</div>
         </div>
 
         <div id="game-over">
@@ -79,7 +79,7 @@
     </div>
 
     <script>
-        // --- 3D SETUP ---
+        // --- 1. SETUP ---
         const container = document.getElementById('game-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x111111);
@@ -91,131 +91,135 @@
         renderer.shadowMap.enabled = true;
         container.insertBefore(renderer.domElement, document.getElementById('touch-layer'));
 
-        // Initialize Camera Controller
+        // Init Camera Controller
         const rCam = new RobloxCamera(camera, document.getElementById('touch-layer'));
 
-        // Lighting
+        // Lights
         const spot = new THREE.SpotLight(0xffffff, 1.2);
-        spot.position.set(50, 100, 50); 
-        spot.castShadow = true; 
-        scene.add(spot);
-        scene.add(new THREE.AmbientLight(0x404040, 0.8)); // Brighter Ambient
+        spot.position.set(50, 100, 50); spot.castShadow = true; scene.add(spot);
+        scene.add(new THREE.AmbientLight(0x404040, 0.8));
 
-        // --- LEVEL GENERATION ---
-        Level.initMap(scene); // Generates Walls & Floor
-        const boxes = Level.spawnCollectibles(scene); // Generates Boxes
+        // --- 2. ASSETS ---
+        // Ensure Level is loaded
+        if (typeof Level !== 'undefined') {
+            Level.initMap(scene);
+            var boxes = Level.spawnCollectibles(scene);
+        } else {
+            console.error("Rainbowfriends-level.js not loaded!");
+            // Fallback floor if file missing
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+            floor.rotation.x = -Math.PI / 2; scene.add(floor);
+            var boxes = [];
+        }
 
-        // --- CHARACTERS ---
         // Player
-        const player = createCharacterModel(); 
-        player.position.set(15, 0, 15); // Safe start pos
+        const player = (typeof createCharacterModel !== 'undefined') ? createCharacterModel() : new THREE.Mesh(new THREE.BoxGeometry(2,4,2), new THREE.MeshBasicMaterial({color:'green'}));
+        player.position.set(15, 0, 15);
         player.userData = { isHiding: false, speed: 0.3 };
         scene.add(player);
 
         // Blue Monster
-        const blue = createBlueMonster(); 
-        blue.position.set(80, 0, 80); // Far away
+        const blue = (typeof createBlueMonster !== 'undefined') ? createBlueMonster() : new THREE.Mesh(new THREE.BoxGeometry(3,6,3), new THREE.MeshBasicMaterial({color:'blue'}));
+        blue.position.set(80, 0, 80);
         scene.add(blue);
 
         // Red (Cutscene)
-        const red = createRedCharacter();
+        const red = (typeof createRedCharacter !== 'undefined') ? createRedCharacter() : new THREE.Mesh(new THREE.BoxGeometry(2,4,2), new THREE.MeshBasicMaterial({color:'red'}));
+        red.position.set(20, 0, 50); 
+        red.lookAt(20, 0, 60);
         scene.add(red);
 
-        // --- GAME LOGIC ---
-        let gameActive = false;
-        let collected = 0;
+        // --- 3. CUTSCENE LOGIC ---
+        let isCutscene = true;
+        const cutsceneUI = document.getElementById('cutscene-overlay');
+        const cutsceneText = document.getElementById('cutscene-text');
 
-        // 1. Start Cutscene
-        Cutscene.start(camera, red, document.getElementById('cutscene-overlay'));
-        
-        // 2. End Cutscene & Start Game
+        // Set Camera to Cutscene Position IMMEDIATELY
+        camera.position.set(20, 6, 60); 
+        camera.lookAt(20, 3, 50); // Look at Red
+
+        // Sequence
+        setTimeout(() => cutsceneText.innerText = "RED: My blocks have gone missing...", 500);
+        setTimeout(() => cutsceneText.innerText = "RED: Beware of Blue. He isn't friendly.", 2500);
         setTimeout(() => {
-            gameActive = true;
+            // End Cutscene
+            isCutscene = false;
+            cutsceneUI.style.display = 'none';
             scene.remove(red);
             
-            // CRITICAL: Snap camera to player so screen isn't black
-            rCam.tRadius = 25;
+            // CRITICAL: Snap camera to player
+            rCam.tRadius = 30;
             rCam.tPhi = Math.PI / 4;
             rCam.update(player.position); 
-            
-        }, 5000); // 5 seconds
+        }, 5000);
 
-        // --- ACTIONS ---
+        // --- 4. GAMEPLAY ACTIONS ---
         window.toggleBox = function() {
-            if(!gameActive) return;
+            if(isCutscene) return;
             player.userData.isHiding = !player.userData.isHiding;
             
             player.children.forEach(child => {
-                if (child.name === 'hidingBox') {
-                    child.visible = player.userData.isHiding;
-                } else {
-                    child.visible = !player.userData.isHiding;
-                }
+                if (child.name === 'hidingBox') child.visible = player.userData.isHiding;
+                else child.visible = !player.userData.isHiding;
             });
             player.userData.speed = player.userData.isHiding ? 0.15 : 0.3;
         };
 
-        // --- MAIN LOOP ---
+        // --- 5. MAIN LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
-            if (!gameActive && !Cutscene.active) {
-                // If game ended, still render scene
+            if (isCutscene) {
+                // Static render during cutscene
                 renderer.render(scene, camera);
                 return;
             }
 
-            if (gameActive) {
-                // 1. Movement
-                if (window.joystick && window.joystick.active) {
-                    const moveX = window.joystick.x; 
-                    const moveY = window.joystick.y;
-                    const angle = rCam.theta;
-                    
-                    const fX = Math.sin(angle); const fZ = Math.cos(angle);
-                    const rX = Math.sin(angle+Math.PI/2); const rZ = Math.cos(angle+Math.PI/2);
-                    
-                    const dx = (rX * moveX) + (fX * moveY);
-                    const dz = (rZ * moveX) + (fZ * moveY);
-                    
-                    player.position.x += dx * player.userData.speed;
-                    player.position.z += dz * player.userData.speed;
-                    player.rotation.y = Math.atan2(dx, dz);
+            // Movement
+            if (window.joystick && window.joystick.active) {
+                const moveX = window.joystick.x; const moveY = window.joystick.y;
+                const angle = rCam.theta;
+                
+                const fX = Math.sin(angle); const fZ = Math.cos(angle);
+                const rX = Math.sin(angle+Math.PI/2); const rZ = Math.cos(angle+Math.PI/2);
+                
+                const dx = (rX * moveX) + (fX * moveY);
+                const dz = (rZ * moveX) + (fZ * moveY);
+                
+                player.position.x += dx * player.userData.speed;
+                player.position.z += dz * player.userData.speed;
+                player.rotation.y = Math.atan2(dx, dz);
+            }
+
+            // Camera Update
+            rCam.update(player.position);
+
+            // Blue AI
+            const dist = player.position.distanceTo(blue.position);
+            const detectionRange = player.userData.isHiding ? 6 : 40; 
+
+            if(dist < detectionRange) {
+                blue.lookAt(player.position);
+                blue.position.z += Math.cos(blue.rotation.y) * 0.18;
+                blue.position.x += Math.sin(blue.rotation.y) * 0.18;
+
+                if (dist < 3) {
+                    isCutscene = true; // Pause game
+                    document.getElementById('game-over').style.display = 'flex';
+                    document.getElementById('ui-layer').style.display = 'none';
+                    document.getElementById('joystick-zone').style.display = 'none';
                 }
+            } else {
+                blue.rotation.y += 0.02; // Idle spin
+            }
 
-                // 2. Camera Follow
-                rCam.update(player.position);
-
-                // 3. Blue AI
-                const dist = player.position.distanceTo(blue.position);
-                const detectionRange = player.userData.isHiding ? 6 : 40; 
-
-                if(dist < detectionRange) {
-                    blue.lookAt(player.position);
-                    blue.position.z += Math.cos(blue.rotation.y) * 0.18;
-                    blue.position.x += Math.sin(blue.rotation.y) * 0.18;
-
-                    if (dist < 3) {
-                        gameActive = false;
-                        document.getElementById('game-over').style.display = 'flex';
-                        document.getElementById('ui-layer').style.display = 'none';
-                        document.getElementById('joystick-zone').style.display = 'none';
-                    }
-                } else {
-                    blue.rotation.y += 0.02; // Idle spin
-                }
-
-                // 4. Boxes
-                for (let i = boxes.length - 1; i >= 0; i--) {
-                    const box = boxes[i];
-                    box.rotation.y += 0.05;
-                    if (player.position.distanceTo(box.position) < 4) {
-                        scene.remove(box);
-                        boxes.splice(i, 1);
-                        collected++;
-                        document.getElementById('score').innerText = collected;
-                        if(collected === 5) { alert("YOU SURVIVED!"); location.href="roblox.html"; }
-                    }
+            // Boxes
+            for (let i = boxes.length - 1; i >= 0; i--) {
+                boxes[i].rotation.y += 0.05;
+                if (player.position.distanceTo(boxes[i].position) < 4) {
+                    scene.remove(boxes[i]); boxes.splice(i, 1);
+                    document.getElementById('score').innerText = (5 - boxes.length);
+                    if(boxes.length === 0) { alert("YOU SURVIVED!"); location.href="roblox.html"; }
                 }
             }
 
