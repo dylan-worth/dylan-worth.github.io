@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebGodot Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="engine.js"></script> <style>
+        body { margin: 0; display: flex; height: 100vh; background: #333; color: white; font-family: sans-serif; overflow: hidden; }
+        
+        /* LAYOUT */
+        #sidebar-left { width: 250px; background: #252526; border-right: 1px solid #111; display: flex; flex-direction: column; }
+        #viewport { flex-grow: 1; position: relative; background: black; }
+        #sidebar-right { width: 300px; background: #252526; border-left: 1px solid #111; padding: 10px; }
+        
+        /* UI ELEMENTS */
+        .panel-header { background: #3c3c3c; padding: 10px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .toolbar { height: 40px; background: #333; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #111; gap: 10px; }
+        
+        /* TREE VIEW */
+        #scene-tree { padding: 10px; overflow-y: auto; }
+        .tree-item { padding: 5px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; }
+        .tree-item:hover { background: #444; }
+        .tree-item.active { background: #007acc; color: white; }
+
+        /* INSPECTOR */
+        .prop-row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
+        input[type="number"] { width: 60px; background: #1e1e1e; border: 1px solid #444; color: white; padding: 4px; border-radius: 4px; }
+        input[type="text"] { width: 100%; background: #1e1e1e; border: 1px solid #444; color: white; padding: 4px; margin-bottom: 10px; }
+
+        /* BUTTONS */
+        .btn { padding: 5px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-play { background: #2ecc71; }
+        .btn-stop { background: #e74c3c; }
+        .btn-add { background: #3498db; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar-left">
+        <div class="panel-header">Scene Tree</div>
+        <div id="scene-tree"></div>
+        <div style="padding:10px;">
+            <button class="btn btn-add" onclick="spawnCube()">+ Add Cube</button>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div class="toolbar">
+            <button class="btn btn-play" onclick="togglePlay(true)">▶ PLAY</button>
+            <button class="btn btn-stop" onclick="togglePlay(false)">⏹ STOP</button>
+            <span id="status-text" style="color:#888; font-size:12px;">Mode: Editor</span>
+        </div>
+        <div id="game-canvas" style="width:100%; height:calc(100% - 41px);"></div>
+    </div>
+
+    <div id="sidebar-right">
+        <div class="panel-header">Inspector</div>
+        <div id="inspector-content">
+            <p style="color:#666; font-style:italic;">Select a node to edit properties.</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. INIT ENGINE
+        const canvasContainer = document.getElementById('game-canvas');
+        Game.init(canvasContainer);
+
+        // 2. EDITOR STATE
+        let selectedNode = null;
+
+        // 3. EDITOR FUNCTIONS
+        window.Editor = {
+            refreshTree: function() {
+                const tree = document.getElementById('scene-tree');
+                tree.innerHTML = "";
+                
+                // Recursive tree builder
+                const build = (node, depth) => {
+                    const div = document.createElement('div');
+                    div.className = 'tree-item';
+                    if (selectedNode === node) div.classList.add('active');
+                    div.style.paddingLeft = (depth * 15 + 10) + "px";
+                    div.innerText = (node.children.length > 0 ? "📂 " : "📦 ") + node.name;
+                    div.onclick = () => selectNode(node);
+                    tree.appendChild(div);
+                    
+                    node.children.forEach(c => build(c, depth + 1));
+                };
+                build(Game.root, 0);
+            }
+        };
+
+        function spawnCube() {
+            const c = new CubeObj("Cube_" + Math.floor(Math.random()*100));
+            // Random pos to prevent stacking
+            c.export.x = (Math.random()-0.5) * 10;
+            c.export.z = (Math.random()-0.5) * 10;
+            Game.root.add_child(c);
+            selectNode(c); // Auto select new object
+        }
+
+        function selectNode(node) {
+            selectedNode = node;
+            window.Editor.refreshTree(); // Highlight selection
+            
+            // Populate Inspector
+            const insp = document.getElementById('inspector-content');
+            insp.innerHTML = "";
+
+            // Name
+            const nameLabel = document.createElement('div'); nameLabel.innerText = "Name";
+            const nameInput = document.createElement('input'); nameInput.type="text"; nameInput.value = node.name;
+            nameInput.onchange = (e) => { node.name = e.target.value; window.Editor.refreshTree(); };
+            insp.appendChild(nameLabel); insp.appendChild(nameInput);
+
+            // Transform (X, Y, Z)
+            ['x', 'y', 'z'].forEach(axis => {
+                const row = document.createElement('div'); row.className = 'prop-row';
+                row.innerHTML = `<span>Position ${axis.toUpperCase()}</span>`;
+                
+                const input = document.createElement('input');
+                input.type = "number";
+                input.value = node.export[axis];
+                input.oninput = (e) => {
+                    node.export[axis] = parseFloat(e.target.value);
+                    // Live update visually without running logic
+                    if(node.sceneObj) node.sceneObj.position[axis] = node.export[axis];
+                };
+                
+                row.appendChild(input);
+                insp.appendChild(row);
+            });
+        }
+
+        function togglePlay(play) {
+            Game.running = play;
+            const status = document.getElementById('status-text');
+            if(play) {
+                status.innerText = "Mode: Playing";
+                status.style.color = "#2ecc71";
+            } else {
+                status.innerText = "Mode: Editor";
+                status.style.color = "#888";
+                // Reset positions (Simple implementation: refresh page or restore state)
+                // For this demo, we just pause logic.
+            }
+        }
+
+        // Initial setup
+        window.Editor.refreshTree();
+        
+        // Handle Resize
+        window.addEventListener('resize', () => {
+             Game.camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+             Game.camera.updateProjectionMatrix();
+             Game.renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        });
+    </script>
+</body>
+</html>
