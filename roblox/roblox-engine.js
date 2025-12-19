@@ -4,7 +4,6 @@ const RobloxEngine = {
     scene: null,
     camera: null,
     renderer: null,
-    joystick: null,
     camControl: null,
     clock: new THREE.Clock(),
     
@@ -12,6 +11,8 @@ const RobloxEngine = {
     onUpdate: null, 
 
     init: function(containerId, touchLayerId) {
+        console.log("Initializing Engine...");
+        
         // 1. Setup Three.js
         const container = document.getElementById(containerId);
         this.scene = new THREE.Scene();
@@ -19,14 +20,33 @@ const RobloxEngine = {
         this.scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
 
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); // alpha: false prevents transparent black background
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.insertBefore(this.renderer.domElement, document.getElementById(touchLayerId));
+        
+        // Clear container and append
+        container.innerHTML = ""; 
+        container.appendChild(this.renderer.domElement);
+        
+        // Re-add UI layers on top if they were wiped (optional safety)
+        const touchLayer = document.createElement('div');
+        touchLayer.id = touchLayerId;
+        touchLayer.style.position = 'absolute';
+        touchLayer.style.top = '0';
+        touchLayer.style.left = '0';
+        touchLayer.style.width = '100%';
+        touchLayer.style.height = '100%';
+        touchLayer.style.zIndex = '10';
+        container.appendChild(touchLayer);
 
         // 2. Setup Camera Control
-        this.camControl = new RobloxCamera(this.camera, document.getElementById(touchLayerId));
+        // Assumes roblox-cam.js is loaded
+        if (typeof RobloxCamera !== 'undefined') {
+            this.camControl = new RobloxCamera(this.camera, touchLayer);
+        } else {
+            console.warn("RobloxCamera not found. Camera locked.");
+        }
 
         // 3. Resize Handler
         window.addEventListener('resize', () => {
@@ -37,7 +57,6 @@ const RobloxEngine = {
 
         // 4. Start Loop
         this.animate();
-        console.log("RobloxEngine Initialized.");
     },
 
     animate: function() {
@@ -47,13 +66,14 @@ const RobloxEngine = {
 
         // 5. SAFETY TRY-CATCH
         // If game logic crashes, the game keeps rendering the last frame instead of going black.
-        try {
-            if (this.onUpdate) this.onUpdate(dt);
-        } catch (error) {
-            console.error("GAME LOGIC CRASHED:", error);
-            // Optional: Stop the update loop to prevent console spam
-            this.onUpdate = null; 
-            alert("Game Error: Check Console. Rendering Safety Mode.");
+        if (this.onUpdate) {
+            try {
+                this.onUpdate(dt);
+            } catch (error) {
+                console.error("GAME LOGIC CRASHED:", error);
+                this.onUpdate = null; // Disable logic to save the renderer
+                alert("Game Error! Check Console. (Safety Mode Active)");
+            }
         }
 
         this.renderer.render(this.scene, this.camera);
