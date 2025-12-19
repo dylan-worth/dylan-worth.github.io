@@ -1,4 +1,4 @@
-/* roblox-engine.js - The Foundation */
+/* roblox-engine.js - Fixed (No UI Deletion) */
 
 const RobloxEngine = {
     scene: null,
@@ -6,7 +6,7 @@ const RobloxEngine = {
     renderer: null,
     camControl: null,
     clock: new THREE.Clock(),
-    onUpdate: null, // This is where your game logic plugs in
+    onUpdate: null,
 
     init: function(containerId, touchLayerId) {
         console.log("Engine: Initializing...");
@@ -19,7 +19,7 @@ const RobloxEngine = {
 
         // 1. Setup Three.js
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87CEEB); // Default Sky
+        this.scene.background = new THREE.Color(0x87CEEB); 
         this.scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
 
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -29,60 +29,66 @@ const RobloxEngine = {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
-        // Wipe container and add Canvas
-        container.innerHTML = "";
-        container.appendChild(this.renderer.domElement);
+        // 2. Insert Canvas SAFELY (Do NOT wipe innerHTML)
+        // We set the canvas to absolute position at z-index 0 so it sits behind UI
+        this.renderer.domElement.style.position = 'absolute';
+        this.renderer.domElement.style.top = '0';
+        this.renderer.domElement.style.left = '0';
+        this.renderer.domElement.style.zIndex = '0'; // Behind everything
+        
+        // Prepend adds it as the FIRST child, effectively putting it "behind" existing UI elements in DOM order
+        if (container.firstChild) {
+            container.insertBefore(this.renderer.domElement, container.firstChild);
+        } else {
+            container.appendChild(this.renderer.domElement);
+        }
 
-        // 2. Re-create Touch Layer (Safe UI Stacking)
-        // We create this dynamically so you don't have to put it in HTML manually
+        // 3. Setup Touch Layer (For Camera Rotation)
         let touchLayer = document.getElementById(touchLayerId);
         if (!touchLayer) {
             touchLayer = document.createElement('div');
             touchLayer.id = touchLayerId;
-            touchLayer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;";
+            // Z-Index 10: Above Canvas (0), Below UI (20)
+            touchLayer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;"; 
             container.appendChild(touchLayer);
         }
 
-        // 3. Connect Camera Script
+        // 4. Connect Camera Script
         if (typeof RobloxCamera !== 'undefined') {
             this.camControl = new RobloxCamera(this.camera, touchLayer);
         } else {
             console.warn("RobloxCamera script missing!");
         }
 
-        // 4. Safety Light (Prevents total blackness if you forget lights)
+        // 5. Safety Light
         const safetyLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
         this.scene.add(safetyLight);
 
-        // 5. Resize Handling
+        // 6. Resize Handling
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 6. Start Loop
+        // 7. Start Loop
         this.animate();
     },
 
     animate: function() {
-        // Request next frame FIRST (Prevent freezing)
         requestAnimationFrame(() => this.animate());
 
         const dt = this.clock.getDelta();
 
-        // Run Game Logic (Safely)
         if (this.onUpdate) {
             try {
                 this.onUpdate(dt);
             } catch (error) {
                 console.error("Game Logic Crash:", error);
-                this.onUpdate = null; // Stop logic, keep rendering
-                alert("Game Error! Engine entered Safe Mode.");
+                this.onUpdate = null; 
             }
         }
 
-        // Render
         if (this.scene && this.camera) {
             this.renderer.render(this.scene, this.camera);
         }
