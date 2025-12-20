@@ -117,6 +117,45 @@ header .status { font-size: 0.8rem; color: #00ff00; }
 .icon-alch { background-position: 50% 0%; }
 .icon-b2p  { background-position: 100% 0%; }
 
+/* --- MODERATOR CROWNS (Custom Art) --- */
+
+/* 1. Base Crown Setup */
+.mod-crown {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    
+    /* Load your custom image */
+    background-image: url('crown.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    vertical-align: middle;
+    margin-right: 6px;
+    margin-bottom: 3px;
+    
+    /* Default shadow to make it pop */
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
+}
+
+/* 2. Admin Crown (Gold) - Pure Image */
+.crown-admin {
+    /* The base image is already gold, so we just add brightness if needed */
+    filter: brightness(110%);
+}
+
+/* 3. Global Mod (Silver) - Grayscale + Brightness */
+.crown-global {
+    filter: grayscale(100%) brightness(140%) contrast(120%);
+}
+
+/* 4. Forum Mod (Orange) - Sepia + Saturation Shift */
+.crown-forum {
+    filter: sepia(100%) saturate(500%) hue-rotate(-30deg) brightness(90%);
+}
+
+
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
