@@ -2,128 +2,250 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Home - Lumbridge Castle</title>
+<title>Open881 - 2017 Server Project</title>
 <style>
-  /* --- SAFE ZONE THEME --- */
+  /* --- RS3 NIS (New Interface System) THEME --- */
   body {
-    background-color: #1a1a1a;
-    background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); /* Subtle noise */
-    color: #333;
-    font-family: 'Verdana', sans-serif;
+    background: #000 url('https://i.imgur.com/3sF7qQp.jpg') no-repeat center center fixed; /* Generic space/dark background */
+    background-size: cover;
+    color: #cdd6db;
+    font-family: 'Trebuchet MS', sans-serif;
     margin: 0;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
   }
-  
-  /* The Main Wrapper */
-  .site-wrapper {
-    width: 800px;
-    background-color: #f4e4bc; /* Parchment Color */
-    border: 5px double #5d5648;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    animation: fadeIn 1.5s ease-out; /* Arrival animation */
+
+  /* The Main Window */
+  .interface-window {
+    width: 900px;
+    height: 600px;
+    background: rgba(8, 30, 43, 0.9); /* RS3 Transparent Dark Blue */
+    border: 1px solid #3c4b57;
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.1), inset 0 0 50px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 10;
   }
 
   /* Header */
   header {
-    background: #2b2317;
-    color: #ff981f;
+    background: linear-gradient(to bottom, #1a2a36, #0d161c);
+    padding: 10px 20px;
+    border-bottom: 1px solid #3c4b57;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  h1 { margin: 0; font-size: 22px; color: #ffffff; text-shadow: 0 0 5px #00ccff; }
+  .status { font-size: 12px; color: #00ff00; }
+
+  /* Content Layout */
+  .content-area {
+    display: flex;
+    flex: 1;
     padding: 20px;
-    text-align: center;
-    border-bottom: 3px solid #b8a68a;
-  }
-  h1 { margin: 0; font-family: 'Times New Roman', serif; letter-spacing: 2px; }
-
-  /* Columns */
-  .layout { display: flex; min-height: 400px; }
-  
-  /* Sidebar */
-  aside {
-    width: 200px;
-    background: #e6d3a3;
-    border-right: 2px solid #b8a68a;
-    padding: 15px;
+    gap: 20px;
   }
 
-  .nav-btn {
-    display: block;
-    background: #5d5648;
-    color: #ff981f;
-    text-decoration: none;
-    padding: 8px;
-    margin-bottom: 5px;
-    font-size: 11px;
-    font-weight: bold;
-    text-align: center;
-    border: 1px solid #000;
-    cursor: pointer;
-  }
-  .nav-btn:hover { background: #6b6455; color: white; }
-  
-  /* Content */
-  main { flex: 1; padding: 30px; }
-  
-  .news-box {
-    border: 1px solid #b8a68a;
-    background: #fff8e3;
+  /* Action Bar / Spellbook */
+  .action-bar {
+    width: 250px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #3c4b57;
     padding: 10px;
-    margin-bottom: 20px;
   }
-  .news-date { font-weight: bold; font-size: 10px; color: #555; border-bottom: 1px solid #ccc; margin-bottom: 5px; display: block; }
   
-  h2 { font-size: 18px; color: #4a3b2a; margin-top: 0; }
-  p { font-size: 12px; line-height: 1.6; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); filter: blur(5px); }
-    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  .spell-btn {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to bottom, #2b3945, #182026);
+    border: 1px solid #485b6b;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
   }
+  
+  /* Spell Icons (CSS Circles for demo) */
+  .icon { width: 24px; height: 24px; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px currentColor; }
+  .icon-home { background: #00ccff; border: 2px solid white; }
+  .icon-alch { background: #ffd700; border: 2px solid orange; }
+  .icon-b2p { background: #ff99cc; border: 2px solid #90ee90; }
+
+  .spell-btn:hover { border-color: #00eaff; box-shadow: 0 0 10px rgba(0, 234, 255, 0.3); transform: scale(1.02); }
+  
+  /* Main Text Area */
+  .info-panel {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #3c4b57;
+    padding: 20px;
+  }
+  h2 { color: #00eaff; border-bottom: 1px solid #3c4b57; padding-bottom: 5px; margin-top: 0;}
+  p { font-size: 14px; line-height: 1.6; color: #aebdc5; }
+
+  /* --- ANIMATION OVERLAYS --- */
+  .fx-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; display: none;
+    z-index: 999;
+    justify-content: center; align-items: center;
+  }
+
+  /* 1. Home Teleport (Blue Beam) */
+  .home-anim .rune-circle {
+    width: 300px; height: 300px; border: 5px solid #00ccff; border-radius: 50%;
+    transform: rotateX(70deg) scale(0);
+    animation: teleCircle 2.5s ease-out forwards;
+    box-shadow: 0 0 40px #00ccff;
+  }
+  .home-anim .beam {
+    position: absolute; width: 80px; bottom: 0; height: 0;
+    background: linear-gradient(to top, rgba(0, 204, 255, 0.8), transparent);
+    animation: teleBeam 2.5s ease-out forwards;
+  }
+  
+  /* 2. High Alchemy (Gold Flash) */
+  .alch-anim {
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, transparent 70%);
+    animation: alchFlash 1.5s ease-out forwards;
+  }
+  .alch-icon {
+    font-size: 100px; opacity: 0;
+    animation: floatUp 1s ease-out forwards;
+  }
+
+  /* 3. Bones to Peaches (Transformation) */
+  .b2p-anim .bone {
+    font-size: 80px; position: absolute;
+    animation: boneDie 1.5s ease-in-out forwards;
+  }
+  .b2p-anim .peach {
+    font-size: 80px; position: absolute; opacity: 0; transform: scale(0);
+    animation: peachBorn 1.5s ease-in-out forwards 1s; /* Starts after bone dies */
+  }
+
+  /* Keyframes */
+  @keyframes teleCircle { 0% { transform: rotateX(70deg) scale(0); opacity: 0; } 50% { transform: rotateX(70deg) scale(1); opacity: 1; } 100% { transform: rotateX(70deg) scale(0); opacity: 0; } }
+  @keyframes teleBeam { 0% { height: 0; } 50% { height: 100vh; } 100% { height: 0; bottom: 100%; } }
+  
+  @keyframes alchFlash { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes floatUp { 0% { transform: translateY(50px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+
+  @keyframes boneDie { 0% { opacity: 1; transform: scale(1); } 50% { filter: hue-rotate(90deg); } 100% { opacity: 0; transform: scale(0.5); } }
+  @keyframes peachBorn { 0% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+  
+  /* Screen Fade Out (Universal) */
+  .fade-out { animation: fadeScreen 1s forwards; }
+  @keyframes fadeScreen { to { opacity: 0; filter: blur(10px); } }
+
 </style>
 </head>
 <body>
 
-<div class="site-wrapper">
-  <header>
-    <h1>🏰 Dylan's Realm</h1>
-    <small>Welcome to the Safe Zone</small>
-  </header>
+  <div id="fx-container" class="fx-layer"></div>
 
-  <div class="layout">
-    <aside>
-      <div style="text-align:center; margin-bottom:15px;">
-        <div style="width:50px; height:50px; background:#444; margin:0 auto; border:2px solid #000;"></div>
-        <p style="font-size:10px; margin-top:5px;"><b>Admin: Dylan</b></p>
+  <div id="main-interface" class="interface-window">
+    <header>
+      <h1>Open881</h1>
+      <span class="status">System: Online (Rev 881)</span>
+    </header>
+
+    <div class="content-area">
+      <div class="action-bar">
+        <div style="font-size: 11px; text-transform: uppercase; color: #5a6e7a; margin-bottom: 10px; font-weight: bold;">Teleport Matrix</div>
+        
+        <div class="spell-btn" onclick="castSpell('home')">
+          <div class="icon icon-home"></div>
+          <div>
+            <strong>Home Teleport</strong><br>
+            <span style="font-size:10px; color:#aaa;">To Lodestone</span>
+          </div>
+        </div>
+
+        <div class="spell-btn" onclick="castSpell('alch')">
+          <div class="icon icon-alch"></div>
+          <div>
+            <strong>High Alchemy</strong><br>
+            <span style="font-size:10px; color:#aaa;">To Market</span>
+          </div>
+        </div>
+
+        <div class="spell-btn" onclick="castSpell('b2p')">
+          <div class="icon icon-b2p"></div>
+          <div>
+            <strong>Bones to Peaches</strong><br>
+            <span style="font-size:10px; color:#aaa;">To Forums</span>
+          </div>
+        </div>
       </div>
 
-      <a href="rune-projects.html" class="nav-btn">⚔️ Go to Wilderness (Projects)</a>
-      <a class="nav-btn">📜 Forum (Maintenance)</a>
-      <a class="nav-btn">💰 Grand Exchange</a>
-      <a class="nav-btn">🛡️ Clan Chat</a>
-    </aside>
-
-    <main>
-      <h2>Latest News</h2>
-      
-      <div class="news-box">
-        <span class="news-date">December 20, 2025</span>
-        <strong>Home Teleport Successful!</strong>
-        <p>You have successfully teleported from the project wilderness. Your hitpoints have been restored.</p>
+      <div class="info-panel">
+        <h2>Welcome to Open881</h2>
+        <p>An open-source preservation of the 2017 RuneScape 3 era.</p>
+        <p>Use your spellbook on the left to navigate the project architecture.</p>
+        
+        <div style="margin-top: 30px; border: 1px solid #3c4b57; background: rgba(0,0,0,0.3); padding: 10px;">
+          <strong style="color: #ffd700;">Latest Commit:</strong><br>
+          <span style="font-family: monospace; color: #00eaff;">[Core] Fixed NxtClient handshake packet logic.</span>
+        </div>
       </div>
-
-      <div class="news-box">
-        <span class="news-date">June 07, 2025</span>
-        <strong>Trademark Update</strong>
-        <p><i>SMB Assessments</i> is now officially trademarked. The guild is growing.</p>
-      </div>
-
-      <p style="text-align:center; margin-top:40px;">
-        <small><i>You feel a strange power emanating from the project link...</i></small>
-      </p>
-    </main>
+    </div>
   </div>
-</div>
+
+<script>
+  function castSpell(type) {
+    const fx = document.getElementById('fx-container');
+    const ui = document.getElementById('main-interface');
+    
+    // Reset FX Layer
+    fx.style.display = 'flex';
+    fx.innerHTML = '';
+    fx.className = 'fx-layer'; // clear old anim classes
+
+    if (type === 'home') {
+      // 1. Home Teleport Logic
+      fx.classList.add('home-anim');
+      fx.innerHTML = '<div class="rune-circle"></div><div class="beam"></div>';
+      
+      // Visual Shrink
+      setTimeout(() => ui.classList.add('fade-out'), 1500);
+      
+      // Redirect
+      setTimeout(() => window.location.href = 'home.html', 3000);
+
+    } else if (type === 'alch') {
+      // 2. High Alch Logic
+      fx.classList.add('alch-anim');
+      fx.innerHTML = '<div class="alch-icon">💰</div>'; // Money emoji rising
+      
+      // Visual Flash
+      setTimeout(() => ui.style.opacity = '0', 800);
+      
+      // Redirect
+      setTimeout(() => window.location.href = 'market.html', 1500);
+
+    } else if (type === 'b2p') {
+      // 3. Bones to Peaches Logic
+      fx.classList.add('b2p-anim');
+      fx.innerHTML = '<div class="bone">🦴</div><div class="peach">🍑</div>';
+      
+      // Visual Transformation
+      setTimeout(() => ui.classList.add('fade-out'), 2000);
+      
+      // Redirect
+      setTimeout(() => window.location.href = 'forums.html', 2500);
+    }
+  }
+</script>
 
 </body>
 </html>
