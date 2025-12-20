@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Open881 - World</title>
+    <title>Open881 - City Update</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Trebuchet MS', sans-serif; touch-action: none; }
         #game-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -15,14 +15,32 @@
             font-size: 16px;
         }
 
+        /* CENTER WINDOWS (Bank/Shop) */
+        .center-window {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; background: #081218; border: 2px solid #5a7b8f;
+            display: none; flex-direction: column; pointer-events: auto;
+            box-shadow: 0 0 20px #000;
+        }
+        .win-header { background: #152936; color: #ffd700; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .win-close { cursor: pointer; color: #ff5555; }
+        .win-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px; max-height: 200px; overflow-y: auto; }
+        
+        /* ITEM SLOT */
+        .item-slot {
+            width: 40px; height: 40px; background: #2b3945; border: 1px solid #3c4b57;
+            display: flex; align-items: center; justify-content: center; position: relative;
+            cursor: pointer; color: #fff; font-size: 10px;
+        }
+        .item-slot:hover { border-color: #ffd700; }
+        .item-count { position: absolute; top: 2px; left: 2px; color: #ffd700; font-size: 10px; }
+
         /* BOTTOM RIGHT TABS */
         #tabs-container {
             position: absolute; bottom: 10px; right: 10px;
             display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
             pointer-events: auto;
         }
-
-        /* TAB BUTTONS */
         .tab-icons { display: flex; gap: 5px; }
         .tab-btn {
             width: 40px; height: 40px; background: #1a2a36; border: 2px solid #5a7b8f;
@@ -31,25 +49,12 @@
         }
         .tab-btn:hover { border-color: #00ccff; background: #2b3945; }
 
-        /* CONTENT PANELS */
-        .panel {
-            width: 180px; background: rgba(8, 30, 43, 0.95); border: 2px solid #3c4b57;
-            padding: 10px; display: none; margin-bottom: 5px;
-        }
+        /* PANELS */
+        .panel { width: 190px; background: rgba(8, 30, 43, 0.95); border: 2px solid #3c4b57; padding: 10px; display: none; }
         .panel.active { display: block; }
-        .panel-header { border-bottom:1px solid #5a7b8f; margin-bottom:10px; font-weight:bold; color:#00ccff; font-size: 14px; }
-
-        /* SPELL GRID */
         .spell-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .spell {
-            background: #000; border: 1px solid #5a7b8f; aspect-ratio: 1;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; cursor: pointer; border-radius: 3px; position: relative;
-        }
-        .spell:hover { border-color: #ffd700; box-shadow: 0 0 5px #ffd700; }
-        
-        /* SKILL ROWS */
-        .skill-row { display: flex; justify-content: space-between; color: #ffd700; font-size: 12px; margin-bottom: 4px; }
+        .spell { background: #000; border: 1px solid #5a7b8f; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .spell:hover { border-color: #ffd700; }
     </style>
     
     <script type="importmap">
@@ -60,35 +65,40 @@
 
     <div id="game-ui">
         <div id="context-text">Welcome to Gielinor</div>
+
+        <div id="bank-window" class="center-window">
+            <div class="win-header"><span>Bank of Gielinor</span><span class="win-close" onclick="game.closeWindows()">X</span></div>
+            <div class="win-grid" id="bank-grid"></div>
+        </div>
+
+        <div id="shop-window" class="center-window">
+            <div class="win-header"><span>General Store</span><span class="win-close" onclick="game.closeWindows()">X</span></div>
+            <div class="win-grid" id="shop-grid"></div>
+        </div>
         
         <div id="tabs-container">
-            <div id="panel-skills" class="panel active">
-                <div class="panel-header">Stats</div>
-                <div class="skill-row"><span>🌲 Woodcutting</span><span id="wc-level">1</span></div>
-                <div class="skill-row" style="color:#aaa;">XP: <span id="wc-xp">0</span></div>
+            <div id="panel-inv" class="panel active">
+                <div style="color:#ffd700; margin-bottom:5px; font-weight:bold;">Backpack <span style="float:right; color:#ffd700">💰 <span id="coin-display">0</span></span></div>
+                <div class="win-grid" id="inv-grid" style="padding:0; grid-template-columns: repeat(4, 1fr);"></div>
             </div>
 
             <div id="panel-magic" class="panel">
-                <div class="panel-header">Teleports</div>
+                <div style="color:#00ccff; margin-bottom:10px; font-weight:bold;">Teleports</div>
                 <div class="spell-grid">
                     <div class="spell" onclick="window.game.teleport('lumbridge')" title="Lumbridge">🏰</div>
                     <div class="spell" onclick="window.game.teleport('falador')" title="Falador">🛡️</div>
                     <div class="spell" onclick="window.game.teleport('menaphos')" title="Menaphos">🏜️</div>
-                    <div class="spell" style="opacity:0.3">💀</div>
-                    <div class="spell" style="opacity:0.3">❄️</div>
-                    <div class="spell" style="opacity:0.3">💰</div>
                 </div>
             </div>
 
             <div class="tab-icons">
-                <div class="tab-btn" onclick="switchTab('panel-skills')">📊</div>
+                <div class="tab-btn" onclick="switchTab('panel-inv')">🎒</div>
                 <div class="tab-btn" onclick="switchTab('panel-magic')">📘</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Simple UI Switcher
         function switchTab(id) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -97,12 +107,12 @@
 
     <script type="module">
         import { initGame, triggerTeleport } from './main.js';
+        import { closeWindows } from './main.js'; // Helper to close UI
         
-        // Expose teleport for HTML buttons
         window.game = {
-            teleport: (loc) => triggerTeleport(loc)
+            teleport: triggerTeleport,
+            closeWindows: closeWindows
         };
-
         try { initGame(); } catch (e) { console.error(e); }
     </script>
 </body>
