@@ -1,86 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Grand Exchange - Market</title>
-<style>
-  body {
-    background: #0d161c;
-    color: #cdd6db;
-    font-family: 'Trebuchet MS', sans-serif;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    animation: goldFadeIn 1s ease-out;
-  }
-
-  .ge-window {
-    width: 800px;
-    background: #282722; /* GE Dark Brown/Grey */
-    border: 2px solid #5a5245;
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .ge-box {
-    background: #3e3529;
-    border: 1px inset #1e1913;
-    height: 150px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .ge-box:hover { background: #4b4031; }
-
-  h1 { grid-column: span 3; text-align: center; color: #ff981f; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-
-  .price { color: #ffff00; font-weight: bold; margin-top: 5px; }
-
-  /* Navigation Back */
-  .back-btn {
-    grid-column: span 3;
-    text-align: center;
-    margin-top: 20px;
-    color: #aaa;
-    text-decoration: none;
-    font-size: 12px;
-  }
-  .back-btn:hover { color: #fff; }
-
-  @keyframes goldFadeIn { from { background-color: #ffd700; opacity: 0; } to { background-color: #0d161c; opacity: 1; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open881 - Market</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        /* Page specific overrides */
+        .ge-window {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 cols on Desktop */
+            gap: 15px;
+            padding: 20px;
+        }
+        .ge-box {
+            background: #282722;
+            border: 2px solid #5a5245;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+        }
+        .ge-box:hover { background: #333; }
+        .price { color: var(--rs-gold); font-weight: bold; margin-top: 5px; }
+    </style>
 </head>
 <body>
 
-  <div class="ge-window">
-    <h1>Grand Exchange Market</h1>
-    
-    <div class="ge-box">
-      <div style="font-size:30px;">🛡️</div>
-      <span>Source Code</span>
-      <span class="price">Free</span>
-    </div>
+<div class="interface-window">
+    <header>
+        <h1>Grand Exchange</h1>
+        <a href="index.html" style="font-size:0.8rem;">← Back</a>
+    </header>
 
-    <div class="ge-box">
-      <div style="font-size:30px;">📜</div>
-      <span>Documentation</span>
-      <span class="price">100 gp</span>
-    </div>
+    <div style="overflow-y: auto; flex: 1;">
+        <div class="ge-window">
+            <div class="ge-box">
+                <div style="font-size:30px;">🛡️</div>
+                <h3>Core Source</h3>
+                <span class="price">Free</span>
+            </div>
 
-    <div class="ge-box">
-      <div style="font-size:30px;">💎</div>
-      <span>Premium Assets</span>
-      <span class="price">25m gp</span>
-    </div>
+            <div class="ge-box">
+                <div style="font-size:30px;">📜</div>
+                <h3>Docs</h3>
+                <span class="price">100 gp</span>
+            </div>
 
-    <a href="index.html" class="back-btn">← Teleport back to Main Interface</a>
-  </div>
+            <div class="ge-box">
+                <div style="font-size:30px;">💎</div>
+                <h3>Assets</h3>
+                <span class="price">25M gp</span>
+            </div>
+
+            <div class="ge-box">
+                <div style="font-size:30px;">🔧</div>
+                <h3>Tools</h3>
+                <span class="price">500k gp</span>
+            </div>
+
+            <div class="ge-box">
+                <div style="font-size:30px;">💊</div>
+                <h3>Potions</h3>
+                <span class="price">2k gp</span>
+            </div>
+            
+            <div class="ge-box">
+                <div style="font-size:30px;">🐉</div>
+                <h3>Bossing</h3>
+                <span class="price">Locked</span>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
