@@ -21,17 +21,17 @@
             <div style="font-size: 10px; text-transform: uppercase; color: #5a6e7a; margin-bottom: 10px; font-weight: bold; width:100%;">Teleports</div>
             
             <div class="spell-btn" onclick="castSpell('home')">
-                <div class="icon icon-home">H</div>
+                <div class="icon icon-home"></div>
                 <div><strong>Home</strong></div>
             </div>
 
             <div class="spell-btn" onclick="castSpell('alch')">
-                <div class="icon icon-alch">HA</div>
+                <div class="icon icon-alch"></div>
                 <div><strong>High Alch</strong></div>
             </div>
 
             <div class="spell-btn" onclick="castSpell('b2p')">
-                <div class="icon icon-b2p">B2P</div>
+                <div class="icon icon-b2p"></div>
                 <div><strong>Bones2Peach</strong></div>
             </div>
         </div>
@@ -43,7 +43,7 @@
             
             <div style="margin-top:20px; padding:15px; background:rgba(0,0,0,0.4); border-radius:4px;">
                 <small style="color:var(--rs-gold)">Server Message:</small><br>
-                Mobile view is now supported. Double-tap spells if on touch devices.
+                Graphics engine updated. Spell icons are now rendered from sprite sheets.
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
             fx.classList.add('home-anim');
             fx.innerHTML = '<div class="rune-circle"></div><div class="beam"></div>';
             setTimeout(() => ui.classList.add('fade-out'), 1500);
-            setTimeout(() => window.location.href = 'home.html', 3000); // Create this file if needed
+            setTimeout(() => window.location.href = 'home.html', 3000); 
         } 
         else if (type === 'alch') {
             fx.classList.add('alch-anim');
