@@ -16,7 +16,7 @@ body {
   background-size: cover;
   color: var(--rs-text);
   height: 100vh;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,9 +25,9 @@ body {
 /* --- THE MAIN INTERFACE BOX --- */
 .interface-window {
   width: 900px;
-  max-width: 95%; /* Mobile safe width */
+  max-width: 95%;
   height: 600px;
-  max-height: 90vh; /* Don't overflow mobile height */
+  max-height: 90vh;
   background: var(--rs-panel);
   border: 1px solid var(--rs-border);
   box-shadow: 0 0 15px rgba(0, 234, 255, 0.1), inset 0 0 50px rgba(0,0,0,0.8);
@@ -35,7 +35,7 @@ body {
   flex-direction: column;
   position: relative;
   z-index: 10;
-  overflow: hidden; /* Keeps content inside rounded corners if used */
+  overflow: hidden;
 }
 
 /* --- HEADER --- */
@@ -56,10 +56,9 @@ header .status { font-size: 0.8rem; color: #00ff00; }
   flex: 1;
   padding: 20px;
   gap: 20px;
-  overflow-y: auto; /* Allow scrolling inside the box if needed */
+  overflow-y: auto;
 }
 
-/* Spellbook/Nav Sidebar */
 .action-bar {
   width: 250px;
   flex-shrink: 0;
@@ -69,7 +68,6 @@ header .status { font-size: 0.8rem; color: #00ff00; }
   overflow-y: auto;
 }
 
-/* Main Text Panel */
 .info-panel {
   flex: 1;
   background: rgba(0, 0, 0, 0.2);
@@ -78,7 +76,7 @@ header .status { font-size: 0.8rem; color: #00ff00; }
   overflow-y: auto;
 }
 
-/* Buttons */
+/* --- SPELL BUTTONS --- */
 .spell-btn {
   display: flex;
   align-items: center;
@@ -96,65 +94,49 @@ header .status { font-size: 0.8rem; color: #00ff00; }
   box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
   transform: scale(1.02);
 }
-.icon { width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; display:flex; align-items:center; justify-content:center; font-size: 16px;}
-.icon-home { background: #00ccff; border: 2px solid white; color: #000; }
-.icon-alch { background: #ffd700; border: 2px solid orange; color: #000; }
-.icon-b2p { background: #ff99cc; border: 2px solid #90ee90; color: #000; }
 
-/* Link styling */
-a { color: var(--rs-blue); text-decoration: none; }
-a:hover { text-decoration: underline; }
+/* --- NEW ICON SPRITE LOGIC --- */
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  margin-right: 15px;
+  flex-shrink: 0;
+  
+  /* Loading the image */
+  background-image: url('icons.jpg'); 
+  background-size: 300% 100%; /* Zoom so 1 icon fills the box */
+  background-repeat: no-repeat;
+  
+  border: 1px solid #3c4b57;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Shift image for each spell */
+.icon-home { background-position: 0% 0%; }
+.icon-alch { background-position: 50% 0%; }
+.icon-b2p  { background-position: 100% 0%; }
+
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-  body {
-    align-items: flex-start; /* Stick to top on mobile */
-    height: auto;
-    min-height: 100vh;
-  }
-  
-  .interface-window {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    min-height: 100vh;
-    border: none;
-  }
-
-  .content-area {
-    flex-direction: column; /* Stack sidebar and content */
-    padding: 10px;
-  }
-
-  .action-bar {
-    width: 100%; /* Full width spellbook */
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 buttons per row */
-    gap: 10px;
-  }
-
-  .spell-btn {
-    margin-bottom: 0; /* Remove bottom margin in grid */
-    flex-direction: column;
-    text-align: center;
-    padding: 15px 5px;
-  }
-  
+  body { align-items: flex-start; height: auto; min-height: 100vh; }
+  .interface-window { width: 100%; max-width: 100%; height: auto; min-height: 100vh; border: none; }
+  .content-area { flex-direction: column; padding: 10px; }
+  .action-bar { width: 100%; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .spell-btn { margin-bottom: 0; flex-direction: column; text-align: center; padding: 15px 5px; }
   .icon { margin-right: 0; margin-bottom: 5px; }
-  
-  /* Market Grid mobile fix */
   .ge-window { grid-template-columns: 1fr !important; }
 }
 
-/* --- ANIMATIONS (Shared) --- */
+/* --- ANIMATIONS --- */
 .fx-layer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none; display: none; z-index: 999;
   justify-content: center; align-items: center;
 }
 
-/* Animations Logic */
+/* Animation Styles */
 .home-anim .rune-circle {
   width: 250px; height: 250px; border: 5px solid #00ccff; border-radius: 50%;
   transform: rotateX(70deg) scale(0);
@@ -170,7 +152,6 @@ a:hover { text-decoration: underline; }
 .b2p-anim .bone { font-size: 80px; position: absolute; animation: boneDie 1.5s forwards; }
 .b2p-anim .peach { font-size: 80px; position: absolute; opacity: 0; animation: peachBorn 1.5s forwards 1s; }
 
-/* Keyframes */
 @keyframes teleCircle { 0%,100% { transform: rotateX(70deg) scale(0); opacity: 0; } 50% { transform: rotateX(70deg) scale(1); opacity: 1; } }
 @keyframes teleBeam { 0%,100% { height: 0; } 50% { height: 100vh; } }
 @keyframes flash { 0%,100% { opacity: 0; } 20% { opacity: 1; } }
