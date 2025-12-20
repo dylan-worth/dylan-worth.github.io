@@ -6,7 +6,6 @@
     <title>Open881 - Community Forums</title>
     <link rel="stylesheet" href="main.css">
     <style>
-        /* Category Header Style */
         .category-header {
             background: linear-gradient(to right, #152936, #0d161c);
             padding: 10px 15px;
@@ -18,17 +17,15 @@
             border-bottom: 1px solid #3c4b57;
             margin-top: 20px;
         }
-        /* Remove margin for the first one */
         .category-header:first-child { margin-top: 0; }
 
-        /* Forum Row Style */
         .forum-row {
             display: flex;
             align-items: center;
             padding: 15px;
             background: rgba(0,0,0,0.2);
             border-bottom: 1px solid #1f2b33;
-            text-decoration: none; /* remove underline from link block */
+            text-decoration: none;
             transition: background 0.2s;
         }
         .forum-row:hover { background: rgba(255,255,255,0.05); }
@@ -43,6 +40,7 @@
         .forum-info p { margin: 3px 0 0 0; font-size: 0.75rem; color: #5a7b8f; }
         
         .post-count { margin-left: auto; font-size: 0.7rem; color: #5a7b8f; text-align: right; }
+        .locked-text { color: #ff5555; font-weight: bold; font-size: 0.65rem; border: 1px solid #550000; padding: 2px 5px; background: #330000; }
     </style>
 </head>
 <body>
@@ -57,13 +55,24 @@
         
         <div class="category-header">Official Information</div>
         
+        <a href="rules.html" class="forum-row">
+            <div class="forum-icon">⚖️</div>
+            <div class="forum-info">
+                <h3 style="color:#ff5555;">Official Server Rules</h3>
+                <p>Read these before playing. Ignorance is not an excuse.</p>
+            </div>
+            <div class="post-count">
+                <span class="locked-text">READ ONLY</span>
+            </div>
+        </a>
+
         <a href="news.html" class="forum-row">
             <div class="forum-icon">📜</div>
             <div class="forum-info">
                 <h3>News & Announcements</h3>
                 <p>Official updates regarding the Open881 project.</p>
             </div>
-            <div class="post-count">2 Posts<br>Latest: Mod Dylan</div>
+            <div class="post-count">4 Posts<br>Latest: Mod Dylan</div>
         </a>
 
         <div class="category-header">Open881 Project</div>
