@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open881 - News</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        /* Thread List Styles */
+        .thread-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #1f2b33;
+            background: rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+        .thread-row:hover { background: rgba(255,255,255,0.05); }
+
+        .thread-icon { font-size: 18px; width: 40px; text-align: center; }
+        .pinned { color: #ffd700; } /* Gold icon for pinned threads */
+        
+        .thread-title { 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            color: #00ccff; 
+            display: block; 
+            margin-bottom: 3px;
+        }
+        .thread-meta { font-size: 0.75rem; color: #5a7b8f; }
+        
+        .locked-label {
+            background: #330000;
+            color: #ff5555;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border: 1px solid #550000;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="interface-window">
+    <header>
+        <h1>News & Announcements</h1>
+        <a href="forums.html" style="font-size:0.8rem;">← Back to Forum Index</a>
+    </header>
+
+    <div class="content-area" style="flex-direction: column; padding: 0;">
+        
+        <div style="padding:10px; background:#0b161d; font-size:0.75rem; color:#4a6c82; display:flex; justify-content:space-between;">
+            <span>Displaying topics 1-3 of 3</span>
+        </div>
+
+        <a href="thread-welcome.html" class="thread-row">
+            <div class="thread-icon pinned">📌</div>
+            <div style="flex: 1;">
+                <span class="thread-title" style="color:#ffd700;">READ FIRST: Project Update & Information</span>
+                <span class="thread-meta">By <b>Mod Dylan</b> | 20-Dec-2025</span>
+            </div>
+        </a>
+
+        <a href="#" class="thread-row">
+            <div class="thread-icon pinned">⚖️</div>
+            <div style="flex: 1;">
+                <div style="display:flex; align-items:center;">
+                    <span class="thread-title" style="color:#ffd700;">Official Server Rules</span>
+                    <span class="locked-label">LOCKED</span>
+                </div>
+                <span class="thread-meta">By <b>Mod Dylan</b> | 01-Dec-2025</span>
+            </div>
+        </a>
+
+        <a href="#" class="thread-row">
+            <div class="thread-icon">⚔️</div>
+            <div style="flex: 1;">
+                <span class="thread-title">Source Code Credits (Summer @ Gitlab)</span>
+                <span class="thread-meta">By <b>Mod Dylan</b> | 15-Nov-2025</span>
+            </div>
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>
