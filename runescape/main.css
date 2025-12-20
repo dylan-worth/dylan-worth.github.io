@@ -104,7 +104,7 @@ header .status { font-size: 0.8rem; color: #00ff00; }
   flex-shrink: 0;
   
   /* Loading the image */
-  background-image: url('icons.jpg'); 
+  background-image: url('Icons.jpg'); 
   background-size: 300% 100%; /* Zoom so 1 icon fills the box */
   background-repeat: no-repeat;
   
