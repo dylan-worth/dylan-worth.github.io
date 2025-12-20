@@ -1,44 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Home - Lumbridge</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: #1a1a1a;
-            color: #ccc;
-            font-family: 'Verdana', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            /* Simple fade in upon arrival */
-            animation: arrive 1.5s ease-out;
-        }
+<meta charset="UTF-8">
+<title>Home - Lumbridge Castle</title>
+<style>
+  /* --- SAFE ZONE THEME --- */
+  body {
+    background-color: #1a1a1a;
+    background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); /* Subtle noise */
+    color: #333;
+    font-family: 'Verdana', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* The Main Wrapper */
+  .site-wrapper {
+    width: 800px;
+    background-color: #f4e4bc; /* Parchment Color */
+    border: 5px double #5d5648;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: fadeIn 1.5s ease-out; /* Arrival animation */
+  }
 
-        .castle {
-            text-align: center;
-            border: 2px solid #5d5648;
-            padding: 40px;
-            background: #2b2317;
-        }
+  /* Header */
+  header {
+    background: #2b2317;
+    color: #ff981f;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 3px solid #b8a68a;
+  }
+  h1 { margin: 0; font-family: 'Times New Roman', serif; letter-spacing: 2px; }
 
-        h1 { color: #ff981f; text-shadow: 2px 2px 0 #000; }
+  /* Columns */
+  .layout { display: flex; min-height: 400px; }
+  
+  /* Sidebar */
+  aside {
+    width: 200px;
+    background: #e6d3a3;
+    border-right: 2px solid #b8a68a;
+    padding: 15px;
+  }
 
-        @keyframes arrive {
-            from { opacity: 0; transform: scale(2); filter: blur(10px); }
-            to { opacity: 1; transform: scale(1); filter: blur(0); }
-        }
-    </style>
+  .nav-btn {
+    display: block;
+    background: #5d5648;
+    color: #ff981f;
+    text-decoration: none;
+    padding: 8px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #000;
+    cursor: pointer;
+  }
+  .nav-btn:hover { background: #6b6455; color: white; }
+  
+  /* Content */
+  main { flex: 1; padding: 30px; }
+  
+  .news-box {
+    border: 1px solid #b8a68a;
+    background: #fff8e3;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  .news-date { font-weight: bold; font-size: 10px; color: #555; border-bottom: 1px solid #ccc; margin-bottom: 5px; display: block; }
+  
+  h2 { font-size: 18px; color: #4a3b2a; margin-top: 0; }
+  p { font-size: 12px; line-height: 1.6; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); filter: blur(5px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+</style>
 </head>
 <body>
 
-    <div class="castle">
-        <h1>Welcome to Lumbridge</h1>
-        <p>You have arrived safely.</p>
-        <p><small>(Click back on your browser to return to Wilderness)</small></p>
-    </div>
+<div class="site-wrapper">
+  <header>
+    <h1>🏰 Dylan's Realm</h1>
+    <small>Welcome to the Safe Zone</small>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div style="text-align:center; margin-bottom:15px;">
+        <div style="width:50px; height:50px; background:#444; margin:0 auto; border:2px solid #000;"></div>
+        <p style="font-size:10px; margin-top:5px;"><b>Admin: Dylan</b></p>
+      </div>
+
+      <a href="rune-projects.html" class="nav-btn">⚔️ Go to Wilderness (Projects)</a>
+      <a class="nav-btn">📜 Forum (Maintenance)</a>
+      <a class="nav-btn">💰 Grand Exchange</a>
+      <a class="nav-btn">🛡️ Clan Chat</a>
+    </aside>
+
+    <main>
+      <h2>Latest News</h2>
+      
+      <div class="news-box">
+        <span class="news-date">December 20, 2025</span>
+        <strong>Home Teleport Successful!</strong>
+        <p>You have successfully teleported from the project wilderness. Your hitpoints have been restored.</p>
+      </div>
+
+      <div class="news-box">
+        <span class="news-date">June 07, 2025</span>
+        <strong>Trademark Update</strong>
+        <p><i>SMB Assessments</i> is now officially trademarked. The guild is growing.</p>
+      </div>
+
+      <p style="text-align:center; margin-top:40px;">
+        <small><i>You feel a strange power emanating from the project link...</i></small>
+      </p>
+    </main>
+  </div>
+</div>
 
 </body>
 </html>
