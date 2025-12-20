@@ -3,10 +3,9 @@ import * as THREE from 'three';
 let targetPosition = new THREE.Vector3();
 let isMoving = false;
 let moveSpeed = 0.15;
-let playerRef = null;
-let raycaster = new THREE.Raycaster();
-let mouse = new THREE.Vector2();
-let cameraRef, sceneRef;
+let playerRef, cameraRef, sceneRef;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 export function setupMovement(camera, scene, player) {
     cameraRef = camera;
@@ -14,11 +13,10 @@ export function setupMovement(camera, scene, player) {
     playerRef = player;
     targetPosition.copy(player.position);
 
-    window.addEventListener('pointerdown', onClick);
+    window.addEventListener('pointerdown', onGroundClick);
 }
 
-function onClick(event) {
-    // Don't click through UI
+function onGroundClick(event) {
     if (event.target.id !== 'game-ui' && event.target.tagName !== 'CANVAS') return;
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -28,16 +26,19 @@ function onClick(event) {
     const intersects = raycaster.intersectObjects(sceneRef.children, true);
 
     for (let hit of intersects) {
-        // If we clicked the ground, move there
+        // Only move if we clicked the GROUND
         if (hit.object.name === "ground") {
             targetPosition.set(hit.point.x, 0, hit.point.z);
             isMoving = true;
+            
+            // Create yellow X marker
             spawnMarker(hit.point);
             
             // UI Feedback
-            document.getElementById('context-text').innerText = "Walking...";
-            document.getElementById('context-text').style.color = "#ffff00";
-            break;
+            const ctx = document.getElementById('context-text');
+            ctx.innerText = ""; 
+            ctx.style.color = "#ffff00";
+            break; 
         }
     }
 }
@@ -50,14 +51,13 @@ export function updateMovement() {
 
     if (dist < 0.1) {
         isMoving = false;
-        playerRef.position.y = 0; // Reset bob
-        document.getElementById('context-text').innerText = "";
+        playerRef.position.y = 0; 
     } else {
         dir.normalize();
         playerRef.position.add(dir.multiplyScalar(moveSpeed));
         playerRef.lookAt(targetPosition.x, playerRef.position.y, targetPosition.z);
 
-        // Bob animation
+        // Bobbing animation
         playerRef.position.y = Math.abs(Math.sin(Date.now() * 0.01)) * 0.1;
 
         // Camera Follow
@@ -67,5 +67,13 @@ export function updateMovement() {
 }
 
 function spawnMarker(pos) {
-    // Yellow X marker logic could go here
+    const marker = new THREE.Mesh(
+        new THREE.RingGeometry(0.2, 0.3, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide })
+    );
+    marker.rotation.x = -Math.PI / 2;
+    marker.position.copy(pos);
+    marker.position.y = 0.05;
+    sceneRef.add(marker);
+    setTimeout(() => sceneRef.remove(marker), 500);
 }
