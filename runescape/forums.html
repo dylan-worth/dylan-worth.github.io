@@ -3,76 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open881 - Forums</title>
+    <title>Open881 - Community Forums</title>
     <link rel="stylesheet" href="main.css">
     <style>
-        .thread-row {
-            padding: 15px;
-            border-bottom: 1px solid var(--rs-border);
+        /* Category Header Style */
+        .category-header {
+            background: linear-gradient(to right, #152936, #0d161c);
+            padding: 10px 15px;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-top: 1px solid #3c4b57;
+            border-bottom: 1px solid #3c4b57;
+            margin-top: 20px;
+        }
+        /* Remove margin for the first one */
+        .category-header:first-child { margin-top: 0; }
+
+        /* Forum Row Style */
+        .forum-row {
             display: flex;
             align-items: center;
+            padding: 15px;
             background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid #1f2b33;
+            text-decoration: none; /* remove underline from link block */
+            transition: background 0.2s;
         }
-        .thread-row:hover { background: rgba(255,255,255,0.05); }
-        .thread-icon { font-size: 20px; width: 40px; text-align: center; }
-        .thread-info { flex: 1; }
-        .thread-meta { font-size: 0.75rem; color: #5a7b8f; margin-top: 4px; }
+        .forum-row:hover { background: rgba(255,255,255,0.05); }
+
+        .forum-icon {
+            font-size: 24px;
+            width: 50px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        .forum-info h3 { margin: 0; font-size: 1rem; color: #00ccff; }
+        .forum-info p { margin: 3px 0 0 0; font-size: 0.75rem; color: #5a7b8f; }
+        
+        .post-count { margin-left: auto; font-size: 0.7rem; color: #5a7b8f; text-align: right; }
     </style>
 </head>
 <body>
 
 <div class="interface-window">
     <header>
-        <h1>Community Forums</h1>
-        <a href="index.html" style="font-size:0.8rem;">← Back</a>
+        <h1>Forums Index</h1>
+        <a href="index.html" style="font-size:0.8rem;">← Back to Game</a>
     </header>
 
     <div class="content-area" style="flex-direction: column; padding: 0;">
-        <div style="padding:10px; background:#0b161d; font-size:0.8rem; font-weight:bold; color:#4a6c82; display:flex; justify-content:space-between;">
-            <span>General Discussion</span>
-            <span>QFC: 881-2017</span>
-        </div>
-
-        <div class="thread-row">
-            <div class="thread-icon">📌</div>
-            <div class="thread-info">
-                <a href="#" style="color:var(--rs-gold); font-weight:bold;">READ FIRST: Server Rules</a>
-                <div class="thread-meta">By <b>Admin</b> | 20-Dec-2025</div>
-            </div>
-        </div>
-
-        <div class="thread-row">
-            <div class="thread-icon">⚔️</div>
-            <div class="thread-info">
-                <a href="#" style="font-weight:bold;">Development Update: Mobile Support</a>
-                <div class="thread-meta">By <b>Dev Team</b> | 1 hour ago</div>
-            </div>
-        </div>
-
-        <div class="thread-row">
-            <div class="thread-icon">🍑</div>
-            <div class="thread-info">
-                <a href="#">Bones to Peaches Glitch?</a>
-                <div class="thread-meta">By <b>User123</b> | 5 mins ago</div>
-            </div>
-        </div>
-
-<div class="thread-row">
-    <div class="thread-icon">📌</div>
-    <div class="thread-info">
-        <a href="thread-welcome.html" style="color:var(--rs-gold); font-weight:bold;">READ FIRST: Project Update</a>
-        <div class="thread-meta">By <b>Mod Dylan</b> | 20-Dec-2025</div>
-    </div>
-</div>
-
         
-        <div class="thread-row">
-            <div class="thread-icon">❓</div>
-            <div class="thread-info">
-                <a href="#">How to compile the source?</a>
-                <div class="thread-meta">By <b>JavaNewbie</b> | Yesterday</div>
+        <div class="category-header">Official Information</div>
+        
+        <a href="news.html" class="forum-row">
+            <div class="forum-icon">📜</div>
+            <div class="forum-info">
+                <h3>News & Announcements</h3>
+                <p>Official updates regarding the Open881 project.</p>
+            </div>
+            <div class="post-count">2 Posts<br>Latest: Mod Dylan</div>
+        </a>
+
+        <div class="category-header">Open881 Project</div>
+
+        <div class="forum-row">
+            <div class="forum-icon">🔨</div>
+            <div class="forum-info">
+                <h3>Development Progress</h3>
+                <p>Track the slow-burn progress of the source code.</p>
             </div>
         </div>
+        
+        <div class="forum-row">
+            <div class="forum-icon">🐛</div>
+            <div class="forum-info">
+                <h3>Bug Reports</h3>
+                <p>Found a glitch? Report it here (Gitlab issues).</p>
+            </div>
+        </div>
+
+        <div class="forum-row">
+            <div class="forum-icon">💡</div>
+            <div class="forum-info">
+                <h3>Suggestions</h3>
+                <p>Feedback on the 2017 cache restoration.</p>
+            </div>
+        </div>
+
+        <div class="category-header">Community</div>
+
+        <div class="forum-row">
+            <div class="forum-icon">💬</div>
+            <div class="forum-info">
+                <h3>General Discussion</h3>
+                <p>Talk about anything RS3 or 2017 related.</p>
+            </div>
+        </div>
+
+        <div class="forum-row">
+            <div class="forum-icon">⚔️</div>
+            <div class="forum-info">
+                <h3>Clan Chat</h3>
+                <p>Recruitment and clan events.</p>
+            </div>
+        </div>
+
+        <div class="forum-row">
+            <div class="forum-icon">📷</div>
+            <div class="forum-info">
+                <h3>Media & Art</h3>
+                <p>Screenshots and videos.</p>
+            </div>
+        </div>
+
     </div>
 </div>
 
