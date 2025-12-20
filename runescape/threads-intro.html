@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open881 - Credits</title>
+    <title>Open881 - Project Intro</title>
     <link rel="stylesheet" href="main.css">
     <style>
+        /* Thread Specific Styles */
         .breadcrumb { font-size: 0.8rem; color: #5a7b8f; padding: 10px 0; margin-bottom: 10px; }
         .breadcrumb a { color: #5a7b8f; }
+        
         .post-container { background: rgba(0,0,0,0.3); border: 1px solid #3c4b57; margin-bottom: 20px; }
         .post-header { background: #152936; padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #2d4c5e; }
+        
         .username { color: #ffd700; font-weight: bold; font-size: 0.9rem; }
         .post-body { padding: 20px; font-size: 0.95rem; line-height: 1.6; color: #cdd6db; }
-        .code-block { background: #000; border: 1px solid #3c4b57; padding: 10px; font-family: monospace; color: #00ff00; margin: 10px 0; }
+        
+        /* Feature Boxes */
+        .feature-box { background: rgba(0,0,0,0.4); border-left: 3px solid #ffd700; padding: 10px; margin: 15px 0; }
+        .feature-title { color: #00ccff; font-weight: bold; display: block; margin-bottom: 5px; }
+        ul { margin-top: 5px; color: #aebdc5; padding-left: 20px; }
+        li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -24,35 +32,68 @@
     </header>
 
     <div class="content-area" style="flex-direction: column;">
+        
         <div class="breadcrumb">
-            <a href="forums.html">Forums</a> > Information > <span style="color:#fff">Source Code Credits</span>
+            <a href="forums.html">Forums</a> > Official Information > <span style="color:#fff">What is Open881?</span>
         </div>
 
         <div class="post-container">
             <div class="post-header">
-                <div style="display:flex; align-items:center;">
+                <div style="display:flex; gap:10px; align-items:center;">
                     <span class="mod-crown crown-admin"></span>
                     <span class="username">Mod Dylan</span>
                 </div>
-                <div style="font-size: 0.75rem; color: #5a7b8f;">15-Nov-2025</div>
+                <div style="font-size: 0.75rem; color: #5a7b8f;">20-Dec-2025</div>
             </div>
 
             <div class="post-body">
-                <p>Hello Scapers,</p>
-                <p>Transparency is key for this project. As mentioned in the welcome post, <b>Open881</b> is built upon the incredible work done by the open-source community.</p>
+                <h2 style="color:#ffd700; margin-top:0; border-bottom:1px solid #3c4b57; padding-bottom:5px;">Project Introduction: Revision 881</h2>
                 
-                <p>Primary credits go to <b>Summer</b> on Gitlab for the original 881 revision framework.</p>
+                <p>Welcome to <b>Open881</b>. This project aims to preserve and emulate RuneScape 3 as it existed in <b>June 2017</b>.</p>
+                
+                <p>Revision 881 is a critical snapshot in RS history because it captures the game immediately following the release of the <b>Menaphos Expansion</b>. This was a "golden age" for the NXT client, balancing the Evolution of Combat with modern graphics and mid-level content.</p>
 
-                <div class="code-block">
-                    // Credit: Summer (Gitlab)<br>
-                    // Base: NXT Protocol / Matrix 3
+                <h3>Core Features of 881</h3>
+
+                <div class="feature-box">
+                    <span class="feature-title">🏛️ Menaphos: The Golden City</span>
+                    The cache fully supports the mid-level hub Menaphos.
+                    <ul>
+                        <li>Full map data for the Golden City (Ports, Worker, VIP Districts).</li>
+                        <li><b>Shifting Tombs:</b> The fast-paced skilling minigame infrastructure is present.</li>
+                        <li><b>Reputation System:</b> The City Quests and faction reputation mechanics.</li>
+                        <li>The Sophanem Slayer Dungeon mapping.</li>
+                    </ul>
                 </div>
 
-                <p>I have since forked the project to focus specifically on restoring the 2017 Menaphos cache indexes.</p>
-                <p>This repo will remain open for educational purposes.</p>
+                <div class="feature-box">
+                    <span class="feature-title">💀 Slayer 120 Expansion</span>
+                    This revision includes the raising of the Slayer cap from 99 to 120.
+                    <ul>
+                        <li><b>New Mobs:</b> Soul Devourers & Corrupted Creatures.</li>
+                        <li><b>The Magister:</b> Boss assets are present in the cache.</li>
+                        <li><b>Gemstone Dragons:</b> Hydrix, Onyx, and Dragonstone dragons.</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <span class="feature-title">🔮 Systems & Mechanics</span>
+                    <ul>
+                        <li><b>Achievement System Overhaul:</b> This revision includes the major UI update that revamped the Achievement diary interfaces.</li>
+                        <li><b>Shattered Worlds:</b> The Abyssal anime-style minigame.</li>
+                        <li><b>NXT Protocol:</b> Utilizing the C++ client protocol for better performance.</li>
+                    </ul>
+                </div>
+
+                <p><b>Current Status:</b><br>
+                We are currently stabilizing the login server and mapping the XTEA keys for the Menaphos region. As this is a hobby project based on Summer's open-source release, updates will be sporadic as I tweak the networking headers.</p>
+
+                <p><i>- Mod Dylan</i></p>
             </div>
         </div>
+
     </div>
 </div>
+
 </body>
 </html>
