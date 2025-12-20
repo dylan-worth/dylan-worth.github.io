@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Projects - Wilderness</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ccc;
+            font-family: 'Verdana', sans-serif;
+            overflow: hidden; /* Prevents scroll bars during anim */
+            height: 100vh;
+        }
+
+        /* --- UI LAYOUT --- */
+        .game-ui {
+            padding: 20px;
+            text-align: center;
+            transition: transform 1s ease;
+        }
+
+        .osrs-btn {
+            background: #5d5648;
+            border: 2px solid #383023;
+            color: #ff981f;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none; /* Behaves like a link */
+            display: inline-block;
+            box-shadow: inset 2px 2px 0px #7a715f, inset -2px -2px 0px #2b2317;
+        }
+        .osrs-btn:hover {
+            color: white;
+        }
+
+        /* --- TELEPORT ANIMATION CSS --- */
+        .teleport-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 800px;
+            z-index: 1000;
+        }
+
+        .rune-circle {
+            position: absolute;
+            bottom: 15%; 
+            width: 250px; height: 250px;
+            border: 5px solid #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 30px #00d2ff, inset 0 0 20px #00d2ff;
+            transform: rotateX(70deg) scale(0);
+            opacity: 0;
+        }
+
+        .teleport-beam {
+            position: absolute;
+            bottom: 15%;
+            width: 80px; height: 0;
+            background: linear-gradient(to top, rgba(0, 210, 255, 0.7), transparent);
+            border-left: 2px solid rgba(255,255,255,0.5);
+            border-right: 2px solid rgba(255,255,255,0.5);
+            filter: blur(2px);
+        }
+
+        /* Animation Classes */
+        .active-circle { animation: spinCircle 3s ease-in-out forwards; }
+        .active-beam { animation: shootBeam 3s ease-in-out forwards; }
+        
+        /* The entire body shrinks into the distance */
+        .body-shrink { animation: shrinkWorld 1.5s ease-in forwards 1.2s; }
+
+        @keyframes spinCircle {
+            0% { transform: rotateX(70deg) scale(0) rotate(0deg); opacity: 0; }
+            20% { transform: rotateX(70deg) scale(1) rotate(45deg); opacity: 1; }
+            80% { transform: rotateX(70deg) scale(1) rotate(360deg); opacity: 1; }
+            100% { transform: rotateX(70deg) scale(0) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes shootBeam {
+            0% { height: 0; opacity: 0; }
+            30% { height: 0; opacity: 0; }
+            40% { height: 100vh; opacity: 1; }
+            90% { height: 100vh; opacity: 1; }
+            100% { height: 0; opacity: 0; bottom: 100%; }
+        }
+
+        @keyframes shrinkWorld {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(0.1); filter: brightness(20); background: white; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="teleport-layer">
+        <div id="circle" class="rune-circle"></div>
+        <div id="beam" class="teleport-beam"></div>
+    </div>
+
+    <div id="world-content" class="game-ui">
+        <h1>Projects Folder (Lvl 30 Wilderness)</h1>
+        <p>Be careful, PKers are nearby.</p>
+        <br>
+        <button class="osrs-btn" onclick="castHomeTeleport()">
+            🔵 Cast Home Teleport
+        </button>
+    </div>
+
+    <script>
+        function castHomeTeleport() {
+            // 1. Get Elements
+            const circle = document.getElementById('circle');
+            const beam = document.getElementById('beam');
+            const world = document.getElementById('world-content');
+
+            // 2. Play Animations
+            circle.classList.add('active-circle');
+            beam.classList.add('active-beam');
+            world.classList.add('body-shrink');
+
+            // 3. Wait 3 seconds, then switch file
+            setTimeout(() => {
+                window.location.href = 'rune-home.html';
+            }, 2800); // 2800ms gives a slight buffer before the animation fully ends
+        }
+    </script>
+</body>
+</html>
