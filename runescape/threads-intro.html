@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open881 - Project Introduction</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .breadcrumb { font-size: 0.8rem; color: #5a7b8f; padding: 10px 0; margin-bottom: 10px; }
+        .breadcrumb a { color: #5a7b8f; }
+        
+        .post-container { background: rgba(0,0,0,0.3); border: 1px solid #3c4b57; margin-bottom: 20px; }
+        .post-header { background: #152936; padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #2d4c5e; }
+        
+        .mod-crown { width: 15px; height: 13px; background: url('https://runescape.wiki/images/1/12/Gold_crown.png?e0539') no-repeat; background-size: contain; display: inline-block; }
+        .username { color: #ffd700; font-weight: bold; font-size: 0.9rem; }
+        
+        .post-body { padding: 20px; font-size: 0.95rem; line-height: 1.6; color: #cdd6db; }
+        
+        /* Feature List Styling */
+        .feature-box { background: rgba(0,0,0,0.4); border-left: 3px solid #ffd700; padding: 10px; margin: 15px 0; }
+        .feature-title { color: #00ccff; font-weight: bold; display: block; margin-bottom: 5px; }
+        ul { margin-top: 5px; color: #aebdc5; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="interface-window">
+    <header>
+        <h1>Forums</h1>
+        <a href="news.html" style="font-size:0.8rem;">← Back to News</a>
+    </header>
+
+    <div class="content-area" style="flex-direction: column;">
+        
+        <div class="breadcrumb">
+            <a href="forums.html">Forums</a> > Official Information > <span style="color:#fff">What is Open881?</span>
+        </div>
+
+        <div class="post-container">
+            <div class="post-header">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span class="mod-crown"></span>
+                    <span class="username">Mod Dylan</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #5a7b8f;">20-Dec-2025</div>
+            </div>
+
+            <div class="post-body">
+                <h2 style="color:#ffd700; margin-top:0; border-bottom:1px solid #3c4b57; padding-bottom:5px;">Project Introduction: Revision 881</h2>
+                
+                <p>Welcome to <b>Open881</b>. This project aims to preserve and emulate RuneScape 3 as it existed in <b>June 2017</b>.</p>
+                
+                <p>Revision 881 is special because it captures the game immediately following the release of the <b>Menaphos Expansion</b>. This was a "golden age" for the NXT client, balancing the Evolution of Combat with modern graphics and mid-level content.</p>
+
+                <h3>Core Features of 881</h3>
+
+                <div class="feature-box">
+                    <span class="feature-title">🏛️ Menaphos: The Golden City</span>
+                    The cache fully supports the mid-level hub Menaphos.
+                    <ul>
+                        <li>Full map data for the Golden City.</li>
+                        <li>Shifting Tombs minigame infrastructure.</li>
+                        <li>The reputation system (City Quests).</li>
+                        <li>The Sophanem Slayer Dungeon.</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <span class="feature-title">💀 Slayer 120 Expansion</span>
+                    This revision includes the raising of the Slayer cap from 99 to 120.
+                    <ul>
+                        <li>Soul Devourers & Corrupted Creatures.</li>
+                        <li>The Magister (Assets present in cache).</li>
+                        <li>Gemstone Dragons (Hydrix, Onyx, Dragonstone).</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <span class="feature-title">🔮 Systems & Mechanics</span>
+                    <ul>
+                        <li><b>Achievement System Overhaul:</b> This revision includes the UI update that revamped the Achievement diary interfaces.</li>
+                        <li><b>Shattered Worlds:</b> The Abyssal anime-style minigame is present in this build.</li>
+                        <li><b>NXT Protocol:</b> We are utilizing the modern C++ client protocol for better performance and draw distances.</li>
+                    </ul>
+                </div>
+
+                <p><b>Current Status:</b><br>
+                We are currently stabilizing the login server and mapping the XTEA keys for the Menaphos region. As this is a hobby project based on Summer's open-source release, updates will be sporadic as I tweak the networking headers.</p>
+
+                <p><i>- Mod Dylan</i></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
