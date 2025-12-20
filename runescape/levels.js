@@ -1,64 +1,57 @@
-import * as THREE from 'three';
-import { createGround, createTree, createWall } from './assets.js';
+import { createGround, createTree, createBuilding, createInteractable } from './assets.js';
 
 export function loadLevel(scene, levelName) {
-    // 1. CLEAR SCENE (Except Player & Lights)
-    // We filter out anything that isn't a Light or the Player Group
+    // Cleanup
     for(let i = scene.children.length - 1; i >= 0; i--) {
         const obj = scene.children[i];
-        if (!obj.isLight && obj.type !== 'Group') { 
-            // Note: Player is a 'Group', but trees are also 'Groups'. 
-            // We need to be careful. In main.js we stored playerGroup.
-            // A safer way is checking UUID or name, but for this demo:
-            // We assume the Player Group has a specific child count or structure.
-            // Better yet, we just rebuild the environment layers.
-            scene.remove(obj);
-        }
-        // Remove Trees (Groups that have userData.type = tree)
-        if (obj.userData && obj.userData.type === 'tree') {
-            scene.remove(obj);
-        }
+        if (!obj.isLight && obj.type !== 'Group') scene.remove(obj);
+        if (obj.userData && (obj.userData.type === 'tree' || obj.userData.type.includes('bank') || obj.userData.type.includes('shop'))) scene.remove(obj);
     }
 
-    // 2. BUILD NEW WORLD
     if (levelName === 'lumbridge') {
-        scene.background = new THREE.Color(0x87CEEB); // Blue Sky
-        createGround(scene, 0x2d5a27); // Green Grass
+        scene.background.setHex(0x87CEEB);
+        createGround(scene, 0x2d5a27); // Grass
 
-        // Castle Walls
-        createWall(scene, 'castle', -5, 5);
-        createWall(scene, 'castle', 5, 5);
-        createWall(scene, 'castle', 0, -5, Math.PI/2);
+        // Central Castle
+        createBuilding(scene, 'lum_castle', 0, 0); 
+        
+        // General Store (North)
+        createInteractable(scene, 'shop_stall', 0, -15);
+        
+        // Bank (Top Floor of Castle - Simulated on ground nearby for ease)
+        createInteractable(scene, 'bank_booth', 0, 8);
 
-        // Oak Trees
-        createTree(scene, 'oak', -10, -10);
-        createTree(scene, 'oak', -15, 5);
-        createTree(scene, 'oak', 12, -8);
+        // Church (East)
+        createBuilding(scene, 'church', 20, 5, Math.PI/2);
+
+        // Forest (West)
+        for(let i=0; i<10; i++) createTree(scene, 'oak', -15 - Math.random()*10, Math.random()*20 - 10);
     } 
     else if (levelName === 'falador') {
-        scene.background = new THREE.Color(0xaaccff); // Lighter Sky
-        createGround(scene, 0xdddddd); // Paved White
+        scene.background.setHex(0xaaccff);
+        createGround(scene, 0xdddddd); // Paved
 
-        // White Walls
-        createWall(scene, 'white', -6, 6);
-        createWall(scene, 'white', 6, 6);
-        
-        // Park Trees
-        createTree(scene, 'oak', 0, -10);
-        createTree(scene, 'oak', 10, -10);
+        // White Castle (South)
+        createBuilding(scene, 'white_castle', 0, 15);
+
+        // East Bank (Near Park)
+        createInteractable(scene, 'bank_booth', 15, -5);
+
+        // Park (Central/East)
+        for(let i=0; i<8; i++) createTree(scene, 'oak', 15 + Math.random()*5, 5 + Math.random()*5);
     }
     else if (levelName === 'menaphos') {
-        scene.background = new THREE.Color(0xffeebb); // Yellowish Sky
+        scene.background.setHex(0xffeebb);
         createGround(scene, 0xe6c288); // Sand
 
-        // Sandstone Walls
-        createWall(scene, 'sandstone', -8, 8);
-        createWall(scene, 'sandstone', 8, 8);
-        
+        // Grand Pyramid (Far North)
+        createBuilding(scene, 'pyramid', 0, -30);
+
+        // Port District (South)
+        createInteractable(scene, 'shop_stall', 10, 10); // Fish stall
+        createInteractable(scene, 'bank_booth', -10, 10); // Port Bank
+
         // Palm Trees
-        createTree(scene, 'palm', -10, -5);
-        createTree(scene, 'palm', 10, -5);
-        createTree(scene, 'palm', 0, -12);
-        createTree(scene, 'palm', 15, 5);
+        for(let i=0; i<10; i++) createTree(scene, 'palm', Math.random()*40-20, Math.random()*20);
     }
 }
