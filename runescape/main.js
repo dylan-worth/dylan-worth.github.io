@@ -1,51 +1,97 @@
 import { initRenderer, scene, camera, renderer, playerGroup } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
-import { setupWoodcuttingInteraction } from './woodcutting.js';
 import { loadLevel } from './levels.js';
+import { addItem } from './inventory.js';
+import { openBank } from './bank.js';
+import { openShop } from './shop.js';
+import * as THREE from 'three';
 
-// Global State
-window.gameState = {
-    skills: { woodcutting: { level: 1, xp: 0 } }
-};
+// Raycaster for main interactions
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 export function initGame() {
     initRenderer();
-    
-    // Setup Inputs
     setupMovement(camera, scene, playerGroup);
-    setupWoodcuttingInteraction(scene, camera);
-
-    // Load Initial World
-    triggerTeleport('lumbridge');
-
+    
+    // Initial Load
+    loadLevel(scene, 'lumbridge');
+    
+    // Add Interaction Listener
+    window.addEventListener('pointerdown', onInteract);
+    
     animate();
 }
 
-export function triggerTeleport(locationName) {
-    const ctx = document.getElementById('context-text');
-    ctx.innerText = "Teleporting to " + locationName + "...";
-    ctx.style.color = "#cc00ff";
+function onInteract(e) {
+    if (e.target.id !== 'game-ui' && e.target.tagName !== 'CANVAS') return;
 
-    // Teleport Animation (Spin)
-    let spins = 0;
-    const interval = setInterval(() => {
-        playerGroup.rotation.y += 0.5;
-        playerGroup.scale.setScalar(1 - (spins * 0.05)); // Shrink
-        spins++;
-        if(spins > 20) {
-            clearInterval(interval);
-            
-            // ACTUAL LOAD
-            loadLevel(scene, locationName);
-            
-            // Reset Player
-            playerGroup.position.set(0, 0, 0);
-            playerGroup.scale.setScalar(1);
-            playerGroup.rotation.y = 0;
-            ctx.innerText = "Arrived at " + locationName;
-            ctx.style.color = "#00ff00";
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    for (let hit of intersects) {
+        const data = hit.object.userData;
+        const group = data.parentGroup;
+
+        if (group) {
+            // Woodcutting
+            if (group.userData.type === 'tree') {
+                chopTree(group);
+                break;
+            }
+            // Bank
+            if (group.userData.type === 'bank_booth') {
+                openBank();
+                break;
+            }
+            // Shop
+            if (group.userData.type === 'shop_stall') {
+                openShop();
+                break;
+            }
         }
-    }, 50);
+    }
+}
+
+// Woodcutting Logic
+function chopTree(treeGroup) {
+    if (treeGroup.userData.respawning) return;
+    
+    document.getElementById('context-text').innerText = "Chopping...";
+    
+    setTimeout(() => {
+        if(treeGroup.userData.respawning) return;
+        
+        // Add Log to Inventory
+        if(addItem('logs', 'Logs', 1)) {
+            document.getElementById('context-text').innerText = "You get some logs.";
+            
+            // Visual Despawn
+            treeGroup.userData.respawning = true;
+            if(treeGroup.children[1]) treeGroup.children[1].visible = false;
+            
+            setTimeout(() => {
+                if(treeGroup.children[1]) treeGroup.children[1].visible = true;
+                treeGroup.userData.respawning = false;
+            }, 3000);
+        } else {
+            document.getElementById('context-text').innerText = "Inventory full!";
+        }
+    }, 1000);
+}
+
+export function triggerTeleport(locationName) {
+    loadLevel(scene, locationName);
+    playerGroup.position.set(0, 0, 0);
+    document.getElementById('context-text').innerText = "Welcome to " + locationName;
+}
+
+export function closeWindows() {
+    document.getElementById('bank-window').style.display = 'none';
+    document.getElementById('shop-window').style.display = 'none';
 }
 
 function animate() {
