@@ -1,13 +1,17 @@
 import * as THREE from 'three';
 
-export function setupWoodcutting(scene) {
-    // Spawn 5 Trees
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+export function setupWoodcutting(scene, camera) {
+    // 1. Create Trees
     for(let i=0; i<5; i++) {
-        createTree(scene, -10 + (i*5), -5);
+        createTree(scene, -8 + (i*4), -6);
+        createTree(scene, -8 + (i*4), -12);
     }
-    
-    // Add specific click listener for trees
-    window.addEventListener('pointerdown', (e) => handleClick(e, scene));
+
+    // 2. Add Event Listener specifically for chopping
+    window.addEventListener('pointerdown', (e) => onTreeClick(e, scene, camera));
 }
 
 function createTree(scene, x, z) {
@@ -20,7 +24,6 @@ function createTree(scene, x, z) {
     );
     trunk.position.y = 1;
     trunk.castShadow = true;
-    trunk.name = "Tree Trunk"; // Used for raycasting
     
     // Leaves
     const leaves = new THREE.Mesh(
@@ -28,73 +31,81 @@ function createTree(scene, x, z) {
         new THREE.MeshStandardMaterial({ color: 0x228b22 })
     );
     leaves.position.y = 2.5;
-    leaves.name = "Tree Leaves";
     
     group.add(trunk, leaves);
     group.position.set(x, 0, z);
     
-    // Mark this group as a tree for logic
+    // Identifiers for logic
     group.userData = { type: 'tree', hp: 3, respawning: false };
+    // We add user data to children too so raycaster finds it easier
+    trunk.userData = { parentGroup: group };
+    leaves.userData = { parentGroup: group };
     
     scene.add(group);
 }
 
-function handleClick(event, scene) {
-    // Quick raycaster setup (simplified for brevity, usually shared)
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const camera = scene.children.find(c => c.isCamera) || window.gameState.player.parent.children.find(c=>c.isCamera); 
-    // Note: Ideally pass camera in. Using global from window for now as fallback:
-    
+function onTreeClick(event, scene, camera) {
+    if (event.target.id !== 'game-ui' && event.target.tagName !== 'CANVAS') return;
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    
-    // Need camera from render module really, but let's grab it via module scope in real app
-    // Assuming user clicks tree:
-    
-    // LOGIC:
-    // If intersects tree -> chopTree()
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    for (let hit of intersects) {
+        // Check if we hit a part of a tree
+        const data = hit.object.userData;
+        const group = data.parentGroup;
+
+        if (group && group.userData.type === 'tree') {
+            chopTree(group);
+            break; // Stop raycasting once we hit a tree
+        }
+    }
 }
 
-// We expose a function to call from main loop or event listener
-export function checkWoodcutting(intersectedObject) {
-    // Logic moved to Click event inside main.js or movement.js ideally
-    // But here is the specific tree logic:
-    
-    const root = intersectedObject.parent; // Group
-    if(root && root.userData.type === 'tree' && !root.userData.respawning) {
-        
-        // Update UI
-        document.getElementById('context-text').innerText = "Chopping Tree...";
-        document.getElementById('context-text').style.color = "#00ff00";
-
-        // Simulate Chop delay
-        setTimeout(() => {
-            if(root.userData.respawning) return;
-            
-            // Give XP
-            window.gameState.skills.woodcutting.xp += 25;
-            updateUI();
-            
-            // Hide Tree (Stump logic)
-            root.visible = false;
-            root.userData.respawning = true;
-            
-            // Respawn after 3 seconds
-            setTimeout(() => {
-                root.visible = true;
-                root.userData.respawning = false;
-            }, 3000);
-            
-        }, 1000);
+function chopTree(treeGroup) {
+    if (treeGroup.userData.respawning) {
+        updateContext("This tree is empty.", "#ff0000");
+        return;
     }
+
+    updateContext("Chopping...", "#00ff00");
+
+    // Simulate delay
+    setTimeout(() => {
+        if(treeGroup.userData.respawning) return;
+
+        // Success!
+        window.gameState.skills.woodcutting.xp += 25;
+        updateUI();
+        updateContext("You get some logs.", "#00ccff");
+
+        // Stump Logic (Hide leaves)
+        treeGroup.userData.respawning = true;
+        treeGroup.children[1].visible = false; // Hide leaves
+        
+        // Respawn timer
+        setTimeout(() => {
+            treeGroup.children[1].visible = true; // Show leaves
+            treeGroup.userData.respawning = false;
+        }, 3000);
+
+    }, 1000);
+}
+
+function updateContext(msg, color) {
+    const ctx = document.getElementById('context-text');
+    ctx.innerText = msg;
+    ctx.style.color = color;
 }
 
 function updateUI() {
     const xp = window.gameState.skills.woodcutting.xp;
     document.getElementById('wc-xp').innerText = xp;
     
-    // Simple level up calculation
+    // Simple level formula
     const lvl = Math.floor(1 + Math.sqrt(xp / 10));
     document.getElementById('wc-level').innerText = lvl;
 }
