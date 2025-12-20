@@ -1,100 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Open881 Forums</title>
-<style>
-  body {
-    background: #081218;
-    color: #bfd0d9;
-    font-family: 'Trebuchet MS', sans-serif;
-    margin: 0;
-    padding: 50px;
-    animation: natureFadeIn 1.5s ease-out;
-  }
-
-  .forum-container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #0f1e28;
-    border: 1px solid #1f3645;
-  }
-
-  .forum-header {
-    background: #152936;
-    padding: 15px;
-    border-bottom: 2px solid #2d4c5e;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .category-bar {
-    background: #0b161d;
-    padding: 10px;
-    font-size: 12px;
-    color: #4a6c82;
-    text-transform: uppercase;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .thread {
-    display: flex;
-    padding: 15px;
-    border-bottom: 1px solid #1f3645;
-    align-items: center;
-  }
-  .thread:hover { background: #152530; }
-
-  .thread-icon { width: 30px; font-size: 20px; text-align: center; margin-right: 15px; }
-  .thread-title { color: #00aaff; font-weight: bold; font-size: 15px; text-decoration: none; }
-  .thread-meta { font-size: 11px; color: #5a7b8f; margin-top: 4px; }
-  
-  .sticky { color: #ffd700; }
-
-  @keyframes natureFadeIn { from { filter: hue-rotate(-90deg); opacity: 0; } to { filter: hue-rotate(0deg); opacity: 1; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open881 - Forums</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .thread-row {
+            padding: 15px;
+            border-bottom: 1px solid var(--rs-border);
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+        .thread-row:hover { background: rgba(255,255,255,0.05); }
+        .thread-icon { font-size: 20px; width: 40px; text-align: center; }
+        .thread-info { flex: 1; }
+        .thread-meta { font-size: 0.75rem; color: #5a7b8f; margin-top: 4px; }
+    </style>
 </head>
 <body>
 
-  <div class="forum-container">
-    <div class="forum-header">
-      <span style="font-size: 20px; color: #fff;">Open881 Community</span>
-      <a href="index.html" style="color:#5a7b8f; text-decoration:none; font-size:12px;">Log Out</a>
-    </div>
+<div class="interface-window">
+    <header>
+        <h1>Community Forums</h1>
+        <a href="index.html" style="font-size:0.8rem;">← Back</a>
+    </header>
 
-    <div class="category-bar">
-      <span>General Discussion</span>
-      <span>QFC: 14-15-881-2017</span>
-    </div>
+    <div class="content-area" style="flex-direction: column; padding: 0;">
+        <div style="padding:10px; background:#0b161d; font-size:0.8rem; font-weight:bold; color:#4a6c82; display:flex; justify-content:space-between;">
+            <span>General Discussion</span>
+            <span>QFC: 881-2017</span>
+        </div>
 
-    <div class="thread">
-      <div class="thread-icon sticky">📌</div>
-      <div>
-        <a href="#" class="thread-title sticky">Welcome to the Open881 Forums</a>
-        <div class="thread-meta">By <b>Mod Dylan</b> | 20-Dec-2025</div>
-      </div>
-    </div>
+        <div class="thread-row">
+            <div class="thread-icon">📌</div>
+            <div class="thread-info">
+                <a href="#" style="color:var(--rs-gold); font-weight:bold;">READ FIRST: Server Rules</a>
+                <div class="thread-meta">By <b>Admin</b> | 20-Dec-2025</div>
+            </div>
+        </div>
 
-    <div class="thread">
-      <div class="thread-icon">⚔️</div>
-      <div>
-        <a href="#" class="thread-title">Server Update: Revision 881 Stability</a>
-        <div class="thread-meta">By <b>Dev Team</b> | 15 mins ago</div>
-      </div>
-    </div>
+        <div class="thread-row">
+            <div class="thread-icon">⚔️</div>
+            <div class="thread-info">
+                <a href="#" style="font-weight:bold;">Development Update: Mobile Support</a>
+                <div class="thread-meta">By <b>Dev Team</b> | 1 hour ago</div>
+            </div>
+        </div>
 
-    <div class="thread">
-      <div class="thread-icon">🍑</div>
-      <div>
-        <a href="#" class="thread-title">My Bones just turned into Peaches?</a>
-        <div class="thread-meta">By <b>NoobSlayer</b> | 1 min ago</div>
-      </div>
+        <div class="thread-row">
+            <div class="thread-icon">🍑</div>
+            <div class="thread-info">
+                <a href="#">Bones to Peaches Glitch?</a>
+                <div class="thread-meta">By <b>User123</b> | 5 mins ago</div>
+            </div>
+        </div>
+        
+        <div class="thread-row">
+            <div class="thread-icon">❓</div>
+            <div class="thread-info">
+                <a href="#">How to compile the source?</a>
+                <div class="thread-meta">By <b>JavaNewbie</b> | Yesterday</div>
+            </div>
+        </div>
     </div>
-
-  </div>
+</div>
 
 </body>
 </html>
