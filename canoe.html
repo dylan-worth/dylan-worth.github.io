@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RuneScape Canoe Animation</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', monospace; }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffff00; /* RS Yellow */
+            text-shadow: 2px 2px #000;
+            pointer-events: none;
+        }
+        button {
+            pointer-events: auto;
+            background: #5b5b5b;
+            color: #fff;
+            border: 2px solid #383838;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+        button:hover { background: #757575; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h1>Canoe Station</h1>
+    <p>Destination: Deep Wilderness</p>
+    <button onclick="startTravel()">TRAVEL</button>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// --- 1. SETUP THE SCENE (GIELINOR) ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB); // Sky blue
+scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+// Isometric-ish view similar to OSRS camera
+camera.position.set(10, 15, 10);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(10, 20, 10);
+scene.add(dirLight);
+
+// --- 2. CREATE THE RIVER LUM ---
+// We use a Spline Curve to create the winding river path
+const riverPath = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-8, 0, 10),  // Lumbridge (Start)
+    new THREE.Vector3(-2, 0, 5),   // Champion's Guild
+    new THREE.Vector3(2, 0, -2),   // Barbarian Village
+    new THREE.Vector3(0, 0, -8),   // Edgeville
+    new THREE.Vector3(5, 0, -15)   // Wilderness (End)
+]);
+
+// Create the River Water Geometry
+const tubeGeometry = new THREE.TubeGeometry(riverPath, 64, 1.5, 8, false);
+const waterMaterial = new THREE.MeshLambertMaterial({ color: 0x0066cc });
+const riverMesh = new THREE.Mesh(tubeGeometry, waterMaterial);
+// Lower slightly so the "land" covers the bottom half
+riverMesh.position.y = -0.2; 
+scene.add(riverMesh);
+
+// --- 3. CREATE THE TERRAIN ---
+// A simple green plane for the grass
+const planeGeo = new THREE.PlaneGeometry(100, 100);
+const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e8b57 }); // RS Green
+const terrain = new THREE.Mesh(planeGeo, grassMat);
+terrain.rotation.x = -Math.PI / 2;
+terrain.position.y = -0.5;
+scene.add(terrain);
+
+// --- 4. CREATE THE CANOE ---
+// A simple "Waka" style canoe (hollowed log)
+const canoeGroup = new THREE.Group();
+
+// Main log body
+const canoeGeo = new THREE.BoxGeometry(0.8, 0.4, 2.5);
+const woodMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // SaddleBrown
+const canoeBody = new THREE.Mesh(canoeGeo, woodMat);
+canoeGroup.add(canoeBody);
+
+// A little "seat" inside
+const seatGeo = new THREE.BoxGeometry(0.6, 0.1, 0.5);
+const seatMat = new THREE.MeshStandardMaterial({ color: 0x5C4033 });
+const seat = new THREE.Mesh(seatGeo, seatMat);
+seat.position.y = 0.2;
+canoeGroup.add(seat);
+
+scene.add(canoeGroup);
+
+// --- 5. ANIMATION LOGIC ---
+let progress = 0;
+let isTraveling = false;
+const speed = 0.001; // How fast the canoe moves
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (isTraveling) {
+        progress += speed;
+        if (progress > 1) {
+            progress = 1;
+            isTraveling = false; // Arrived
+            alert("You have arrived at the Wilderness!");
+        }
+
+        // Get the position on the curve based on progress (0 to 1)
+        const position = riverPath.getPointAt(progress);
+        canoeGroup.position.copy(position);
+
+        // Make the canoe face the direction it is moving
+        const tangent = riverPath.getTangentAt(progress).normalize();
+        const lookAtPos = position.clone().add(tangent);
+        canoeGroup.lookAt(lookAtPos);
+        
+        // Slight bobbing effect for water realism
+        canoeGroup.position.y = Math.sin(Date.now() * 0.005) * 0.1;
+
+        // Camera Follow (Optional - gives it a cinematic feel)
+        camera.position.x = position.x + 10;
+        camera.position.z = position.z + 10;
+        camera.lookAt(position);
+    } else {
+        // Idle bobbing at start
+        if(progress === 0) {
+            const startPos = riverPath.getPointAt(0);
+            canoeGroup.position.copy(startPos);
+            // Look down river
+            const startTan = riverPath.getTangentAt(0.01);
+            canoeGroup.lookAt(startPos.clone().add(startTan));
+        }
+    }
+
+    renderer.render(scene, camera);
+}
+
+// Connect HTML button to JS
+window.startTravel = function() {
+    if (progress >= 1) progress = 0; // Reset if already at end
+    isTraveling = true;
+};
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Start the loop
+animate();
+
+</script>
+</body>
+</html>
