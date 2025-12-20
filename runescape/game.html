@@ -2,431 +2,285 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Open881 - 3D Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Open881 3D Mobile</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Trebuchet MS', sans-serif; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: 'Trebuchet MS', sans-serif; background: #000; touch-action: none; }
         
-        /* --- UI OVERLAYS (RS3 Style) --- */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between;
+        /* UI LAYERS */
+        #game-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* MOBILE SIDEBAR */
+        #sidebar-toggle {
+            position: absolute; top: 10px; right: 10px; pointer-events: auto;
+            background: #1a2a36; border: 2px solid #5a7b8f; color: #ffd700;
+            width: 40px; height: 40px; border-radius: 5px; font-size: 24px;
+            display: flex; align-items: center; justify-content: center; z-index: 20;
         }
 
-        /* Top Bar */
-        .top-bar {
-            background: rgba(8, 30, 43, 0.9); border-bottom: 2px solid #3c4b57;
-            padding: 10px; color: #ffd700; font-weight: bold; pointer-events: auto;
-            display: flex; gap: 15px;
+        #mobile-sidebar {
+            position: absolute; top: 0; right: 0; width: 250px; height: 100%;
+            background: rgba(8, 30, 43, 0.95); border-left: 3px solid #3c4b57;
+            transform: translateX(100%); transition: transform 0.3s ease;
+            pointer-events: auto; z-index: 10; display: flex; flex-direction: column;
         }
+        #mobile-sidebar.open { transform: translateX(0); }
+
+        .panel-header { background: #152936; padding: 15px; color: #ffd700; font-weight: bold; border-bottom: 1px solid #5a7b8f; }
+        
+        .spell-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
+        .spell-icon {
+            background: #2b3945; border: 1px solid #5a7b8f; aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; border-radius: 5px;
+        }
+        .spell-icon:hover { border-color: #00ccff; background: #3c4b57; }
+
+        .tele-list { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .tele-btn {
             background: #1a2a36; border: 1px solid #00ccff; color: #00ccff;
-            padding: 5px 15px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
-        }
-        .tele-btn:hover { background: #00ccff; color: #000; box-shadow: 0 0 10px #00ccff; }
-
-        /* Action Bar */
-        .action-bar {
-            align-self: center; margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.6); border: 1px solid #3c4b57;
-            display: flex; gap: 5px; padding: 5px; pointer-events: auto;
-        }
-        .slot {
-            width: 40px; height: 40px; background: #2b3945; border: 1px solid #5a7b8f;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            position: relative; font-size: 20px;
-        }
-        .slot:hover { border-color: #ffd700; }
-        .slot span { position: absolute; bottom: 2px; right: 2px; font-size: 8px; color: #fff; }
-
-        /* Tooltip / Context */
-        #context-menu {
-            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
-            color: #00ff00; text-shadow: 1px 1px 0 #000; font-weight: bold; pointer-events: none;
+            padding: 10px; text-align: center; font-weight: bold;
         }
 
-        /* Health Bar */
-        #hp-bar {
-            position: absolute; top: 10px; right: 10px; width: 200px; height: 20px;
-            background: #330000; border: 1px solid #5a7b8f;
+        /* CONTEXT TEXT */
+        #context-text {
+            position: absolute; top: 10px; left: 10px; 
+            color: #00ff00; font-weight: bold; text-shadow: 1px 1px #000;
+            font-size: 14px; pointer-events: none;
         }
-        #hp-fill { width: 100%; height: 100%; background: #00ff00; transition: width 0.2s; }
     </style>
+    
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div class="top-bar">
-            <span>Open881 Client</span>
-            <button class="tele-btn" onclick="window.game.teleport('home')">🏠 Menaphos</button>
-            <button class="tele-btn" onclick="window.game.teleport('forest')">🌲 Lumbridge</button>
-            <button class="tele-btn" onclick="window.game.teleport('ice')">❄️ Senntisten</button>
-        </div>
+    <div id="game-ui">
+        <div id="context-text">Tap to move...</div>
         
-        <div id="context-menu">Welcome to Gielinor</div>
+        <div id="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+        
+        <div id="mobile-sidebar">
+            <div class="panel-header">Spellbook</div>
+            <div class="spell-grid">
+                <div class="spell-icon" onclick="game.cast('home')">🏠</div>
+                <div class="spell-icon" onclick="game.cast('alch')">💰</div>
+                <div class="spell-icon" onclick="game.cast('barrage')">❄️</div>
+                <div class="spell-icon" onclick="game.cast('veng')">💀</div>
+                <div class="spell-icon" onclick="game.cast('heal')">❤️</div>
+                <div class="spell-icon" onclick="game.cast('farm')">🌱</div>
+            </div>
 
-        <div id="hp-bar"><div id="hp-fill"></div></div>
-
-        <div class="action-bar">
-            <div class="slot" onclick="window.game.castSpell('alch')">💰<span>Alch</span></div>
-            <div class="slot" onclick="window.game.castSpell('barrage')">❄️<span>Barrage</span></div>
-            <div class="slot" onclick="window.game.castSpell('veng')">💀<span>Veng</span></div>
-            <div class="slot" onclick="window.game.castSpell('heal')">🌙<span>Heal</span></div>
+            <div class="panel-header">Teleports</div>
+            <div class="tele-list">
+                <div class="tele-btn" onclick="game.teleport('lumbridge')">Lumbridge</div>
+                <div class="tele-btn" onclick="game.teleport('menaphos')">Menaphos</div>
+                <div class="tele-btn" onclick="game.teleport('falador')">Falador</div>
+            </div>
         </div>
     </div>
 
+    <script>
+        function toggleSidebar() {
+            document.getElementById('mobile-sidebar').classList.toggle('open');
+        }
+    </script>
+
     <script type="module">
         import * as THREE from 'three';
+        import { createBuilding, getColliders } from './buildings.js';
+        import { createTree } from './foliage.js';
+        import { loadLumbridge } from './lumbridge.js';
+        import { loadMenaphos } from './menaphos.js';
+        import { loadFalador } from './falador.js';
 
-        class Game {
+        class GameEngine {
             constructor() {
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
-                this.scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+                this.scene.background = new THREE.Color(0x87CEEB);
+                this.scene.fog = new THREE.Fog(0x87CEEB, 20, 80);
 
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.set(0, 15, 15);
-                this.camera.lookAt(0, 0, 0);
-
                 this.renderer = new THREE.WebGLRenderer({ antialias: true });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.shadowMap.enabled = true;
                 document.body.appendChild(this.renderer.domElement);
 
-                // Inputs
+                // --- PLAYER SETUP ---
+                this.player = this.createPlayerMesh();
+                this.scene.add(this.player);
+                this.targetPos = new THREE.Vector3(0, 0, 0);
+                this.isMoving = false;
+                this.moveSpeed = 0.15;
+
+                // --- INPUTS ---
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2();
-                
-                // Game State
-                this.player = null;
-                this.targetPos = new THREE.Vector3();
-                this.isMoving = false;
-                this.mobs = [];
-                this.farms = [];
-                this.particles = [];
 
-                this.init();
-                this.animate();
-            }
+                // --- LOAD WORLD ---
+                this.initLights();
+                this.loadLocation('lumbridge'); // Start location
 
-            init() {
-                // Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-                this.scene.add(ambient);
-                const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                dirLight.position.set(50, 100, 50);
-                dirLight.castShadow = true;
-                this.scene.add(dirLight);
-
-                // --- WORLD GENERATION ---
-                this.createTerrain();
-                this.player = this.createHumanoid(0x8B4513, 0xCCCCCC); // Brown skin, Grey Armor
-                this.scene.add(this.player);
-
-                // Mobs (Not Cylinders!)
-                this.createMob('Goblin', -10, -10, 0x00ff00);
-                this.createMob('Demon', 10, -15, 0xff0000);
-                
-                // Farming Plots
-                this.createFarmPlot(-5, 5);
-                this.createFarmPlot(5, 5);
-
-                // Event Listeners
+                // Listeners
+                window.addEventListener('pointerdown', (e) => this.onPointerDown(e));
                 window.addEventListener('resize', () => this.onResize());
-                window.addEventListener('mousedown', (e) => this.onClick(e));
-                
-                // Expose to window for UI buttons
-                window.game = this; 
+
+                this.animate();
+                window.game = this; // Expose for UI
             }
 
-            // --- ASSET GENERATION (Procedural Models) ---
-            createHumanoid(skinColor, armorColor) {
+            createPlayerMesh() {
                 const group = new THREE.Group();
-
-                // Head
-                const headGeo = new THREE.BoxGeometry(0.8, 0.9, 0.8);
-                const headMat = new THREE.MeshStandardMaterial({ color: skinColor });
-                const head = new THREE.Mesh(headGeo, headMat);
-                head.position.y = 3.5;
-                head.castShadow = true;
-                group.add(head);
-
-                // Torso
-                const bodyGeo = new THREE.BoxGeometry(1.2, 1.5, 0.6);
-                const bodyMat = new THREE.MeshStandardMaterial({ color: armorColor });
-                const body = new THREE.Mesh(bodyGeo, bodyMat);
-                body.position.y = 2.2;
+                // Body
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), new THREE.MeshStandardMaterial({ color: 0x555555 })); // Platebody
+                body.position.y = 1.6;
                 body.castShadow = true;
                 group.add(body);
-
-                // Arms
-                const armGeo = new THREE.BoxGeometry(0.35, 1.2, 0.35);
-                const armL = new THREE.Mesh(armGeo, headMat);
-                armL.position.set(-0.8, 2.2, 0);
-                group.add(armL);
-                
-                const armR = new THREE.Mesh(armGeo, headMat);
-                armR.position.set(0.8, 2.2, 0);
-                group.add(armR);
-
-                // Legs
-                const legGeo = new THREE.BoxGeometry(0.4, 1.5, 0.4);
-                const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 }); // Pants
-                const legL = new THREE.Mesh(legGeo, legMat);
-                legL.position.set(-0.3, 0.75, 0);
-                group.add(legL);
-
-                const legR = new THREE.Mesh(legGeo, legMat);
-                legR.position.set(0.3, 0.75, 0);
-                group.add(legR);
-
+                // Head
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.4), new THREE.MeshStandardMaterial({ color: 0xffccaa })); // Skin
+                head.position.y = 2.5;
+                group.add(head);
+                // Cape
+                const cape = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.0, 0.1), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+                cape.position.set(0, 1.6, -0.3);
+                group.add(cape);
                 return group;
             }
 
-            createMob(type, x, z, color) {
-                const mob = this.createHumanoid(color, 0x222222);
-                mob.position.set(x, 0, z);
+            initLights() {
+                const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambient);
+                const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+                sun.position.set(50, 100, 50);
+                sun.castShadow = true;
+                this.scene.add(sun);
+            }
+
+            loadLocation(name) {
+                // Clear old world objects (except player/lights)
+                // (Simplified cleanup for demo)
+                this.scene.children = this.scene.children.filter(c => c === this.player || c.type.includes('Light'));
+                this.initLights(); // Re-add lights if wiped
+
+                if(name === 'lumbridge') loadLumbridge(this.scene);
+                if(name === 'menaphos') loadMenaphos(this.scene);
+                if(name === 'falador') loadFalador(this.scene);
+
+                // Reset player
+                this.player.position.set(0, 0, 0);
+                this.targetPos.set(0, 0, 0);
+                this.isMoving = false;
                 
-                // Scaling for monster variety
-                if(type === 'Demon') mob.scale.set(1.5, 1.5, 1.5); // Big
-                if(type === 'Goblin') mob.scale.set(0.7, 0.7, 0.7); // Small
-
-                mob.userData = { type: type, hp: 100, maxHp: 100 };
-                this.scene.add(mob);
-                this.mobs.push(mob);
-            }
-
-            createTerrain() {
-                // Menaphos (Sand)
-                const sandGeo = new THREE.PlaneGeometry(100, 100);
-                const sandMat = new THREE.MeshStandardMaterial({ color: 0xe6c288 });
-                const sand = new THREE.Mesh(sandGeo, sandMat);
-                sand.rotation.x = -Math.PI / 2;
-                sand.receiveShadow = true;
-                this.scene.add(sand);
-
-                // Lumbridge (Grass)
-                const grassGeo = new THREE.PlaneGeometry(50, 50);
-                const grassMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
-                const grass = new THREE.Mesh(grassGeo, grassMat);
-                grass.rotation.x = -Math.PI / 2;
-                grass.position.set(50, 0.01, 50); // Offset
-                this.scene.add(grass);
-
-                // Ice (White)
-                const iceGeo = new THREE.PlaneGeometry(50, 50);
-                const iceMat = new THREE.MeshStandardMaterial({ color: 0xdfffff, roughness: 0.1 });
-                const ice = new THREE.Mesh(iceGeo, iceMat);
-                ice.rotation.x = -Math.PI / 2;
-                ice.position.set(-50, 0.01, 50);
-                this.scene.add(ice);
-            }
-
-            createFarmPlot(x, z) {
-                const plotGeo = new THREE.PlaneGeometry(3, 3);
-                const plotMat = new THREE.MeshStandardMaterial({ color: 0x3d2817 }); // Soil
-                const plot = new THREE.Mesh(plotGeo, plotMat);
-                plot.rotation.x = -Math.PI / 2;
-                plot.position.set(x, 0.02, z);
-                
-                plot.userData = { isFarm: true, stage: 0, mesh: plot };
-                this.scene.add(plot);
-                this.farms.push(plot);
-            }
-
-            // --- GAMEPLAY MECHANICS ---
-
-            teleport(location) {
-                this.createTeleportEffect(this.player.position);
-                
-                setTimeout(() => {
-                    if(location === 'home') this.player.position.set(0, 0, 0);
-                    if(location === 'forest') this.player.position.set(50, 0, 50);
-                    if(location === 'ice') this.player.position.set(-50, 0, 50);
-                    
-                    this.targetPos.copy(this.player.position); // Stop moving
-                    this.updateContext(`Teleported to ${location}`);
-                }, 1000);
-            }
-
-            castSpell(type) {
-                const pPos = this.player.position;
-                if(type === 'alch') {
-                    this.spawnParticles(pPos, 0xffd700, 20); // Gold
-                    this.updateContext("Cast High Level Alchemy");
-                }
-                if(type === 'barrage') {
-                    this.spawnParticles(pPos, 0x00ffff, 50); // Ice Square
-                    this.updateContext("Cast Ice Barrage");
-                }
-                if(type === 'veng') {
-                    this.spawnParticles(pPos, 0xff0000, 10); // Red Skull vibe
-                    this.updateContext("Taste Vengeance!");
-                }
-                if(type === 'heal') {
-                    this.spawnParticles(pPos, 0xffffff, 30); // White/Pink
-                    this.updateContext("Cast Heal Other");
-                }
-            }
-
-            growFarm(plot) {
-                plot.userData.stage++;
-                if(plot.userData.stage > 3) plot.userData.stage = 0; // Reset
-
-                const stage = plot.userData.stage;
-                if(stage === 0) {
-                    plot.material.color.setHex(0x3d2817); // Dirt
-                    this.updateContext("Patched cleared.");
-                } else if (stage === 1) {
-                    plot.material.color.setHex(0x00aa00); // Seeds
-                    this.updateContext("Seeds planted.");
-                } else if (stage === 2) {
-                    // Add a simple plant mesh if you want, changing color for now
-                    plot.material.color.setHex(0x00ff00); // Grown
-                    this.updateContext("Crops growing...");
+                // Update Fog color based on location
+                if(name === 'menaphos') {
+                    this.scene.background.setHex(0xffeebb);
+                    this.scene.fog.color.setHex(0xffeebb);
                 } else {
-                    plot.material.color.setHex(0xffaa00); // Harvest
-                    this.updateContext("Harvested crops! +XP");
+                    this.scene.background.setHex(0x87CEEB);
+                    this.scene.fog.color.setHex(0x87CEEB);
                 }
             }
 
-            // --- INTERACTION ---
+            teleport(loc) {
+                this.loadLocation(loc);
+                document.getElementById('sidebar-toggle').click(); // Close menu
+                document.getElementById('context-text').innerText = "Teleported to " + loc;
+            }
 
-            onClick(event) {
-                if(event.target.closest('.tele-btn') || event.target.closest('.slot')) return;
+            cast(spell) {
+                document.getElementById('context-text').innerText = "Casting " + spell + "...";
+                // Add particle logic here
+            }
+
+            onPointerDown(event) {
+                // Ignore clicks on UI
+                if (event.target.id !== 'game-ui' && event.target.tagName !== 'CANVAS') return;
 
                 this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
                 this.raycaster.setFromCamera(this.mouse, this.camera);
-                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+                const intersects = this.raycaster.intersectObjects(this.scene.children, true); // True = recursive
 
-                if (intersects.length > 0) {
-                    const hit = intersects[0];
-                    const obj = hit.object;
-
-                    // Check for Mob
-                    const parent = obj.parent;
-                    if(parent && parent.userData.type) {
-                        this.spawnParticles(parent.position, 0xff0000, 5); // Blood splat
-                        this.updateContext(`Attacking ${parent.userData.type}`);
-                        return;
-                    }
-
-                    // Check for Farm
-                    if(obj.userData.isFarm) {
-                        this.growFarm(obj);
-                        return;
-                    }
-
-                    // Move Player
+                for (let hit of intersects) {
+                    // Ignore hitting the player itself
+                    if (hit.object.parent === this.player) continue;
+                    
+                    // Clicked Ground?
                     this.targetPos.set(hit.point.x, 0, hit.point.z);
                     this.isMoving = true;
-                    this.createMarker(hit.point);
+                    this.spawnMarker(hit.point);
+                    break;
                 }
             }
 
-            createMarker(pos) {
-                const geo = new THREE.RingGeometry(0.2, 0.3, 8);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
-                const marker = new THREE.Mesh(geo, mat);
-                marker.rotation.x = -Math.PI / 2;
+            spawnMarker(pos) {
+                const marker = new THREE.Mesh(
+                    new THREE.RingGeometry(0.2, 0.3, 8), 
+                    new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide })
+                );
+                marker.rotation.x = -Math.PI/2;
                 marker.position.copy(pos);
                 marker.position.y = 0.1;
                 this.scene.add(marker);
                 setTimeout(() => this.scene.remove(marker), 500);
             }
 
-            createTeleportEffect(pos) {
-                // Purple spiral
-                const geometry = new THREE.CylinderGeometry(0.5, 0.5, 10, 8, 1, true);
-                const material = new THREE.MeshBasicMaterial({ 
-                    color: 0xaa00ff, 
-                    transparent: true, 
-                    opacity: 0.5, 
-                    side: THREE.DoubleSide 
-                });
-                const beam = new THREE.Mesh(geometry, material);
-                beam.position.copy(pos);
-                beam.position.y = 5;
-                this.scene.add(beam);
-
-                // Animate and remove
-                const startTime = Date.now();
-                const animateBeam = () => {
-                    const elapsed = Date.now() - startTime;
-                    if(elapsed > 1000) {
-                        this.scene.remove(beam);
-                        return;
-                    }
-                    beam.rotation.y += 0.2;
-                    beam.scale.x -= 0.01;
-                    beam.scale.z -= 0.01;
-                    requestAnimationFrame(animateBeam);
-                }
-                animateBeam();
-            }
-
-            spawnParticles(pos, color, count) {
-                const geo = new THREE.BufferGeometry();
-                const positions = [];
-                for(let i=0; i<count; i++) {
-                    positions.push((Math.random()-0.5)*2, Math.random()*2, (Math.random()-0.5)*2);
-                }
-                geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                const mat = new THREE.PointsMaterial({ color: color, size: 0.2 });
-                const points = new THREE.Points(geo, mat);
-                points.position.copy(pos);
-                this.scene.add(points);
+            checkCollision(nextPos) {
+                const colliders = getColliders(); // From buildings.js
+                // Simple box check
+                const playerBox = new THREE.Box3().setFromCenterAndSize(nextPos, new THREE.Vector3(1, 2, 1));
                 
-                setTimeout(() => this.scene.remove(points), 500);
-            }
-
-            updateContext(text) {
-                document.getElementById('context-menu').innerText = text;
-            }
-
-            // --- LOOP ---
-            onResize() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                for(let box of colliders) {
+                    if(playerBox.intersectsBox(box)) return true; // Collision detected
+                }
+                return false;
             }
 
             animate() {
                 requestAnimationFrame(() => this.animate());
 
-                // Player Movement
-                if(this.isMoving && this.player) {
+                if (this.isMoving) {
                     const dir = new THREE.Vector3().subVectors(this.targetPos, this.player.position);
                     const dist = dir.length();
-                    
-                    if(dist < 0.2) {
+
+                    if (dist < 0.2) {
                         this.isMoving = false;
+                        this.player.position.y = 0; // Reset height
                     } else {
                         dir.normalize();
-                        this.player.position.add(dir.multiplyScalar(0.1)); // Speed
-                        this.player.lookAt(this.targetPos.x, 3.5, this.targetPos.z);
+                        const step = dir.multiplyScalar(this.moveSpeed);
+                        const nextPos = this.player.position.clone().add(step);
+
+                        if(!this.checkCollision(nextPos)) {
+                            this.player.position.copy(nextPos);
+                            this.player.lookAt(this.targetPos.x, this.player.position.y, this.targetPos.z);
+                            
+                            // Bobbing Animation (Walking)
+                            const time = Date.now() * 0.01;
+                            this.player.position.y = Math.abs(Math.sin(time)) * 0.2; 
+                        } else {
+                            this.isMoving = false; // Stop if hit wall
+                        }
                     }
                     
-                    // Camera Follow
-                    this.camera.position.x = this.player.position.x;
-                    this.camera.position.z = this.player.position.z + 15;
+                    // Smooth Camera Follow
+                    this.camera.position.lerp(new THREE.Vector3(this.player.position.x, 15, this.player.position.z + 12), 0.1);
                     this.camera.lookAt(this.player.position);
                 }
-                
+
                 this.renderer.render(this.scene, this.camera);
+            }
+            
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
             }
         }
 
-        // Start Game
-        new Game();
+        new GameEngine();
     </script>
 </body>
 </html>
