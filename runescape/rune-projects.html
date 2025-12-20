@@ -1,135 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Projects - Wilderness</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: #1a1a1a;
-            color: #ccc;
-            font-family: 'Verdana', sans-serif;
-            overflow: hidden; /* Prevents scroll bars during anim */
-            height: 100vh;
-        }
+<meta charset="UTF-8">
+<title>Dylan's Project Log - Lvl 50 Wilderness</title>
+<style>
+  /* --- 2000s MMO THEME --- */
+  body {
+    background-color: #0d0d0d;
+    background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #d1c4a9;
+    font-family: 'Verdana', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+  }
+  
+  /* The Main Wrapper (This is what shrinks) */
+  .site-wrapper {
+    width: 900px;
+    margin: 20px auto;
+    background-color: #2b2317;
+    border: 3px outset #5d5648;
+    box-shadow: 0 0 20px #000;
+  }
 
-        /* --- UI LAYOUT --- */
-        .game-ui {
-            padding: 20px;
-            text-align: center;
-            transition: transform 1s ease;
-        }
+  /* Header */
+  header {
+    background: #400808; /* Dark Red for Wilderness Danger */
+    border-bottom: 3px solid #5d5648;
+    padding: 15px;
+    text-align: center;
+  }
+  h1 { margin: 0; font-family: 'Georgia', serif; color: #ff3333; text-shadow: 2px 2px 0 #000; letter-spacing: 2px; }
+  .subtitle { font-size: 10px; color: #aaa; }
 
-        .osrs-btn {
-            background: #5d5648;
-            border: 2px solid #383023;
-            color: #ff981f;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none; /* Behaves like a link */
-            display: inline-block;
-            box-shadow: inset 2px 2px 0px #7a715f, inset -2px -2px 0px #2b2317;
-        }
-        .osrs-btn:hover {
-            color: white;
-        }
+  /* Layout Columns */
+  .layout { display: flex; }
+  
+  /* Sidebar */
+  aside {
+    width: 180px;
+    background: #1e1810;
+    border-right: 2px solid #5d5648;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .menu-box {
+    border: 2px inset #383023;
+    background: #2b2317;
+    margin-bottom: 15px;
+    padding: 5px;
+  }
+  .menu-header {
+    background: #383023;
+    color: #ff981f;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 3px;
+    border: 1px solid #5d5648;
+  }
 
-        /* --- TELEPORT ANIMATION CSS --- */
-        .teleport-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 800px;
-            z-index: 1000;
-        }
+  /* Navigation Links */
+  .nav-link {
+    display: block;
+    color: #d1c4a9;
+    text-decoration: none;
+    padding: 5px;
+    border-bottom: 1px solid #383023;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .nav-link:hover { color: #fff; background: #443a2a; }
 
-        .rune-circle {
-            position: absolute;
-            bottom: 15%; 
-            width: 250px; height: 250px;
-            border: 5px solid #00d2ff;
-            border-radius: 50%;
-            box-shadow: 0 0 30px #00d2ff, inset 0 0 20px #00d2ff;
-            transform: rotateX(70deg) scale(0);
-            opacity: 0;
-        }
+  /* Special Magic Button */
+  .teleport-btn {
+    color: #00d2ff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #00d2ff;
+  }
 
-        .teleport-beam {
-            position: absolute;
-            bottom: 15%;
-            width: 80px; height: 0;
-            background: linear-gradient(to top, rgba(0, 210, 255, 0.7), transparent);
-            border-left: 2px solid rgba(255,255,255,0.5);
-            border-right: 2px solid rgba(255,255,255,0.5);
-            filter: blur(2px);
-        }
+  /* Main Content */
+  main {
+    flex: 1;
+    padding: 20px;
+    background-image: radial-gradient(circle at center, #362d20 0%, #2b2317 100%);
+  }
 
-        /* Animation Classes */
-        .active-circle { animation: spinCircle 3s ease-in-out forwards; }
-        .active-beam { animation: shootBeam 3s ease-in-out forwards; }
-        
-        /* The entire body shrinks into the distance */
-        .body-shrink { animation: shrinkWorld 1.5s ease-in forwards 1.2s; }
+  .quest-log {
+    border: 2px ridge #7a715f;
+    background: #241e14;
+    padding: 10px;
+  }
 
-        @keyframes spinCircle {
-            0% { transform: rotateX(70deg) scale(0) rotate(0deg); opacity: 0; }
-            20% { transform: rotateX(70deg) scale(1) rotate(45deg); opacity: 1; }
-            80% { transform: rotateX(70deg) scale(1) rotate(360deg); opacity: 1; }
-            100% { transform: rotateX(70deg) scale(0) rotate(720deg); opacity: 0; }
-        }
+  h2 { color: #ff981f; border-bottom: 1px solid #5d5648; padding-bottom: 5px; font-size: 16px; }
 
-        @keyframes shootBeam {
-            0% { height: 0; opacity: 0; }
-            30% { height: 0; opacity: 0; }
-            40% { height: 100vh; opacity: 1; }
-            90% { height: 100vh; opacity: 1; }
-            100% { height: 0; opacity: 0; bottom: 100%; }
-        }
+  .quest-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #383023;
+    background: #1e1810;
+  }
+  .quest-status { float: right; font-size: 10px; font-weight: bold; }
+  .status-wip { color: yellow; }
+  .status-done { color: #00ff00; }
 
-        @keyframes shrinkWorld {
-            0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(0.1); filter: brightness(20); background: white; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-    </style>
+  /* Footer */
+  footer {
+    background: #1e1810;
+    border-top: 3px solid #5d5648;
+    padding: 5px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+  }
+
+  /* --- TELEPORT FX CSS (Overlay) --- */
+  .teleport-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; display: flex; justify-content: center; align-items: center;
+    perspective: 1000px; z-index: 9999;
+  }
+  .rune-circle {
+    position: absolute; bottom: 10%; width: 300px; height: 300px;
+    border: 4px solid #00d2ff; border-radius: 50%;
+    box-shadow: 0 0 30px #00d2ff, inset 0 0 30px #00d2ff;
+    transform: rotateX(70deg) scale(0); opacity: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="40" stroke="%2300d2ff" fill="none" stroke-width="2"/></svg>');
+  }
+  .beam {
+    position: absolute; bottom: 10%; width: 100px; height: 0;
+    background: linear-gradient(to top, rgba(0, 210, 255, 0.8), transparent);
+    border-left: 2px solid white; border-right: 2px solid white;
+    filter: blur(4px);
+  }
+
+  /* Animations */
+  .anim-circle { animation: spin 3s ease-in-out forwards; }
+  .anim-beam { animation: shoot 3s ease-in-out forwards; }
+  .anim-shrink { animation: shrink 1.5s ease-in forwards 1.2s; transform-origin: center 80%; }
+
+  @keyframes spin {
+    0% { transform: rotateX(70deg) scale(0) rotate(0deg); opacity: 0; }
+    20% { transform: rotateX(70deg) scale(1) rotate(45deg); opacity: 1; }
+    80% { transform: rotateX(70deg) scale(1) rotate(360deg); opacity: 1; }
+    100% { transform: rotateX(70deg) scale(0) rotate(720deg); opacity: 0; }
+  }
+  @keyframes shoot {
+    0% { height: 0; opacity: 0; }
+    30% { height: 0; opacity: 0; }
+    40% { height: 100vh; opacity: 1; }
+    100% { height: 0; opacity: 0; bottom: 100%; }
+  }
+  @keyframes shrink {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(0.1); filter: brightness(10) contrast(2); }
+    100% { transform: scale(0); opacity: 0; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="teleport-layer">
-        <div id="circle" class="rune-circle"></div>
-        <div id="beam" class="teleport-beam"></div>
-    </div>
+<div class="teleport-overlay">
+  <div id="circle" class="rune-circle"></div>
+  <div id="beam" class="beam"></div>
+</div>
 
-    <div id="world-content" class="game-ui">
-        <h1>Projects Folder (Lvl 30 Wilderness)</h1>
-        <p>Be careful, PKers are nearby.</p>
-        <br>
-        <button class="osrs-btn" onclick="castHomeTeleport()">
-            🔵 Cast Home Teleport
-        </button>
-    </div>
+<div id="website" class="site-wrapper">
+  
+  <header>
+    <h1>⚔️ SMB ASSESSMENTS ⚔️</h1>
+    <div class="subtitle">Official Project Log & Quest List</div>
+  </header>
 
-    <script>
-        function castHomeTeleport() {
-            // 1. Get Elements
-            const circle = document.getElementById('circle');
-            const beam = document.getElementById('beam');
-            const world = document.getElementById('world-content');
+  <div class="layout">
+    <aside>
+      <div class="menu-box">
+        <div class="menu-header">SPELLBOOK</div>
+        <a class="nav-link teleport-btn" onclick="startTeleport()">🔵 Home Teleport</a>
+        <a class="nav-link">High Alchemy</a>
+        <a class="nav-link">Bones to Peaches</a>
+      </div>
+      
+      <div class="menu-box">
+        <div class="menu-header">STATS</div>
+        <div style="font-size: 10px; padding: 5px;">
+          Mold Assess: <span style="color:#0f0">92</span><br>
+          Microbiology: <span style="color:yellow">65</span><br>
+          Web Dev: <span style="color:red">40</span>
+        </div>
+      </div>
+    </aside>
 
-            // 2. Play Animations
-            circle.classList.add('active-circle');
-            beam.classList.add('active-beam');
-            world.classList.add('body-shrink');
+    <main>
+      <h2>CURRENT QUESTS (2025)</h2>
+      
+      <div class="quest-log">
+        <p><i>Warning: You are currently in a PvP zone. Organize your finances before proceeding.</i></p>
+        
+        <div class="quest-item">
+          <span class="quest-status status-wip">IN PROGRESS</span>
+          <strong style="color: #ff981f;">Quest: The LLC Launch</strong>
+          <p>Prepare documentation for January 2026 launch. Obtain MRSA certification in Florida region.</p>
+        </div>
 
-            // 3. Wait 3 seconds, then switch file
-            setTimeout(() => {
-                window.location.href = 'rune-home.html';
-            }, 2800); // 2800ms gives a slight buffer before the animation fully ends
-        }
-    </script>
+        <div class="quest-item">
+          <span class="quest-status status-wip">IN PROGRESS</span>
+          <strong style="color: #ff981f;">Quest: Microbiology Grind</strong>
+          <p>Gain XP in Environmental Microbiology. Grind labs until graduation event.</p>
+        </div>
+
+        <div class="quest-item">
+          <span class="quest-status status-done">COMPLETED</span>
+          <strong style="color: #ff981f;">Quest: Family Setup</strong>
+          <p>Established clan headquarters. Party size: 6 (Wife + 4 adds).</p>
+        </div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="menu-box">
+        <div class="menu-header">SERVER STATUS</div>
+        <div style="font-size:10px; padding:5px; text-align: center;">
+          World 1: <span style="color:green">Online</span><br>
+          Ping: 34ms<br>
+          <br>
+          <small>Users Online: 1</small>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    Copyright © 2004-2025 Dylan Worth. Best viewed in Internet Explorer 6.
+  </footer>
+</div>
+
+<script>
+  function startTeleport() {
+    // 1. Get Elements
+    const circle = document.getElementById('circle');
+    const beam = document.getElementById('beam');
+    const site = document.getElementById('website');
+
+    // 2. Add Animation Classes
+    circle.classList.add('anim-circle');
+    beam.classList.add('anim-beam');
+    site.classList.add('anim-shrink');
+
+    // 3. Navigate after animation
+    setTimeout(() => {
+      window.location.href = 'rune-home.html';
+    }, 2800);
+  }
+</script>
+
 </body>
 </html>
