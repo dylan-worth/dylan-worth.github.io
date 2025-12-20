@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki: The Magister</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .wiki-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+        .wiki-content h2 { color: #ffd700; border-bottom: 1px solid #3c4b57; margin-top: 0; }
+        .wiki-content p { line-height: 1.6; color: #cdd6db; }
+        .wiki-content b { color: #00ccff; }
+        .infobox { width: 100%; border-collapse: separate; border-spacing: 1px; background: #3c4b57; border: 1px solid #3c4b57; }
+        .infobox th { background: #152936; color: #ffd700; padding: 8px; text-align: center; font-weight: bold; }
+        .infobox td { background: #0b161d; padding: 8px; color: #cdd6db; font-size: 0.9rem; vertical-align: middle; }
+        .infobox-header { font-size: 1.1rem; }
+        .infobox-image-cell { text-align: center; padding: 20px !important; background: #081218 !important; }
+        .infobox img { max-width: 100%; height: auto; image-rendering: pixelated; }
+        @media (max-width: 768px) { .wiki-grid { grid-template-columns: 1fr; } .infobox { order: -1; margin-bottom: 20px; } }
+    </style>
+</head>
+<body>
+
+<div class="interface-window">
+    <header>
+        <h1>Wiki: The Magister</h1>
+        <a href="index.html" style="font-size:0.8rem;">← Back to Game</a>
+    </header>
+
+    <div class="content-area">
+        <div class="wiki-grid">
+            
+            <div class="wiki-content">
+                <h2>Description</h2>
+                <p><b>The Magister</b> (Oreb) is a high-level Slayer boss introduced in the Slayer 120 Expansion (Revision 881). He is a corrupted necromancer found deep within the Sophanem Slayer Dungeon.</p>
+                <p>He is the first boss to require a specific Slayer level to kill (115), making him an exclusive encounter for dedicated players.</p>
+
+                <h3>Mechanics</h3>
+                <p>Accessing the Magister requires a <b>Key to the Crossing</b>, which is dropped by Soul Devourers and Corrupted Creatures. Each fight consumes one key.</p>
+                <p>The fight revolves around managing his "Corruption" stacks. As the fight progresses, the player takes increased damage but deals increased damage in return.</p>
+            </div>
+
+            <table class="infobox">
+                <tr><th colspan="2" class="infobox-header">The Magister</th></tr>
+                <tr>
+                    <td colspan="2" class="infobox-image-cell">
+                        <img src="boss-magister.png" alt="The Magister">
+                    </td>
+                </tr>
+                <tr><th width="50%">Combat Level</th><td>500</td></tr>
+                <tr><th>Slayer Level</th><td>115</td></tr>
+                <tr><th>Life Points</th><td>200,000</td></tr>
+                <tr><th>Location</th><td>Soul Obelisk</td></tr>
+                <tr>
+                    <th>Notable Drops</th>
+                    <td>
+                        <span style="color:#ffd700">Khopesh Fragments</span><br>
+                        Gloves of Passage<br>
+                        Vital Sparks
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
