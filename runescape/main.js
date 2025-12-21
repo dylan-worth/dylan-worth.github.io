@@ -27,7 +27,8 @@ window.gameState = {
     bank: [],
     selectedSnowPile: null, 
     selectedItem: null,
-    gameTime: 12 
+    gameTime: 12, // Noon
+    lanternLights: [] // Stores the PointLights
 };
 
 const raycaster = new THREE.Raycaster();
@@ -44,12 +45,10 @@ export function initGame() {
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
         
-        // --- FORCE STARTER ITEMS ---
-        // If inventory is empty, give items.
         if(!window.gameState.inventory || window.gameState.inventory.length === 0) {
-             console.log("Granting starter items...");
              addItem('axe_bronze', 'Bronze Axe', 1);
              addItem('sword_iron', 'Iron Sword', 1); 
+             addItem('santa_hat', 'Santa Hat', 1); // FREE SANTA HAT
         }
         updateStatsUI(); 
     } 
@@ -60,9 +59,11 @@ export function initGame() {
         if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
         if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
         
-        window.gameState.gameTime += 0.05; 
+        // SLOWED DOWN DAY/NIGHT (was 0.05)
+        window.gameState.gameTime += 0.005; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
         updateEnvironment();
+
     }, 1000);
 
     animate();
@@ -72,15 +73,26 @@ function updateEnvironment() {
     const t = window.gameState.gameTime;
     let intensity = 1.0;
     let skyColor = 0x87ceeb; 
+    let lanternOn = false;
 
-    if (t > 20 || t < 6) {
+    // Night Logic (Between 19:00 and 6:00)
+    if (t > 19 || t < 6) {
         intensity = 0.2; 
         skyColor = 0x1a1a2a; 
-    } else if (t > 18 || t < 8) {
+        lanternOn = true;
+    } else if (t > 17 || t < 8) {
         intensity = 0.5; 
         skyColor = 0xffa500; 
     }
+
     setDayNight(intensity, skyColor);
+    
+    // UPDATE LANTERNS
+    if(window.gameState.lanternLights) {
+        window.gameState.lanternLights.forEach(light => {
+            light.intensity = lanternOn ? 1.0 : 0;
+        });
+    }
 }
 
 function onInteract(mouse) {
@@ -95,13 +107,7 @@ function onInteract(mouse) {
             const type = group.userData.type;
             const name = group.userData.name;
 
-            // 1. QUEST / TALK
-            if (type === 'quest_npc') {
-                talkToNPC(name);
-                break; 
-            }
-
-            // 2. COMBAT
+            if (type === 'quest_npc') { talkToNPC(name); break; }
             if (type === 'npc') {
                 if (window.gameState.selectedItem === 'snowball') {
                     if (removeItem('snowball', 1)) {
@@ -116,15 +122,12 @@ function onInteract(mouse) {
                 }
                 break; 
             }
-
-            // 3. OBJECTS
             if (type === 'snow_pile') {
                 window.gameState.selectedSnowPile = group;
                 const modal = document.getElementById('snow-modal');
                 if(modal) modal.style.display = 'flex';
                 break;
             }
-
             if (type === 'tree') { attemptChop(group); break; }
             if (type === 'bank_booth') { openBank(); break; }
             if (type === 'shop_stall') { openShop(); break; }
@@ -133,7 +136,6 @@ function onInteract(mouse) {
     }
 }
 
-// Helpers
 window.selectItem = (id) => { 
     window.gameState.selectedItem = id; 
     if (id.includes('axe') || id.includes('sword') || id.includes('hat')) {
@@ -159,9 +161,7 @@ function attemptChop(treeGroup) {
     if(treeGroup.userData.respawning) return;
     const axe = getBestAxe();
     if(!axe) { addChatMessage("No axe.", "red"); return; }
-    
-    equipItem(axe.id); // Visual Equip
-
+    equipItem(axe.id);
     addChatMessage("Chopping...", "white");
     choppingInterval = setInterval(() => {
         if(treeGroup.userData.respawning) { clearInterval(choppingInterval); return; }
