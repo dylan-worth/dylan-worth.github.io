@@ -1,47 +1,35 @@
-import { createGround, createPath } from './assets_env.js';
-import { createBuilding } from './assets_buildings.js';
-import { createTree, createNPC, createInteractable, createChessTable, createSnowPile, createLantern } from './assets_entities.js';
-import { addChatMessage } from './chat.js';
-import { getObjectById } from './id_map.js';
+import { buildLumbridge } from './lumbridge.js';
 
-let hansNPC = null;
-let currentHansTarget = 0;
-const hansPath = [
-    { x: 8.2,  z: 23.1 }, 
-    { x: -8.2, z: 23.1 }, 
-    { x: -8.2, z: 15.0 }, 
-    { x: 8.2,  z: 15.0 }  
-];
+/**
+ * Level Manager
+ * Now uses async/await to handle JSON data fetching from build functions.
+ */
+export async function loadLevel(scene, levelName) {
+    console.log(`Loading level: ${levelName}...`);
 
-export async function buildLumbridge(scene) {
-    // 1. ENVIRONMENT
-    createGround(scene, 0x2d5a27); 
-    createBuilding(scene, 'lum_castle', 0, -5); 
+    // 1. CLEAR EXISTING LEVEL DATA
+    // Clear colliders so we don't walk on invisible walls from the old level
+    window.gameState.colliders = [];
+    
+    // Clear lantern lights to reset day/night associations
+    window.gameState.lanternLights = [];
 
-    // 2. DATA-DRIVEN TREES (Safe Fetch Method)
-    try {
-        const response = await fetch('./tree.json');
-        const data = await response.json();
+    // 2. DISPATCH TO REGION BUILDER
+    switch (levelName) {
+        case 'lumbridge':
+            // We await this because buildLumbridge now fetches tree.json
+            await buildLumbridge(scene);
+            break;
         
-        data.trees.forEach(entry => {
-            const config = getObjectById(entry.id);
-            if (config && config.type === 'tree') {
-                createTree(scene, config.name, entry.x, entry.z);
-            }
-        });
-    } catch (e) {
-        console.error("Could not load tree.json:", e);
+        case 'varrock':
+            // Placeholder for future expansion
+            // await buildVarrock(scene);
+            break;
+
+        default:
+            console.error(`Level ${levelName} not found.`);
+            break;
     }
 
-    // 3. REMAINING SETUP
-    createPath(scene, 0, 25, 6, 30);  
-    createPath(scene, 0, -35, 6, 30); 
-    setupGuards(scene);
-    hansNPC = createNPC(scene, 'hans', 8.2, 23.1);
-    createNPC(scene, 'cook', 0, -5); 
-    
-    createBuilding(scene, 'church', 45, -5);
-    createBuilding(scene, 'bobs_axes', -35, -5);
+    console.log(`${levelName} loaded successfully.`);
 }
-
-// ... (rest of setupGuards and updateHans functions remain the same)
