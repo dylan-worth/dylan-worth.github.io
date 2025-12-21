@@ -1,6 +1,3 @@
-// inventory.js - Handles items and backpack logic
-
-// We do NOT import from assets.js anymore to prevent crashes
 import { addChatMessage } from './chat.js';
 
 // STARTING INVENTORY
@@ -11,8 +8,7 @@ const MAX_SLOTS = 20;
 export function addItem(id, name, amount = 1) {
     const inv = window.gameState.inventory;
 
-    // 1. Check if we already have this stackable item (e.g. coins)
-    // For now, let's assume only Coins are stackable for simplicity
+    // 1. Stackable Check (Coins)
     if (id === 'coins') {
         const existing = inv.find(item => item.id === 'coins');
         if (existing) {
@@ -22,23 +18,46 @@ export function addItem(id, name, amount = 1) {
         }
     }
 
-    // 2. Check for empty space
+    // 2. Space Check
     if (inv.length >= MAX_SLOTS) {
         addChatMessage("Your backpack is full!", "red");
         return false;
     }
 
-    // 3. Add Item
+    // 3. Add New Item
     inv.push({ id, name, amount });
     updateInventoryUI();
     return true;
 }
 
+// --- THIS WAS THE MISSING FUNCTION ---
+export function removeItem(id, amount = 1) {
+    const inv = window.gameState.inventory;
+    const index = inv.findIndex(item => item.id === id);
+
+    if (index === -1) return false; // Item not found
+
+    const item = inv[index];
+
+    if (item.amount > amount) {
+        item.amount -= amount;
+    } else {
+        // Remove the slot entirely if amount reaches 0
+        inv.splice(index, 1);
+    }
+    
+    updateInventoryUI();
+    return true;
+}
+
+export function hasItem(id, amount = 1) {
+    const item = window.gameState.inventory.find(i => i.id === id);
+    return item && item.amount >= amount;
+}
+
 export function getBestAxe() {
-    // Simple check: do we have an axe?
-    // In future, check woodcutting level vs axe type
+    // Returns an axe object or a default 'hand' object
     return window.gameState.inventory.find(i => i.id.includes('axe')) || { power: 1 }; 
-    // Default power 1 (Hands) if no axe, or handle logic in main.js
 }
 
 export function updateInventoryUI() {
@@ -46,12 +65,12 @@ export function updateInventoryUI() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    window.gameState.inventory.forEach((item, index) => {
+    window.gameState.inventory.forEach((item) => {
         const slot = document.createElement('div');
         slot.className = 'item-slot';
-        slot.innerText = item.name.substring(0, 2); // Simple icon
+        // Display first 2 letters as a "icon"
+        slot.innerText = item.name.substring(0, 2); 
         
-        // Count
         if (item.amount > 1) {
             const count = document.createElement('div');
             count.className = 'item-count';
@@ -59,7 +78,7 @@ export function updateInventoryUI() {
             slot.appendChild(count);
         }
 
-        // Click to Drop/Use (Basic)
+        // Click to identify
         slot.onclick = () => {
             addChatMessage(`Selected: ${item.name}`, "cyan");
         };
