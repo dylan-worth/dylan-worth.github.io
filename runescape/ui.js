@@ -23,28 +23,31 @@ export function updateStatsUI() {
     // Skill Stats
     set('wc-level', s.woodcutting.level);
     set('wc-xp', Math.floor(s.woodcutting.xp));
-
-    // Optional: Coin display update (redundant if inventory does it, but good safety)
-    // const coins = document.getElementById('coin-display');
-    // if(coins && window.gameState.inventory) ... 
 }
 
-// 2. CLOSE MODALS (Bank/Shop)
+// 2. CLOSE MODALS (Bank, Shop, Chess)
 export function closeWindows() {
     const bank = document.getElementById('bank-window');
     const shop = document.getElementById('shop-window');
+    const chess = document.getElementById('chess-window'); // New Chess Window
     
     if (bank) bank.style.display = 'none';
     if (shop) shop.style.display = 'none';
+    if (chess) chess.style.display = 'none';
     
-    // Reset interaction mode
+    // Reset interaction mode so clicking moves the player again
     if (window.gameState) window.gameState.uiMode = 'normal';
 }
 
 // 3. SWITCH TABS (Inventory / Stats / Magic)
 export function switchTab(tabId) {
     // Hide all panels
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => {
+        // Don't hide the windows (bank/shop/chess), only hide the side-tabs
+        if (!p.classList.contains('window')) {
+            p.classList.remove('active');
+        }
+    });
     
     // Show target panel
     const target = document.getElementById(tabId);
