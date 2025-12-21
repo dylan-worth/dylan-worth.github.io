@@ -1,0 +1,7 @@
+{
+  "objects": [
+    { "type": "bank_booth", "x": -10, "z": -5 },
+    { "type": "chess_table", "x": 10, "z": -5 },
+    { "type": "snow_pile", "x": -10, "z": 5 }
+  ]
+}
