@@ -1,7 +1,3 @@
-export function initMinimap() {
-    // No setup needed, HTML canvas handles it
-}
-
 export function updateMinimap(scene, player) {
     const canvas = document.getElementById('minimap-canvas');
     if (!canvas || !player) return;
@@ -9,72 +5,82 @@ export function updateMinimap(scene, player) {
     const ctx = canvas.getContext('2d');
     const size = canvas.width;
     const center = size / 2;
-    const range = 40; // How far the minimap sees (world units)
+    const range = 50; // Zoom level
     const scale = center / range;
 
-    // 1. Clear Background
-    ctx.fillStyle = '#000000'; // Black background
+    // 1. Clear & Background
+    ctx.fillStyle = '#111'; 
     ctx.fillRect(0, 0, size, size);
     
-    // 2. Clip Circle (Optional, makes it look like a radar)
     ctx.save();
     ctx.beginPath();
     ctx.arc(center, center, center, 0, Math.PI * 2);
     ctx.clip();
 
-    // 3. Draw Objects
+    // 2. Draw Terrain (Ground, Water, Paths) first
     scene.children.forEach(obj => {
         if (!obj.visible) return;
+        
+        // Calculate relative position (Top-down view)
+        const dx = (obj.position.x - player.position.x) * scale;
+        const dy = (obj.position.z - player.position.z) * scale;
+        
+        let color = null;
+        let w = 0, h = 0;
 
-        // Calculate relative position
-        const dx = obj.position.x - player.position.x;
-        const dz = obj.position.z - player.position.z;
+        // Detect Terrain Types based on Name
+        if (obj.name === 'water_terrain') { color = '#0066ff'; }
+        else if (obj.name === 'path_terrain') { color = '#8b5a2b'; }
+        else if (obj.name === 'ground_terrain') { color = '#2d5a27'; }
 
-        // Skip if too far
-        if (Math.abs(dx) > range || Math.abs(dz) > range) return;
+        if (color && obj.geometry && obj.geometry.parameters) {
+            // Draw Rectangle for terrain chunks
+            ctx.fillStyle = color;
+            
+            // Get dimensions from geometry
+            // Note: Planes are usually Width/Height. Boxes are Width/Height/Depth.
+            let geoW = obj.geometry.parameters.width || 1;
+            let geoH = obj.geometry.parameters.height || obj.geometry.parameters.depth || 1;
+            
+            // Apply rotation logic roughly
+            if (Math.abs(obj.rotation.z) > 1) { [geoW, geoH] = [geoH, geoW]; }
 
-        // Map to Canvas Coords (Rotate -90 deg because Canvas Y is Down)
-        // Actually, just direct mapping works if camera is aligned
-        const mapX = center + dx * scale;
-        const mapY = center + dz * scale;
+            ctx.fillRect(center + dx - (geoW*scale/2), center + dy - (geoH*scale/2), geoW*scale, geoH*scale);
+        }
+    });
 
-        // Determine Type
+    // 3. Draw Objects (Trees, NPCs, Walls) on top
+    scene.children.forEach(obj => {
+        if (!obj.userData || !obj.visible) return;
+        
+        const dx = (obj.position.x - player.position.x) * scale;
+        const dy = (obj.position.z - player.position.z) * scale;
+
         let color = null;
         let radius = 2;
 
-        if (obj.userData) {
-            if (obj.userData.type === 'tree') { color = '#00ff00'; } // Green Tree
-            else if (obj.userData.type === 'npc') { color = '#ffff00'; radius = 3; } // Yellow Dot
-            else if (obj.userData.type === 'bank_booth') { color = '#00ffff'; radius = 3; } // Cyan Bank
-            else if (obj.userData.type === 'chess_table') { color = '#ffffff'; } // White
-        }
+        if (obj.userData.type === 'tree') color = '#00ff00';
+        if (obj.userData.type === 'npc') { color = '#ffff00'; radius = 3; }
+        if (obj.userData.type === 'snow_pile') { color = '#ffffff'; radius = 3; }
+        if (obj.userData.type === 'bank_booth') { color = 'cyan'; radius = 3; }
         
-        // Draw Walls (Buildings)
-        // Walls are usually standard Meshes without userData groups, check geometry
-        if (!color && obj.geometry && obj.geometry.type === 'BoxGeometry') {
-             // Simple check for walls (grey boxes)
-             if(obj.material && obj.material.color && obj.material.color.getHex() === 0x888888) {
-                 color = '#888888';
-             }
-        }
-
         if (color) {
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(mapX, mapY, radius, 0, Math.PI * 2);
+            ctx.arc(center + dx, center + dy, radius, 0, Math.PI*2);
             ctx.fill();
         }
     });
 
-    // 4. Draw Player (Center Red Dot)
+    // 4. Player
     ctx.fillStyle = '#ff0000';
     ctx.beginPath();
     ctx.arc(center, center, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    // 5. Draw Border
-    ctx.strokeStyle = '#dba159'; // OSRS Gold Border
-    ctx.lineWidth = 4;
+    // 5. Border
+    ctx.strokeStyle = '#dba159';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(center, center, center-2, 0, Math.PI * 2);
     ctx.stroke();
