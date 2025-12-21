@@ -1,14 +1,13 @@
 import { addChatMessage } from './chat.js';
 
-// Game State
 let selectedSquare = null; // {x, y}
 
 const PIECES = {
-    'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟', // Black
-    'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'  // White
+    'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟', 
+    'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'  
 };
 
-// Board State (Mutable)
+// 8x8 Board
 const BOARD = [
     ['r','n','b','q','k','b','n','r'],
     ['p','p','p','p','p','p','p','p'],
@@ -23,7 +22,7 @@ const BOARD = [
 export function openChess() {
     const chessWin = document.getElementById('chess-window');
     if (chessWin) {
-        chessWin.style.display = 'block'; // Changed from flex to block for better layout
+        chessWin.style.display = 'block'; 
         window.gameState.uiMode = 'chess';
         addChatMessage("You sit down at the chessboard.", "cyan");
         renderBoard();
@@ -31,37 +30,35 @@ export function openChess() {
 }
 
 function handleSquareClick(x, y) {
-    const clickedPiece = BOARD[y][x];
+    const clickedVal = BOARD[y][x];
 
-    // 1. If nothing selected, try to select a piece
+    // CASE 1: Select a Piece
     if (!selectedSquare) {
-        if (clickedPiece !== ' ') {
+        if (clickedVal !== ' ') {
             selectedSquare = { x, y };
-            addChatMessage(`Selected: ${clickedPiece}`, "yellow");
-            renderBoard(); // Re-render to show highlight
+            // addChatMessage(`Selected ${clickedVal}`, "yellow");
+            renderBoard();
         }
         return;
     }
 
-    // 2. If something IS selected...
-    
-    // If clicking the SAME square, deselect
+    // CASE 2: Deselect (Click same square)
     if (selectedSquare.x === x && selectedSquare.y === y) {
         selectedSquare = null;
         renderBoard();
         return;
     }
 
-    // Otherwise, MOVE the piece (Capture if needed)
-    const movingPiece = BOARD[selectedSquare.y][selectedSquare.x];
+    // CASE 3: Move
+    // Get the piece we are moving
+    const piece = BOARD[selectedSquare.y][selectedSquare.x];
     
-    // Execute Move
-    BOARD[y][x] = movingPiece;
+    // Update Board Data
+    BOARD[y][x] = piece; // Place piece in new spot
     BOARD[selectedSquare.y][selectedSquare.x] = ' '; // Clear old spot
     
-    addChatMessage(`Moved to ${String.fromCharCode(97+x)}${8-y}`, "lime");
+    // addChatMessage(`Moved to ${x},${y}`, "lime");
     
-    // Deselect and Render
     selectedSquare = null;
     renderBoard();
 }
@@ -76,17 +73,17 @@ function renderBoard() {
             const sq = document.createElement('div');
             sq.className = 'chess-square';
             
-            // 1. Determine Background Color
+            // Background Color
             let bgColor = ((x+y)%2 === 0) ? '#f0d9b5' : '#b58863';
             
-            // 2. Highlight Selected Square
+            // Highlight Selection
             if (selectedSquare && selectedSquare.x === x && selectedSquare.y === y) {
-                bgColor = '#6a9c49'; // Green Highlight
+                bgColor = '#6a9c49'; // Green
             }
             
             sq.style.backgroundColor = bgColor;
 
-            // 3. Draw Piece
+            // Render Piece
             const piece = BOARD[y][x];
             if (piece !== ' ') {
                 sq.innerText = PIECES[piece];
@@ -95,9 +92,7 @@ function renderBoard() {
                 sq.style.cursor = 'pointer';
             }
 
-            // 4. Click Handler
             sq.onclick = () => handleSquareClick(x, y);
-
             grid.appendChild(sq);
         }
     }
