@@ -3,218 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open881 Wiki - The Knowledge Base</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@400;700&display=swap');
-
-        :root {
-            --gold: #ffc400;
-            --gold-dim: #b8860b;
-            --dark: #0a0a0f;
-            --panel: #16161d;
-            --text: #e0e0e0;
-            --border: #333;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark);
-            color: var(--text);
-            font-family: 'Lato', sans-serif;
-            display: flex;
-            flex-direction: row; /* Desktop Default */
-            min-height: 100vh;
-        }
-
-        /* --- SIDEBAR (Responsive) --- */
-        aside {
-            width: 250px;
-            background: #050508;
-            border-right: 2px solid var(--gold-dim);
-            padding: 30px 20px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .wiki-logo {
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 1.5rem;
-            margin-bottom: 40px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        .nav-section { margin-bottom: 25px; }
-        .nav-section h4 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold-dim);
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        .nav-section a {
-            display: block;
-            color: #aaa;
-            text-decoration: none;
-            padding: 8px 0;
-            transition: color 0.2s;
-        }
-        .nav-section a:hover { color: var(--gold); }
-
-        /* --- MAIN CONTENT --- */
-        main {
-            flex: 1;
-            padding: 40px;
-            max-width: 900px;
-            margin: 0 auto; /* Centers content on desktop */
-        }
-
-        h1, h2, h3 { font-family: 'Cinzel', serif; color: var(--gold); margin-top: 30px; }
-        p { line-height: 1.8; color: #ccc; }
-
-        /* --- INFOBOX (Responsive) --- */
-        .infobox {
-            width: 100%; /* Mobile first */
-            max-width: 300px;
-            background: var(--panel);
-            border: 1px solid var(--gold-dim);
-            padding: 15px;
-            border-radius: 4px;
-            margin: 20px auto; 
-        }
-
-        /* --- TABLES (Scrollable on Mobile) --- */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin: 20px 0;
-            border: 1px solid var(--border);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--panel);
-            min-width: 400px; /* Prevents squishing */
-        }
-
-        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
-        th { background: #222; color: var(--gold); font-family: 'Cinzel', serif; }
-
-        /* --- MOBILE MEDIA QUERIES --- */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-
-            aside {
-                width: 100%;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 2px solid var(--gold-dim);
-                padding: 20px;
-                box-sizing: border-box;
-            }
-
-            .wiki-logo { margin-bottom: 15px; }
-
-            .nav-section {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
-                justify-content: center;
-            }
-
-            .nav-section h4 { width: 100%; text-align: center; }
-
-            main { padding: 20px; width: 100%; box-sizing: border-box; }
-
-            .infobox { float: none; margin: 20px auto; }
-        }
-
-        /* Desktop specific float */
-        @media (min-width: 769px) {
-            .infobox { float: right; margin-left: 30px; }
-        }
-    </style>
+    <title>Open881 - Wiki</title>
+    <link rel="stylesheet" href="style_web.css">
 </head>
 <body>
-
-    <aside>
-        <div class="wiki-logo">OPEN881 WIKI</div>
-        
-        <div class="nav-section">
-            <h4>Nav</h4>
-            <a href="#combat">Combat</a>
-            <a href="#weapons">Items</a>
-            <a href="#skills">Skills</a>
+    <nav class="navbar">
+        <div class="logo">OPEN881</div>
+        <div class="links">
             <a href="website_home.html">Home</a>
+            <a href="index.html">Play Now</a>
+            <a href="website_wiki.html" class="active">Wiki</a>
         </div>
-    </aside>
+    </nav>
 
-    <main>
-        <h1>The Adventurer's Guide</h1>
+    <main class="wiki-content">
+        <h1>Official ID Map & Database</h1>
+        <p>Use these IDs when adding objects to <code>tree.json</code> or the level loader.</p>
 
-        <div class="infobox">
-            <div style="text-align:center; font-family:'Cinzel'; color:var(--gold); margin-bottom:10px;">Lumbridge Castle</div>
-            <div style="width:100%; height:120px; background:#000; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:var(--gold-dim);">[IMAGE]</div>
-            <table style="margin:10px 0 0 0; min-width:unset; font-size: 0.85rem;">
-                <tr><td>Region</td><td>Misthalin</td></tr>
-                <tr><td>Difficulty</td><td>Starter</td></tr>
-            </table>
-        </div>
-
-        <p>Welcome to the Open881 Wiki. Here <b>we</b> document everything you need to know about Lumbridge and beyond.</p>
-
-        <h2 id="combat">Combat & Feedback</h2>
-        <p>Combat is fully interactive. When attacking an NPC, 3D hit-splats will appear above their heads to show damage.</p>
-        
-        <div class="table-container">
+        <section class="wiki-section">
+            <h2>Environment Objects</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>Splat</th>
-                        <th>Color</th>
-                        <th>Effect</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Damage</td><td style="color:red">Red</td><td>Reduces Target HP</td></tr>
-                    <tr><td>Miss</td><td style="color:cyan">Blue</td><td>No effect</td></tr>
-                </tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Notes</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Normal Tree</td>
+                    <td>Woodcutting</td>
+                    <td>Yields Logs, 25 XP</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Oak Tree</td>
+                    <td>Woodcutting</td>
+                    <td>Yields Oak Logs, 37.5 XP</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Bank Booth</td>
+                    <td>Interactable</td>
+                    <td>Access your global storage.</td>
+                </tr>
             </table>
-        </div>
+        </section>
 
-        <h2 id="weapons">Starter Gear</h2>
-        <div class="table-container">
+        <section class="wiki-section">
+            <h2>NPC Registry</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Requirement</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Bronze Sword</td><td>1 Attack</td><td>Slash</td></tr>
-                    <tr><td>Bronze Shield</td><td>1 Defence</td><td>Block</td></tr>
-                    <tr><td>Santa Hat</td><td>None</td><td>Cosmetic</td></tr>
-                </tbody>
+                <tr>
+                    <th>Name</th>
+                    <th>ID Reference</th>
+                    <th>Behavior</th>
+                </tr>
+                <tr>
+                    <td>Hans</td>
+                    <td>20</td>
+                    <td>Square Patrol (8.2, 23.1)</td>
+                </tr>
+                <tr>
+                    <td>Castle Guard</td>
+                    <td>-</td>
+                    <td>Proximity Greeting (Entrance)</td>
+                </tr>
+                <tr>
+                    <td>The Cook</td>
+                    <td>21</td>
+                    <td>Stationary (Castle Interior)</td>
+                </tr>
             </table>
-        </div>
-
-        <h2 id="skills">Skill Training</h2>
-        <p>In this realm, <b>we</b> value hard work. Train your skills to unlock better equipment and new areas.</p>
-        <ul>
-            <li><b>Woodcutting:</b> Use axes on trees to gather logs.</li>
-            <li><b>Combat Stats:</b> Fight Goblins to increase Attack, Strength, and HP.</li>
-        </ul>
+        </section>
     </main>
 
+    <footer>
+        <p>Want to contribute? Edit the JSON files in the source folder.</p>
+    </footer>
 </body>
 </html>
