@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open881 Wiki - The Knowledge Base</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@400;700&display=swap');
+
+        :root {
+            --gold: #ffc400;
+            --gold-dim: #b8860b;
+            --dark: #0a0a0f;
+            --panel: #16161d;
+            --text: #e0e0e0;
+            --border: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark);
+            color: var(--text);
+            font-family: 'Lato', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 250px;
+            background: #050508;
+            border-right: 2px solid var(--gold-dim);
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .wiki-logo {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section h4 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-dim);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-section a {
+            display: block;
+            color: #aaa;
+            text-decoration: none;
+            padding: 5px 0;
+            transition: color 0.2s;
+        }
+
+        .nav-section a:hover {
+            color: var(--gold);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 60px 80px;
+            max-width: 1000px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            margin-top: 40px;
+        }
+
+        p {
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .infobox {
+            float: right;
+            width: 300px;
+            background: var(--panel);
+            border: 1px solid var(--gold-dim);
+            margin-left: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .infobox img {
+            width: 100%;
+            background: #000;
+            height: 150px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* --- TABLES --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--panel);
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #222;
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+        }
+
+        tr:hover {
+            background: rgba(255, 196, 0, 0.05);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        code {
+            background: #000;
+            padding: 2px 5px;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="wiki-logo">OPEN881 WIKI</div>
+        
+        <div class="nav-section">
+            <h4>Getting Started</h4>
+            <a href="#combat">Combat Basics</a>
+            <a href="#skills">Skill Training</a>
+            <a href="#world">World Map</a>
+        </div>
+
+        <div class="nav-section">
+            <h4>Items</h4>
+            <a href="#weapons">Weapons</a>
+            <a href="#armor">Armor & Shields</a>
+            <a href="#tools">Tools</a>
+        </div>
+
+        <div class="nav-section">
+            <h4>Quests</h4>
+            <a href="#cooks-assistant">Cook's Assistant</a>
+        </div>
+
+        <div class="nav-section">
+            <a href="website_home.html" style="color: var(--gold); margin-top: 50px;">← Back to Home</a>
+        </div>
+    </aside>
+
+    <main>
+        <a href="website_home.html" class="back-link">Return to Main Site</a>
+        
+        <div class="infobox">
+            <div style="text-align:center; font-family:'Cinzel'; color:var(--gold);">Open881 RPG</div>
+            <img src="https://via.placeholder.com/300x150/000000/FFC400?text=Lumbridge+Castle" alt="Lumbridge">
+            <table style="margin:0; font-size: 0.8rem;">
+                <tr><td>Developer</td><td>Gemini Team</td></tr>
+                <tr><td>Engine</td><td>Three.js</td></tr>
+                <tr><td>Genre</td><td>3D Browser RPG</td></tr>
+            </table>
+        </div>
+
+        <h1>The Adventurer's Guide</h1>
+        <p>Welcome to the official Open881 Wiki. This project is a WebGL-based tribute to classic MMOs. Here <b>we</b> document every mechanic, item, and quest currently implemented in the game engine.</p>
+
+        <h2 id="combat">Combat System</h2>
+        <p>Combat in Open881 is real-time and based on your character's stats. When you attack, <b>we</b> trigger a swing animation and calculate hit-splats based on your Attack level vs. the enemy's defense.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Splat Color</th>
+                    <th>Meaning</th>
+                    <th>Logic</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="color:#ff0000;">Red</td>
+                    <td>Successful Hit</td>
+                    <td>Damage is dealt to the enemy's HP.</td>
+                </tr>
+                <tr>
+                    <td style="color:#00ccff;">Blue</td>
+                    <td>Miss / Block</td>
+                    <td>Zero damage dealt. Accuracy roll failed.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="weapons">Weapons & Equipment</h2>
+        <p>Weapons determine your maximum hit and your attack speed. You can dual-wield a main-hand weapon and a shield.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Requirement</th>
+                    <th>Special Visuals</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bronze Sword</td>
+                    <td>Weapon (1H)</td>
+                    <td>1 Attack</td>
+                    <td>Copper-tinted blade</td>
+                </tr>
+                <tr>
+                    <td>Bronze Shield</td>
+                    <td>Off-hand</td>
+                    <td>1 Defence</td>
+                    <td>Rectangular Plate</td>
+                </tr>
+                <tr>
+                    <td>Bronze Dagger</td>
+                    <td>Weapon (1H)</td>
+                    <td>1 Attack</td>
+                    <td>Reversed Grip</td>
+                </tr>
+                <tr>
+                    <td>Santa Hat</td>
+                    <td>Headwear</td>
+                    <td>None</td>
+                    <td>Festive Red/White Cone</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="skills">Skill Mastery</h2>
+        <p>Training skills unlocks new areas and better equipment. Currently, <b>we</b> have the following skills active:</p>
+        <ul>
+            <li><b>Woodcutting:</b> Chop trees for Logs. Higher levels allow Oaking.</li>
+            <li><b>Attack:</b> Increases your chance to land a successful hit.</li>
+            <li><b>Strength:</b> Increases the maximum damage you can deal.</li>
+            <li><b>Hitpoints:</b> Determines how much damage you can take before death.</li>
+        </ul>
+
+        <h2 id="world">The World: Lumbridge</h2>
+        <p>Lumbridge is the starting capital of Open881. It features a castle, a church, and the dangerous goblin-infested forests. Keep an eye on the time—as night falls, the street lanterns will light up automatically to guide your path.</p>
+
+        <h2 id="cooks-assistant">Active Quests</h2>
+        <h3>Quest: The Cook's Assistant</h3>
+        <p>The Castle Cook is in a panic! The Duke's birthday is tomorrow and he is missing ingredients for the cake.</p>
+        <p><b>Requirements:</b> 1 Egg, 1 Milk, 1 Flour.</p>
+        <p><b>Rewards:</b> 500 Coins and the legendary <code>Chef's Hat</code>.</p>
+    </main>
+
+</body>
+</html>
