@@ -1,57 +1,59 @@
 import { createGround, createTree, createBuilding, createInteractable } from './assets.js';
 
 export function loadLevel(scene, levelName) {
-    // Cleanup
+    // 1. CLEANUP: Remove old objects to prevent duplicates
     for(let i = scene.children.length - 1; i >= 0; i--) {
         const obj = scene.children[i];
-        if (!obj.isLight && obj.type !== 'Group') scene.remove(obj);
-        if (obj.userData && (obj.userData.type === 'tree' || obj.userData.type.includes('bank') || obj.userData.type.includes('shop'))) scene.remove(obj);
+        // Keep Lights and Camera
+        if (obj.isLight || obj.isCamera) continue;
+        // Keep Player (Group) - Assuming Player is the only other Group that ISN'T a tree/building
+        // A safer check: if it has userData.type, remove it.
+        if (obj.userData && (obj.userData.type || obj.userData.treeName)) {
+            scene.remove(obj);
+        }
+        // Remove Ground
+        if (obj.name === 'ground') scene.remove(obj);
     }
 
+    console.log("Loading Level:", levelName);
+
     if (levelName === 'lumbridge') {
-        scene.background.setHex(0x87CEEB);
-        createGround(scene, 0x2d5a27); // Grass
+        scene.background.setHex(0x87CEEB); // Blue Sky
+        createGround(scene, 0x2d5a27); // Green Grass
 
-        // Central Castle
+        // BUILDINGS
         createBuilding(scene, 'lum_castle', 0, 0); 
-        
-        // General Store (North)
-        createInteractable(scene, 'shop_stall', 0, -15);
-        
-        // Bank (Top Floor of Castle - Simulated on ground nearby for ease)
-        createInteractable(scene, 'bank_booth', 0, 8);
+        createBuilding(scene, 'church', 25, 5, Math.PI/2);
 
-        // Church (East)
-        createBuilding(scene, 'church', 20, 5, Math.PI/2);
+        // INTERACTABLES
+        createInteractable(scene, 'shop_stall', -5, -15); // General Store
+        createInteractable(scene, 'bank_booth', 5, 8);   // Castle Bank
 
-        // Forest (West)
-        for(let i=0; i<10; i++) createTree(scene, 'oak', -15 - Math.random()*10, Math.random()*20 - 10);
+        // TREES (Mix of Normal and Oak)
+        for(let i=0; i<15; i++) {
+            const type = (Math.random() > 0.7) ? 'oak' : 'tree';
+            createTree(scene, type, -15 - Math.random()*20, Math.random()*40 - 20);
+        }
     } 
     else if (levelName === 'falador') {
         scene.background.setHex(0xaaccff);
-        createGround(scene, 0xdddddd); // Paved
+        createGround(scene, 0xdddddd); // Paved White
 
-        // White Castle (South)
         createBuilding(scene, 'white_castle', 0, 15);
-
-        // East Bank (Near Park)
-        createInteractable(scene, 'bank_booth', 15, -5);
-
-        // Park (Central/East)
-        for(let i=0; i<8; i++) createTree(scene, 'oak', 15 + Math.random()*5, 5 + Math.random()*5);
+        createInteractable(scene, 'bank_booth', 12, -5); // East Bank
+        
+        // Park Trees
+        for(let i=0; i<10; i++) createTree(scene, 'oak', 15 + Math.random()*10, 5 + Math.random()*15);
     }
     else if (levelName === 'menaphos') {
-        scene.background.setHex(0xffeebb);
+        scene.background.setHex(0xffeebb); // Desert Sky
         createGround(scene, 0xe6c288); // Sand
 
-        // Grand Pyramid (Far North)
         createBuilding(scene, 'pyramid', 0, -30);
-
-        // Port District (South)
-        createInteractable(scene, 'shop_stall', 10, 10); // Fish stall
-        createInteractable(scene, 'bank_booth', -10, 10); // Port Bank
+        createInteractable(scene, 'shop_stall', 10, 10);
+        createInteractable(scene, 'bank_booth', -10, 10);
 
         // Palm Trees
-        for(let i=0; i<10; i++) createTree(scene, 'palm', Math.random()*40-20, Math.random()*20);
+        for(let i=0; i<12; i++) createTree(scene, 'palm', Math.random()*40-20, Math.random()*30-10);
     }
 }
