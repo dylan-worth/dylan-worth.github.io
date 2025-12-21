@@ -10,9 +10,9 @@ const MAX_SLOTS = 20;
 export function addItem(id, name, amount = 1) {
     const inv = window.gameState.inventory;
 
-    // 1. Stackable Check (Coins)
-    if (id === 'coins') {
-        const existing = inv.find(item => item.id === 'coins');
+    // 1. Stackable Check (Coins & Snowballs)
+    if (id === 'coins' || id === 'snowball') {
+        const existing = inv.find(item => item.id === id);
         if (existing) {
             existing.amount += amount;
             updateInventoryUI();
@@ -56,7 +56,7 @@ export function hasItem(id, amount = 1) {
     return item && item.amount >= amount;
 }
 
-// --- MISSING HELPERS FOR SHOP.JS ---
+// --- HELPERS FOR SHOP & ECONOMY ---
 
 export function addCoins(amount) {
     return addItem('coins', 'Coins', amount);
@@ -74,6 +74,7 @@ export function getCoins() {
 // --- UTILS ---
 
 export function getBestAxe() {
+    // Returns an axe object or a default 'hand' object
     return window.gameState.inventory.find(i => i.id.includes('axe')) || { power: 1 }; 
 }
 
@@ -91,7 +92,7 @@ export function updateInventoryUI() {
     window.gameState.inventory.forEach((item) => {
         const slot = document.createElement('div');
         slot.className = 'item-slot';
-        slot.innerText = item.name.substring(0, 2); 
+        slot.innerText = item.name.substring(0, 2); // 2-letter Icon
         
         if (item.amount > 1) {
             const count = document.createElement('div');
@@ -100,8 +101,17 @@ export function updateInventoryUI() {
             slot.appendChild(count);
         }
 
+        // CLICK TO SELECT (For Snowballs/Throwing)
         slot.onclick = () => {
+            // Visual Highlight
+            document.querySelectorAll('.item-slot').forEach(s => s.style.borderColor = '#1b2b3b');
+            slot.style.borderColor = 'lime';
+            
+            // Logic
             addChatMessage(`Selected: ${item.name}`, "cyan");
+            if (window.selectItem) {
+                window.selectItem(item.id); // Trigger global selection in main.js
+            }
         };
 
         grid.appendChild(slot);
