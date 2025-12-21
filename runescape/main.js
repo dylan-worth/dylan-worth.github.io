@@ -13,8 +13,8 @@ import { updateMinimap } from './minimap.js';
 import { createSnowman } from './assets_entities.js'; 
 import { triggerSnowballEvent } from './events.js'; 
 import { triggerSnowWeather } from './weather.js'; 
-import { equipItem } from './equipment.js'; // NEW
-import { talkToNPC } from './quests.js';    // NEW
+import { equipItem } from './equipment.js'; 
+import { talkToNPC } from './quests.js';    
 import * as THREE from 'three';
 
 window.gameState = {
@@ -27,7 +27,7 @@ window.gameState = {
     bank: [],
     selectedSnowPile: null, 
     selectedItem: null,
-    gameTime: 12 // 0 to 24 (12 = Noon)
+    gameTime: 12 
 };
 
 const raycaster = new THREE.Raycaster();
@@ -43,23 +43,19 @@ export function initGame() {
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
-        // Give Starter items to help test Quest/Equip
         if(window.gameState.inventory.length === 0) {
              addItem('axe_bronze', 'Bronze Axe', 1);
-             addItem('sword_iron', 'Iron Sword', 1); // Test Item
+             addItem('sword_iron', 'Iron Sword', 1); 
         }
         updateStatsUI(); 
     } 
     catch(e) { console.error(e); }
 
-    // GAME LOOP (Events + Time)
     setInterval(() => {
-        // Random Events
         if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
         if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
         
-        // Day/Night Cycle (Advance time)
-        window.gameState.gameTime += 0.05; // Fast cycle
+        window.gameState.gameTime += 0.05; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
         updateEnvironment();
 
@@ -71,15 +67,14 @@ export function initGame() {
 function updateEnvironment() {
     const t = window.gameState.gameTime;
     let intensity = 1.0;
-    let skyColor = 0x87ceeb; // Day Blue
+    let skyColor = 0x87ceeb; 
 
-    // Night Logic (Between 20:00 and 6:00)
     if (t > 20 || t < 6) {
         intensity = 0.2; 
-        skyColor = 0x1a1a2a; // Dark Night
+        skyColor = 0x1a1a2a; 
     } else if (t > 18 || t < 8) {
-        intensity = 0.5; // Dusk/Dawn
-        skyColor = 0xffa500; // Orange
+        intensity = 0.5; 
+        skyColor = 0xffa500; 
     }
 
     setDayNight(intensity, skyColor);
@@ -97,12 +92,14 @@ function onInteract(mouse) {
             const type = group.userData.type;
             const name = group.userData.name;
 
-            // NEW: QUEST INTERACTION
-            if (name === 'Cook' || type === 'quest_npc') {
+            // 1. PRIORITY: QUEST / TALKING
+            // If it is a quest npc (Cook/Cow/Chicken), talk to it and STOP.
+            if (type === 'quest_npc') {
                 talkToNPC(name);
-                break;
+                break; // Stop loop, do not check for combat
             }
 
+            // 2. COMBAT (Only if it's a regular NPC)
             if (type === 'npc') {
                 if (window.gameState.selectedItem === 'snowball') {
                     if (removeItem('snowball', 1)) {
@@ -118,6 +115,7 @@ function onInteract(mouse) {
                 break; 
             }
 
+            // 3. OTHER OBJECTS
             if (type === 'snow_pile') {
                 window.gameState.selectedSnowPile = group;
                 const modal = document.getElementById('snow-modal');
@@ -136,7 +134,6 @@ function onInteract(mouse) {
 // Global Helpers
 window.selectItem = (id) => { 
     window.gameState.selectedItem = id; 
-    // AUTO-EQUIP CHECK
     if (id.includes('axe') || id.includes('sword') || id.includes('hat')) {
         equipItem(id);
     }
@@ -161,7 +158,6 @@ function attemptChop(treeGroup) {
     const axe = getBestAxe();
     if(!axe) { addChatMessage("No axe.", "red"); return; }
     
-    // VISUAL: Equip Axe automatically if chopping
     equipItem(axe.id);
 
     addChatMessage("Chopping...", "white");
