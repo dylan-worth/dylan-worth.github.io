@@ -1,226 +1,151 @@
 import * as THREE from 'three';
 
-// --- GROUND GENERATION ---
+// Ensure global collision arrays exist
+window.gameState = window.gameState || {};
+window.gameState.colliders = []; // For walls/trees
+window.gameState.buildings = []; // For roof hiding
+
+// --- GROUND ---
 export function createGround(scene, colorHex) {
     const geo = new THREE.PlaneGeometry(200, 200);
     const mat = new THREE.MeshStandardMaterial({ color: colorHex });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
     mesh.receiveShadow = true;
-    mesh.name = "ground"; // Required for click-to-move raycasting
+    mesh.name = "ground";
     scene.add(mesh);
 }
 
-// --- INTERACTABLES (Banks, Shops) ---
+// --- HELPER: Create a Wall with Collision ---
+function createWall(x, z, width, depth, height, color, rotY, scene) {
+    const geo = new THREE.BoxGeometry(width, height, depth);
+    const mat = new THREE.MeshStandardMaterial({ color: color });
+    const wall = new THREE.Mesh(geo, mat);
+    
+    // Position is center of box
+    wall.position.set(x, height/2, z); 
+    wall.rotation.y = rotY;
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+    
+    scene.add(wall);
+    
+    // Create Bounding Box for Collision
+    // Note: Box3 is axis-aligned. Rotated walls need more complex math, 
+    // but for this demo, we keep walls mostly axis-aligned.
+    const box = new THREE.Box3().setFromObject(wall);
+    window.gameState.colliders.push(box);
+    
+    return wall;
+}
+
+// --- BUILDINGS ---
+export function createBuilding(scene, type, x, z, rotY = 0) {
+    // For simplicity, we are building these relative to (x,z)
+    
+    if (type === 'lum_castle') {
+        const c = 0x777777;
+        // North
+        createWall(x, z - 5, 10, 1, 6, c, 0, scene);
+        // West
+        createWall(x - 5, z, 1, 10, 6, c, 0, scene);
+        // East
+        createWall(x + 5, z, 1, 10, 6, c, 0, scene);
+        // South (Door Gap)
+        createWall(x - 3.5, z + 5, 4, 1, 6, c, 0, scene);
+        createWall(x + 3.5, z + 5, 4, 1, 6, c, 0, scene);
+
+        // Roof
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(8, 4, 4), new THREE.MeshStandardMaterial({ color: 0x443333 }));
+        roof.position.set(x, 8, z);
+        roof.rotation.y = Math.PI/4;
+        scene.add(roof);
+        
+        // Register for hiding
+        window.gameState.buildings.push({ x, z, radius: 6, roofMesh: roof });
+    }
+    else if (type === 'church') {
+        const c = 0x555555;
+        // Walls
+        createWall(x, z - 4, 6, 1, 5, c, 0, scene); // N
+        createWall(x - 3, z, 1, 8, 5, c, 0, scene); // W
+        createWall(x + 3, z, 1, 8, 5, c, 0, scene); // E
+        createWall(x - 2, z + 4, 3, 1, 5, c, 0, scene); // S Left
+        createWall(x + 2, z + 4, 3, 1, 5, c, 0, scene); // S Right
+
+        // Roof
+        const roof = new THREE.Mesh(new THREE.CylinderGeometry(0, 5, 4, 4, 1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        roof.position.set(x, 7, z);
+        roof.rotation.y = Math.PI/4;
+        scene.add(roof);
+        
+        window.gameState.buildings.push({ x, z, radius: 5, roofMesh: roof });
+    }
+    else if (type === 'white_castle') {
+        // Simple big box for Falador for now to prevent complexity errors
+        createWall(x, z-6, 12, 1, 8, 0xeeeeee, 0, scene);
+        createWall(x-6, z, 1, 12, 8, 0xeeeeee, 0, scene);
+        createWall(x+6, z, 1, 12, 8, 0xeeeeee, 0, scene);
+        createWall(x-4, z+6, 5, 1, 8, 0xeeeeee, 0, scene);
+        createWall(x+4, z+6, 5, 1, 8, 0xeeeeee, 0, scene);
+        
+        // No roof hiding for this big guy yet, just collisions
+    }
+    // (Add Menaphos Pyramid here if desired, basically a big wall)
+}
+
+// --- INTERACTABLES & TREES ---
 export function createInteractable(scene, type, x, z) {
     const group = new THREE.Group();
     
+    // Add collision box for the object
+    const box = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 1, z), new THREE.Vector3(2, 5, 2));
+    window.gameState.colliders.push(box);
+
+    // Visuals (Simplified from before)
     if (type === 'bank_booth') {
-        // Wooden Counter
-        const base = new THREE.Mesh(
-            new THREE.BoxGeometry(2, 1.5, 1), 
-            new THREE.MeshStandardMaterial({ color: 0x654321 })
-        );
-        base.position.y = 0.75;
-        base.castShadow = true;
-        group.add(base);
-        
-        // Glass Partition
-        const glass = new THREE.Mesh(
-            new THREE.BoxGeometry(1.8, 1, 0.1), 
-            new THREE.MeshStandardMaterial({ color: 0x88ccff, opacity: 0.6, transparent: true })
-        );
-        glass.position.set(0, 2, 0);
-        group.add(glass);
-    } 
-    else if (type === 'shop_stall') {
-        // Stall Base
-        const base = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 1, 2), 
-            new THREE.MeshStandardMaterial({ color: 0x880000 })
-        );
-        base.position.y = 0.5;
-        base.castShadow = true;
-        group.add(base);
-        
-        // Striped Roof
-        const roof = new THREE.Mesh(
-            new THREE.CylinderGeometry(2, 2, 3.2, 8, 1, false, 0, Math.PI), 
-            new THREE.MeshStandardMaterial({ color: 0xeeeeee })
-        );
-        roof.rotation.z = Math.PI / 2;
-        roof.position.y = 2.5;
-        group.add(roof);
-
-        // Posts
-        const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2), new THREE.MeshStandardMaterial({color: 0x654321}));
-        postL.position.set(-1.4, 1.5, 0);
-        group.add(postL);
-        const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2), new THREE.MeshStandardMaterial({color: 0x654321}));
-        postR.position.set(1.4, 1.5, 0);
-        group.add(postR);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 1), new THREE.MeshStandardMaterial({ color: 0x654321 }));
+        mesh.position.y = 0.75;
+        group.add(mesh);
+    } else if (type === 'shop_stall') {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 2), new THREE.MeshStandardMaterial({ color: 0x880000 }));
+        mesh.position.y = 0.5;
+        group.add(mesh);
     }
 
     group.position.set(x, 0, z);
-    
-    // DATA FOR RAYCASTER
     group.userData = { type: type };
-    // Helper: make sure clicking children triggers the group logic
-    group.traverse((child) => {
-        if(child.isMesh) child.userData = { parentGroup: group };
-    });
-    
+    group.children.forEach(c => c.userData = { parentGroup: group });
     scene.add(group);
 }
 
-// --- BUILDINGS (Walls, Castles, Pyramids) ---
-export function createBuilding(scene, type, x, z, rotY = 0) {
-    const group = new THREE.Group();
-
-    if (type === 'lum_castle') {
-        // Main Keep
-        const keep = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 8, 10), 
-            new THREE.MeshStandardMaterial({ color: 0x777777 })
-        );
-        keep.position.y = 4;
-        keep.castShadow = true;
-        keep.receiveShadow = true;
-        group.add(keep);
-        
-        // Battlements
-        const top = new THREE.Mesh(
-            new THREE.BoxGeometry(11, 1, 11), 
-            new THREE.MeshStandardMaterial({ color: 0x666666 })
-        );
-        top.position.y = 8.5;
-        group.add(top);
-    }
-    else if (type === 'white_castle') {
-        // Falador White Walls
-        const keep = new THREE.Mesh(
-            new THREE.BoxGeometry(12, 10, 8), 
-            new THREE.MeshStandardMaterial({ color: 0xeeeeee })
-        );
-        keep.position.y = 5;
-        keep.castShadow = true;
-        group.add(keep);
-        
-        // Drawbridge
-        const bridge = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 0.5, 6), 
-            new THREE.MeshStandardMaterial({ color: 0x444444 })
-        );
-        bridge.position.set(0, 0.25, 6);
-        group.add(bridge);
-        
-        // Flags
-        const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x888888}));
-        flagPole.position.set(5, 12, 0);
-        group.add(flagPole);
-        const flag = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.1), new THREE.MeshStandardMaterial({color: 0x0000ff}));
-        flag.position.set(5.5, 13.5, 0);
-        group.add(flag);
-    }
-    else if (type === 'pyramid') {
-        // Menaphos Pyramid
-        const pyr = new THREE.Mesh(
-            new THREE.ConeGeometry(12, 15, 4), 
-            new THREE.MeshStandardMaterial({ color: 0xd2b48c })
-        );
-        pyr.rotation.y = Math.PI / 4; 
-        pyr.position.y = 7.5;
-        pyr.castShadow = true;
-        group.add(pyr);
-        
-        // Gold Cap
-        const cap = new THREE.Mesh(
-            new THREE.ConeGeometry(3, 4, 4),
-            new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.5, roughness: 0.2 })
-        );
-        cap.rotation.y = Math.PI / 4;
-        cap.position.y = 14;
-        group.add(cap);
-    }
-    else if (type === 'church') {
-        // Church
-        const body = new THREE.Mesh(
-            new THREE.BoxGeometry(6, 5, 8), 
-            new THREE.MeshStandardMaterial({ color: 0x555555 })
-        );
-        body.position.y = 2.5;
-        body.castShadow = true;
-        group.add(body);
-        
-        const tower = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 10, 3), 
-            new THREE.MeshStandardMaterial({ color: 0x555555 })
-        );
-        tower.position.set(0, 5, 3.5);
-        tower.castShadow = true;
-        group.add(tower);
-    }
-
-    group.position.set(x, 0, z);
-    group.rotation.y = rotY;
-    scene.add(group);
-}
-
-// --- TREES ---
 export function createTree(scene, type, x, z) {
+    // Collision for trunk
+    const box = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 1, z), new THREE.Vector3(1, 10, 1));
+    window.gameState.colliders.push(box);
+
     const group = new THREE.Group();
     
-    let trunkColor = 0x3d2817;
-    let leafColor = 0x228b22;
-    let trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 2);
-    let leafGeo = new THREE.DodecahedronGeometry(1.5);
-    
-    // Stats
+    // Data setup
+    let color = 0x228b22;
     let name = "Tree";
-    let levelReq = 1;
+    let req = 1;
     let xp = 25;
-    let difficulty = 10; 
-
-    if (type === 'oak') {
-        name = "Oak Tree";
-        levelReq = 15;
-        xp = 37.5;
-        difficulty = 25; 
-        trunkGeo = new THREE.CylinderGeometry(0.8, 1.0, 2.5);
-        leafGeo = new THREE.DodecahedronGeometry(2.2);
-    }
-    else if (type === 'palm') {
-        name = "Palm Tree";
-        levelReq = 30;
-        xp = 60;
-        difficulty = 40;
-        leafColor = 0x88aa00;
-        trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 4);
-        leafGeo = new THREE.ConeGeometry(3, 1.5, 6);
-    }
-
-    const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshStandardMaterial({color: trunkColor}));
-    trunk.position.y = (type==='palm') ? 2 : 1;
-    trunk.castShadow = true;
     
-    const leaves = new THREE.Mesh(leafGeo, new THREE.MeshStandardMaterial({color: leafColor}));
-    leaves.position.y = (type==='palm') ? 4 : 2.5;
-
+    if(type === 'oak') { color = 0x116611; name = "Oak"; req = 15; xp = 37; }
+    
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 2), new THREE.MeshStandardMaterial({color:0x3d2817}));
+    trunk.position.y = 1;
+    
+    const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5), new THREE.MeshStandardMaterial({color:color}));
+    leaves.position.y = 2.5;
+    
     group.add(trunk, leaves);
     group.position.set(x, 0, z);
     
-    // DATA
-    group.userData = { 
-        type: 'tree', 
-        treeName: name, 
-        levelReq: levelReq,
-        xp: xp,
-        difficulty: difficulty,
-        respawning: false 
-    };
-    
+    group.userData = { type: 'tree', treeName: name, levelReq: req, xp: xp, hp: 3 };
     trunk.userData = { parentGroup: group };
     leaves.userData = { parentGroup: group };
-
+    
     scene.add(group);
 }
