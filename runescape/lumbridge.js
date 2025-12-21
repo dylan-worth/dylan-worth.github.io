@@ -21,7 +21,7 @@ export function buildLumbridge(scene) {
     // Lanterns
     createLantern(scene, 5, -15); 
     createLantern(scene, -5, 20); 
-    createLantern(scene, 15, 10); 
+    createLantern(scene, 15, 12.5); 
     createLantern(scene, 20, 30); 
 
     createInteractable(scene, 'bank_booth', -5, -8); 
