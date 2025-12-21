@@ -1,5 +1,4 @@
-// IMPORT controls from render.js
-import { initRenderer, scene, camera, renderer, playerGroup, controls } from './render.js';
+import { initRenderer, scene, camera, renderer, playerGroup, controls, setDayNight } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
 import { loadLevel } from './levels.js';
 import { addItem, removeItem, getBestAxe } from './inventory.js'; 
@@ -14,6 +13,8 @@ import { updateMinimap } from './minimap.js';
 import { createSnowman } from './assets_entities.js'; 
 import { triggerSnowballEvent } from './events.js'; 
 import { triggerSnowWeather } from './weather.js'; 
+import { equipItem } from './equipment.js'; // NEW
+import { talkToNPC } from './quests.js';    // NEW
 import * as THREE from 'three';
 
 window.gameState = {
@@ -25,7 +26,8 @@ window.gameState = {
     inventory: [], 
     bank: [],
     selectedSnowPile: null, 
-    selectedItem: null 
+    selectedItem: null,
+    gameTime: 12 // 0 to 24 (12 = Noon)
 };
 
 const raycaster = new THREE.Raycaster();
@@ -41,20 +43,46 @@ export function initGame() {
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
+        // Give Starter items to help test Quest/Equip
         if(window.gameState.inventory.length === 0) {
              addItem('axe_bronze', 'Bronze Axe', 1);
+             addItem('sword_iron', 'Iron Sword', 1); // Test Item
         }
         updateStatsUI(); 
     } 
     catch(e) { console.error(e); }
 
-    // Random Events
+    // GAME LOOP (Events + Time)
     setInterval(() => {
+        // Random Events
         if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
         if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
+        
+        // Day/Night Cycle (Advance time)
+        window.gameState.gameTime += 0.05; // Fast cycle
+        if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
+        updateEnvironment();
+
     }, 1000);
 
     animate();
+}
+
+function updateEnvironment() {
+    const t = window.gameState.gameTime;
+    let intensity = 1.0;
+    let skyColor = 0x87ceeb; // Day Blue
+
+    // Night Logic (Between 20:00 and 6:00)
+    if (t > 20 || t < 6) {
+        intensity = 0.2; 
+        skyColor = 0x1a1a2a; // Dark Night
+    } else if (t > 18 || t < 8) {
+        intensity = 0.5; // Dusk/Dawn
+        skyColor = 0xffa500; // Orange
+    }
+
+    setDayNight(intensity, skyColor);
 }
 
 function onInteract(mouse) {
@@ -67,6 +95,13 @@ function onInteract(mouse) {
         let group = hit.object.userData.parentGroup;
         if (group) {
             const type = group.userData.type;
+            const name = group.userData.name;
+
+            // NEW: QUEST INTERACTION
+            if (name === 'Cook' || type === 'quest_npc') {
+                talkToNPC(name);
+                break;
+            }
 
             if (type === 'npc') {
                 if (window.gameState.selectedItem === 'snowball') {
@@ -99,7 +134,13 @@ function onInteract(mouse) {
 }
 
 // Global Helpers
-window.selectItem = (id) => { window.gameState.selectedItem = id; };
+window.selectItem = (id) => { 
+    window.gameState.selectedItem = id; 
+    // AUTO-EQUIP CHECK
+    if (id.includes('axe') || id.includes('sword') || id.includes('hat')) {
+        equipItem(id);
+    }
+};
 
 window.handleSnowChoice = (choice) => {
     const pile = window.gameState.selectedSnowPile;
@@ -120,6 +161,9 @@ function attemptChop(treeGroup) {
     const axe = getBestAxe();
     if(!axe) { addChatMessage("No axe.", "red"); return; }
     
+    // VISUAL: Equip Axe automatically if chopping
+    equipItem(axe.id);
+
     addChatMessage("Chopping...", "white");
     choppingInterval = setInterval(() => {
         if(treeGroup.userData.respawning) { clearInterval(choppingInterval); return; }
@@ -150,22 +194,13 @@ function commandTriggerEvent() { triggerSnowballEvent(scene, playerGroup); }
 
 function animate() {
     requestAnimationFrame(animate);
-    
-    // 1. Update Player Position
     updateMovement();
-    
-    // 2. Update Camera (OrbitControls) to follow Player
     if (controls && playerGroup) {
-        // Move the camera target to the player
         controls.target.copy(playerGroup.position);
-        // Add height offset so we look at head, not feet
         controls.target.y += 1.0; 
         controls.update();
     }
-
-    // 3. Update Minimap
     updateMinimap(scene, playerGroup);
-    
     renderer.render(scene, camera);
 }
 
