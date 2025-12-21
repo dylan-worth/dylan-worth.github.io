@@ -2,13 +2,15 @@ import { addChatMessage } from './chat.js';
 import { addXp } from './stats.js';
 import { updateStatsUI } from './ui.js';
 import { rollLoot } from './loot.js'; 
-import { playSwingAnimation } from './render.js'; 
+import { playSwingAnimation, spawnHitSplat } from './render.js'; 
 import * as THREE from 'three'; 
 
 let combatInterval = null;
 let currentTarget = null;
 
-// --- SMITE (Debug Command) ---
+/**
+ * SMITE: High-damage debug command with visual lightning effect.
+ */
 export function triggerSmite(scene) {
     if (!currentTarget || !currentTarget.visible) {
         addChatMessage("You are not fighting anyone!", "red");
@@ -25,62 +27,59 @@ export function triggerSmite(scene) {
     
     setTimeout(() => { scene.remove(bolt); }, 200);
 
-    addChatMessage("Smited!", "gold");
+    // Instant kill logic
     currentTarget.userData.hp = 0;
-    // The next combat tick handles the death logic
+    spawnHitSplat(currentTarget, 99, false); // Massive red splat
 }
 
-// --- PACIFY (Snowball Effect) ---
+/**
+ * PACIFY: Stuns an NPC using the snowball event mechanics.
+ */
 export function pacifyNPC(targetGroup) {
     if (!targetGroup) return;
     
-    // Visual Effect: Freeze (Turn Cyan)
+    // Visual Freeze Effect
     targetGroup.children.forEach(c => {
-        if(c.material) {
-            c.material.color.setHex(0x00ffff); 
-        }
+        if(c.material) c.material.color.setHex(0x00ffff); 
     });
 
-    addChatMessage(`${targetGroup.userData.name} is stunned by the snow!`, "cyan");
+    addChatMessage(`${targetGroup.userData.name} is stunned!`, "cyan");
     
-    if (currentTarget === targetGroup) {
-        stopCombat();
-    }
+    if (currentTarget === targetGroup) stopCombat();
     
-    // Reset NPC color after 5 seconds
+    // Thaw after 5 seconds
     setTimeout(() => {
         if (!targetGroup.visible) return; 
-        
         targetGroup.children.forEach(c => {
+            // Restore original colors based on NPC type
             if (targetGroup.userData.npcType === 'man') {
-                if (c.geometry.type === 'BoxGeometry') c.material.color.setHex(0x445588);
-                else c.material.color.setHex(0xffccaa);
+                c.material.color.setHex(c.geometry.type === 'BoxGeometry' ? 0x445588 : 0xffccaa);
             } else if (targetGroup.userData.npcType === 'goblin') {
-                 if (c.geometry.type === 'BoxGeometry') c.material.color.setHex(0x558855);
-                 else c.material.color.setHex(0x00ff00);
+                c.material.color.setHex(c.geometry.type === 'BoxGeometry' ? 0x558855 : 0x00ff00);
             }
         });
     }, 5000);
 }
 
-// --- MAIN COMBAT LOOP ---
+/**
+ * MAIN COMBAT LOOP: Triggers swings, calculates hits, and spawns hit-splats.
+ */
 export function startCombat(targetGroup) {
     if (combatInterval) clearInterval(combatInterval);
     currentTarget = targetGroup;
     const skills = window.gameState.skills;
 
-    addChatMessage(`Attacking ${targetGroup.userData.name}...`, "orange");
-
+    // The character will stop at 1.5 units away due to movement.js updates.
     combatInterval = setInterval(() => {
-        // 1. Validate Target
         if (!currentTarget || !currentTarget.parent || !currentTarget.visible) {
-            stopCombat(); return;
+            stopCombat(); 
+            return;
         }
 
-        // 2. Trigger Visual Swing Animation
+        // 1. Visual Swing
         playSwingAnimation();
 
-        // 3. Calculate Player Hit
+        // 2. Damage Calculation
         const hitChance = (Math.random() * (skills.attack.level + 5));
         const blockChance = (Math.random() * 5); 
         const hit = hitChance > blockChance;
@@ -88,41 +87,40 @@ export function startCombat(targetGroup) {
         let dmg = 0;
         if (hit) {
             dmg = Math.floor(Math.random() * (2 + skills.strength.level / 5));
-            if (dmg === 0) dmg = 1; 
+            if (dmg === 0 && Math.random() > 0.5) dmg = 1; // Minimum hit logic
         }
 
-        // 4. Apply Damage to NPC
+        // 3. Process Result & Spawn 3D Hit Splats
         if (dmg > 0) {
             currentTarget.userData.hp -= dmg;
-            addChatMessage(`You hit ${dmg}.`, "red");
+            spawnHitSplat(currentTarget, dmg, false); // RED HIT
             addXp('hitpoints', dmg * 1.3);
             addXp('strength', dmg * 2.0); 
             addXp('attack', dmg * 2.0);
         } else {
-            addChatMessage("You missed.", "grey");
+            spawnHitSplat(currentTarget, 0, true); // BLUE MISS
         }
 
-        // 5. Check NPC Death
         if (currentTarget.userData.hp <= 0) {
             handleNPCDeath(currentTarget);
             return;
         }
 
-        // 6. NPC Hits Back (Delayed slightly for realism)
+        // 4. NPC Retaliation
         setTimeout(() => {
             if (!currentTarget || !currentTarget.visible) return;
-            if (Math.random() > 0.6) {
+            if (Math.random() > 0.7) { // 30% chance to hit back
                 const npcDmg = Math.floor(Math.random() * 2);
                 if (npcDmg > 0) {
                     skills.hitpoints.level -= npcDmg;
-                    addChatMessage(`The ${currentTarget.userData.name} hits you for ${npcDmg}!`, "red");
+                    spawnHitSplat(window.gameState.player, npcDmg, false); // Splat on player
                     if (skills.hitpoints.level <= 0) handlePlayerDeath();
                 }
             }
             updateStatsUI();
-        }, 400);
+        }, 500);
 
-    }, 1200); // 1.2s intervals to match swing timing
+    }, 1200); // Matched to swing animation speed
 }
 
 export function stopCombat() {
@@ -132,31 +130,23 @@ export function stopCombat() {
 }
 
 function handleNPCDeath(target) {
-    addChatMessage(`You killed the ${target.userData.name}!`, "lime");
     stopCombat();
-    
-    // Loot
     rollLoot(target.userData.npcType);
-
-    // Respawn Logic
     target.visible = false;
     setTimeout(() => {
         target.userData.hp = target.userData.maxHp;
         target.visible = true;
-    }, 5000); 
-    
+    }, 5000); // 5 second respawn timer
     updateStatsUI();
 }
 
 function handlePlayerDeath() {
-    addChatMessage("Oh dear, you are dead!", "red");
     stopCombat();
-    
-    // Reset HP to level 10
+    addChatMessage("Oh dear, you are dead!", "red");
     window.gameState.skills.hitpoints.level = 10; 
     updateStatsUI();
     
-    // Teleport back to start
+    // Respawns at Lumbridge start point
     if (window.game && window.game.teleport) {
         window.game.teleport('lumbridge');
     }
