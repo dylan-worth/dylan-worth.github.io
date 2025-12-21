@@ -1,8 +1,8 @@
-// STATE
-export const inventory = [
-    { id: 'axe_bronze', name: 'Bronze Axe', amount: 1 }
-];
-export let coins = 100;
+import { inventory, coins } from './inventory.js'; // Self import works for state? No, better to keep state here.
+
+// State needs to be defined here
+const invData = [ { id: 'axe_bronze', name: 'Bronze Axe', amount: 1 } ];
+let coinCount = 100;
 
 // AXE STATS
 const AXE_STATS = {
@@ -15,7 +15,7 @@ const AXE_STATS = {
 
 export function getBestAxe() {
     let best = null;
-    inventory.forEach(i => {
+    invData.forEach(i => {
         if(AXE_STATS[i.id]) {
             if(!best || AXE_STATS[i.id].power > best.power) best = { ...i, ...AXE_STATS[i.id] };
         }
@@ -24,30 +24,30 @@ export function getBestAxe() {
 }
 
 export function addItem(id, name, amount=1) {
-    let exists = inventory.find(i => i.id === id);
+    let exists = invData.find(i => i.id === id);
     if(exists) exists.amount += amount;
     else {
-        if(inventory.length >= 28) return false;
-        inventory.push({ id, name, amount });
+        if(invData.length >= 28) return false;
+        invData.push({ id, name, amount });
     }
     updateInvUI();
     return true;
 }
 
 export function removeItem(id, amount=1) {
-    let idx = inventory.findIndex(i => i.id === id);
+    let idx = invData.findIndex(i => i.id === id);
     if(idx > -1) {
-        inventory[idx].amount -= amount;
-        if(inventory[idx].amount <= 0) inventory.splice(idx, 1);
+        invData[idx].amount -= amount;
+        if(invData[idx].amount <= 0) invData.splice(idx, 1);
         updateInvUI();
         return true;
     }
     return false;
 }
 
-export function addCoins(n) { coins += n; updateInvUI(); }
+export function addCoins(n) { coinCount += n; updateInvUI(); }
 export function removeCoins(n) { 
-    if(coins >= n) { coins -= n; updateInvUI(); return true; } 
+    if(coinCount >= n) { coinCount -= n; updateInvUI(); return true; } 
     return false; 
 }
 
@@ -56,9 +56,9 @@ export function updateInvUI() {
     if(!grid) return;
     grid.innerHTML = '';
     
-    document.getElementById('coin-display').innerText = coins;
+    document.getElementById('coin-display').innerText = coinCount;
 
-    inventory.forEach(item => {
+    invData.forEach(item => {
         const slot = document.createElement('div');
         slot.className = 'item-slot';
         
@@ -71,10 +71,10 @@ export function updateInvUI() {
         
         // CLICK LOGIC
         slot.onclick = () => {
-            if(window.gameState.uiMode === 'bank') {
-                // Call global deposit to avoid circular dependency
+            // Check global game state
+            if(window.gameState && window.gameState.uiMode === 'bank') {
                 if(window.game && window.game.deposit) window.game.deposit(item);
-            } else if(window.gameState.uiMode === 'shop') {
+            } else if(window.gameState && window.gameState.uiMode === 'shop') {
                 if(window.game && window.game.sell) window.game.sell(item);
             } else {
                 console.log("Clicked", item.name);
