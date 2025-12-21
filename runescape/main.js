@@ -4,14 +4,16 @@ import { loadLevel } from './levels.js';
 import { addItem, getBestAxe } from './inventory.js'; 
 import { openBank, deposit } from './bank.js';
 import { openShop, sell } from './shop.js';
+import { setupChat, addChatMessage } from './chat.js';
 import * as THREE from 'three';
 
 // GAME STATE
 window.gameState = {
     skills: { woodcutting: { level: 1, xp: 0 } },
-    uiMode: 'normal', // 'normal', 'bank', 'shop'
+    uiMode: 'normal',
     colliders: [],
-    buildings: []
+    buildings: [],
+    player: null
 };
 
 const raycaster = new THREE.Raycaster();
@@ -20,7 +22,9 @@ let choppingInterval = null;
 
 export function initGame() {
     initRenderer();
+    window.gameState.player = playerGroup; // For debug
     setupMovement(camera, scene, playerGroup);
+    setupChat();
     
     try { loadLevel(scene, 'lumbridge'); } 
     catch(e) { console.error(e); }
@@ -31,10 +35,9 @@ export function initGame() {
 
 function onInteract(e) {
     if (e.target.id !== 'game-ui' && e.target.tagName !== 'CANVAS') return;
-    if (e.button === 2) return; // Ignore right click (camera)
+    if (e.button === 2) return; 
 
-    // Stop chopping if we move
-    if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; updateContext("", ""); }
+    if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -57,25 +60,26 @@ function attemptChop(treeGroup) {
     if(treeGroup.userData.respawning) return;
     
     const axe = getBestAxe();
-    if(!axe) { updateContext("Need Axe!", "red"); return; }
+    if(!axe) { addChatMessage("You do not have an axe which you have the woodcutting level to use.", "red"); return; }
     
-    if(window.gameState.skills.woodcutting.level < (treeGroup.userData.levelReq || 1)) {
-        updateContext("Level too low", "red"); return;
+    const req = treeGroup.userData.levelReq || 1;
+    if(window.gameState.skills.woodcutting.level < req) {
+        // REQUESTED FIX: Specific message
+        addChatMessage(`${treeGroup.userData.treeName} requires level ${req} to chop.`, "red");
+        return;
     }
 
-    updateContext("Chopping...", "lime");
+    addChatMessage(`You swing your axe at the ${treeGroup.userData.treeName}...`, "white");
     
     choppingInterval = setInterval(() => {
         if(treeGroup.userData.respawning) { clearInterval(choppingInterval); return; }
         
-        // Success chance
         if(Math.random() * 10 < (window.gameState.skills.woodcutting.level + axe.power)) {
             if(addItem('logs', 'Logs', 1)) {
                 window.gameState.skills.woodcutting.xp += treeGroup.userData.xp;
-                updateContext("Got log", "cyan");
+                addChatMessage("You get some logs.", "lime");
                 updateSkillsUI();
                 
-                // Despawn
                 clearInterval(choppingInterval);
                 choppingInterval = null;
                 treeGroup.userData.respawning = true;
@@ -86,15 +90,10 @@ function attemptChop(treeGroup) {
                 }, 3000);
             } else {
                 clearInterval(choppingInterval);
-                updateContext("Inv Full", "red");
+                addChatMessage("Your inventory is full.", "red");
             }
         }
     }, 600);
-}
-
-function updateContext(msg, color) {
-    const el = document.getElementById('context-text');
-    if(el) { el.innerText = msg; el.style.color = color; }
 }
 
 function updateSkillsUI() {
@@ -102,15 +101,17 @@ function updateSkillsUI() {
     const lvl = Math.floor(1 + Math.sqrt(xp/10));
     window.gameState.skills.woodcutting.level = lvl;
     const elLvl = document.getElementById('wc-level');
+    const elXp = document.getElementById('wc-xp');
     if(elLvl) elLvl.innerText = lvl;
+    if(elXp) elXp.innerText = xp;
 }
 
 export function triggerTeleport(loc) {
-    // Clear old colliders/buildings before loading new level
     window.gameState.colliders = [];
     window.gameState.buildings = [];
     loadLevel(scene, loc);
     playerGroup.position.set(0,0,0);
+    addChatMessage(`Welcome to ${loc}.`, "cyan");
 }
 
 export function closeWindows() {
@@ -125,7 +126,7 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// EXPOSE UTILS FOR INVENTORY.JS
+// EXPOSE UTILS
 window.game = {
     teleport: triggerTeleport,
     closeWindows: closeWindows,
