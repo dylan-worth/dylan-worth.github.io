@@ -43,14 +43,19 @@ export function initGame() {
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
-        if(window.gameState.inventory.length === 0) {
+        
+        // --- FORCE STARTER ITEMS ---
+        // If inventory is empty, give items.
+        if(!window.gameState.inventory || window.gameState.inventory.length === 0) {
+             console.log("Granting starter items...");
              addItem('axe_bronze', 'Bronze Axe', 1);
              addItem('sword_iron', 'Iron Sword', 1); 
         }
         updateStatsUI(); 
     } 
-    catch(e) { console.error(e); }
+    catch(e) { console.error("Level Load Error:", e); }
 
+    // GAME LOOP
     setInterval(() => {
         if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
         if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
@@ -58,7 +63,6 @@ export function initGame() {
         window.gameState.gameTime += 0.05; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
         updateEnvironment();
-
     }, 1000);
 
     animate();
@@ -76,7 +80,6 @@ function updateEnvironment() {
         intensity = 0.5; 
         skyColor = 0xffa500; 
     }
-
     setDayNight(intensity, skyColor);
 }
 
@@ -92,14 +95,13 @@ function onInteract(mouse) {
             const type = group.userData.type;
             const name = group.userData.name;
 
-            // 1. PRIORITY: QUEST / TALKING
-            // If it is a quest npc (Cook/Cow/Chicken), talk to it and STOP.
+            // 1. QUEST / TALK
             if (type === 'quest_npc') {
                 talkToNPC(name);
-                break; // Stop loop, do not check for combat
+                break; 
             }
 
-            // 2. COMBAT (Only if it's a regular NPC)
+            // 2. COMBAT
             if (type === 'npc') {
                 if (window.gameState.selectedItem === 'snowball') {
                     if (removeItem('snowball', 1)) {
@@ -115,7 +117,7 @@ function onInteract(mouse) {
                 break; 
             }
 
-            // 3. OTHER OBJECTS
+            // 3. OBJECTS
             if (type === 'snow_pile') {
                 window.gameState.selectedSnowPile = group;
                 const modal = document.getElementById('snow-modal');
@@ -131,7 +133,7 @@ function onInteract(mouse) {
     }
 }
 
-// Global Helpers
+// Helpers
 window.selectItem = (id) => { 
     window.gameState.selectedItem = id; 
     if (id.includes('axe') || id.includes('sword') || id.includes('hat')) {
@@ -158,7 +160,7 @@ function attemptChop(treeGroup) {
     const axe = getBestAxe();
     if(!axe) { addChatMessage("No axe.", "red"); return; }
     
-    equipItem(axe.id);
+    equipItem(axe.id); // Visual Equip
 
     addChatMessage("Chopping...", "white");
     choppingInterval = setInterval(() => {
