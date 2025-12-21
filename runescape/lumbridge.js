@@ -1,73 +1,89 @@
-import { createGround, createRiver, createBridge, createPath } from './assets_env.js';
-import { createBuilding, createFence } from './assets_buildings.js';
+import { createGround, createPath } from './assets_env.js';
+import { createBuilding } from './assets_buildings.js';
 import { createInteractable, createTree, createChessTable, createSnowPile, createNPC, createLantern } from './assets_entities.js';
-import { addChatMessage } from './chat.js'; // Ensure chat is imported
+import { addChatMessage } from './chat.js';
 
 /**
- * Builds the Lumbridge region with Guard interaction logic.
+ * Builds the Lumbridge region with the massive open-interior castle and through-paths.
  */
 export function buildLumbridge(scene) {
-    // 1. ENVIRONMENT
+    // 1. BASE ENVIRONMENT
     createGround(scene, 0x2d5a27); 
-    createRiver(scene, 0, -15, 20, 4, false); 
-    createRiver(scene, 0, 10, 20, 4, false);  
-    createRiver(scene, -12, -5, 4, 25, true); 
-    createRiver(scene, 12, -5, 4, 25, true);  
 
-    // 2. THE CASTLE & BRIDGE
+    // 2. THE MASSIVE CASTLE (30x30 with openings)
+    // Positioned at z: -5, so it spans from z: -20 to z: 10
     createBuilding(scene, 'lum_castle', 0, -5); 
-    createBridge(scene, 0, -15, 6, 8); 
 
-    // 3. THE CASTLE GUARDS
+    // 3. THROUGH-PATHS
+    // Path entering from the South (Front)
+    createPath(scene, 0, 25, 6, 30);  
+    // Path exiting to the North (Back)
+    createPath(scene, 0, -35, 6, 30); 
+    // East path toward the Church
+    createPath(scene, 30, -5, 30, 6, 0); 
+
+    // 4. THE CASTLE GUARDS (Stationed at the front entrance)
     const guards = [];
-    const guardL = createNPC(scene, 'man', -2.5, -18);
-    const guardR = createNPC(scene, 'man', 2.5, -18);
+    const guardL = createNPC(scene, 'man', -4, 16);
+    const guardR = createNPC(scene, 'man', 4, 16);
 
     [guardL, guardR].forEach(g => {
         g.userData.name = "Castle Guard";
-        g.userData.hasGreeted = false; // Prevent spamming
+        g.userData.hasGreeted = false;
         g.children.forEach(c => { if (c.material) c.material.color.setHex(0xcccccc); });
         guards.push(g);
     });
 
-    // --- PROXIMITY SCRIPT ---
-    // We check every second if the player is near the drawbridge
+    // Proximity greeting logic
     setInterval(() => {
         if (!window.gameState.player) return;
-        
         guards.forEach(guard => {
             const dist = guard.position.distanceTo(window.gameState.player.position);
-            
             if (dist < 5 && !guard.userData.hasGreeted) {
-                addChatMessage(`${guard.userData.name}: Welcome to Lumbridge, traveler!`, "white");
+                addChatMessage(`${guard.userData.name}: Welcome to the Great Hall of Lumbridge!`, "white");
                 guard.userData.hasGreeted = true;
-                
-                // Reset greeting after 30 seconds so it can happen again later
                 setTimeout(() => { guard.userData.hasGreeted = false; }, 30000);
             }
         });
     }, 1000);
 
-    // 4. INFRASTRUCTURE
-    createPath(scene, 0, -25, 4, 30);
-    createBuilding(scene, 'church', 25, 15);
-    createBuilding(scene, 'bobs_axes', -20, 10);
-    createLantern(scene, 5, -18); 
-    createLantern(scene, -5, -18);
+    // 5. INTERIOR FURNISHING & NPCs (Spaced out in the 30x30 hall)
+    createNPC(scene, 'cook', 0, -5);           // Center of the room
+    createInteractable(scene, 'bank_booth', -10, -5); // To the left
+    createChessTable(scene, 10, -5);          // To the right
+    createSnowPile(scene, -10, 5);            // Near the front-left corner
 
-    // 5. NPCS & OBJECTS
-    createInteractable(scene, 'bank_booth', 0, -3); 
-    createNPC(scene, 'cook', 0, 0); 
-    createNPC(scene, 'goblin', -20, -30);
+    // 6. EXTERIOR BUILDINGS
+    createBuilding(scene, 'church', 45, -5);
+    createBuilding(scene, 'bobs_axes', -35, -5);
+    
+    // Lanterns for the paths
+    createLantern(scene, 6, 12); 
+    createLantern(scene, -6, 12);
+    createLantern(scene, 20, -5);
+
+    // 7. WORLD POPULATION
+    createNPC(scene, 'man', 15, 20);
+    createNPC(scene, 'goblin', -25, -30);
+    createNPC(scene, 'cow', 50, 15);
+
+    // 8. USER SPECIFIC TREES (Kept at your requested coords)
     createTree(scene, 'tree', -2.9, 7.4);
     createTree(scene, 'tree', -3.7, 14.7);
     createTree(scene, 'tree', 4.1, 13.2);
 
-    // 6. FOREST FILL
-    for(let i=0; i<40; i++) {
-        const x = (Math.random() * 180) - 90; 
-        const z = (Math.random() * 180) - 90;
+    // 9. REGIONAL FOREST GENERATION
+    for(let i=0; i<80; i++) {
+        const x = (Math.random() * 200) - 100; 
+        const z = (Math.random() * 200) - 100;
+        
+        // Exclusion Zone: Don't spawn trees inside the 30x30 castle footprint
         if (Math.abs(x) < 18 && Math.abs(z + 5) < 18) continue;
-        createTree(scene, 'tree', x, z);
+        
+        // Don't spawn on the north/south paths
+        if (Math.abs(x) < 5) continue;
+
+        const type = Math.random() > 0.8 ? 'oak' : 'tree';
+        createTree(scene, type, x, z);
     }
 }
