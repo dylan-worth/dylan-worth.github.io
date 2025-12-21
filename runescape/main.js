@@ -22,7 +22,7 @@ let choppingInterval = null;
 
 export function initGame() {
     initRenderer();
-    window.gameState.player = playerGroup; // For debug
+    window.gameState.player = playerGroup; 
     setupMovement(camera, scene, playerGroup);
     setupChat();
     
@@ -64,7 +64,6 @@ function attemptChop(treeGroup) {
     
     const req = treeGroup.userData.levelReq || 1;
     if(window.gameState.skills.woodcutting.level < req) {
-        // REQUESTED FIX: Specific message
         addChatMessage(`${treeGroup.userData.treeName} requires level ${req} to chop.`, "red");
         return;
     }
@@ -126,10 +125,12 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// EXPOSE UTILS
+// --- FINAL FIXED EXPORT ---
+// We attach everything here so game.html doesn't have to guess
 window.game = {
     teleport: triggerTeleport,
     closeWindows: closeWindows,
     deposit: deposit,
-    sell: sell
+    sell: sell,
+    openBank: openBank // Added this so ::bank command works
 };
