@@ -12,6 +12,7 @@ export function setupChat() {
 
 export function addChatMessage(msg, color = 'white') {
     const list = document.getElementById('chat-list');
+    if (!list) return;
     const line = document.createElement('div');
     line.style.color = color;
     line.style.textShadow = '1px 1px 0 #000';
@@ -26,15 +27,50 @@ function processCommand(text) {
         return;
     }
 
-    const cmd = text.substring(2).toLowerCase().trim();
+    // Clean up command: remove '::', lowercase, trim
+    const fullCmd = text.substring(2).toLowerCase().trim();
+    const parts = fullCmd.split(' ');
+    const cmd = parts[0];
+    const arg = parts[1]; // e.g., "lumbridge"
 
     if (cmd === 'debug') {
         runDebug();
-    } else if (cmd === 'bank') {
-        window.game.openBank(); 
-        addChatMessage("Debug: Bank opened.", "lime");
-    } else {
+    } 
+    else if (cmd === 'bank') {
+        if(window.game && window.game.openBank) {
+            window.game.openBank();
+            addChatMessage("Bank opened.", "lime");
+        }
+    }
+    // TELEPORT COMMANDS
+    else if (cmd === 'teleport' || cmd === 'tele') {
+        handleTeleport(arg);
+    }
+    else if (cmd === 'teleport_falador') {
+        window.game.teleport('falador');
+    }
+    else if (cmd === 'teleport_menaphos') {
+        window.game.teleport('menaphos');
+    }
+    else {
         addChatMessage(`Unknown command: ${cmd}`, 'red');
+    }
+}
+
+function handleTeleport(loc) {
+    if (!loc) {
+        addChatMessage("Usage: ::teleport [location]", "orange");
+        return;
+    }
+    
+    if (loc === 'lumbridge' || loc === 'lumby') {
+        window.game.teleport('lumbridge');
+    } else if (loc === 'falador' || loc === 'fally') {
+        window.game.teleport('falador');
+    } else if (loc === 'menaphos') {
+        window.game.teleport('menaphos');
+    } else {
+        addChatMessage(`Unknown location: ${loc}`, "red");
     }
 }
 
