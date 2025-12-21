@@ -4,10 +4,12 @@ import { loadLevel } from './levels.js';
 import { addItem, getBestAxe } from './inventory.js'; 
 import { openBank, deposit } from './bank.js';
 import { openShop, sell } from './shop.js';
+import { openChess } from './chess.js'; // Chess UI
 import { setupChat, addChatMessage } from './chat.js';
 import { startCombat, triggerSmite } from './combat.js'; 
 import { INITIAL_SKILLS, addXp } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
+import { updateMinimap } from './minimap.js'; // Minimap
 import * as THREE from 'three';
 
 // 1. SETUP GAME STATE
@@ -17,10 +19,9 @@ window.gameState = {
     colliders: [],
     buildings: [],
     player: null,
-    // --- FIX: ADD THESE TWO LINES ---
+    // Critical: Initialize empty arrays to prevent crashes
     inventory: [], 
     bank: []
-    // --------------------------------
 };
 
 const raycaster = new THREE.Raycaster();
@@ -30,13 +31,15 @@ export function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
     
+    // Pass 'onInteract' to movement.js (only fires on Taps, not Swipes)
     setupMovement(camera, scene, playerGroup, onInteract);
     setupChat();
     
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
-        // Give starter items safely
+        
+        // Grant Starter Item if inventory is empty
         if(window.gameState.inventory.length === 0) {
              addItem('axe_bronze', 'Bronze Axe', 1);
         }
@@ -47,6 +50,7 @@ export function initGame() {
     animate();
 }
 
+// This function receives normalized mouse coordinates (-1 to 1)
 function onInteract(mouse) {
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
 
@@ -58,13 +62,11 @@ function onInteract(mouse) {
         if (group) {
             const type = group.userData.type;
 
-            if (type === 'npc') {
-                startCombat(group);
-                break;
-            }
+            if (type === 'npc') { startCombat(group); break; }
             if (type === 'tree') { attemptChop(group); break; }
             if (type === 'bank_booth') { openBank(); break; }
             if (type === 'shop_stall') { openShop(); break; }
+            if (type === 'chess_table') { openChess(); break; } 
         }
     }
 }
@@ -98,6 +100,7 @@ function attemptChop(treeGroup) {
                 clearInterval(choppingInterval);
                 choppingInterval = null;
                 
+                // Respawn Logic
                 treeGroup.userData.respawning = true;
                 if(treeGroup.children[1]) treeGroup.children[1].visible = false;
                 setTimeout(() => {
@@ -120,16 +123,20 @@ export function triggerTeleport(loc) {
     addChatMessage(`Teleported to ${loc}.`, "cyan");
 }
 
-function smiteCommand() {
-    triggerSmite(scene);
-}
+function smiteCommand() { triggerSmite(scene); }
 
 function animate() {
     requestAnimationFrame(animate);
+    
     updateMovement();
+    
+    // Update the Minimap Radar
+    updateMinimap(scene, playerGroup);
+    
     renderer.render(scene, camera);
 }
 
+// Global Exports for UI/Console
 window.game = {
     teleport: triggerTeleport,
     closeWindows: closeWindows,
@@ -137,5 +144,6 @@ window.game = {
     sell: sell,
     openBank: openBank,
     switchTab: switchTab,
-    smite: smiteCommand
+    smite: smiteCommand,
+    openChess: openChess 
 };
