@@ -43,34 +43,39 @@ export async function initGame() {
     camera.position.set(0, 4, 5); 
 
     try { 
+        // 1. Wait for trees.json, npcs.json, and objects.json to fetch
         await loadLevel(scene, 'lumbridge'); 
         
-        setupMovement(camera, scene, playerGroup, onInteract);
-        setupChat();
+        // 2. Add a 500ms delay to ensure models are placed and physics is ready
+        setTimeout(() => {
+            setupMovement(camera, scene, playerGroup, onInteract);
+            setupChat();
+            addChatMessage("Welcome to Lumbridge.", "yellow");
+            
+            if (window.gameState.inventory.length === 0) {
+                 addItem('sword_bronze', 'Bronze Sword', 1);
+                 addItem('shield_bronze', 'Bronze Shield', 1);
+                 addItem('axe_bronze', 'Bronze Axe', 1);
+                 equipItem('sword_bronze');
+                 equipItem('shield_bronze');
+            }
+            updateStatsUI(); 
+            
+            // Start the render/logic loop after delay
+            animate();
+        }, 500);
         
-        addChatMessage("Welcome to Lumbridge.", "yellow");
-        
-        if (window.gameState.inventory.length === 0) {
-             addItem('sword_bronze', 'Bronze Sword', 1);
-             addItem('shield_bronze', 'Bronze Shield', 1);
-             addItem('axe_bronze', 'Bronze Axe', 1);
-             equipItem('sword_bronze');
-             equipItem('shield_bronze');
-        }
-        updateStatsUI(); 
     } 
     catch(e) { 
         console.error("Initialization failed:", e); 
     }
 
-    // This cycle calls updateEnvironment every second
+    // Environmental Cycle Loop
     setInterval(() => {
         window.gameState.gameTime += 0.005; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
         updateEnvironment(); 
     }, 1000);
-
-    animate();
 }
 
 function updateEnvironment() {
