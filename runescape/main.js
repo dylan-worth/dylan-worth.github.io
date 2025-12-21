@@ -1,3 +1,4 @@
+// main.js - The Brain
 import { initRenderer, scene, camera, renderer, playerGroup } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
 import { loadLevel } from './levels.js';
@@ -5,8 +6,6 @@ import { addItem, getBestAxe } from './inventory.js';
 import { openBank } from './bank.js';
 import { openShop } from './shop.js';
 import * as THREE from 'three';
-
-console.log("Main.js loaded...");
 
 // GAME STATE
 window.gameState = {
@@ -18,34 +17,37 @@ const mouse = new THREE.Vector2();
 let choppingInterval = null;
 
 export function initGame() {
-    console.log("Initializing Game...");
+    console.log("Starting Game...");
     
-    // 1. Setup Graphics
+    // 1. Init Graphics
     initRenderer();
     
-    // 2. Setup Controls
+    // 2. Init Controls
     setupMovement(camera, scene, playerGroup);
     
-    // 3. Load World
-    loadLevel(scene, 'lumbridge');
+    // 3. Load Level (This is where it was likely failing)
+    try {
+        loadLevel(scene, 'lumbridge');
+    } catch (err) {
+        console.error("Failed to load level:", err);
+        alert("Error loading level check console");
+    }
     
-    // 4. Listen for Clicks
+    // 4. Input Listener
     window.addEventListener('pointerdown', onInteract);
     
     // 5. Start Loop
     animate();
-    
-    console.log("Game Running!");
 }
 
 function onInteract(e) {
     if (e.target.id !== 'game-ui' && e.target.tagName !== 'CANVAS') return;
 
-    // Reset chopping if we click away
+    // Reset chopping
     if(choppingInterval) {
         clearInterval(choppingInterval);
         choppingInterval = null;
-        document.getElementById('context-text').innerText = "";
+        updateContext("", "");
     }
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -55,8 +57,7 @@ function onInteract(e) {
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     for (let hit of intersects) {
-        // We look for objects that have parent groups with userData
-        // (Because we click the mesh, but the data is on the group)
+        // Find the group root (since we click children meshes)
         let group = hit.object.userData.parentGroup;
         
         if (group) {
@@ -81,16 +82,15 @@ function onInteract(e) {
 function attemptChop(treeGroup) {
     if (treeGroup.userData.respawning) return;
 
-    // AXE CHECK
     const axe = getBestAxe();
     if (!axe) {
         updateContext("You need an axe!", "#ff5555");
         return;
     }
     
-    // LEVEL CHECK
     const myLvl = window.gameState.skills.woodcutting.level;
     const req = treeGroup.userData.levelReq || 1;
+    
     if (myLvl < req) {
         updateContext(`Need Lvl ${req} Woodcutting.`, "#ff5555");
         return;
@@ -98,33 +98,29 @@ function attemptChop(treeGroup) {
 
     updateContext(`Chopping with ${axe.name}...`, "#00ff00");
 
-    // TICK SYSTEM (600ms loops)
+    // TICK SYSTEM
     choppingInterval = setInterval(() => {
         if (treeGroup.userData.respawning) {
             clearInterval(choppingInterval);
             return;
         }
 
-        // CALC CHANCE
         const difficulty = treeGroup.userData.difficulty || 10;
         const roll = Math.random() * difficulty;
         const power = myLvl + axe.power;
 
         if (power > roll) {
-            // SUCCESS
             if (addItem('logs', 'Logs', 1)) {
-                // XP
                 window.gameState.skills.woodcutting.xp += (treeGroup.userData.xp || 25);
                 updateSkillsUI();
                 updateContext("You get some logs.", "#00ccff");
 
-                // CLEAR
                 clearInterval(choppingInterval);
                 choppingInterval = null;
                 
-                // DESPAWN TREE
+                // Despawn
                 treeGroup.userData.respawning = true;
-                if(treeGroup.children[1]) treeGroup.children[1].visible = false; // Hide leaves
+                if(treeGroup.children[1]) treeGroup.children[1].visible = false; 
 
                 setTimeout(() => {
                     if(treeGroup.children[1]) treeGroup.children[1].visible = true;
@@ -140,11 +136,9 @@ function attemptChop(treeGroup) {
 
 function updateSkillsUI() {
     const xp = window.gameState.skills.woodcutting.xp;
-    // Simple Level Algo
     const lvl = Math.floor(1 + Math.sqrt(xp / 10));
     window.gameState.skills.woodcutting.level = lvl;
     
-    // Attempt to update HTML if elements exist
     const elLvl = document.getElementById('wc-level');
     const elXp = document.getElementById('wc-xp');
     if(elLvl) elLvl.innerText = lvl;
@@ -166,8 +160,10 @@ export function triggerTeleport(loc) {
 }
 
 export function closeWindows() {
-    document.getElementById('bank-window').style.display = 'none';
-    document.getElementById('shop-window').style.display = 'none';
+    const bank = document.getElementById('bank-window');
+    const shop = document.getElementById('shop-window');
+    if(bank) bank.style.display = 'none';
+    if(shop) shop.style.display = 'none';
 }
 
 function animate() {
