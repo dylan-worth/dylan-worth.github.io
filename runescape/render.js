@@ -6,70 +6,66 @@ export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 export const playerGroup = new THREE.Group();
 
-// Export controls so main.js can update them
+// GLOBAL EXPORTS for Main.js to control
 export let controls; 
+export let sunLight;     // To dim at night
+export let ambientLight; // To dim at night
+export let playerHand;   // To attach items to
 
 export function initRenderer() {
-    // 1. Setup Renderer
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     document.getElementById('game-container').appendChild(renderer.domElement);
 
-    // 2. Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambient);
+    // 1. DYNAMIC LIGHTING
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
     
-    const sun = new THREE.DirectionalLight(0xffffff, 1);
-    sun.position.set(50, 100, 50);
-    sun.castShadow = true;
-    sun.shadow.camera.left = -50;
-    sun.shadow.camera.right = 50;
-    sun.shadow.camera.top = 50;
-    sun.shadow.camera.bottom = -50;
-    sun.shadow.mapSize.width = 2048;
-    sun.shadow.mapSize.height = 2048;
-    scene.add(sun);
+    sunLight = new THREE.DirectionalLight(0xffffff, 1);
+    sunLight.position.set(50, 100, 50);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    scene.add(sunLight);
 
-    // 3. Sky & Fog
-    scene.background = new THREE.Color(0x87ceeb); // Sky Blue
-    // scene.fog = new THREE.Fog(0x87ceeb, 20, 100); // Optional Fog
+    // Initial Sky Color (Day)
+    scene.background = new THREE.Color(0x87ceeb); 
 
-    // 4. Player Setup
-    // Simple blocky character
-    const body = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 0.8, 0.4), 
-        new THREE.MeshStandardMaterial({ color: 0x333333 }) // Dark Armor
-    ); 
+    // 2. PLAYER MODEL WITH HAND
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({ color: 0x333333 })); 
     body.position.y = 0.8;
     body.castShadow = true;
 
-    const head = new THREE.Mesh(
-        new THREE.BoxGeometry(0.3, 0.3, 0.3), 
-        new THREE.MeshStandardMaterial({ color: 0xffccaa }) // Skin tone
-    );
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
     head.position.y = 1.4;
 
-    playerGroup.add(body, head);
+    // --- NEW: THE HAND ---
+    playerHand = new THREE.Group();
+    playerHand.position.set(0.4, 0.8, 0.2); // Right side of body
+    
+    playerGroup.add(body, head, playerHand);
     scene.add(playerGroup);
 
-    // 5. Camera Initial Position
+    // 3. CAMERA
     camera.position.set(0, 10, 10);
-    
-    // 6. SETUP CONTROLS (Rotation/Zoom)
     controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // Smoothness
+    controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.minDistance = 5; // Zoom limit in
-    controls.maxDistance = 25; // Zoom limit out
-    controls.maxPolarAngle = Math.PI / 2.1; // Prevent going underground
-    
-    // Focus controls on player initially
+    controls.minDistance = 5;
+    controls.maxDistance = 25;
+    controls.maxPolarAngle = Math.PI / 2.1;
     controls.target.copy(playerGroup.position);
-    
-    // Handle Window Resize
+
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
+}
+
+// HELPER: Change Environment
+export function setDayNight(intensity, colorHex) {
+    if(sunLight) sunLight.intensity = intensity;
+    if(ambientLight) ambientLight.intensity = intensity * 0.6;
+    scene.background.setHex(colorHex);
 }
