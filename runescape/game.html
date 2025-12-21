@@ -47,7 +47,7 @@
 
         /* --- PANELS (Inventory / Magic) --- */
         .panel { 
-            width: 190px; background: rgba(8, 30, 43, 0.95); border: 2px solid #3c4b57; 
+            width: 200px; background: rgba(8, 30, 43, 0.95); border: 2px solid #3c4b57; 
             padding: 10px; display: none; margin-bottom: 5px; 
         }
         .panel.active { display: block; }
@@ -111,6 +111,15 @@
         
         <div id="tabs-container">
             
+            <div id="panel-skills" class="panel">
+                <div style="color:#00ccff; margin-bottom:5px; font-weight:bold; font-size:14px; border-bottom:1px solid #5a7b8f; padding-bottom:5px;">Stats</div>
+                <div style="display:flex; justify-content:space-between; color:#ffd700; font-size:12px;">
+                    <span>🌲 Woodcutting</span>
+                    <span id="wc-level">1</span>
+                </div>
+                <div style="text-align:right; font-size:10px; color:#aaa;">XP: <span id="wc-xp">0</span></div>
+            </div>
+
             <div id="panel-inv" class="panel active">
                 <div style="color:#ffd700; margin-bottom:5px; font-weight:bold; font-size:14px; border-bottom:1px solid #5a7b8f; padding-bottom:5px;">
                     Backpack <span style="float:right; color:#ffd700">💰 <span id="coin-display">0</span></span>
@@ -128,6 +137,7 @@
             </div>
 
             <div class="tab-icons">
+                <div class="tab-btn" onclick="switchTab('panel-skills')">📊</div>
                 <div class="tab-btn" onclick="switchTab('panel-inv')">🎒</div>
                 <div class="tab-btn" onclick="switchTab('panel-magic')">📘</div>
             </div>
