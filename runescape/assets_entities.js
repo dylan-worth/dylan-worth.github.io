@@ -78,11 +78,12 @@ export function createInteractable(scene, type, x, z) {
         mesh = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1.5), new THREE.MeshStandardMaterial({ color: 0x880000 }));
         mesh.position.y = 0.5; 
     }
-    group.add(mesh);
+    if (mesh) group.add(mesh);
     group.position.set(x, 0, z);
     group.userData = { type: type, name: type === 'bank_booth' ? "Bank" : "Shop" };
     group.children.forEach(c => c.userData = { parentGroup: group });
     scene.add(group);
+    return group;
 }
 
 // --- TREES ---
@@ -91,10 +92,12 @@ export function createTree(scene, type, x, z) {
     const group = new THREE.Group();
     let color = 0x228b22, name = "Tree", req = 1, xp = 25;
     if(type === 'oak'){ color = 0x116611; name = "Oak"; req = 15; xp = 37.5; }
+    
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2), new THREE.MeshStandardMaterial({color:0x3d2817}));
     trunk.position.y = 1;
     const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2), new THREE.MeshStandardMaterial({color: color}));
     leaves.position.y = 2.5;
+    
     group.add(trunk, leaves);
     group.position.set(x, 0, z);
     group.userData = { type: 'tree', treeName: name, levelReq: req, xp: xp, respawning: false };
@@ -102,61 +105,89 @@ export function createTree(scene, type, x, z) {
     scene.add(group);
 }
 
-// --- NPCS (Updated with Cows/Chickens) ---
+// --- NPCS (FIXED) ---
 export function createNPC(scene, type, x, z) {
     const group = new THREE.Group();
-    let bodyColor=0x445588, headColor=0xffccaa, hp=7, name="Man", scale=1;
-    let isAnimal = false;
-    let npcTypeOverride = 'npc'; // Default to attackable
-
-    if (type === 'man') { bodyColor=0x445588; name="Man"; }
-    else if (type === 'woman') { bodyColor=0x884488; name="Woman"; }
-    else if (type === 'goblin') { bodyColor=0x558855; headColor=0x00ff00; name="Goblin"; hp=5; }
     
-    // QUEST NPCS
-    else if (type === 'cook') { 
-        bodyColor=0xffffff; name="Cook"; npcTypeOverride='quest_npc'; 
+    // 1. DEFAULT CONFIG (Standard Man)
+    let config = {
+        bodyColor: 0x445588,
+        headColor: 0xffccaa,
+        hp: 7,
+        name: "Man",
+        isAnimal: false,
+        interactionType: 'npc' // 'npc' or 'quest_npc'
+    };
+
+    // 2. APPLY TYPE OVERRIDES
+    if (type === 'man') {
+        // Defaults are fine
+    } 
+    else if (type === 'woman') {
+        config.bodyColor = 0x884488;
+        config.name = "Woman";
     }
-    else if (type === 'cow') { 
-        bodyColor=0x222222; headColor=0xffffff; name="Cow"; isAnimal=true; npcTypeOverride='quest_npc';
+    else if (type === 'goblin') {
+        config.bodyColor = 0x558855;
+        config.headColor = 0x00ff00;
+        config.name = "Goblin";
+        config.hp = 5;
     }
-    else if (type === 'chicken') { 
-        bodyColor=0xccaa88; headColor=0xcc0000; name="Chicken"; isAnimal=true; npcTypeOverride='quest_npc';
+    else if (type === 'cook') {
+        config.bodyColor = 0xffffff;
+        config.name = "Cook";
+        config.interactionType = 'quest_npc';
+    }
+    else if (type === 'cow') {
+        config.bodyColor = 0x222222;
+        config.headColor = 0xffffff;
+        config.name = "Cow";
+        config.isAnimal = true;
+        config.interactionType = 'quest_npc';
+    }
+    else if (type === 'chicken') {
+        config.bodyColor = 0xccaa88;
+        config.headColor = 0xcc0000;
+        config.name = "Chicken";
+        config.isAnimal = true;
+        config.interactionType = 'quest_npc';
     }
 
+    // 3. BUILD GEOMETRY
     let body, head;
-    if (isAnimal && type === 'cow') {
+
+    if (config.isAnimal && type === 'cow') {
         // Cow Shape
-        body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 2), new THREE.MeshStandardMaterial({color: bodyColor}));
+        body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 2), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.5;
-        head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: headColor}));
+        head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: config.headColor}));
         head.position.set(0, 1, 1);
     } 
-    else if (isAnimal && type === 'chicken') {
+    else if (config.isAnimal && type === 'chicken') {
         // Chicken Shape
-        body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.5), new THREE.MeshStandardMaterial({color: bodyColor}));
+        body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.5), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.2;
-        head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({color: headColor}));
+        head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({color: config.headColor}));
         head.position.set(0, 0.5, 0.2);
     } 
     else {
-        // Humanoid
-        body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: bodyColor}));
+        // Humanoid Shape (Man, Woman, Goblin, Cook)
+        body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.8;
-        head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({color: headColor}));
+        head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({color: config.headColor}));
         head.position.y = 1.4;
     }
 
     group.add(body, head);
     group.position.set(x, 0, z);
     
-    // CRITICAL: Set the types correctly so Main.js knows how to interact
+    // 4. ATTACH DATA
     group.userData = { 
-        type: npcTypeOverride, // 'npc' or 'quest_npc'
-        npcType: type,         // 'man', 'cow', etc
-        name: name, 
-        hp: hp, 
-        maxHp: hp 
+        type: config.interactionType, 
+        npcType: type,
+        name: config.name, 
+        hp: config.hp, 
+        maxHp: config.hp 
     };
     
     group.children.forEach(c => c.userData = { parentGroup: group });
