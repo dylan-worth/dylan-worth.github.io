@@ -115,3 +115,38 @@ export function createNPC(scene, type, x, z) {
     head.userData = { parentGroup: group };
     scene.add(group);
 }
+export function createSnowPile(scene, x, z) {
+    const geo = new THREE.SphereGeometry(1, 8, 6, 0, Math.PI * 2, 0, Math.PI/2);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const pile = new THREE.Mesh(geo, mat);
+    pile.position.set(x, 0, z);
+    pile.scale.y = 0.5; // Flatten it
+    
+    const group = new THREE.Group();
+    group.add(pile);
+    group.userData = { type: 'snow_pile', name: "Snow Pile" };
+    pile.userData = { parentGroup: group };
+    
+    scene.add(group);
+}
+
+export function createSnowman(scene, x, z) {
+    const group = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    
+    // 3 Snowballs
+    const bot = new THREE.Mesh(new THREE.SphereGeometry(0.6), mat); bot.position.y = 0.6;
+    const mid = new THREE.Mesh(new THREE.SphereGeometry(0.4), mat); mid.position.y = 1.4;
+    const top = new THREE.Mesh(new THREE.SphereGeometry(0.3), mat); top.position.y = 2.0;
+    
+    // Arms
+    const stickMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.05), stickMat);
+    arm.position.y = 1.4;
+
+    group.add(bot, mid, top, arm);
+    group.position.set(x, 0, z);
+    
+    window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x,1,z), new THREE.Vector3(1,2,1)));
+    scene.add(group);
+}
