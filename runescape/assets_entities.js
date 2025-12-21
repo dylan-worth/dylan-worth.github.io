@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 
 /**
- * Creates NPCs, including the unique Hans character with custom styling and dialogue.
+ * Creates NPCs, including unique logic for Hans.
+ * @param {string} type - The NPC identifier (e.g., 'hans', 'man', 'cook')
  */
 export function createNPC(scene, type, x, z) {
     const group = new THREE.Group();
     
-    // 1. BODY (SHIRT) 
-    // Hans wears a Maroon shirt (0x800000), others wear standard blue.
+    // 1. BODY (Shirt)
+    // maroon for Hans (0x800000), standard blue for others
     const bodyColor = (type === 'hans') ? 0x800000 : 0x445588; 
     const body = new THREE.Mesh(
         new THREE.BoxGeometry(0.6, 0.8, 0.4),
@@ -24,7 +25,7 @@ export function createNPC(scene, type, x, z) {
     head.position.y = 1.0;
     head.castShadow = true;
 
-    // 3. HAIR (Unique to Hans - Brown)
+    // 3. HAIR (Brown for Hans)
     if (type === 'hans') {
         const hair = new THREE.Mesh(
             new THREE.BoxGeometry(0.32, 0.1, 0.32),
@@ -37,20 +38,20 @@ export function createNPC(scene, type, x, z) {
     group.add(body, head);
     group.position.set(x, 0, z);
     
-    // 4. METADATA & DIALOGUE
+    // 4. DATA & INTERACTION
     group.userData = { 
         type: 'npc', 
         npcType: type, 
-        name: type === 'hans' ? 'Hans' : (type === 'cook' ? 'Cook' : 'Man'),
+        name: type.charAt(0).toUpperCase() + type.slice(1),
         hp: 10,
         maxHp: 10,
         parentGroup: group,
         onInteract: () => {
             if (type === 'hans') {
                 const lines = [
-                    "Hans: I've been here for a long time... watching the castle grow.",
+                    "Hans: I've been patrolling these grounds for ages.",
                     "Hans: I've seen many adventurers come and go, but I remain.",
-                    "Hans: Welcome! It's a fine day to be in Lumbridge."
+                    "Hans: Welcome! Stay safe out there traveler."
                 ];
                 return lines[Math.floor(Math.random() * lines.length)];
             }
@@ -63,7 +64,46 @@ export function createNPC(scene, type, x, z) {
 }
 
 /**
- * Creates interactable world objects like Bank Booths or Chests.
+ * Creates trees based on the type provided by id_map.js.
+ */
+export function createTree(scene, type, x, z) {
+    const group = new THREE.Group();
+    
+    // Trunk
+    const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.4, 2, 8),
+        new THREE.MeshStandardMaterial({ color: 0x5c4033 })
+    );
+    trunk.position.y = 1;
+    
+    // Leaves (Oak is a darker green)
+    const leafColor = (type === 'oak') ? 0x1a331a : 0x2d5a27;
+    const leaves = new THREE.Mesh(
+        new THREE.SphereGeometry(1.2, 8, 8),
+        new THREE.MeshStandardMaterial({ color: leafColor })
+    );
+    leaves.position.y = 2.5;
+
+    group.add(trunk, leaves);
+    group.position.set(x, 0, z);
+    
+    // Store metadata for the Woodcutting system in main.js
+    group.userData = { 
+        type: 'tree', 
+        name: type, 
+        xp: (type === 'oak') ? 37.5 : 25, 
+        parentGroup: group 
+    };
+    
+    scene.add(group);
+    
+    // Collision bounding box
+    window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
+    return group;
+}
+
+/**
+ * World interactables (Banks, Chests, etc.)
  */
 export function createInteractable(scene, type, x, z) {
     const group = new THREE.Group();
@@ -77,7 +117,7 @@ export function createInteractable(scene, type, x, z) {
     } else {
         mesh = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshStandardMaterial({ color: 0xff00ff })
+            new THREE.MeshStandardMaterial({ color: 0x777777 })
         );
     }
 
@@ -91,36 +131,7 @@ export function createInteractable(scene, type, x, z) {
 }
 
 /**
- * Creates trees for the Woodcutting skill.
- */
-export function createTree(scene, type, x, z) {
-    const group = new THREE.Group();
-    
-    // Trunk
-    const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.4, 2, 8),
-        new THREE.MeshStandardMaterial({ color: 0x5c4033 })
-    );
-    trunk.position.y = 1;
-    
-    // Leaves
-    const leafColor = type === 'oak' ? 0x224422 : 0x2d5a27;
-    const leaves = new THREE.Mesh(
-        new THREE.SphereGeometry(1.2, 8, 8),
-        new THREE.MeshStandardMaterial({ color: leafColor })
-    );
-    leaves.position.y = 2.5;
-
-    group.add(trunk, leaves);
-    group.position.set(x, 0, z);
-    group.userData = { type: 'tree', name: type, xp: type === 'oak' ? 37 : 25, parentGroup: group };
-    
-    scene.add(group);
-    window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
-}
-
-/**
- * Miscellaneous props (Chess Tables, Snow, Lanterns).
+ * Decorative Props
  */
 export function createChessTable(scene, x, z) {
     const group = new THREE.Group();
@@ -144,10 +155,10 @@ export function createSnowPile(scene, x, z) {
 
 export function createLantern(scene, x, z) {
     const group = new THREE.Group();
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x111111}));
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x111111}));
     pole.position.y = 2;
     
-    const light = new THREE.PointLight(0xffaa00, 0, 10);
+    const light = new THREE.PointLight(0xffaa00, 0, 12);
     light.position.y = 4;
     window.gameState.lanternLights.push(light);
 
