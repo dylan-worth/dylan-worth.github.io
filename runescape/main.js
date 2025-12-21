@@ -12,7 +12,6 @@ import * as THREE from 'three';
 
 // 1. SETUP GAME STATE
 window.gameState = {
-    // Deep copy stats so we don't edit the constant
     skills: JSON.parse(JSON.stringify(INITIAL_SKILLS)),
     uiMode: 'normal',
     colliders: [],
@@ -21,34 +20,38 @@ window.gameState = {
 };
 
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
 let choppingInterval = null;
 
 export function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
-    setupMovement(camera, scene, playerGroup);
+    
+    // CHANGED: We pass 'onInteract' to movement.js
+    // movement.js will call this function ONLY on valid Taps (not drags)
+    setupMovement(camera, scene, playerGroup, onInteract);
+    
     setupChat();
     
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
-        updateStatsUI(); // Initial UI render
+        updateStatsUI(); 
     } 
     catch(e) { console.error(e); }
 
-    window.addEventListener('pointerdown', onInteract);
+    // NOTE: We REMOVED the 'pointerdown' listener here because 
+    // movement.js handles it now!
     animate();
 }
 
-function onInteract(e) {
-    if (e.target.id !== 'game-ui' && e.target.tagName !== 'CANVAS') return;
-    if (e.button === 2) return; 
+// This function receives normalized mouse coordinates (-1 to 1)
+function onInteract(mouse) {
+    // Check if we clicked UI (ignore game click)
+    // NOTE: movement.js handles WebGL clicks, but we still need to ignore if hitting HUD
+    // Ideally we check DOM elements, but 'mouse' here is purely WebGL coords.
+    // DOM clicks are usually caught by HTML event bubbling before canvas.
 
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
-
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
@@ -58,13 +61,10 @@ function onInteract(e) {
         if (group) {
             const type = group.userData.type;
 
-            // Combat
             if (type === 'npc') {
                 startCombat(group);
                 break;
             }
-            
-            // Skills & Shops
             if (type === 'tree') { attemptChop(group); break; }
             if (type === 'bank_booth') { openBank(); break; }
             if (type === 'shop_stall') { openShop(); break; }
@@ -91,18 +91,15 @@ function attemptChop(treeGroup) {
         
         if(Math.random() * 10 < (window.gameState.skills.woodcutting.level + axe.power)) {
             if(addItem('logs', 'Logs', 1)) {
-                // XP DROP
                 if (addXp('woodcutting', treeGroup.userData.xp)) {
                     addChatMessage("Congratulations, you advanced a Woodcutting level!", "gold");
                 }
-                
                 addChatMessage("You get some logs.", "lime");
                 updateStatsUI();
                 
                 clearInterval(choppingInterval);
                 choppingInterval = null;
                 
-                // Despawn Tree
                 treeGroup.userData.respawning = true;
                 if(treeGroup.children[1]) treeGroup.children[1].visible = false;
                 setTimeout(() => {
@@ -131,7 +128,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// --- CRITICAL FIX: Attach to window.game AFTER defining functions ---
 window.game = {
     teleport: triggerTeleport,
     closeWindows: closeWindows,
