@@ -8,10 +8,8 @@ export function createBuilding(scene, type, x, z) {
         return createCastle(scene, x, z);
     }
 
-    // Standard building (Bob's Axes, Church, etc.)
+    // Standard building for shops/houses
     const group = new THREE.Group();
-    
-    // Stone Body
     const body = new THREE.Mesh(
         new THREE.BoxGeometry(6, 4, 6),
         new THREE.MeshStandardMaterial({ color: 0x888888 })
@@ -20,13 +18,12 @@ export function createBuilding(scene, type, x, z) {
     body.castShadow = true;
     body.receiveShadow = true;
     
-    // Conical Roof
     const roof = new THREE.Mesh(
         new THREE.ConeGeometry(5, 3, 4),
         new THREE.MeshStandardMaterial({ color: 0x444444 })
     );
     roof.position.y = 5;
-    roof.rotation.y = Math.PI / 4; 
+    roof.rotation.y = Math.PI / 4;
     roof.castShadow = true;
 
     group.add(body, roof);
@@ -37,76 +34,71 @@ export function createBuilding(scene, type, x, z) {
 }
 
 /**
- * Generates the Upgraded Castle with an accessible entrance.
+ * Generates the Large Expanded Castle with Front/Back openings and Occlusion Roof.
  */
 function createCastle(scene, x, z) {
     const castleGroup = new THREE.Group();
     const stoneMat = new THREE.MeshStandardMaterial({ color: 0x999999 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4b3621 }); // Dark brown wooden roof
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4b3621, transparent: true, opacity: 0.9 });
 
-    // 1. MAIN KEEP (Broken into walls to allow internal access)
-    const backWall = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 2), stoneMat);
-    backWall.position.set(0, 4, -5);
-    
-    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 12), stoneMat);
-    leftWall.position.set(-5, 4, 0);
-    
-    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 12), stoneMat);
-    rightWall.position.set(5, 4, 0);
-    
-    // Front walls (leaving a 4-unit gap for the door)
-    const frontWallL = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 2), stoneMat);
-    frontWallL.position.set(-4, 4, 5);
-    
-    const frontWallR = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 2), stoneMat);
-    frontWallR.position.set(4, 4, 5);
-    
-    // Header above the gate
-    const doorHeader = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 2), stoneMat);
-    doorHeader.position.set(0, 6.5, 5);
-    
-    castleGroup.add(backWall, leftWall, rightWall, frontWallL, frontWallR, doorHeader);
+    const wallHeight = 10;
+    const thickness = 2;
 
-    // 2. CORNER TOWERS
-    const towerPositions = [
-        { x: -6, z: -6 }, { x: 6, z: -6 },
-        { x: -6, z: 6 },  { x: 6, z: 6 }
+    // 1. WALL SYSTEM (30x30 Footprint)
+    // Defined as parts to allow for hollow interior and two door openings
+    const walls = [
+        { w: 30, h: wallHeight, d: thickness, px: 0, pz: -15 }, // Back Wall (Archway added later)
+        { w: thickness, h: wallHeight, d: 30, px: -15, pz: 0 }, // Left Wall
+        { w: thickness, h: wallHeight, d: 30, px: 15, pz: 0 },  // Right Wall
+        // Front Walls (Leaving a gap for the door at x:0)
+        { w: 12, h: wallHeight, d: thickness, px: -9, pz: 15 }, 
+        { w: 12, h: wallHeight, d: thickness, px: 9, pz: 15 }
     ];
 
-    towerPositions.forEach(pos => {
-        const tower = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 8), stoneMat);
-        tower.position.set(pos.x, 6, pos.z);
-        tower.castShadow = true;
+    walls.forEach(data => {
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(data.w, data.h, data.d), stoneMat);
+        wall.position.set(data.px, data.h / 2, data.pz);
+        wall.castShadow = true;
+        wall.receiveShadow = true;
+        castleGroup.add(wall);
         
-        const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4, 8), roofMat);
-        towerRoof.position.set(pos.x, 14, pos.z);
-        towerRoof.castShadow = true;
-        
-        castleGroup.add(tower, towerRoof);
-    });
-
-    // 3. CENTRAL SPIRE
-    const centralSpire = new THREE.Mesh(new THREE.BoxGeometry(4, 12, 4), stoneMat);
-    centralSpire.position.y = 10;
-    
-    const spireRoof = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 4), roofMat);
-    spireRoof.position.y = 19;
-    spireRoof.rotation.y = Math.PI / 4;
-    
-    castleGroup.add(centralSpire, spireRoof);
-
-    // 4. SET POSITION & ADD TO SCENE
-    castleGroup.position.set(x, 0, z);
-    scene.add(castleGroup);
-
-    // 5. COLLISIONS (Added per wall to allow the player to enter the center)
-    const walls = [backWall, leftWall, rightWall, frontWallL, frontWallR];
-    walls.forEach(wall => {
+        // Add individual wall colliders
         const box = new THREE.Box3().setFromObject(wall);
-        // Translate the local wall bounds to the castle's world position
         box.translate(new THREE.Vector3(x, 0, z));
         window.gameState.colliders.push(box);
     });
+
+    // 2. THE ROOF (Tagged for Occlusion)
+    // This mesh will be hidden by render.js when the player is inside
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(32, 1, 32), roofMat);
+    roof.position.y = wallHeight;
+    roof.userData.isCastleRoof = true; 
+    castleGroup.add(roof);
+
+    // 3. DOOR ARCHWAYS (Visual headers above openings)
+    const frontHeader = new THREE.Mesh(new THREE.BoxGeometry(6, 3, thickness), stoneMat);
+    frontHeader.position.set(0, wallHeight - 1.5, 15);
+    
+    const backHeader = new THREE.Mesh(new THREE.BoxGeometry(6, 3, thickness), stoneMat);
+    backHeader.position.set(0, wallHeight - 1.5, -15);
+    
+    castleGroup.add(frontHeader, backHeader);
+
+    // 4. CORNER TOWERS (Decorative)
+    const towerPos = [
+        {x:-15, z:-15}, {x:15, z:-15}, {x:-15, z:15}, {x:15, z:15}
+    ];
+    towerPos.forEach(p => {
+        const tower = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 14, 8), stoneMat);
+        tower.position.set(p.x, 7, p.z);
+        const tRoof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 5, 8), roofMat);
+        tRoof.position.set(p.x, 16.5, p.z);
+        tRoof.userData.isCastleRoof = true;
+        castleGroup.add(tower, tRoof);
+    });
+
+    castleGroup.position.set(x, 0, z);
+    scene.add(castleGroup);
 }
 
 /**
