@@ -94,11 +94,9 @@ export function spawnHitSplat(target, amount, isMiss) {
     ctx.font = 'Bold 90px Arial';
     ctx.textAlign = 'center';
     
-    // Draw Text with shadow for visibility
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillText(isMiss ? '0' : amount, 68, 84); // Shadow
+    ctx.fillText(isMiss ? '0' : amount, 68, 84); 
     
-    // Blue for Miss, Red for Hit
     ctx.fillStyle = isMiss ? '#00ccff' : '#ff0000'; 
     ctx.fillText(isMiss ? '0' : amount, 64, 80);
 
@@ -106,7 +104,6 @@ export function spawnHitSplat(target, amount, isMiss) {
     const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
     const sprite = new THREE.Sprite(spriteMat);
 
-    // Position above target head
     sprite.position.copy(target.position);
     sprite.position.y += 2.2;
     sprite.scale.set(1.5, 1.5, 1);
@@ -119,8 +116,8 @@ export function updateHitSplats() {
     for (let i = hitSplats.length - 1; i >= 0; i--) {
         const s = hitSplats[i];
         s.age += 0.025;
-        s.sprite.position.y += 0.015; // Float upwards
-        s.sprite.material.opacity = 1 - s.age; // Fade out
+        s.sprite.position.y += 0.015; 
+        s.sprite.material.opacity = 1 - s.age; 
 
         if (s.age >= 1) {
             scene.remove(s.sprite);
@@ -129,7 +126,7 @@ export function updateHitSplats() {
     }
 }
 
-// --- ANIMATIONS ---
+// --- ANIMATIONS & ROOF OCCLUSION ---
 export function playSwingAnimation() {
     if (isSwinging) return;
     isSwinging = true;
@@ -149,6 +146,17 @@ export function updateAnimations() {
 
     // 2. Handle Splats
     updateHitSplats();
+
+    // 3. Handle Roof Occlusion
+    const playerPos = playerGroup.position;
+    // Bounds based on the new 30x30 castle centered at x:0, z:-5
+    const isInsideCastle = (playerPos.x > -15 && playerPos.x < 15 && playerPos.z > -20 && playerPos.z < 10);
+
+    scene.traverse((obj) => {
+        if (obj.userData && obj.userData.isCastleRoof) {
+            obj.visible = !isInsideCastle;
+        }
+    });
 }
 
 export function setDayNight(intensity, colorHex) {
