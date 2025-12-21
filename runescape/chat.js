@@ -1,4 +1,3 @@
-// chat.js
 export function setupChat() {
     const input = document.getElementById('chat-input');
     
@@ -27,11 +26,10 @@ function processCommand(text) {
         return;
     }
 
-    // Clean up command: remove '::', lowercase, trim
     const fullCmd = text.substring(2).toLowerCase().trim();
     const parts = fullCmd.split(' ');
     const cmd = parts[0];
-    const arg = parts[1]; // e.g., "lumbridge"
+    const arg = parts[1];
 
     if (cmd === 'debug') {
         runDebug();
@@ -42,15 +40,14 @@ function processCommand(text) {
             addChatMessage("Bank opened.", "lime");
         }
     }
-    // TELEPORT COMMANDS
     else if (cmd === 'teleport' || cmd === 'tele') {
         handleTeleport(arg);
     }
-    else if (cmd === 'teleport_falador') {
-        window.game.teleport('falador');
-    }
-    else if (cmd === 'teleport_menaphos') {
-        window.game.teleport('menaphos');
+    // NEW COMMAND
+    else if (cmd === 'smite') {
+        if (window.game && window.game.smite) {
+            window.game.smite();
+        }
     }
     else {
         addChatMessage(`Unknown command: ${cmd}`, 'red');
@@ -62,16 +59,10 @@ function handleTeleport(loc) {
         addChatMessage("Usage: ::teleport [location]", "orange");
         return;
     }
-    
-    if (loc === 'lumbridge' || loc === 'lumby') {
-        window.game.teleport('lumbridge');
-    } else if (loc === 'falador' || loc === 'fally') {
-        window.game.teleport('falador');
-    } else if (loc === 'menaphos') {
-        window.game.teleport('menaphos');
-    } else {
-        addChatMessage(`Unknown location: ${loc}`, "red");
-    }
+    if (loc === 'lumbridge' || loc === 'lumby') window.game.teleport('lumbridge');
+    else if (loc === 'falador' || loc === 'fally') window.game.teleport('falador');
+    else if (loc === 'menaphos') window.game.teleport('menaphos');
+    else addChatMessage(`Unknown location: ${loc}`, "red");
 }
 
 function runDebug() {
@@ -79,17 +70,9 @@ function runDebug() {
     const mods = [
         { name: 'Main', check: !!window.game },
         { name: 'Bank', check: !!window.game.deposit },
-        { name: 'Shop', check: !!window.game.sell },
-        { name: 'Inv', check: !!document.getElementById('inv-grid') }
+        { name: 'Smite', check: !!window.game.smite }
     ];
     mods.forEach(m => {
         addChatMessage(`${m.name}: ${m.check ? 'OK' : 'FAIL'}`, m.check ? 'lime' : 'red');
     });
-    
-    if (window.gameState && window.gameState.player) {
-        const p = window.gameState.player.position;
-        addChatMessage(`Pos: ${p.x.toFixed(1)}, ${p.z.toFixed(1)}`, "white");
-    } else {
-        addChatMessage("Player: NOT FOUND", "red");
-    }
 }
