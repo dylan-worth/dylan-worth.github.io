@@ -1,10 +1,13 @@
+// ui.js
 export function updateStatsUI() {
     const s = window.gameState.skills;
     if (!s) return;
+
     const set = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.innerText = val;
     };
+
     set('stat-att', s.attack.level);
     set('stat-str', s.strength.level);
     set('stat-def', s.defence.level);
@@ -29,9 +32,20 @@ export function closeWindows() {
 }
 
 export function switchTab(tabId) {
-    document.querySelectorAll('.panel').forEach(p => {
-        if (!p.classList.contains('window')) p.classList.remove('active');
-    });
+    // 1. Check if we are clicking the ALREADY active tab
     const target = document.getElementById(tabId);
+    if (target && target.classList.contains('active')) {
+        // CLOSE IT
+        target.classList.remove('active');
+        return;
+    }
+
+    // 2. Otherwise, hide others and show new one
+    document.querySelectorAll('.panel').forEach(p => {
+        if (!p.classList.contains('window')) {
+            p.classList.remove('active');
+        }
+    });
+    
     if (target) target.classList.add('active');
 }
