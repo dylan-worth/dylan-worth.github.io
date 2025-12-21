@@ -5,7 +5,7 @@ import { addItem, getBestAxe } from './inventory.js';
 import { openBank, deposit } from './bank.js';
 import { openShop, sell } from './shop.js';
 import { setupChat, addChatMessage } from './chat.js';
-import { startCombat } from './combat.js'; 
+import { startCombat, triggerSmite } from './combat.js'; 
 import { INITIAL_SKILLS, addXp } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
 import * as THREE from 'three';
@@ -16,7 +16,11 @@ window.gameState = {
     uiMode: 'normal',
     colliders: [],
     buildings: [],
-    player: null
+    player: null,
+    // --- FIX: ADD THESE TWO LINES ---
+    inventory: [], 
+    bank: []
+    // --------------------------------
 };
 
 const raycaster = new THREE.Raycaster();
@@ -26,31 +30,24 @@ export function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
     
-    // CHANGED: We pass 'onInteract' to movement.js
-    // movement.js will call this function ONLY on valid Taps (not drags)
     setupMovement(camera, scene, playerGroup, onInteract);
-    
     setupChat();
     
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
+        // Give starter items safely
+        if(window.gameState.inventory.length === 0) {
+             addItem('axe_bronze', 'Bronze Axe', 1);
+        }
         updateStatsUI(); 
     } 
     catch(e) { console.error(e); }
 
-    // NOTE: We REMOVED the 'pointerdown' listener here because 
-    // movement.js handles it now!
     animate();
 }
 
-// This function receives normalized mouse coordinates (-1 to 1)
 function onInteract(mouse) {
-    // Check if we clicked UI (ignore game click)
-    // NOTE: movement.js handles WebGL clicks, but we still need to ignore if hitting HUD
-    // Ideally we check DOM elements, but 'mouse' here is purely WebGL coords.
-    // DOM clicks are usually caught by HTML event bubbling before canvas.
-
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
 
     raycaster.setFromCamera(mouse, camera);
@@ -94,6 +91,7 @@ function attemptChop(treeGroup) {
                 if (addXp('woodcutting', treeGroup.userData.xp)) {
                     addChatMessage("Congratulations, you advanced a Woodcutting level!", "gold");
                 }
+                
                 addChatMessage("You get some logs.", "lime");
                 updateStatsUI();
                 
@@ -122,6 +120,10 @@ export function triggerTeleport(loc) {
     addChatMessage(`Teleported to ${loc}.`, "cyan");
 }
 
+function smiteCommand() {
+    triggerSmite(scene);
+}
+
 function animate() {
     requestAnimationFrame(animate);
     updateMovement();
@@ -134,5 +136,6 @@ window.game = {
     deposit: deposit,
     sell: sell,
     openBank: openBank,
-    switchTab: switchTab
+    switchTab: switchTab,
+    smite: smiteCommand
 };
