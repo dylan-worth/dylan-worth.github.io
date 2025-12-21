@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 window.gameState = window.gameState || {};
 window.gameState.colliders = window.gameState.colliders || [];
+window.gameState.lanternLights = []; // Store lights to toggle them later
 
-// --- HELPER: CHESS TEXTURE ---
 function getChessTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 64; canvas.height = 64;
@@ -20,13 +20,45 @@ function getChessTexture() {
     return tex;
 }
 
+// --- LANTERNS (NEW) ---
+export function createLantern(scene, x, z) {
+    const group = new THREE.Group();
+    
+    // 1. Post
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 0.2), new THREE.MeshStandardMaterial({color: 0x222222}));
+    post.position.y = 1.5;
+    
+    // 2. Lamp Case
+    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), new THREE.MeshStandardMaterial({color: 0x444444}));
+    lamp.position.y = 3.0;
+
+    // 3. The Light (Orange Glow)
+    const light = new THREE.PointLight(0xffaa00, 0, 10); // Start intensity 0 (Day)
+    light.position.y = 2.8;
+    light.castShadow = false; // Performance optimization
+    
+    // Add light to global state for Day/Night cycle
+    window.gameState.lanternLights.push(light);
+
+    // 4. Glow Mesh (Visual only)
+    const bulb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.3), new THREE.MeshBasicMaterial({color: 0xffaa00}));
+    bulb.position.y = 3.0;
+    
+    group.add(post, lamp, bulb, light);
+    group.position.set(x, 0, z);
+    
+    // Collision so you don't walk through it
+    window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 1.5, z), new THREE.Vector3(0.5, 3, 0.5)));
+    
+    scene.add(group);
+}
+
 // --- SNOW OBJECTS ---
 export function createSnowPile(scene, x, z) {
     const geo = new THREE.SphereGeometry(1, 8, 6, 0, Math.PI * 2, 0, Math.PI/2);
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
     const pile = new THREE.Mesh(geo, mat);
     pile.scale.y = 0.5; 
-    
     const group = new THREE.Group();
     group.add(pile);
     group.position.set(x, 0, z);
@@ -88,6 +120,9 @@ export function createInteractable(scene, type, x, z) {
 
 // --- TREES ---
 export function createTree(scene, type, x, z) {
+    // Random rotation for variety
+    const rot = Math.random() * Math.PI;
+    
     window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 1, z), new THREE.Vector3(1, 10, 1)));
     const group = new THREE.Group();
     let color = 0x228b22, name = "Tree", req = 1, xp = 25;
@@ -100,78 +135,41 @@ export function createTree(scene, type, x, z) {
     
     group.add(trunk, leaves);
     group.position.set(x, 0, z);
+    group.rotation.y = rot;
+    
     group.userData = { type: 'tree', treeName: name, levelReq: req, xp: xp, respawning: false };
     group.children.forEach(c => c.userData = { parentGroup: group });
     scene.add(group);
 }
 
-// --- NPCS (FIXED) ---
+// --- NPCS ---
 export function createNPC(scene, type, x, z) {
     const group = new THREE.Group();
     
-    // 1. DEFAULT CONFIG (Standard Man)
     let config = {
-        bodyColor: 0x445588,
-        headColor: 0xffccaa,
-        hp: 7,
-        name: "Man",
-        isAnimal: false,
-        interactionType: 'npc' // 'npc' or 'quest_npc'
+        bodyColor: 0x445588, headColor: 0xffccaa, hp: 7, name: "Man", isAnimal: false, interactionType: 'npc'
     };
 
-    // 2. APPLY TYPE OVERRIDES
-    if (type === 'man') {
-        // Defaults are fine
-    } 
-    else if (type === 'woman') {
-        config.bodyColor = 0x884488;
-        config.name = "Woman";
-    }
-    else if (type === 'goblin') {
-        config.bodyColor = 0x558855;
-        config.headColor = 0x00ff00;
-        config.name = "Goblin";
-        config.hp = 5;
-    }
-    else if (type === 'cook') {
-        config.bodyColor = 0xffffff;
-        config.name = "Cook";
-        config.interactionType = 'quest_npc';
-    }
-    else if (type === 'cow') {
-        config.bodyColor = 0x222222;
-        config.headColor = 0xffffff;
-        config.name = "Cow";
-        config.isAnimal = true;
-        config.interactionType = 'quest_npc';
-    }
-    else if (type === 'chicken') {
-        config.bodyColor = 0xccaa88;
-        config.headColor = 0xcc0000;
-        config.name = "Chicken";
-        config.isAnimal = true;
-        config.interactionType = 'quest_npc';
-    }
+    if (type === 'woman') { config.bodyColor = 0x884488; config.name = "Woman"; }
+    else if (type === 'goblin') { config.bodyColor = 0x558855; config.headColor = 0x00ff00; config.name = "Goblin"; config.hp = 5; }
+    else if (type === 'cook') { config.bodyColor = 0xffffff; config.name = "Cook"; config.interactionType = 'quest_npc'; }
+    else if (type === 'cow') { config.bodyColor = 0x222222; config.headColor = 0xffffff; config.name = "Cow"; config.isAnimal = true; config.interactionType = 'quest_npc'; }
+    else if (type === 'chicken') { config.bodyColor = 0xccaa88; config.headColor = 0xcc0000; config.name = "Chicken"; config.isAnimal = true; config.interactionType = 'quest_npc'; }
 
-    // 3. BUILD GEOMETRY
     let body, head;
-
     if (config.isAnimal && type === 'cow') {
-        // Cow Shape
         body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 2), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.5;
         head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: config.headColor}));
         head.position.set(0, 1, 1);
     } 
     else if (config.isAnimal && type === 'chicken') {
-        // Chicken Shape
         body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.5), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.2;
         head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({color: config.headColor}));
         head.position.set(0, 0.5, 0.2);
     } 
     else {
-        // Humanoid Shape (Man, Woman, Goblin, Cook)
         body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: config.bodyColor}));
         body.position.y = 0.8;
         head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({color: config.headColor}));
@@ -181,15 +179,7 @@ export function createNPC(scene, type, x, z) {
     group.add(body, head);
     group.position.set(x, 0, z);
     
-    // 4. ATTACH DATA
-    group.userData = { 
-        type: config.interactionType, 
-        npcType: type,
-        name: config.name, 
-        hp: config.hp, 
-        maxHp: config.hp 
-    };
-    
+    group.userData = { type: config.interactionType, npcType: type, name: config.name, hp: config.hp, maxHp: config.hp };
     group.children.forEach(c => c.userData = { parentGroup: group });
     scene.add(group);
     return group;
