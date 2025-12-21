@@ -39,8 +39,7 @@ export async function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
 
-    // --- CAMERA START POSITION ---
-    // We set the camera closer: 5 units back, 4 units up
+    // Camera Start Position (Closer Follow)
     camera.position.set(0, 4, 5); 
 
     try { 
@@ -64,20 +63,36 @@ export async function initGame() {
         console.error("Initialization failed:", e); 
     }
 
+    // This cycle calls updateEnvironment every second
     setInterval(() => {
         window.gameState.gameTime += 0.005; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
-        updateEnvironment();
+        updateEnvironment(); 
     }, 1000);
 
     animate();
 }
 
-// ... updateEnvironment and attemptChop stay the same ...
+function updateEnvironment() {
+    const t = window.gameState.gameTime;
+    let intensity = 1.0;
+    let skyColor = 0x87ceeb; 
+    let lanternOn = false;
+
+    if (t > 19 || t < 6) { intensity = 0.2; skyColor = 0x1a1a2a; lanternOn = true; }
+    else if (t > 17 || t < 8) { intensity = 0.5; skyColor = 0xffa500; }
+
+    setDayNight(intensity, skyColor);
+    
+    if(window.gameState.lanternLights) {
+        window.gameState.lanternLights.forEach(light => {
+            light.intensity = lanternOn ? 1.0 : 0;
+        });
+    }
+}
 
 function onInteract(mouse) {
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
-
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
 
@@ -95,7 +110,6 @@ function onInteract(mouse) {
                 break; 
             }
             if (type === 'tree') { attemptChop(group); break; }
-            if (type === 'bank_booth') { addChatMessage("Banker: Welcome to the bank.", "green"); break; }
         }
     }
 }
@@ -106,13 +120,10 @@ function animate() {
     updateAnimations();
     updateHans(); 
     
-    // --- CAMERA FOLLOW LOGIC ---
     if (controls && playerGroup) {
-        // We track the player's position closely
         const targetPos = playerGroup.position.clone();
-        targetPos.y += 1.2; // Aim at character chest/head height
-        
-        controls.target.lerp(targetPos, 0.2); // Faster lerp for tighter following
+        targetPos.y += 1.2; 
+        controls.target.lerp(targetPos, 0.2); 
         controls.update();
     }
 
