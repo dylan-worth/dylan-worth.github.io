@@ -1,54 +1,47 @@
-import { createGround, createRiver, createBridge, createBuilding, createInteractable, createTree, createFence } from './assets.js';
+import { createGround, createRiver, createBridge, createPath, createBuilding, createInteractable, createTree, createFence } from './assets.js';
 
 export function buildLumbridge(scene) {
-    console.log("Building Custom Lumbridge Map...");
+    console.log("Building Lumbridge...");
 
     // 1. GROUND & RIVER
-    createGround(scene, 0x2d5a27); // Dark Green Grass
+    createGround(scene, 0x2d5a27); // Grass
     
-    // River Lum (East of Castle)
-    // Runs North to South (z: -100 to 100) at x: 25
-    createRiver(scene, 25, 0, 12, 200);
+    // River Lum (East side, running N/S)
+    createRiver(scene, 35, 0, 15, 200);
 
-    // Bridge to Goblin side
-    createBridge(scene, 25, 5); // x=25, z=5
+    // Bridge (Connecting to Goblin area)
+    createBridge(scene, 35, 10);
 
-    // 2. CASTLE (Center)
-    // We place the main keep and the walls
-    createBuilding(scene, 'lum_castle', 0, 0); 
+    // 2. PATHS (Dirt Walkways)
+    // Path from Castle Gate (0, 8) Southwards
+    createPath(scene, 0, 15, 4, 30); 
+    // Path East to Bridge
+    createPath(scene, 15, 10, 30, 4, 0);
+
+    // 3. CASTLE (West Side)
+    // Castle Center at 0,0. 
+    createBuilding(scene, 'lum_castle', 0, -5); 
     
-    // Bank Booth inside the castle courtyard/foyer
-    createInteractable(scene, 'bank_booth', 0, 5);
+    // BANK (Inside Castle - Top Floor logic simulated by putting it in NW corner)
+    // Placed at (-5, -5) to be inside the walls but not blocking the door at z=8
+    createInteractable(scene, 'bank_booth', -5, -8); 
 
-    // 3. TOWN BUILDINGS
-    // General Store (North)
-    createBuilding(scene, 'general_store', -10, -25);
-    createInteractable(scene, 'shop_stall', -10, -22); // Outside store
+    // 4. TOWN BUILDINGS
+    // Bob's Axes (South of Castle)
+    createBuilding(scene, 'bobs_axes', -10, 25);
+    createInteractable(scene, 'shop_stall', -10, 25); // Inside Bob's
+
+    // Church (South East, near River)
+    createBuilding(scene, 'church', 20, 35);
+    // Church Altar/Interactable could go here
+
+    // 5. GOBLIN AREA (East of River)
+    // Fences
+    createFence(scene, 50, 0, 20); // North Fence
+    createFence(scene, 50, 20, 20); // South Fence
     
-    // Church (South East of Castle, near river)
-    createBuilding(scene, 'church', 10, 20);
-
-    // 4. FENCES & PATHS
-    // Fence blocking the goblin side (East side of river)
-    createFence(scene, 40, -10, 15); // North part of goblin field
-    createFence(scene, 40, 20, 15);  // South part of goblin field
-
-    // 5. TREES & NPCS (Static placement for "Handcrafted" look)
-    
-    // -- West Woods (behind General Store) --
-    createTree(scene, 'tree', -25, -30);
-    createTree(scene, 'tree', -35, -25);
-    createTree(scene, 'tree', -30, -15);
-    createTree(scene, 'oak', -40, -10); // Big Oak
-
-    // -- Graveyard / Swamp area (South) --
-    createTree(scene, 'tree', -5, 35);
-    createTree(scene, 'tree', 5, 40);
-
-    // -- Goblin/Cow Field (East across bridge) --
-    // These are the "training" trees
-    createTree(scene, 'oak', 35, 0);
-    createTree(scene, 'oak', 45, 5);
-    createTree(scene, 'tree', 40, 15);
-    createTree(scene, 'tree', 35, -5);
+    // Training Trees
+    createTree(scene, 'oak', 55, 5);
+    createTree(scene, 'tree', 60, 15);
+    createTree(scene, 'oak', 50, -5);
 }
