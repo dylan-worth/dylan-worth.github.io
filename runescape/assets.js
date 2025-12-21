@@ -43,7 +43,7 @@ export function createInteractable(scene, type, x, z) {
         base.castShadow = true;
         group.add(base);
         
-        // Striped Roof (Cylinder cut in half)
+        // Striped Roof
         const roof = new THREE.Mesh(
             new THREE.CylinderGeometry(2, 2, 3.2, 8, 1, false, 0, Math.PI), 
             new THREE.MeshStandardMaterial({ color: 0xeeeeee })
@@ -52,7 +52,7 @@ export function createInteractable(scene, type, x, z) {
         roof.position.y = 2.5;
         group.add(roof);
 
-        // Posts holding roof
+        // Posts
         const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2), new THREE.MeshStandardMaterial({color: 0x654321}));
         postL.position.set(-1.4, 1.5, 0);
         group.add(postL);
@@ -63,7 +63,7 @@ export function createInteractable(scene, type, x, z) {
 
     group.position.set(x, 0, z);
     
-    // DATA FOR MAIN.JS RAYCASTER
+    // DATA FOR RAYCASTER
     group.userData = { type: type };
     // Helper: make sure clicking children triggers the group logic
     group.traverse((child) => {
@@ -78,7 +78,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
     const group = new THREE.Group();
 
     if (type === 'lum_castle') {
-        // Main Keep (Grey)
+        // Main Keep
         const keep = new THREE.Mesh(
             new THREE.BoxGeometry(10, 8, 10), 
             new THREE.MeshStandardMaterial({ color: 0x777777 })
@@ -88,7 +88,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         keep.receiveShadow = true;
         group.add(keep);
         
-        // Battlements (Top rim)
+        // Battlements
         const top = new THREE.Mesh(
             new THREE.BoxGeometry(11, 1, 11), 
             new THREE.MeshStandardMaterial({ color: 0x666666 })
@@ -106,7 +106,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         keep.castShadow = true;
         group.add(keep);
         
-        // Drawbridge / Entrance
+        // Drawbridge
         const bridge = new THREE.Mesh(
             new THREE.BoxGeometry(4, 0.5, 6), 
             new THREE.MeshStandardMaterial({ color: 0x444444 })
@@ -114,7 +114,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         bridge.position.set(0, 0.25, 6);
         group.add(bridge);
         
-        // Blue Flags (Falador colors)
+        // Flags
         const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x888888}));
         flagPole.position.set(5, 12, 0);
         group.add(flagPole);
@@ -123,12 +123,12 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         group.add(flag);
     }
     else if (type === 'pyramid') {
-        // Menaphos Sandstone Pyramid
+        // Menaphos Pyramid
         const pyr = new THREE.Mesh(
             new THREE.ConeGeometry(12, 15, 4), 
             new THREE.MeshStandardMaterial({ color: 0xd2b48c })
         );
-        pyr.rotation.y = Math.PI / 4; // Rotate to look square
+        pyr.rotation.y = Math.PI / 4; 
         pyr.position.y = 7.5;
         pyr.castShadow = true;
         group.add(pyr);
@@ -143,7 +143,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         group.add(cap);
     }
     else if (type === 'church') {
-        // Main Hall
+        // Church
         const body = new THREE.Mesh(
             new THREE.BoxGeometry(6, 5, 8), 
             new THREE.MeshStandardMaterial({ color: 0x555555 })
@@ -152,7 +152,6 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         body.castShadow = true;
         group.add(body);
         
-        // Bell Tower
         const tower = new THREE.Mesh(
             new THREE.BoxGeometry(3, 10, 3), 
             new THREE.MeshStandardMaterial({ color: 0x555555 })
@@ -160,14 +159,6 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
         tower.position.set(0, 5, 3.5);
         tower.castShadow = true;
         group.add(tower);
-        
-        // Stained Glass Window (Blue)
-        const window = new THREE.Mesh(
-            new THREE.PlaneGeometry(1.5, 3),
-            new THREE.MeshBasicMaterial({ color: 0x00aaff, side: THREE.DoubleSide })
-        );
-        window.position.set(0, 5, 5.1);
-        group.add(window);
     }
 
     group.position.set(x, 0, z);
@@ -175,7 +166,7 @@ export function createBuilding(scene, type, x, z, rotY = 0) {
     scene.add(group);
 }
 
-// --- TREES (Woodcutting Nodes) ---
+// --- TREES ---
 export function createTree(scene, type, x, z) {
     const group = new THREE.Group();
     
@@ -184,35 +175,30 @@ export function createTree(scene, type, x, z) {
     let trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 2);
     let leafGeo = new THREE.DodecahedronGeometry(1.5);
     
-    // --- STATS CONFIGURATION ---
+    // Stats
     let name = "Tree";
     let levelReq = 1;
     let xp = 25;
-    let difficulty = 10; // Lower is easier to chop
+    let difficulty = 10; 
 
     if (type === 'oak') {
         name = "Oak Tree";
         levelReq = 15;
         xp = 37.5;
         difficulty = 25; 
-        
-        // Visuals: Thicker, darker
         trunkGeo = new THREE.CylinderGeometry(0.8, 1.0, 2.5);
         leafGeo = new THREE.DodecahedronGeometry(2.2);
     }
     else if (type === 'palm') {
         name = "Palm Tree";
-        levelReq = 30; // Making Palms higher level for Menaphos
+        levelReq = 30;
         xp = 60;
         difficulty = 40;
-
-        // Visuals: Tall, thin, green canopy
         leafColor = 0x88aa00;
         trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 4);
         leafGeo = new THREE.ConeGeometry(3, 1.5, 6);
     }
 
-    // Build Mesh
     const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshStandardMaterial({color: trunkColor}));
     trunk.position.y = (type==='palm') ? 2 : 1;
     trunk.castShadow = true;
@@ -223,7 +209,7 @@ export function createTree(scene, type, x, z) {
     group.add(trunk, leaves);
     group.position.set(x, 0, z);
     
-    // DATA FOR MAIN.JS LOGIC
+    // DATA
     group.userData = { 
         type: 'tree', 
         treeName: name, 
@@ -233,7 +219,6 @@ export function createTree(scene, type, x, z) {
         respawning: false 
     };
     
-    // Helper for Raycaster
     trunk.userData = { parentGroup: group };
     leaves.userData = { parentGroup: group };
 
