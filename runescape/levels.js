@@ -1,9 +1,11 @@
-import { createGround, createBuilding, createInteractable } from './assets.js';
+import { createGround } from './assets_env.js';
+import { createBuilding } from './assets_buildings.js';
+import { createInteractable } from './assets_entities.js';
 import { buildLumbridge } from './lumbridge.js';
 import { spawnLevelNPCs } from './npcs.js';
 
 export function loadLevel(scene, levelName) {
-    // 1. CLEANUP (Remove old objects)
+    // 1. CLEANUP
     for(let i = scene.children.length - 1; i >= 0; i--) {
         const obj = scene.children[i];
         if (obj.isLight || obj.isCamera) continue;
@@ -19,12 +21,10 @@ export function loadLevel(scene, levelName) {
 
     console.log("Loading Level:", levelName);
 
-    // 2. LOAD MAP
+    // 2. LOAD NEW LEVEL
     if (levelName === 'lumbridge') {
         scene.background.setHex(0x87CEEB); 
-        // Build the physical map
         buildLumbridge(scene);
-        // Spawn the NPCs
         spawnLevelNPCs(scene, 'lumbridge');
     } 
     else if (levelName === 'falador') {
