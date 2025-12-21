@@ -38,6 +38,30 @@ export function triggerSmite(scene) {
     // to ensure XP/Loot drops happen correctly.
 }
 
+export function pacifyNPC(targetGroup) {
+    if (!targetGroup) return;
+    
+    // Visual effect
+    targetGroup.children.forEach(c => {
+        if(c.material) c.material.color.setHex(0x00ffff); // Turn Blue
+    });
+
+    addChatMessage(`${targetGroup.userData.name} is stunned by the snow!`, "cyan");
+    
+    // If currently fighting this NPC, stop combat
+    if (currentTarget === targetGroup) {
+        stopCombat();
+    }
+    
+    // Reset color after 5 seconds
+    setTimeout(() => {
+        targetGroup.children.forEach(c => {
+            // Reset to roughly original colors (simple reset)
+            if(c.geometry.type === 'BoxGeometry') c.material.color.setHex(0x445588); // Man color
+        });
+    }, 5000);
+}
+
 export function startCombat(targetGroup) {
     if (combatInterval) clearInterval(combatInterval);
     
