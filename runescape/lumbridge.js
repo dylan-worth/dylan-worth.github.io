@@ -1,60 +1,57 @@
 import { createGround, createRiver, createBridge, createPath } from './assets_env.js';
 import { createBuilding, createFence } from './assets_buildings.js';
 import { createInteractable, createTree, createChessTable, createSnowPile, createNPC } from './assets_entities.js';
-import * as THREE from 'three';
 
 export function buildLumbridge(scene) {
-    // Environment
+    // 1. Environment
     createGround(scene, 0x2d5a27); 
+
+    // RIVER FIX:
+    // River 1: Ends at z=-20
     createRiver(scene, 35, -50, 15, 60, true); 
-    createRiver(scene, 35, 60, 15, 100, true); 
+    // River 2: Starts at z=65 (Length 100 means extent is 15 to 115)
+    // Bridge is at z=10. Gap is now -20 to 15. Safe.
+    createRiver(scene, 35, 65, 15, 100, true); 
+    
+    // Visual Water under bridge (No collision)
     createRiver(scene, 35, 10, 15, 60, false); 
+    
+    // The Bridge
     createBridge(scene, 35, 10, 18, 6); 
 
-    // Paths
+    // 2. Paths
     createPath(scene, 0, 15, 4, 30); 
     createPath(scene, 15, 10, 30, 4, 0);
 
-    // Buildings
+    // 3. Buildings
     createBuilding(scene, 'lum_castle', 0, -5); 
     createBuilding(scene, 'bobs_axes', -10, 25);
     createBuilding(scene, 'church', 20, 35);
     createFence(scene, 50, 0, 20); 
     createFence(scene, 50, 20, 20);
 
-    // Objects
+    // 4. Objects
     createInteractable(scene, 'bank_booth', -5, -8); 
     createInteractable(scene, 'shop_stall', -10, 25); 
     createChessTable(scene, 2, -8);
     createSnowPile(scene, 5, 5);
 
-    // --- QUEST NPCS ---
-    // 1. The Cook (Inside Castle)
-    const cook = createNPC(scene, 'man', 4, -4);
-    cook.children[0].children[0].material.color.setHex(0xffffff); // White Apron
-    cook.userData.name = "Cook"; // Override name for Quest
+    // 5. QUEST NPCS (Using new types)
+    createNPC(scene, 'cook', 4, -4);    // Inside Castle
+    createNPC(scene, 'cow', 52, 5);     // Cow Pen
+    createNPC(scene, 'chicken', 48, 15); // Chicken Pen
 
-    // 2. The Cow (Near Fence)
-    const cow = createNPC(scene, 'man', 52, 5); // Using 'man' as placeholder model
-    cow.children[0].children[0].material.color.setHex(0x000000); // Black/White Cow
-    cow.scale.set(1.5, 0.8, 1); // Horizontal stretch
-    cow.userData.name = "Cow";
-    cow.userData.type = 'quest_npc'; // Tag
-
-    // 3. The Chicken (Near Fence)
-    const chicken = createNPC(scene, 'man', 48, 15);
-    chicken.scale.set(0.3, 0.3, 0.3); // Tiny
-    chicken.children[0].children[0].material.color.setHex(0xccaa88); 
-    chicken.userData.name = "Chicken";
-    chicken.userData.type = 'quest_npc';
-
-    // 4. Wheat Field (North)
-    const wheat = createInteractable(scene, 'shop_stall', -15, 35); // Placeholder
-    wheat.children.forEach(c => c.material.color.setHex(0xeedd00)); // Yellow
+    // Wheat (Using shop stall as placeholder for now, colored yellow)
+    const wheat = createInteractable(scene, 'shop_stall', -15, 35); 
+    wheat.children.forEach(c => c.material.color.setHex(0xeedd00)); 
     wheat.userData.name = "Wheat";
-    wheat.userData.type = 'quest_npc'; // Treat as NPC for talking/interaction
+    wheat.userData.type = 'quest_npc'; 
 
-    // Trees
+    // 6. Normal NPCs
+    createNPC(scene, 'man', 10, 10);
+    createNPC(scene, 'goblin', 30, 30);
+
+    // 7. Trees
     createTree(scene, 'oak', 55, 5);
     createTree(scene, 'tree', 60, 15);
 }
