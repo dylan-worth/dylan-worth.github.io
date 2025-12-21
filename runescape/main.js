@@ -1,27 +1,47 @@
 import { initRenderer, scene, camera, renderer, playerGroup } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
 import { loadLevel } from './levels.js';
-import { addItem, getBestAxe } from './inventory.js'; // Import getBestAxe
+import { addItem, getBestAxe } from './inventory.js'; 
 import { openBank } from './bank.js';
 import { openShop } from './shop.js';
 import * as THREE from 'three';
 
+console.log("Main.js loaded...");
+
+// GAME STATE
+window.gameState = {
+    skills: { woodcutting: { level: 1, xp: 0 } }
+};
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-let choppingInterval = null; // Store the interval ID
+let choppingInterval = null;
 
 export function initGame() {
+    console.log("Initializing Game...");
+    
+    // 1. Setup Graphics
     initRenderer();
+    
+    // 2. Setup Controls
     setupMovement(camera, scene, playerGroup);
+    
+    // 3. Load World
     loadLevel(scene, 'lumbridge');
+    
+    // 4. Listen for Clicks
     window.addEventListener('pointerdown', onInteract);
+    
+    // 5. Start Loop
     animate();
+    
+    console.log("Game Running!");
 }
 
 function onInteract(e) {
     if (e.target.id !== 'game-ui' && e.target.tagName !== 'CANVAS') return;
 
-    // Stop chopping if we move or click something else
+    // Reset chopping if we click away
     if(choppingInterval) {
         clearInterval(choppingInterval);
         choppingInterval = null;
@@ -35,19 +55,22 @@ function onInteract(e) {
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     for (let hit of intersects) {
-        const data = hit.object.userData;
-        const group = data.parentGroup;
-
+        // We look for objects that have parent groups with userData
+        // (Because we click the mesh, but the data is on the group)
+        let group = hit.object.userData.parentGroup;
+        
         if (group) {
-            if (group.userData.type === 'tree') {
+            const type = group.userData.type;
+
+            if (type === 'tree') {
                 attemptChop(group);
                 break;
             }
-            if (group.userData.type === 'bank_booth') {
+            if (type === 'bank_booth') {
                 openBank();
                 break;
             }
-            if (group.userData.type === 'shop_stall') {
+            if (type === 'shop_stall') {
                 openShop();
                 break;
             }
@@ -58,100 +81,88 @@ function onInteract(e) {
 function attemptChop(treeGroup) {
     if (treeGroup.userData.respawning) return;
 
-    // 1. Check for Axe
+    // AXE CHECK
     const axe = getBestAxe();
     if (!axe) {
-        document.getElementById('context-text').innerText = "You need an axe to chop this tree.";
-        document.getElementById('context-text').style.color = "#ff5555";
+        updateContext("You need an axe!", "#ff5555");
         return;
     }
-
-    // 2. Check Level Requirements
-    const wcLevel = window.gameState.skills.woodcutting.level;
     
-    // Axe Level Req
-    if (wcLevel < axe.req) {
-        document.getElementById('context-text').innerText = `You need lvl ${axe.req} WC to use ${axe.name}.`;
-        return;
-    }
-    // Tree Level Req
-    if (wcLevel < treeGroup.userData.levelReq) {
-        document.getElementById('context-text').innerText = `You need lvl ${treeGroup.userData.levelReq} WC to chop ${treeGroup.userData.treeName}.`;
+    // LEVEL CHECK
+    const myLvl = window.gameState.skills.woodcutting.level;
+    const req = treeGroup.userData.levelReq || 1;
+    if (myLvl < req) {
+        updateContext(`Need Lvl ${req} Woodcutting.`, "#ff5555");
         return;
     }
 
-    // 3. Start Chopping Loop (Tick System)
-    document.getElementById('context-text').innerText = "Swinging " + axe.name + "...";
-    document.getElementById('context-text').style.color = "#00ff00";
+    updateContext(`Chopping with ${axe.name}...`, "#00ff00");
 
+    // TICK SYSTEM (600ms loops)
     choppingInterval = setInterval(() => {
-        // Stop if tree despawned (someone else chopped it)
         if (treeGroup.userData.respawning) {
             clearInterval(choppingInterval);
-            document.getElementById('context-text').innerText = "";
             return;
         }
 
-        // ROLL FOR LOG
-        // Formula: (Level + AxePower) vs Difficulty
-        // Difficulty: Normal=10, Oak=20
-        // Axe Power: Bronze=1, Rune=5
-        
-        const roll = Math.random() * treeGroup.userData.difficulty; // e.g., 0 to 20
-        const power = wcLevel + axe.power; // e.g., Lvl 10 + Bronze(1) = 11
-        
-        // Debug log to console to see rates
-        // console.log(`Rolled ${roll.toFixed(1)} vs Power ${power}`);
+        // CALC CHANCE
+        const difficulty = treeGroup.userData.difficulty || 10;
+        const roll = Math.random() * difficulty;
+        const power = myLvl + axe.power;
 
         if (power > roll) {
             // SUCCESS
-            if(addItem('logs', 'Logs', 1)) {
-                // XP Drop
-                window.gameState.skills.woodcutting.xp += treeGroup.userData.xp;
-                updateUI();
-                
-                document.getElementById('context-text').innerText = "You get some logs.";
-                
-                // Stop Chopping (Standard Tree Logic: 1 log = stump)
-                // For Oaks/High level, you usually get multiple, but let's stick to 1 for now
+            if (addItem('logs', 'Logs', 1)) {
+                // XP
+                window.gameState.skills.woodcutting.xp += (treeGroup.userData.xp || 25);
+                updateSkillsUI();
+                updateContext("You get some logs.", "#00ccff");
+
+                // CLEAR
                 clearInterval(choppingInterval);
                 choppingInterval = null;
-
-                // Visual Despawn
-                treeGroup.userData.respawning = true;
-                if(treeGroup.children[1]) treeGroup.children[1].visible = false;
                 
+                // DESPAWN TREE
+                treeGroup.userData.respawning = true;
+                if(treeGroup.children[1]) treeGroup.children[1].visible = false; // Hide leaves
+
                 setTimeout(() => {
                     if(treeGroup.children[1]) treeGroup.children[1].visible = true;
                     treeGroup.userData.respawning = false;
                 }, 3000);
             } else {
-                // Inventory Full
                 clearInterval(choppingInterval);
-                document.getElementById('context-text').innerText = "Inventory full!";
-                document.getElementById('context-text').style.color = "#ff5555";
+                updateContext("Inventory Full!", "#ff5555");
             }
         }
-        // If fail, just wait for next tick (loop continues)
-
-    }, 600); // 600ms = 1 RuneScape Tick
+    }, 600);
 }
 
-function updateUI() {
+function updateSkillsUI() {
     const xp = window.gameState.skills.woodcutting.xp;
-    document.getElementById('wc-xp').innerText = xp;
-    const lvl = Math.floor(1 + Math.sqrt(xp / 10)); // Simple curve
-    document.getElementById('wc-level').innerText = lvl;
+    // Simple Level Algo
+    const lvl = Math.floor(1 + Math.sqrt(xp / 10));
     window.gameState.skills.woodcutting.level = lvl;
+    
+    // Attempt to update HTML if elements exist
+    const elLvl = document.getElementById('wc-level');
+    const elXp = document.getElementById('wc-xp');
+    if(elLvl) elLvl.innerText = lvl;
+    if(elXp) elXp.innerText = xp;
 }
 
-// ... (Keep triggerTeleport, closeWindows, animate same as before) ...
-// Ensure you copy them from the previous main.js or keep them if editing the file directly.
+function updateContext(msg, color) {
+    const ctx = document.getElementById('context-text');
+    if(ctx) {
+        ctx.innerText = msg;
+        ctx.style.color = color;
+    }
+}
 
-export function triggerTeleport(locationName) {
-    loadLevel(scene, locationName);
-    playerGroup.position.set(0, 0, 0);
-    document.getElementById('context-text').innerText = "Welcome to " + locationName;
+export function triggerTeleport(loc) {
+    loadLevel(scene, loc);
+    playerGroup.position.set(0,0,0);
+    updateContext(`Welcome to ${loc}`, "#ffffff");
 }
 
 export function closeWindows() {
