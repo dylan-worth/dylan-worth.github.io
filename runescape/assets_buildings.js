@@ -8,7 +8,7 @@ export function createBuilding(scene, type, x, z) {
         return createCastle(scene, x, z);
     }
 
-    // Standard building for Bob's Axes, Church, or General Stores
+    // Standard building (Bob's Axes, Church, etc.)
     const group = new THREE.Group();
     
     // Stone Body
@@ -26,46 +26,58 @@ export function createBuilding(scene, type, x, z) {
         new THREE.MeshStandardMaterial({ color: 0x444444 })
     );
     roof.position.y = 5;
-    roof.rotation.y = Math.PI / 4; // Align square base to body
+    roof.rotation.y = Math.PI / 4; 
     roof.castShadow = true;
 
     group.add(body, roof);
     group.position.set(x, 0, z);
     scene.add(group);
     
-    // Add collision box
     window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
 }
 
 /**
- * Generates a multi-part Castle based on the requested visual design.
+ * Generates the Upgraded Castle with an accessible entrance.
  */
 function createCastle(scene, x, z) {
     const castleGroup = new THREE.Group();
     const stoneMat = new THREE.MeshStandardMaterial({ color: 0x999999 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4b3621 }); // Dark brown / Wooden texture
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4b3621 }); // Dark brown wooden roof
 
-    // 1. MAIN KEEP (Central Body)
-    const mainBody = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 12), stoneMat);
-    mainBody.position.y = 4;
-    mainBody.castShadow = true;
-    mainBody.receiveShadow = true;
-    castleGroup.add(mainBody);
+    // 1. MAIN KEEP (Broken into walls to allow internal access)
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 2), stoneMat);
+    backWall.position.set(0, 4, -5);
+    
+    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 12), stoneMat);
+    leftWall.position.set(-5, 4, 0);
+    
+    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 12), stoneMat);
+    rightWall.position.set(5, 4, 0);
+    
+    // Front walls (leaving a 4-unit gap for the door)
+    const frontWallL = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 2), stoneMat);
+    frontWallL.position.set(-4, 4, 5);
+    
+    const frontWallR = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 2), stoneMat);
+    frontWallR.position.set(4, 4, 5);
+    
+    // Header above the gate
+    const doorHeader = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 2), stoneMat);
+    doorHeader.position.set(0, 6.5, 5);
+    
+    castleGroup.add(backWall, leftWall, rightWall, frontWallL, frontWallR, doorHeader);
 
-    // 2. CORNER TOWERS (4 Cylindrical Towers)
+    // 2. CORNER TOWERS
     const towerPositions = [
         { x: -6, z: -6 }, { x: 6, z: -6 },
         { x: -6, z: 6 },  { x: 6, z: 6 }
     ];
 
     towerPositions.forEach(pos => {
-        // Tower Shaft
         const tower = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 8), stoneMat);
         tower.position.set(pos.x, 6, pos.z);
         tower.castShadow = true;
-        tower.receiveShadow = true;
         
-        // Tower Pointed Roof
         const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4, 8), roofMat);
         towerRoof.position.set(pos.x, 14, pos.z);
         towerRoof.castShadow = true;
@@ -73,34 +85,28 @@ function createCastle(scene, x, z) {
         castleGroup.add(tower, towerRoof);
     });
 
-    // 3. CENTRAL SPIRE (The High Peak)
+    // 3. CENTRAL SPIRE
     const centralSpire = new THREE.Mesh(new THREE.BoxGeometry(4, 12, 4), stoneMat);
     centralSpire.position.y = 10;
-    centralSpire.castShadow = true;
-
+    
     const spireRoof = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 4), roofMat);
     spireRoof.position.y = 19;
     spireRoof.rotation.y = Math.PI / 4;
-    spireRoof.castShadow = true;
     
     castleGroup.add(centralSpire, spireRoof);
 
-    // 4. ENTRANCE GATEWAY
-    const gate = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 1.5), stoneMat);
-    gate.position.set(0, 2.5, 6); // Positioned at the front
-    castleGroup.add(gate);
-
-    // Set world position and add to scene
+    // 4. SET POSITION & ADD TO SCENE
     castleGroup.position.set(x, 0, z);
     scene.add(castleGroup);
 
-    // 5. COLLISION ZONE
-    // Create a large box covering the castle footprint to prevent walking through it
-    const castleCollider = new THREE.Box3().setFromCenterAndSize(
-        new THREE.Vector3(x, 5, z), 
-        new THREE.Vector3(16, 20, 16)
-    );
-    window.gameState.colliders.push(castleCollider);
+    // 5. COLLISIONS (Added per wall to allow the player to enter the center)
+    const walls = [backWall, leftWall, rightWall, frontWallL, frontWallR];
+    walls.forEach(wall => {
+        const box = new THREE.Box3().setFromObject(wall);
+        // Translate the local wall bounds to the castle's world position
+        box.translate(new THREE.Vector3(x, 0, z));
+        window.gameState.colliders.push(box);
+    });
 }
 
 /**
@@ -110,11 +116,9 @@ export function createFence(scene, x, z, length) {
     const group = new THREE.Group();
     const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
 
-    // Main horizontal rail
     const rail = new THREE.Mesh(new THREE.BoxGeometry(length, 0.4, 0.2), woodMat);
     rail.position.y = 0.8;
     
-    // Support posts every 4 units
     const postCount = Math.floor(length / 4) + 1;
     for (let i = 0; i < postCount; i++) {
         const post = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), woodMat);
@@ -127,6 +131,5 @@ export function createFence(scene, x, z, length) {
     group.position.set(x, 0, z);
     scene.add(group);
     
-    // Collision for fence
     window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
 }
