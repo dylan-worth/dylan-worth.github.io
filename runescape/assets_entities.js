@@ -3,29 +3,23 @@ import * as THREE from 'three';
 window.gameState = window.gameState || {};
 window.gameState.colliders = window.gameState.colliders || [];
 
-// --- HELPER: GENERATE CHESS TEXTURE ---
 function getChessTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 64; canvas.height = 64;
     const ctx = canvas.getContext('2d');
-    
-    // White background
-    ctx.fillStyle = '#eecfa1'; // Light wood color
+    ctx.fillStyle = '#eecfa1'; 
     ctx.fillRect(0,0,64,64);
-    
-    // Black squares
-    ctx.fillStyle = '#5c4033'; // Dark wood color
+    ctx.fillStyle = '#5c4033'; 
     for(let y=0; y<8; y++){
         for(let x=0; x<8; x++){
             if((x+y)%2===1) ctx.fillRect(x*8, y*8, 8, 8);
         }
     }
     const tex = new THREE.CanvasTexture(canvas);
-    tex.magFilter = THREE.NearestFilter; // Keep it pixelated/sharp
+    tex.magFilter = THREE.NearestFilter; 
     return tex;
 }
 
-// --- FURNITURE ---
 export function createChessTable(scene, x, z) {
     const group = new THREE.Group();
     
@@ -34,7 +28,6 @@ export function createChessTable(scene, x, z) {
     const topMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
     const top = new THREE.Mesh(topGeo, topMat);
     top.position.y = 0.8;
-    top.castShadow = true;
 
     // 2. Legs
     const legGeo = new THREE.BoxGeometry(0.1, 0.8, 0.1);
@@ -48,12 +41,17 @@ export function createChessTable(scene, x, z) {
     const boardMat = new THREE.MeshStandardMaterial({ map: getChessTexture() });
     const board = new THREE.Mesh(boardGeo, boardMat);
     board.rotation.x = -Math.PI/2;
-    board.position.y = 0.86; // Sit slightly on top of table
+    board.position.y = 0.86;
 
     group.add(top, p1, p2, p3, p4, board);
     group.position.set(x, 0, z);
     
-    // Collision (So you don't walk through it)
+    // --- KEY CHANGE: INTERACTION DATA ---
+    group.userData = { type: 'chess_table', name: "Chess Table" };
+    // Make sure children point back to group for Raycaster
+    group.children.forEach(c => c.userData = { parentGroup: group });
+
+    // Collision
     window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(
         new THREE.Vector3(x, 0.5, z), 
         new THREE.Vector3(1.2, 1, 1.2)
@@ -62,79 +60,54 @@ export function createChessTable(scene, x, z) {
     scene.add(group);
 }
 
-// --- INTERACTABLES ---
+// ... (Keep createInteractable, createTree, createNPC exactly as they were) ...
+// (I will omit them here to save space, but DO NOT DELETE THEM from your file)
 export function createInteractable(scene, type, x, z) {
     const group = new THREE.Group();
     window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(
-        new THREE.Vector3(x, 1, z), 
-        new THREE.Vector3(1.5, 2, 1.5)
+        new THREE.Vector3(x, 1, z), new THREE.Vector3(1.5, 2, 1.5)
     ));
-
     if (type === 'bank_booth') {
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1), new THREE.MeshStandardMaterial({ color: 0x654321 }));
-        mesh.position.y = 0.75;
-        group.add(mesh);
+        mesh.position.y = 0.75; group.add(mesh);
     } else if (type === 'shop_stall') {
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1.5), new THREE.MeshStandardMaterial({ color: 0x880000 }));
-        mesh.position.y = 0.5;
-        group.add(mesh);
+        mesh.position.y = 0.5; group.add(mesh);
     }
-    
     group.position.set(x, 0, z);
     group.userData = { type: type };
     group.children.forEach(c => c.userData = { parentGroup: group });
     scene.add(group);
 }
-
-// --- TREES ---
 export function createTree(scene, type, x, z) {
-    window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(
-        new THREE.Vector3(x, 1, z), 
-        new THREE.Vector3(1, 10, 1)
-    ));
-    
+    window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 1, z), new THREE.Vector3(1, 10, 1)));
     const group = new THREE.Group();
-    let color = 0x228b22, name = "Tree", req = 1, xp = 25;
-    if(type === 'oak'){ color = 0x116611; name = "Oak"; req = 15; xp = 37.5; }
-
+    let color = 0x228b22, name="Tree", req=1, xp=25;
+    if(type==='oak'){color=0x116611; name="Oak"; req=15; xp=37.5;}
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2), new THREE.MeshStandardMaterial({color:0x3d2817}));
-    trunk.position.y = 1;
-    const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2), new THREE.MeshStandardMaterial({color: color}));
-    leaves.position.y = 2.5;
-    
-    group.add(trunk, leaves);
-    group.position.set(x, 0, z);
-    group.userData = { type: 'tree', treeName: name, levelReq: req, xp: xp, respawning: false };
-    trunk.userData = { parentGroup: group };
-    leaves.userData = { parentGroup: group };
+    trunk.position.y=1;
+    const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2), new THREE.MeshStandardMaterial({color:color}));
+    leaves.position.y=2.5;
+    group.add(trunk,leaves);
+    group.position.set(x,0,z);
+    group.userData={type:'tree', treeName:name, levelReq:req, xp:xp, respawning:false};
+    trunk.userData={parentGroup:group};
+    leaves.userData={parentGroup:group};
     scene.add(group);
 }
-
-// --- NPCS ---
 export function createNPC(scene, type, x, z) {
     const group = new THREE.Group();
     let bodyColor, headColor, hp, maxHp, combatLvl, name;
     let isWoman = (type === 'woman');
-
-    if (type === 'man') {
-        bodyColor = 0x445588; headColor = 0xffccaa; hp = 7; maxHp = 7; combatLvl = 2; name = "Man";
-    } else if (type === 'woman') {
-        bodyColor = 0x884488; headColor = 0xffccaa; hp = 7; maxHp = 7; combatLvl = 2; name = "Woman";
-    } else if (type === 'goblin') {
-        bodyColor = 0x558855; headColor = 0x00ff00; hp = 5; maxHp = 5; combatLvl = 2; name = "Goblin";
-    }
-
+    if (type === 'man') { bodyColor = 0x445588; headColor = 0xffccaa; hp = 7; maxHp = 7; combatLvl = 2; name = "Man"; } 
+    else if (type === 'woman') { bodyColor = 0x884488; headColor = 0xffccaa; hp = 7; maxHp = 7; combatLvl = 2; name = "Woman"; }
+    else if (type === 'goblin') { bodyColor = 0x558855; headColor = 0x00ff00; hp = 5; maxHp = 5; combatLvl = 2; name = "Goblin"; }
     let body;
-    if (isWoman) {
-        body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 0.8), new THREE.MeshStandardMaterial({color: bodyColor}));
-    } else {
-        body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: bodyColor}));
-    }
+    if (isWoman) body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 0.8), new THREE.MeshStandardMaterial({color: bodyColor}));
+    else body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: bodyColor}));
     body.position.y = 0.8;
-    
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({color: headColor}));
     head.position.y = 1.4;
-
     group.add(body, head);
     group.position.set(x, 0, z);
     group.userData = { type: 'npc', npcType: type, name: name, hp: hp, maxHp: maxHp, combatLevel: combatLvl };
