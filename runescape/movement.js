@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 let targetPosition = null;
 let isMoving = false;
-const speed = 0.15; 
+const speed = 0.25; 
 
 export function setupMovement(camera, scene, playerGroup, onInteractCallback) {
     const raycaster = new THREE.Raycaster();
