@@ -4,22 +4,21 @@ import { loadLevel } from './levels.js';
 import { addItem, getBestAxe } from './inventory.js'; 
 import { openBank, deposit } from './bank.js';
 import { openShop, sell } from './shop.js';
-import { openChess } from './chess.js'; // Chess UI
+import { openChess } from './chess.js'; 
 import { setupChat, addChatMessage } from './chat.js';
 import { startCombat, triggerSmite } from './combat.js'; 
 import { INITIAL_SKILLS, addXp } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
-import { updateMinimap } from './minimap.js'; // Minimap
+import { updateMinimap } from './minimap.js';
+import { triggerSnowballEvent } from './events.js'; // NEW IMPORT
 import * as THREE from 'three';
 
-// 1. SETUP GAME STATE
 window.gameState = {
     skills: JSON.parse(JSON.stringify(INITIAL_SKILLS)),
     uiMode: 'normal',
     colliders: [],
     buildings: [],
     player: null,
-    // Critical: Initialize empty arrays to prevent crashes
     inventory: [], 
     bank: []
 };
@@ -31,15 +30,12 @@ export function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
     
-    // Pass 'onInteract' to movement.js (only fires on Taps, not Swipes)
     setupMovement(camera, scene, playerGroup, onInteract);
     setupChat();
     
     try { 
         loadLevel(scene, 'lumbridge'); 
         addChatMessage("Welcome to Open881.", "yellow");
-        
-        // Grant Starter Item if inventory is empty
         if(window.gameState.inventory.length === 0) {
              addItem('axe_bronze', 'Bronze Axe', 1);
         }
@@ -47,10 +43,24 @@ export function initGame() {
     } 
     catch(e) { console.error(e); }
 
+    // Start Random Event Loop
+    setInterval(checkRandomEvent, 1000);
+
     animate();
 }
 
-// This function receives normalized mouse coordinates (-1 to 1)
+// 1/500 chance every second to trigger snowballs naturally
+function checkRandomEvent() {
+    if (Math.random() < 0.002) { 
+        triggerSnowballEvent(scene, playerGroup);
+    }
+}
+
+// Wrapper for Command
+function commandTriggerEvent() {
+    triggerSnowballEvent(scene, playerGroup);
+}
+
 function onInteract(mouse) {
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
 
@@ -73,34 +83,26 @@ function onInteract(mouse) {
 
 function attemptChop(treeGroup) {
     if(treeGroup.userData.respawning) return;
-    
     const axe = getBestAxe();
     if(!axe) { addChatMessage("You do not have an axe for this.", "red"); return; }
     
     const req = treeGroup.userData.levelReq || 1;
     if(window.gameState.skills.woodcutting.level < req) {
-        addChatMessage(`${treeGroup.userData.treeName} requires level ${req}.`, "red");
+        addChatMessage("Level too low.", "red");
         return;
     }
 
-    addChatMessage(`You swing your axe at the ${treeGroup.userData.treeName}...`, "white");
+    addChatMessage("Chopping...", "white");
     
     choppingInterval = setInterval(() => {
         if(treeGroup.userData.respawning) { clearInterval(choppingInterval); return; }
         
         if(Math.random() * 10 < (window.gameState.skills.woodcutting.level + axe.power)) {
             if(addItem('logs', 'Logs', 1)) {
-                if (addXp('woodcutting', treeGroup.userData.xp)) {
-                    addChatMessage("Congratulations, you advanced a Woodcutting level!", "gold");
-                }
-                
-                addChatMessage("You get some logs.", "lime");
+                if(addXp('woodcutting', treeGroup.userData.xp)) addChatMessage("Level Up!", "gold");
                 updateStatsUI();
-                
                 clearInterval(choppingInterval);
                 choppingInterval = null;
-                
-                // Respawn Logic
                 treeGroup.userData.respawning = true;
                 if(treeGroup.children[1]) treeGroup.children[1].visible = false;
                 setTimeout(() => {
@@ -127,16 +129,11 @@ function smiteCommand() { triggerSmite(scene); }
 
 function animate() {
     requestAnimationFrame(animate);
-    
     updateMovement();
-    
-    // Update the Minimap Radar
     updateMinimap(scene, playerGroup);
-    
     renderer.render(scene, camera);
 }
 
-// Global Exports for UI/Console
 window.game = {
     teleport: triggerTeleport,
     closeWindows: closeWindows,
@@ -145,5 +142,6 @@ window.game = {
     openBank: openBank,
     switchTab: switchTab,
     smite: smiteCommand,
-    openChess: openChess 
+    openChess: openChess,
+    triggerEvent: commandTriggerEvent // NEW: Exposed for chat command
 };
