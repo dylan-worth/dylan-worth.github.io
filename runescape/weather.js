@@ -16,9 +16,9 @@ export function triggerSnowWeather(scene, player) {
     
     for(let i=0; i<count; i++) {
         positions.push(
-            (Math.random() - 0.5) * 60, // X range
-            Math.random() * 30,         // Y range (height)
-            (Math.random() - 0.5) * 60  // Z range
+            (Math.random() - 0.5) * 60, 
+            Math.random() * 30,         
+            (Math.random() - 0.5) * 60  
         );
     }
     
@@ -28,30 +28,25 @@ export function triggerSnowWeather(scene, player) {
     
     scene.add(snowSystem);
 
-    // Animation Loop
     const animateSnow = () => {
         if (!isSnowing) {
-            scene.remove(snowSystem);
+            if(snowSystem) scene.remove(snowSystem);
             return;
         }
-
-        const positions = snowSystem.geometry.attributes.position.array;
-        for(let i=1; i<positions.length; i+=3) {
-            positions[i] -= 0.1; // Fall down
-            if (positions[i] < 0) positions[i] = 30; // Reset to top
+        if(snowSystem) {
+            const positions = snowSystem.geometry.attributes.position.array;
+            for(let i=1; i<positions.length; i+=3) {
+                positions[i] -= 0.1; 
+                if (positions[i] < 0) positions[i] = 30; 
+            }
+            snowSystem.position.x = player.position.x;
+            snowSystem.position.z = player.position.z;
+            snowSystem.geometry.attributes.position.needsUpdate = true;
         }
-        
-        // Follow player
-        snowSystem.position.x = player.position.x;
-        snowSystem.position.z = player.position.z;
-
-        snowSystem.geometry.attributes.position.needsUpdate = true;
         requestAnimationFrame(animateSnow);
     };
-    
     animateSnow();
 
-    // Stop after 30 seconds
     setTimeout(() => {
         isSnowing = false;
         addChatMessage("The snow stops falling.", "cyan");
