@@ -1,41 +1,47 @@
-import { createGround } from './assets_env.js';
+import { createGround, createPath } from './assets_env.js';
 import { createBuilding } from './assets_buildings.js';
-import { createInteractable } from './assets_entities.js';
-import { buildLumbridge } from './lumbridge.js';
-import { spawnLevelNPCs } from './npcs.js';
+import { createTree, createNPC, createInteractable, createChessTable, createSnowPile, createLantern } from './assets_entities.js';
+import { addChatMessage } from './chat.js';
+import { getObjectById } from './id_map.js';
 
-export function loadLevel(scene, levelName) {
-    // 1. CLEANUP
-    for(let i = scene.children.length - 1; i >= 0; i--) {
-        const obj = scene.children[i];
-        if (obj.isLight || obj.isCamera) continue;
-        if (obj.userData && (obj.userData.type || obj.userData.treeName || obj.userData.npcType)) {
-            scene.remove(obj);
-        }
-        if (obj.name === 'ground') scene.remove(obj);
-        // Clean up River planes
-        if (obj.geometry && obj.geometry.type === 'PlaneGeometry' && obj.material && obj.material.color && obj.material.color.getHex() === 0x0066ff) {
-            scene.remove(obj);
-        }
+let hansNPC = null;
+let currentHansTarget = 0;
+const hansPath = [
+    { x: 8.2,  z: 23.1 }, 
+    { x: -8.2, z: 23.1 }, 
+    { x: -8.2, z: 15.0 }, 
+    { x: 8.2,  z: 15.0 }  
+];
+
+export async function buildLumbridge(scene) {
+    // 1. ENVIRONMENT
+    createGround(scene, 0x2d5a27); 
+    createBuilding(scene, 'lum_castle', 0, -5); 
+
+    // 2. DATA-DRIVEN TREES (Safe Fetch Method)
+    try {
+        const response = await fetch('./tree.json');
+        const data = await response.json();
+        
+        data.trees.forEach(entry => {
+            const config = getObjectById(entry.id);
+            if (config && config.type === 'tree') {
+                createTree(scene, config.name, entry.x, entry.z);
+            }
+        });
+    } catch (e) {
+        console.error("Could not load tree.json:", e);
     }
 
-    console.log("Loading Level:", levelName);
-
-    // 2. LOAD NEW LEVEL
-    if (levelName === 'lumbridge') {
-        scene.background.setHex(0x87CEEB); 
-        buildLumbridge(scene);
-        spawnLevelNPCs(scene, 'lumbridge');
-    } 
-    else if (levelName === 'falador') {
-        scene.background.setHex(0xffffff);
-        createGround(scene, 0xdddddd);
-        createBuilding(scene, 'white_castle', 0, 0);
-        createInteractable(scene, 'bank_booth', 10, -5);
-    }
-    else if (levelName === 'menaphos') {
-        scene.background.setHex(0xffaa00);
-        createGround(scene, 0xe6c288);
-        createInteractable(scene, 'bank_booth', 0, 0);
-    }
+    // 3. REMAINING SETUP
+    createPath(scene, 0, 25, 6, 30);  
+    createPath(scene, 0, -35, 6, 30); 
+    setupGuards(scene);
+    hansNPC = createNPC(scene, 'hans', 8.2, 23.1);
+    createNPC(scene, 'cook', 0, -5); 
+    
+    createBuilding(scene, 'church', 45, -5);
+    createBuilding(scene, 'bobs_axes', -35, -5);
 }
+
+// ... (rest of setupGuards and updateHans functions remain the same)
