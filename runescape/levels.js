@@ -1,57 +1,62 @@
-import { createGround, createTree, createBuilding, createInteractable } from './assets.js';
+import { createGround, createRiver, createBridge, createBuilding, createInteractable, createTree, createFence } from './assets.js';
 
 export function loadLevel(scene, levelName) {
-    // 1. CLEANUP: Remove old objects
+    // CLEANUP
     for(let i = scene.children.length - 1; i >= 0; i--) {
         const obj = scene.children[i];
         if (obj.isLight || obj.isCamera) continue;
-        
-        // Remove known game objects
-        if (obj.userData && (obj.userData.type || obj.userData.treeName)) {
-            scene.remove(obj);
-        }
+        if (obj.userData && (obj.userData.type || obj.userData.treeName)) scene.remove(obj);
         if (obj.name === 'ground') scene.remove(obj);
     }
 
-    console.log("Loading Level:", levelName);
+    console.log("Loading:", levelName);
 
     if (levelName === 'lumbridge') {
         scene.background.setHex(0x87CEEB); 
-        createGround(scene, 0x2d5a27); 
+        createGround(scene, 0x2d5a27); // Grass
 
-        // Buildings
-        createBuilding(scene, 'lum_castle', 0, 0); 
-        createBuilding(scene, 'church', 25, 5, Math.PI/2);
+        // --- GEOGRAPHY ---
+        // River Lum (Runs North/South at X=20)
+        createRiver(scene, 25, 0, 10, 200); 
+        
+        // The Bridge
+        createBridge(scene, 25, 5);
 
-        // Interactables
-        createInteractable(scene, 'shop_stall', -5, -15);
-        createInteractable(scene, 'bank_booth', 5, 8);
+        // --- BUILDINGS ---
+        // Castle (Center)
+        createBuilding(scene, 'lum_castle', 0, 0);
+        createInteractable(scene, 'bank_booth', 3, 3); // Bank inside castle
 
-        // Trees
-        for(let i=0; i<15; i++) {
-            const type = (Math.random() > 0.7) ? 'oak' : 'tree';
-            createTree(scene, type, -15 - Math.random()*20, Math.random()*40 - 20);
-        }
+        // General Store (North West)
+        createBuilding(scene, 'general_store', -15, -20);
+        createInteractable(scene, 'shop_stall', -15, -20);
+
+        // --- FENCES ---
+        // Fence around goblin area (East of river)
+        createFence(scene, 40, 10, 10);
+        createFence(scene, 40, -10, 10);
+
+        // --- NATURE ---
+        // Normal Trees (West side)
+        for(let i=0; i<8; i++) createTree(scene, 'tree', -10 - Math.random()*20, Math.random()*40 - 20);
+        
+        // Oaks (South)
+        for(let i=0; i<5; i++) createTree(scene, 'oak', Math.random()*15, 20 + Math.random()*15);
+
+        // Goblins/Cows area (East side across bridge)
+        for(let i=0; i<10; i++) createTree(scene, 'oak', 35 + Math.random()*20, Math.random()*40 - 20);
     } 
     else if (levelName === 'falador') {
-        scene.background.setHex(0xaaccff);
-        createGround(scene, 0xdddddd); 
-
-        createBuilding(scene, 'white_castle', 0, 15);
-        createInteractable(scene, 'bank_booth', 12, -5); 
-        
-        // Park Trees
-        for(let i=0; i<10; i++) createTree(scene, 'oak', 15 + Math.random()*10, 5 + Math.random()*15);
+        // ... Falador layout ...
+        scene.background.setHex(0xffffff);
+        createGround(scene, 0xdddddd);
+        createBuilding(scene, 'lum_castle', 0, 0); // Placeholder
+        createInteractable(scene, 'bank_booth', 0, -10);
     }
     else if (levelName === 'menaphos') {
-        scene.background.setHex(0xffeebb);
-        createGround(scene, 0xe6c288); 
-
-        createBuilding(scene, 'pyramid', 0, -30);
-        createInteractable(scene, 'shop_stall', 10, 10);
-        createInteractable(scene, 'bank_booth', -10, 10);
-
-        // Palm Trees
-        for(let i=0; i<12; i++) createTree(scene, 'palm', Math.random()*40-20, Math.random()*30-10);
+        // ... Menaphos layout ...
+        scene.background.setHex(0xffaa00);
+        createGround(scene, 0xe6c288);
+        createInteractable(scene, 'bank_booth', 0, 0);
     }
 }
