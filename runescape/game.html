@@ -13,7 +13,7 @@
         /* INTERACTIVE ELEMENTS */
         .interactive { pointer-events: auto; }
 
-        /* --- MINIMAP (FIXED: Moved to Top Left to avoid Backpack) --- */
+        /* --- MINIMAP (Top Left) --- */
         #minimap-container {
             position: absolute; top: 10px; left: 10px; 
             width: 150px; height: 150px; 
@@ -57,7 +57,7 @@
         .tab-btn {
             background: #2b3b4b; border: 2px solid #5b6b7b;
             color: white; width: 32%; padding: 5px; cursor: pointer;
-            text-align: center; font-size: 20px;
+            text-align: center; font-size: 16px;
         }
         .tab-btn:hover { background: #3b4b5b; }
 
@@ -69,19 +69,19 @@
         }
         .panel.active { display: block; }
 
-        /* --- POPUP WINDOWS (FIXED CSS) --- */
+        /* --- POPUP WINDOWS --- */
         .panel.window { 
             position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); 
             width: 300px; /* Fixed width prevents header collapse */
             height: auto; 
             display: none; 
-            z-index: 100; /* Higher than everything else */
+            z-index: 100;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             pointer-events: auto;
         }
 
-        /* WINDOW HEADER (FIXED) */
+        /* WINDOW HEADER */
         .window-header {
             display: flex; 
             justify-content: space-between;
@@ -91,7 +91,7 @@
             margin-bottom: 10px; 
             padding-bottom: 5px; 
             font-weight: bold;
-            height: 30px; /* Force height so button fits */
+            height: 30px;
         }
         .close-btn { 
             background: #cc0000; 
@@ -102,7 +102,7 @@
             font-weight: bold;
         }
 
-        /* GRIDS */
+        /* GRIDS & ITEMS */
         .inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
         .item-slot {
             width: 40px; height: 40px; background: #3b4b5b;
@@ -118,11 +118,12 @@
         .stat-row { display: flex; justify-content: space-between; color: white; margin-bottom: 4px; font-size: 14px; }
         .stat-val { color: yellow; }
         
+        /* CHESS SQUARES */
         .chess-square {
             width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; cursor: pointer;
-            user-select: none; /* Prevents text highlighting when clicking fast */
+            user-select: none;
         }
     </style>
     
@@ -139,16 +140,6 @@
     <div id="game-container"></div>
 
     <div id="game-ui">
-
-<div id="snow-modal" class="panel window" style="height: 100px; text-align: center;">
-    <div style="color:orange; margin-bottom:10px;">Snow Pile</div>
-    <div style="display:flex; justify-content:space-around;">
-        <button class="tab-btn" onclick="window.handleSnowChoice('take')">Take Ball</button>
-        <button class="tab-btn" onclick="window.handleSnowChoice('build')">Build Man</button>
-    </div>
-    <button class="close-btn" style="margin-top:10px;" onclick="document.getElementById('snow-modal').style.display='none'">Cancel</button>
-</div>
-
         <div id="minimap-container">
             <span style="display:block; text-align:center; color:white; font-size:12px; margin-bottom:2px; text-shadow: 1px 1px 0 #000;">World Map</span>
             <canvas id="minimap-canvas" width="150" height="150"></canvas>
@@ -216,9 +207,19 @@
                 width: 280px; 
                 height: 280px; 
                 border: 4px solid #5c4033;
-                margin: 0 auto; /* Center board */
+                margin: 0 auto;
             "></div>
         </div>
+
+        <div id="snow-modal" class="panel window" style="height: auto; text-align: center; padding-bottom: 15px;">
+            <div style="color:orange; margin-bottom:15px; font-weight:bold;">Snow Pile</div>
+            <div style="display:flex; justify-content:space-around; margin-bottom: 15px;">
+                <button class="tab-btn" style="width:45%; background:#4a6fa5;" onclick="window.handleSnowChoice('take')">Take Ball</button>
+                <button class="tab-btn" style="width:45%; background:#4a6fa5;" onclick="window.handleSnowChoice('build')">Build Man</button>
+            </div>
+            <button class="close-btn" style="width: 100%; background: #333; border: 1px solid #555;" onclick="document.getElementById('snow-modal').style.display='none'">Cancel</button>
+        </div>
+
     </div>
 
     <script type="module">
