@@ -10,15 +10,14 @@ import {
 } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
 import { loadLevel } from './levels.js';
+import { updateHans } from './lumbridge.js'; 
 import { addItem } from './inventory.js'; 
 import { setupChat, addChatMessage } from './chat.js';
-import { startCombat, triggerSmite, pacifyNPC } from './combat.js'; 
-import { INITIAL_SKILLS, addXp } from './stats.js';
+import { startCombat, pacifyNPC } from './combat.js'; 
+import { INITIAL_SKILLS } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
 import { updateMinimap } from './minimap.js';
 import { equipItem } from './equipment.js'; 
-import { talkToNPC } from './quests.js';    
-import { openChess } from './chess.js';
 import * as THREE from 'three';
 
 // 1. GLOBAL GAME STATE
@@ -29,10 +28,8 @@ window.gameState = {
     buildings: [],
     player: null,
     inventory: [], 
-    bank: [],
-    selectedSnowPile: null, 
     selectedItem: null,
-    gameTime: 12, // Noon
+    gameTime: 12, // Noon start
     lanternLights: []
 };
 
@@ -49,17 +46,13 @@ export function initGame() {
     
     try { 
         loadLevel(scene, 'lumbridge'); 
-        addChatMessage("Welcome to Open881.", "yellow");
+        addChatMessage("Welcome to Lumbridge.", "yellow");
         
-        // --- STARTER KIT: BRONZE WEAPONS ---
-        if (!window.gameState.inventory || window.gameState.inventory.length === 0) {
+        // --- STARTER KIT ---
+        if (window.gameState.inventory.length === 0) {
              addItem('sword_bronze', 'Bronze Sword', 1);
              addItem('shield_bronze', 'Bronze Shield', 1);
              addItem('axe_bronze', 'Bronze Axe', 1);
-             addItem('dagger_bronze', 'Bronze Dagger', 1);
-             addItem('santa_hat', 'Santa Hat', 1); 
-             
-             // Visual Auto-Equip
              equipItem('sword_bronze');
              equipItem('shield_bronze');
         }
@@ -69,7 +62,6 @@ export function initGame() {
 
     // Logic Loop (Time & Events)
     setInterval(() => {
-        // Slow Day/Night Cycle (Approx 45 mins real-time per day)
         window.gameState.gameTime += 0.005; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
         updateEnvironment();
@@ -96,7 +88,6 @@ function updateEnvironment() {
 
     setDayNight(intensity, skyColor);
     
-    // Update Street Lights
     if(window.gameState.lanternLights) {
         window.gameState.lanternLights.forEach(light => {
             light.intensity = lanternOn ? 1.0 : 0;
@@ -115,53 +106,40 @@ function onInteract(mouse) {
         let group = hit.object.userData.parentGroup;
         if (group) {
             const type = group.userData.type;
-            const name = group.userData.name;
+            const npcType = group.userData.npcType;
 
-            // Talk to NPCs
-            if (type === 'quest_npc') {
-                talkToNPC(name);
-                break; 
-            }
-
-            // Start Combat (Character stops at 1.5 units away)
+            // Handle NPCs (Hans, Guards, Cook)
             if (type === 'npc') {
-                if (window.gameState.selectedItem === 'snowball') {
-                    pacifyNPC(group); 
-                    window.gameState.selectedItem = null; 
-                } else {
-                    startCombat(group); 
+                // If it's a friendly/unique NPC with dialogue
+                if (group.userData.onInteract) {
+                    const response = group.userData.onInteract();
+                    if (response) addChatMessage(response, "yellow");
+                    return; 
                 }
+                
+                // Otherwise, standard combat
+                startCombat(group); 
                 break; 
             }
 
-            // Object Interaction
             if (type === 'tree') { attemptChop(group); break; }
-            if (type === 'bank_booth') { window.game.openBank(); break; }
-            if (type === 'shop_stall') { window.game.openShop(); break; }
-            if (type === 'chess_table') { openChess(); break; } 
+            if (type === 'bank_booth') { addChatMessage("Banker: Welcome to the bank of Lumbridge.", "green"); break; }
+            if (type === 'chess_table') { addChatMessage("You look at the chess board. It's a stalemate.", "white"); break; } 
         }
     }
 }
 
-// --- INVENTORY & SKILLS ---
-window.selectItem = (id) => { 
-    window.gameState.selectedItem = id; 
-    if (id.includes('axe') || id.includes('sword') || id.includes('dagger') || id.includes('shield') || id.includes('hat')) {
-        equipItem(id);
-    }
-};
-
+// --- WOODCUTTING LOGIC ---
 function attemptChop(treeGroup) {
     if(treeGroup.userData.respawning) return;
     equipItem('axe_bronze');
-    addChatMessage("You swing your axe at the tree...", "white");
+    addChatMessage("You begin swinging at the tree...", "white");
     
     choppingInterval = setInterval(() => {
         if(treeGroup.userData.respawning) { clearInterval(choppingInterval); return; }
         
         if(addItem('logs', 'Logs', 1)) {
-            addXp('woodcutting', treeGroup.userData.xp || 25);
-            updateStatsUI();
+            addChatMessage("You get some logs.", "white");
             clearInterval(choppingInterval);
             
             treeGroup.userData.respawning = true;
@@ -170,46 +148,42 @@ function attemptChop(treeGroup) {
             setTimeout(() => { 
                 treeGroup.children[1].visible = true; 
                 treeGroup.userData.respawning = false; 
-            }, 3000);
+            }, 5000);
         } else {
             clearInterval(choppingInterval);
-            addChatMessage("Backpack full.", "red");
+            addChatMessage("Your inventory is full.", "red");
         }
-    }, 600);
+    }, 1200);
 }
 
 // --- RENDER ENGINE LOOP ---
 function animate() {
     requestAnimationFrame(animate);
     
-    // Update movement logic
+    // Update movement and unique AI
     updateMovement();
+    updateAnimations(); // Handles Roof Hiding & Hit Splats
+    updateHans();       // Keeps Hans walking his square path
     
-    // Update visual systems (Swings, Hit-Splats)
-    updateAnimations(); 
-    
-    // Camera follow logic
+    // Camera follow player
     if (controls && playerGroup) {
-        controls.target.copy(playerGroup.position);
-        controls.target.y += 1.0; 
+        controls.target.lerp(playerGroup.position, 0.1);
         controls.update();
     }
 
-    // HUD Logic
     updateMinimap(scene, playerGroup);
-    
     renderer.render(scene, camera);
 }
 
-// Global API for UI/Buttons
+// Global API
 window.game = {
     teleport: (loc) => loadLevel(scene, loc),
     closeWindows,
     switchTab,
-    smite: () => triggerSmite(scene),
-    openChess: openChess,
-    openBank: () => { /* bank code */ },
-    openShop: () => { /* shop code */ }
+    selectItem: (id) => { 
+        window.gameState.selectedItem = id; 
+        equipItem(id);
+    }
 };
 
 window.onload = initGame;
