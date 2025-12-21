@@ -1,83 +1,132 @@
 import * as THREE from 'three';
 
-// Helper: Create a single wall
-function createWall(x, z, width, depth, height, color, rotY, scene) {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), new THREE.MeshStandardMaterial({ color: color }));
-    wall.position.set(x, height/2, z);
-    wall.rotation.y = rotY;
-    wall.castShadow = true;
-    wall.receiveShadow = true;
-    scene.add(wall);
-    
-    // Collision
-    window.gameState.colliders.push(new THREE.Box3().setFromObject(wall));
-}
-
-export function createFence(scene, x, z, length, rotY=0) {
-    const group = new THREE.Group();
-    const postGeo = new THREE.BoxGeometry(0.2, 1.2, 0.2);
-    const railGeo = new THREE.BoxGeometry(length, 0.1, 0.1);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x654321 });
-
-    const p1 = new THREE.Mesh(postGeo, mat); p1.position.set(-length/2, 0.6, 0);
-    const p2 = new THREE.Mesh(postGeo, mat); p2.position.set(length/2, 0.6, 0);
-    const r1 = new THREE.Mesh(railGeo, mat); r1.position.set(0, 0.9, 0);
-    
-    group.add(p1, p2, r1);
-    group.position.set(x, 0, z);
-    group.rotation.y = rotY;
-    scene.add(group);
-
-    // Fence Collision
-    window.gameState.colliders.push(new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 0.5, z), new THREE.Vector3(length, 2, 0.2)));
-}
-
-export function createBuilding(scene, type, x, z, rotY = 0) {
+/**
+ * Main building dispatcher.
+ */
+export function createBuilding(scene, type, x, z) {
     if (type === 'lum_castle') {
-        const c = 0x888888;
-        createWall(x, z-8, 14, 1, 10, c, 0, scene);
-        createWall(x-7, z-2, 1, 12, 10, c, 0, scene);
-        createWall(x+7, z-2, 1, 12, 10, c, 0, scene);
-        createWall(x-5, z+5, 1, 6, 6, c, 0, scene);
-        createWall(x+5, z+5, 1, 6, 6, c, 0, scene);
-        createWall(x-4, z+8, 3, 1, 6, c, 0, scene);
-        createWall(x+4, z+8, 3, 1, 6, c, 0, scene);
+        return createCastle(scene, x, z);
+    }
 
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(10, 5, 4), new THREE.MeshStandardMaterial({color:0x555555}));
-        roof.position.set(x, 12, z-2);
-        roof.rotation.y = Math.PI/4;
-        scene.add(roof);
-        window.gameState.buildings.push({ x, z: z-2, radius: 8, roofMesh: roof });
-    }
-    else if (type === 'bobs_axes') {
-        const c = 0x8b4513; 
-        createWall(x, z-4, 8, 1, 5, c, 0, scene);
-        createWall(x-4, z, 1, 8, 5, c, 0, scene);
-        createWall(x+4, z, 1, 8, 5, c, 0, scene);
-        createWall(x-3, z+4, 2, 1, 5, c, 0, scene);
-        createWall(x+3, z+4, 2, 1, 5, c, 0, scene);
+    // Standard building for Bob's Axes, Church, or General Stores
+    const group = new THREE.Group();
+    
+    // Stone Body
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(6, 4, 6),
+        new THREE.MeshStandardMaterial({ color: 0x888888 })
+    );
+    body.position.y = 2;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    
+    // Conical Roof
+    const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(5, 3, 4),
+        new THREE.MeshStandardMaterial({ color: 0x444444 })
+    );
+    roof.position.y = 5;
+    roof.rotation.y = Math.PI / 4; // Align square base to body
+    roof.castShadow = true;
+
+    group.add(body, roof);
+    group.position.set(x, 0, z);
+    scene.add(group);
+    
+    // Add collision box
+    window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
+}
+
+/**
+ * Generates a multi-part Castle based on the requested visual design.
+ */
+function createCastle(scene, x, z) {
+    const castleGroup = new THREE.Group();
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x999999 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4b3621 }); // Dark brown / Wooden texture
+
+    // 1. MAIN KEEP (Central Body)
+    const mainBody = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 12), stoneMat);
+    mainBody.position.y = 4;
+    mainBody.castShadow = true;
+    mainBody.receiveShadow = true;
+    castleGroup.add(mainBody);
+
+    // 2. CORNER TOWERS (4 Cylindrical Towers)
+    const towerPositions = [
+        { x: -6, z: -6 }, { x: 6, z: -6 },
+        { x: -6, z: 6 },  { x: 6, z: 6 }
+    ];
+
+    towerPositions.forEach(pos => {
+        // Tower Shaft
+        const tower = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 12, 8), stoneMat);
+        tower.position.set(pos.x, 6, pos.z);
+        tower.castShadow = true;
+        tower.receiveShadow = true;
         
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(6, 3, 4), new THREE.MeshStandardMaterial({color:0x443322}));
-        roof.position.set(x, 6, z);
-        roof.rotation.y = Math.PI/4;
-        scene.add(roof);
-        window.gameState.buildings.push({ x, z, radius: 5, roofMesh: roof });
-    }
-    else if (type === 'church') {
-        const c = 0x999999; 
-        createWall(x, z-5, 8, 1, 7, c, 0, scene);
-        createWall(x-4, z, 1, 10, 7, c, 0, scene);
-        createWall(x+4, z, 1, 10, 7, c, 0, scene);
-        createWall(x-3, z+5, 2, 1, 7, c, 0, scene);
-        createWall(x+3, z+5, 2, 1, 7, c, 0, scene);
+        // Tower Pointed Roof
+        const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4, 8), roofMat);
+        towerRoof.position.set(pos.x, 14, pos.z);
+        towerRoof.castShadow = true;
         
-        const roof = new THREE.Mesh(new THREE.CylinderGeometry(0, 6, 4, 4, 1), new THREE.MeshStandardMaterial({color:0x333333}));
-        roof.position.set(x, 9, z);
-        roof.rotation.y = Math.PI/4;
-        scene.add(roof);
-        window.gameState.buildings.push({ x, z, radius: 6, roofMesh: roof });
+        castleGroup.add(tower, towerRoof);
+    });
+
+    // 3. CENTRAL SPIRE (The High Peak)
+    const centralSpire = new THREE.Mesh(new THREE.BoxGeometry(4, 12, 4), stoneMat);
+    centralSpire.position.y = 10;
+    centralSpire.castShadow = true;
+
+    const spireRoof = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 4), roofMat);
+    spireRoof.position.y = 19;
+    spireRoof.rotation.y = Math.PI / 4;
+    spireRoof.castShadow = true;
+    
+    castleGroup.add(centralSpire, spireRoof);
+
+    // 4. ENTRANCE GATEWAY
+    const gate = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 1.5), stoneMat);
+    gate.position.set(0, 2.5, 6); // Positioned at the front
+    castleGroup.add(gate);
+
+    // Set world position and add to scene
+    castleGroup.position.set(x, 0, z);
+    scene.add(castleGroup);
+
+    // 5. COLLISION ZONE
+    // Create a large box covering the castle footprint to prevent walking through it
+    const castleCollider = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(x, 5, z), 
+        new THREE.Vector3(16, 20, 16)
+    );
+    window.gameState.colliders.push(castleCollider);
+}
+
+/**
+ * Creates fences for boundaries.
+ */
+export function createFence(scene, x, z, length) {
+    const group = new THREE.Group();
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+
+    // Main horizontal rail
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(length, 0.4, 0.2), woodMat);
+    rail.position.y = 0.8;
+    
+    // Support posts every 4 units
+    const postCount = Math.floor(length / 4) + 1;
+    for (let i = 0; i < postCount; i++) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), woodMat);
+        post.position.x = -length / 2 + (i * 4);
+        post.position.y = 0.6;
+        group.add(post);
     }
-    else if (type === 'white_castle') {
-        createWall(x, z, 10, 10, 10, 0xeeeeee, 0, scene);
-    }
+
+    group.add(rail);
+    group.position.set(x, 0, z);
+    scene.add(group);
+    
+    // Collision for fence
+    window.gameState.colliders.push(new THREE.Box3().setFromObject(group));
 }
