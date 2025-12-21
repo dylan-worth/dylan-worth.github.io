@@ -1,0 +1,59 @@
+import * as THREE from 'three';
+import { addChatMessage } from './chat.js';
+
+let snowSystem = null;
+let isSnowing = false;
+
+export function triggerSnowWeather(scene, player) {
+    if (isSnowing) return;
+    isSnowing = true;
+    addChatMessage("A cold wind blows... It starts to snow!", "cyan");
+
+    // Create Particles
+    const count = 1000;
+    const geo = new THREE.BufferGeometry();
+    const positions = [];
+    
+    for(let i=0; i<count; i++) {
+        positions.push(
+            (Math.random() - 0.5) * 60, // X range
+            Math.random() * 30,         // Y range (height)
+            (Math.random() - 0.5) * 60  // Z range
+        );
+    }
+    
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.3, transparent: true });
+    snowSystem = new THREE.Points(geo, mat);
+    
+    scene.add(snowSystem);
+
+    // Animation Loop
+    const animateSnow = () => {
+        if (!isSnowing) {
+            scene.remove(snowSystem);
+            return;
+        }
+
+        const positions = snowSystem.geometry.attributes.position.array;
+        for(let i=1; i<positions.length; i+=3) {
+            positions[i] -= 0.1; // Fall down
+            if (positions[i] < 0) positions[i] = 30; // Reset to top
+        }
+        
+        // Follow player
+        snowSystem.position.x = player.position.x;
+        snowSystem.position.z = player.position.z;
+
+        snowSystem.geometry.attributes.position.needsUpdate = true;
+        requestAnimationFrame(animateSnow);
+    };
+    
+    animateSnow();
+
+    // Stop after 30 seconds
+    setTimeout(() => {
+        isSnowing = false;
+        addChatMessage("The snow stops falling.", "cyan");
+    }, 30000);
+}
