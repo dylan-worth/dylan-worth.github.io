@@ -5,6 +5,8 @@ window.gameState = window.gameState || {};
 window.gameState.inventory = [];
 const MAX_SLOTS = 20;
 
+// --- CORE FUNCTIONS ---
+
 export function addItem(id, name, amount = 1) {
     const inv = window.gameState.inventory;
 
@@ -30,7 +32,6 @@ export function addItem(id, name, amount = 1) {
     return true;
 }
 
-// --- THIS WAS THE MISSING FUNCTION ---
 export function removeItem(id, amount = 1) {
     const inv = window.gameState.inventory;
     const index = inv.findIndex(item => item.id === id);
@@ -55,20 +56,41 @@ export function hasItem(id, amount = 1) {
     return item && item.amount >= amount;
 }
 
+// --- MISSING HELPERS FOR SHOP.JS ---
+
+export function addCoins(amount) {
+    return addItem('coins', 'Coins', amount);
+}
+
+export function removeCoins(amount) {
+    return removeItem('coins', amount);
+}
+
+export function getCoins() {
+    const item = window.gameState.inventory.find(i => i.id === 'coins');
+    return item ? item.amount : 0;
+}
+
+// --- UTILS ---
+
 export function getBestAxe() {
-    // Returns an axe object or a default 'hand' object
     return window.gameState.inventory.find(i => i.id.includes('axe')) || { power: 1 }; 
 }
 
 export function updateInventoryUI() {
     const grid = document.getElementById('inv-grid');
+    const coinDisplay = document.getElementById('coin-display'); // HUD Coin counter
+    
+    if (coinDisplay) {
+        coinDisplay.innerText = getCoins();
+    }
+
     if (!grid) return;
     grid.innerHTML = '';
 
     window.gameState.inventory.forEach((item) => {
         const slot = document.createElement('div');
         slot.className = 'item-slot';
-        // Display first 2 letters as a "icon"
         slot.innerText = item.name.substring(0, 2); 
         
         if (item.amount > 1) {
@@ -78,7 +100,6 @@ export function updateInventoryUI() {
             slot.appendChild(count);
         }
 
-        // Click to identify
         slot.onclick = () => {
             addChatMessage(`Selected: ${item.name}`, "cyan");
         };
