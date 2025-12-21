@@ -1,4 +1,5 @@
-import { initRenderer, scene, camera, renderer, playerGroup } from './render.js';
+// IMPORT controls from render.js
+import { initRenderer, scene, camera, renderer, playerGroup, controls } from './render.js';
 import { setupMovement, updateMovement } from './movement.js';
 import { loadLevel } from './levels.js';
 import { addItem, removeItem, getBestAxe } from './inventory.js'; 
@@ -11,7 +12,6 @@ import { INITIAL_SKILLS, addXp } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
 import { updateMinimap } from './minimap.js';
 import { createSnowman } from './assets_entities.js'; 
-// RE-ENABLED IMPORTS:
 import { triggerSnowballEvent } from './events.js'; 
 import { triggerSnowWeather } from './weather.js'; 
 import * as THREE from 'three';
@@ -48,7 +48,7 @@ export function initGame() {
     } 
     catch(e) { console.error(e); }
 
-    // RANDOM EVENTS ACTIVE
+    // Random Events
     setInterval(() => {
         if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
         if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
@@ -150,8 +150,22 @@ function commandTriggerEvent() { triggerSnowballEvent(scene, playerGroup); }
 
 function animate() {
     requestAnimationFrame(animate);
+    
+    // 1. Update Player Position
     updateMovement();
+    
+    // 2. Update Camera (OrbitControls) to follow Player
+    if (controls && playerGroup) {
+        // Move the camera target to the player
+        controls.target.copy(playerGroup.position);
+        // Add height offset so we look at head, not feet
+        controls.target.y += 1.0; 
+        controls.update();
+    }
+
+    // 3. Update Minimap
     updateMinimap(scene, playerGroup);
+    
     renderer.render(scene, camera);
 }
 
