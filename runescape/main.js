@@ -36,16 +36,16 @@ const raycaster = new THREE.Raycaster();
 let choppingInterval = null;
 
 export async function initGame() {
-    // 1. Initialize the 3D Engine first
     initRenderer();
     window.gameState.player = playerGroup; 
 
-    // 2. Load the Level (This waits for the 3 JSON files now)
+    // --- CAMERA START POSITION ---
+    // We set the camera closer: 5 units back, 4 units up
+    camera.position.set(0, 4, 5); 
+
     try { 
         await loadLevel(scene, 'lumbridge'); 
         
-        // 3. ONLY ONCE THE LEVEL IS LOADED, SETUP EVENTS
-        // This prevents "Event System Not Ready" by ensuring the world exists first
         setupMovement(camera, scene, playerGroup, onInteract);
         setupChat();
         
@@ -64,7 +64,6 @@ export async function initGame() {
         console.error("Initialization failed:", e); 
     }
 
-    // 4. Start Loops
     setInterval(() => {
         window.gameState.gameTime += 0.005; 
         if(window.gameState.gameTime >= 24) window.gameState.gameTime = 0;
@@ -74,7 +73,7 @@ export async function initGame() {
     animate();
 }
 
-// ... updateEnvironment, attemptChop, and animate functions remain the same ...
+// ... updateEnvironment and attemptChop stay the same ...
 
 function onInteract(mouse) {
     if(choppingInterval) { clearInterval(choppingInterval); choppingInterval = null; }
@@ -107,8 +106,13 @@ function animate() {
     updateAnimations();
     updateHans(); 
     
+    // --- CAMERA FOLLOW LOGIC ---
     if (controls && playerGroup) {
-        controls.target.lerp(playerGroup.position, 0.1);
+        // We track the player's position closely
+        const targetPos = playerGroup.position.clone();
+        targetPos.y += 1.2; // Aim at character chest/head height
+        
+        controls.target.lerp(targetPos, 0.2); // Faster lerp for tighter following
         controls.update();
     }
 
