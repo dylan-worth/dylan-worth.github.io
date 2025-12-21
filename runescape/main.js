@@ -11,11 +11,10 @@ import { INITIAL_SKILLS, addXp } from './stats.js';
 import { updateStatsUI, closeWindows, switchTab } from './ui.js';
 import { updateMinimap } from './minimap.js';
 import { createSnowman } from './assets_entities.js'; 
+// RE-ENABLED IMPORTS:
+import { triggerSnowballEvent } from './events.js'; 
+import { triggerSnowWeather } from './weather.js'; 
 import * as THREE from 'three';
-
-// --- TEMPORARILY DISABLED TO FIX CRASH ---
-// import { triggerSnowballEvent } from './events.js'; 
-// import { triggerSnowWeather } from './weather.js'; 
 
 window.gameState = {
     skills: JSON.parse(JSON.stringify(INITIAL_SKILLS)),
@@ -36,10 +35,7 @@ export function initGame() {
     initRenderer();
     window.gameState.player = playerGroup; 
     
-    // Setup Movement
     setupMovement(camera, scene, playerGroup, onInteract);
-    addChatMessage("Movement System: Online", "lime"); // DEBUG MESSAGE
-    
     setupChat();
     
     try { 
@@ -51,6 +47,12 @@ export function initGame() {
         updateStatsUI(); 
     } 
     catch(e) { console.error(e); }
+
+    // RANDOM EVENTS ACTIVE
+    setInterval(() => {
+        if(Math.random() < 0.01) triggerSnowWeather(scene, playerGroup);
+        if(Math.random() < 0.002) triggerSnowballEvent(scene, playerGroup);
+    }, 1000);
 
     animate();
 }
@@ -144,6 +146,7 @@ export function triggerTeleport(loc) {
 }
 
 function smiteCommand() { triggerSmite(scene); }
+function commandTriggerEvent() { triggerSnowballEvent(scene, playerGroup); }
 
 function animate() {
     requestAnimationFrame(animate);
@@ -161,5 +164,5 @@ window.game = {
     switchTab: switchTab,
     smite: smiteCommand,
     openChess: openChess,
-    // triggerEvent: triggerSnowballEvent // Disabled for safety
+    triggerEvent: commandTriggerEvent
 };
