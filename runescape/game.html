@@ -139,6 +139,16 @@
     <div id="game-container"></div>
 
     <div id="game-ui">
+
+<div id="snow-modal" class="panel window" style="height: 100px; text-align: center;">
+    <div style="color:orange; margin-bottom:10px;">Snow Pile</div>
+    <div style="display:flex; justify-content:space-around;">
+        <button class="tab-btn" onclick="window.handleSnowChoice('take')">Take Ball</button>
+        <button class="tab-btn" onclick="window.handleSnowChoice('build')">Build Man</button>
+    </div>
+    <button class="close-btn" style="margin-top:10px;" onclick="document.getElementById('snow-modal').style.display='none'">Cancel</button>
+</div>
+
         <div id="minimap-container">
             <span style="display:block; text-align:center; color:white; font-size:12px; margin-bottom:2px; text-shadow: 1px 1px 0 #000;">World Map</span>
             <canvas id="minimap-canvas" width="150" height="150"></canvas>
