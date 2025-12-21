@@ -6,83 +6,74 @@ export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 export const playerGroup = new THREE.Group();
 
-// GLOBAL EXPORTS
 export let controls; 
-export let sunLight;     // Modified by Day/Night cycle
-export let ambientLight; // Modified by Day/Night cycle
-export let playerHand;   // Where items are attached
+export let sunLight;
+export let ambientLight;
+export let playerHand;     // Right Hand (Sword/Axe)
+export let playerLeftHand; // Left Hand (Shield)
+
+// Animation State
+let isSwinging = false;
+let swingProgress = 0;
 
 export function initRenderer() {
-    // 1. SETUP RENDERER
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     document.getElementById('game-container').appendChild(renderer.domElement);
 
-    // 2. LIGHTING
+    // 1. LIGHTING
     ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
     
     sunLight = new THREE.DirectionalLight(0xffffff, 1);
     sunLight.position.set(50, 100, 50);
     sunLight.castShadow = true;
-    
-    // Optimize Shadow Map
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.left = -50;
-    sunLight.shadow.camera.right = 50;
-    sunLight.shadow.camera.top = 50;
-    sunLight.shadow.camera.bottom = -50;
-    
     scene.add(sunLight);
 
-    // Initial Sky (Day)
     scene.background = new THREE.Color(0x87ceeb); 
 
-    // 3. PLAYER MODEL
+    // 2. PLAYER MODEL
     const body = new THREE.Mesh(
         new THREE.BoxGeometry(0.6, 0.8, 0.4), 
-        new THREE.MeshStandardMaterial({ color: 0x333333 }) // Dark Grey Armor
+        new THREE.MeshStandardMaterial({ color: 0x333333 }) 
     ); 
     body.position.y = 0.8;
     body.castShadow = true;
 
     const head = new THREE.Mesh(
         new THREE.BoxGeometry(0.3, 0.3, 0.3), 
-        new THREE.MeshStandardMaterial({ color: 0xffccaa }) // Skin Tone
+        new THREE.MeshStandardMaterial({ color: 0xffccaa }) 
     );
     head.position.y = 1.4;
 
-    // The "Hand" Anchor Point (Right side)
+    // HAND ANCHORS
     playerHand = new THREE.Group();
     playerHand.position.set(0.4, 0.8, 0.2); 
+
+    playerLeftHand = new THREE.Group();
+    playerLeftHand.position.set(-0.4, 0.8, 0.2); 
     
-    playerGroup.add(body, head, playerHand);
+    playerGroup.add(body, head, playerHand, playerLeftHand);
     scene.add(playerGroup);
 
-    // 4. CAMERA & CONTROLS
+    // 3. CAMERA & CONTROLS
     camera.position.set(0, 10, 10);
-    
     controls = new OrbitControls(camera, renderer.domElement);
     
-    // Smoothness
+    // Sensitivity Fixes for Touch/Mobile
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.5;
+    controls.zoomSpeed = 0.5;
+    controls.panSpeed = 0.5;
     
-    // Sensitivity Fix (0.5 is half speed)
-    controls.rotateSpeed = 0.5; 
-    controls.zoomSpeed = 0.5;   
-    controls.panSpeed = 0.5;    
-    
-    // Constraints
-    controls.minDistance = 5;  // Can't zoom inside player
-    controls.maxDistance = 25; // Can't zoom too far out
-    controls.maxPolarAngle = Math.PI / 2.1; // Can't go under ground
-    
-    // Start by looking at player
+    controls.minDistance = 5;
+    controls.maxDistance = 25;
+    controls.maxPolarAngle = Math.PI / 2.1;
     controls.target.copy(playerGroup.position);
 
-    // 5. RESIZE HANDLER
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -90,7 +81,28 @@ export function initRenderer() {
     });
 }
 
-// Helper to dim lights for Night Cycle
+// TRIGGER ATTACK ANIMATION
+export function playSwingAnimation() {
+    if (isSwinging) return;
+    isSwinging = true;
+    swingProgress = 0;
+}
+
+export function updateAnimations() {
+    if (!isSwinging) return;
+
+    swingProgress += 0.2; // Swing Speed
+    
+    // Rotate Right Arm forward and back using Sine wave
+    playerHand.rotation.x = -Math.sin(swingProgress) * 1.5;
+
+    if (swingProgress >= Math.PI) {
+        isSwinging = false;
+        playerHand.rotation.x = 0; // Reset Position
+    }
+}
+
+// ENVIRONMENT SETTINGS
 export function setDayNight(intensity, colorHex) {
     if(sunLight) sunLight.intensity = intensity;
     if(ambientLight) ambientLight.intensity = intensity * 0.6;
