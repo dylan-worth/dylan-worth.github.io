@@ -4,28 +4,30 @@ import { createTree, createNPC, createInteractable, createChessTable, createSnow
 import { addChatMessage } from './chat.js';
 import { getObjectById } from './id_map.js';
 
-// Import JSON data (Ensure your bundler/server supports JSON imports)
+// Load our external tree coordinate data
 import treeData from './tree.json' assert { type: 'json' };
 
-// Hans Patrol State
+// --- HANS PATROL STATE ---
 let hansNPC = null;
 let currentHansTarget = 0;
 const hansPath = [
-    { x: 8.2,  z: 23.1 }, 
-    { x: -8.2, z: 23.1 }, 
-    { x: -8.2, z: 15.0 }, 
-    { x: 8.2,  z: 15.0 }  
+    { x: 8.2,  z: 23.1 }, // Point A (Start)
+    { x: -8.2, z: 23.1 }, // Point B
+    { x: -8.2, z: 15.0 }, // Point C
+    { x: 8.2,  z: 15.0 }  // Point D
 ];
 
 /**
- * Builds Lumbridge using external JSON data for object placement.
+ * The Master Lumbridge Level Builder.
  */
 export function buildLumbridge(scene) {
-    // 1. STATIC ENVIRONMENT
+    // 1. BASE GROUND & LARGE CASTLE
+    // The Great Hall spans x: [-15, 15] and z: [-20, 10]
     createGround(scene, 0x2d5a27); 
     createBuilding(scene, 'lum_castle', 0, -5); 
 
     // 2. DATA-DRIVEN TREES (from tree.json)
+    // We iterate through the JSON to place every manual tree via ID Map
     treeData.trees.forEach(entry => {
         const config = getObjectById(entry.id);
         if (config && config.type === 'tree') {
@@ -34,35 +36,54 @@ export function buildLumbridge(scene) {
     });
 
     // 3. THROUGH-PATHS
-    createPath(scene, 0, 25, 6, 30);  
-    createPath(scene, 0, -35, 6, 30); 
-    createPath(scene, 30, -5, 30, 6, 0); 
+    createPath(scene, 0, 25, 6, 30);      // South Entrance Path
+    createPath(scene, 0, -35, 6, 30);     // North Exit Path
+    createPath(scene, 30, -5, 30, 6, 0);  // East path to Church
 
-    // 4. THE CASTLE GUARDS (Greeting Logic)
+    // 4. THE CASTLE GUARDS (Greeting Triggers)
     setupGuards(scene);
 
     // 5. UNIQUE NPCs
-    hansNPC = createNPC(scene, 'hans', 8.2, 23.1);
-    createNPC(scene, 'cook', 0, -5); 
+    hansNPC = createNPC(scene, 'hans', 8.2, 23.1); // Patrol Start
+    createNPC(scene, 'cook', 0, -5);               // Inside Castle Center
 
-    // 6. INTERACTIVE OBJECTS
-    const bankConfig = getObjectById(10); // ID 10 = Bank Booth
+    // 6. INTERACTIVE & DECORATIVE OBJECTS
+    // Bank booth positioned inside the castle
+    const bankConfig = getObjectById(10);
     if(bankConfig) createInteractable(scene, bankConfig.name, -10, -5);
     
     createChessTable(scene, 10, -5);
     createSnowPile(scene, -10, 5);
 
-    // 7. EXTERIOR BUILDINGS
+    // 7. EXTERIOR CITY BUILDINGS
     createBuilding(scene, 'church', 45, -5);
     createBuilding(scene, 'bobs_axes', -35, -5);
     
-    // 8. WORLD LIGHTING
+    // 8. CITY LIGHTING (Linked to day/night cycle in main.js)
     createLantern(scene, 6, 12); 
     createLantern(scene, -6, 12);
+    createLantern(scene, 20, -5);
+
+    // 9. AMBIENT POPULATION
+    createNPC(scene, 'man', 15, 20);
+    createNPC(scene, 'goblin', -25, -30);
+    createNPC(scene, 'cow', 50, 15);
+
+    // 10. RANDOM FOREST (Avoiding paths and buildings)
+    for(let i=0; i<60; i++) {
+        const x = (Math.random() * 200) - 100; 
+        const z = (Math.random() * 200) - 100;
+        
+        // Safety check: Don't spawn trees on the castle island or paths
+        if (Math.abs(x) < 18 && Math.abs(z + 5) < 18) continue;
+        if (Math.abs(x) < 5) continue; 
+
+        createTree(scene, Math.random() > 0.8 ? 'oak' : 'tree', x, z);
+    }
 }
 
 /**
- * Internal helper to setup guards and their proximity triggers.
+ * Handles proximity-based greetings for the Castle Guards.
  */
 function setupGuards(scene) {
     const guards = [
@@ -73,6 +94,7 @@ function setupGuards(scene) {
     guards.forEach(g => {
         g.userData.name = "Castle Guard";
         g.userData.hasGreeted = false;
+        // Apply "Iron" coloring for guard appearance
         g.children.forEach(c => { if (c.material) c.material.color.setHex(0xcccccc); });
     });
 
@@ -83,6 +105,7 @@ function setupGuards(scene) {
             if (dist < 6 && !guard.userData.hasGreeted) {
                 addChatMessage(`${guard.userData.name}: Welcome to Lumbridge, traveler!`, "white");
                 guard.userData.hasGreeted = true;
+                // Cooldown: prevent multiple greetings too quickly
                 setTimeout(() => { guard.userData.hasGreeted = false; }, 45000);
             }
         });
@@ -90,7 +113,7 @@ function setupGuards(scene) {
 }
 
 /**
- * Updates Hans's patrol movement (called in main.js loop).
+ * Logic to advance Hans's patrol. This is updated via the main animation loop.
  */
 export function updateHans() {
     if (!hansNPC) return;
@@ -101,11 +124,13 @@ export function updateHans() {
     const dist = Math.sqrt(dx * dx + dz * dz);
 
     if (dist < 0.2) {
+        // Switch target to the next corner of the square
         currentHansTarget = (currentHansTarget + 1) % hansPath.length;
     } else {
         const speed = 0.035;
         hansNPC.position.x += (dx / dist) * speed;
         hansNPC.position.z += (dz / dist) * speed;
+        // Keep Hans facing his destination
         hansNPC.rotation.y = Math.atan2(dx, dz);
     }
 }
