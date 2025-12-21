@@ -1,49 +1,66 @@
-import { addItem, removeItem } from './inventory.js';
+import { addItem, removeItem } from './inventory.js'; // Imports must match inventory.js
+import { addChatMessage } from './chat.js';
 
-const bankItems = [
-    { id: 'logs', name: 'Logs', amount: 50 },
-    { id: 'axe_rune', name: 'Rune Axe', amount: 1 }
-];
+window.gameState = window.gameState || {};
+window.gameState.bank = [];
 
 export function openBank() {
-    document.getElementById('shop-window').style.display = 'none';
-    document.getElementById('bank-window').style.display = 'flex';
-    window.gameState.uiMode = 'bank'; // Tell inventory we are banking
-    renderBank();
+    const bankWindow = document.getElementById('bank-window');
+    if (bankWindow) {
+        bankWindow.style.display = 'flex';
+        updateBankUI();
+        window.gameState.uiMode = 'bank';
+    }
 }
 
-function renderBank() {
+export function deposit(id, name, amount) {
+    // Remove from Inv
+    if (removeItem(id, amount)) {
+        // Add to Bank
+        const existing = window.gameState.bank.find(i => i.id === id);
+        if (existing) {
+            existing.amount += amount;
+        } else {
+            window.gameState.bank.push({ id, name, amount });
+        }
+        updateBankUI();
+    }
+}
+
+export function withdraw(id, name, amount) {
+    const bankItem = window.gameState.bank.find(i => i.id === id);
+    if (!bankItem) return;
+
+    if (bankItem.amount >= amount) {
+        // Add to Inv
+        if (addItem(id, name, amount)) {
+            // Remove from Bank
+            bankItem.amount -= amount;
+            if (bankItem.amount <= 0) {
+                const idx = window.gameState.bank.indexOf(bankItem);
+                window.gameState.bank.splice(idx, 1);
+            }
+            updateBankUI();
+        }
+    }
+}
+
+function updateBankUI() {
     const grid = document.getElementById('bank-grid');
+    if (!grid) return;
     grid.innerHTML = '';
-    
-    bankItems.forEach(item => {
+
+    window.gameState.bank.forEach(item => {
         const slot = document.createElement('div');
         slot.className = 'item-slot';
-        slot.innerHTML = `<span>${getIcon(item.id)}</span><span class="item-count">${item.amount}</span>`;
-        slot.title = item.name;
-        // Withdraw
-        slot.onclick = () => {
-            if(item.amount > 0 && addItem(item.id, item.name, 1)) {
-                item.amount--;
-                renderBank();
-            }
-        };
+        slot.innerText = item.name.substring(0, 2);
+        
+        const count = document.createElement('div');
+        count.className = 'item-count';
+        count.innerText = item.amount;
+        slot.appendChild(count);
+
+        slot.onclick = () => withdraw(item.id, item.name, 1);
         grid.appendChild(slot);
     });
-}
-
-// Called by main.js via window.game.deposit
-export function deposit(invItem) {
-    let bItem = bankItems.find(i => i.id === invItem.id);
-    if(bItem) bItem.amount++;
-    else bankItems.push({ id: invItem.id, name: invItem.name, amount: 1 });
-    
-    removeItem(invItem.id, 1);
-    renderBank();
-}
-
-function getIcon(id) {
-    if(id.includes('axe')) return '🪓';
-    if(id === 'logs') return '🪵';
-    return '📦';
 }
