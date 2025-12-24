@@ -2,54 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Remake Docs | System Integration</title>
+    <title>Remake Documentation | GameLauncher</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 40px; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
-        h1, h2 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
-        .tech-note { border-left: 4px solid #f0883e; background: rgba(240, 136, 62, 0.1); padding: 15px; margin: 15px 0; }
-        code { color: #d2a8ff; background: #1f242c; padding: 2px 5px; border-radius: 3px; }
-        .flow-table { width: 100%; border-collapse: collapse; }
-        .flow-table td { padding: 10px; border: 1px solid #30363d; vertical-align: top; }
-        .step { font-weight: bold; color: #79c0ff; width: 150px; }
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --note-bg: rgba(88, 166, 255, 0.05);
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 40px; line-height: 1.6; }
+        .docs-container { max-width: 1000px; margin: auto; }
+        
+        /* Collapsible Styling */
+        details { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; padding: 10px; }
+        summary { font-weight: bold; cursor: pointer; padding: 10px; color: var(--accent); outline: none; }
+        details[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+
+        pre { background: #000; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
+        code { color: #d2a8ff; }
+
+        .tech-notes { background: var(--note-bg); border-left: 4px solid var(--accent); padding: 20px; margin-top: 10px; border-radius: 0 4px 4px 0; }
+        .tech-notes h4 { margin-top: 0; color: var(--accent); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        .tech-notes ul { margin: 0; padding-left: 20px; }
+        
+        .status-tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: #238636; color: white; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Core System Integration</h1>
-    <p>This document details how we bridge server settings with the live game world during the <code>GameLauncher</code> boot sequence.</p>
+<div class="docs-container">
+    <span class="status-tag">Engine Core</span>
+    <h1>GameLauncher.java</h1>
+    <p>This is the entry point for the server. It handles the bootstrap sequence, environment variables, and the initialization of all game systems.</p>
 
-    <div class="card">
-        <h2>Settings & Config</h2>
-        <p>The <code>Settings</code> class provides the static constants required for the server to determine its behavior. We parse these from the <code>main(String[] args)</code> array.</p>
-        <ul>
-            <li><code>WORLD_ID</code>: Unique identifier for the instance.</li>
-            <li><code>DEBUG</code>: Enables verbose logging and developer commands.</li>
-            <li><code>SPAWN_WORLD</code>: Toggles the economy between standard and "Instant PVP" modes.</li>
-        </ul>
-    </div>
+    <details>
+        <summary>View Code: Main Bootstrap & Environment Setup</summary>
+        <pre><code>public static void main(String[] args) throws Exception {
+    if (args.length < 5) {
+        System.out.println("USE: worldid(int) debug(boolean) hosted(boolean) pvpworld(boolean) hammershield_enabled(boolean)");
+        return;
+    }
+    Settings.WORLD_ID = Integer.parseInt(args[0]);
+    Settings.DEBUG = Boolean.parseBoolean(args[1]);
+    Settings.HOSTED = Boolean.parseBoolean(args[2]);
+    Settings.SPAWN_WORLD = Boolean.parseBoolean(args[3]);
+    Settings.CX_HAMMERSHIELD_ENABLED = Boolean.parseBoolean(args[4]);
 
-    <div class="card">
-        <h2>World Lifecycle</h2>
-        <table class="flow-table">
-            <tr>
-                <td class="step">Initialization</td>
-                <td><code>World.init()</code> is called. We prepare the region manager and entity lists.</td>
-            </tr>
-            <tr>
-                <td class="step">Active Loop</td>
-                <td>We use <code>World.getPlayers()</code> every 60 seconds to perform automated background saves.</td>
-            </tr>
-            <tr>
-                <td class="step">Termination</td>
-                <td>During <code>processShutdown</code>, we iterate the world to force-disconnect and save all sessions.</td>
-            </tr>
-        </table>
-    </div>
+    long currentTime = Utils.currentTimeMillis();
+    Settings.init();
+    // ... setup continues
+}</code></pre>
+        <div class="tech-notes">
+            <h4>Technician Notes</h4>
+            <ul>
+                <li>We must pass exactly 5 arguments or the engine will kill the process immediately.</li>
+                <li>We initialize <code>Settings</code> first to ensure global flags like <code>DEBUG</code> are available before any logging starts.</li>
+            </ul>
+        </div>
+    </details>
 
-    <div class="tech-note">
-        <strong>Technician Note:</strong> We must ensure <code>Settings.init()</code> is called before any other manager. If the world starts before the settings are loaded, we risk initializing the cache with incorrect paths or memory limits.
-    </div>
+    <details>
+        <summary>View Code: Subsystem & Cache Loading</summary>
+        <pre><code>Logger.log("Launcher", "Initing Cache...");
+Cache.init();
+Huffman.init();
+BodyDefinitions.init();
+
+Logger.log("Launcher", "Initing Data Files...");
+Censor.init();
+MapArchiveKeys.init();
+ObjectSpawns.init();
+NPCSpawns.init(); 
+NPCDrops.init();
+ShopsHandler.init();
+GrandExchange.init();</code></pre>
+        <div class="tech-notes">
+            <h4>Technician Notes</h4>
+            <ul>
+                <li>We load the <code>Cache</code> and <code>Huffman</code> tables before data files because definitions (NPCs/Objects) depend on the store being open.</li>
+                <li>We specifically load <code>ShopsHandler</code> and <code>GrandExchange</code> after definitions to prevent null pointers when mapping item IDs.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>View Code: Automated Maintenance Tasks</summary>
+        <pre><code>private static void addAutoSavingTask() {
+    GameExecutorManager.slowExecutor.scheduleWithFixedDelay(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                savePlayers();
+            } catch (Throwable e) {
+                Logger.handle(e);
+            }
+        }
+    }, 0, 1, TimeUnit.MINUTES);
+}</code></pre>
+        <div class="tech-notes">
+            <h4>Technician Notes</h4>
+            <ul>
+                <li>We use a 1-minute interval for <code>savePlayers()</code> to minimize data loss in the event of a crash.</li>
+                <li>We run these on the <code>slowExecutor</code> to ensure that saving large batches of player data doesn't interfere with the main game tick.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>View Code: The Shutdown Hook</summary>
+        <pre><code>Runtime.getRuntime().addShutdownHook(new Thread() {
+    @Override
+    public void run() {
+        savePlayers(); 
+    }
+});</code></pre>
+        <div class="tech-notes">
+            <h4>Technician Notes</h4>
+            <ul>
+                <li>We registered this hook as a failsafe; if we manually terminate the process, the JVM will attempt one final save of all active players.</li>
+                <li>We must ensure the database or file system remains accessible until this thread completes.</li>
+            </ul>
+        </div>
+    </details>
+
+</div>
 
 </body>
 </html>
