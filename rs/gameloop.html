@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2.5D Town Fishing Hole</title>
+    <title>2.5D Pixel Town Fishing</title>
     <style>
         body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; touch-action: none; }
         
@@ -18,38 +18,40 @@
 
         #action-container {
             position: absolute;
-            bottom: 50px; width: 100%;
+            bottom: 40px; width: 100%;
             display: flex; justify-content: center;
             z-index: 20;
         }
 
         .btn {
-            padding: 20px 40px;
-            font-size: 20px;
+            padding: 25px 50px;
+            font-size: 24px;
             background: #ff4444;
             color: white;
-            border: 4px solid white;
-            border-radius: 10px;
+            border: 4px solid #fff;
+            border-radius: 15px;
             cursor: pointer;
             pointer-events: auto;
-            box-shadow: 0 5px 0 #880000;
+            box-shadow: 0 6px 0 #880000;
+            user-select: none;
+            font-family: inherit;
         }
 
         .btn:active { transform: translateY(4px); box-shadow: none; }
 
-        #status { font-size: 24px; text-shadow: 2px 2px #000; }
-        #score { font-size: 18px; margin-top: 10px; color: #ffeb3b; }
+        #status { font-size: 22px; text-shadow: 3px 3px #000; letter-spacing: 1px; }
+        #score { font-size: 16px; margin-top: 5px; color: #ffeb3b; text-shadow: 2px 2px #000; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <div id="status">The Town Fishing Hole</div>
-        <div id="score">Fish Caught: 0</div>
+        <div id="status">LAKESIDE TOWN</div>
+        <div id="score">CAUGHT: 0</div>
     </div>
 
     <div id="action-container">
-        <button class="btn" id="fishBtn">CAST LINE</button>
+        <button class="btn" id="mainBtn">CAST LINE</button>
     </div>
 
     <script type="importmap">
@@ -63,14 +65,14 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- SCENE & PIXEL-PERFECT CAMERA ---
+        // --- CORE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x6eb5ff); // Clear sky
+        scene.background = new THREE.Color(0x87CEEB);
 
         const aspect = window.innerWidth / window.innerHeight;
         const d = 5;
         const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 1000);
-        camera.position.set(10, 8, 10);
+        camera.position.set(10, 10, 10);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -78,115 +80,134 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // --- GENERATING THE TOWN BACKGROUND ---
-        // Grass Base
-        const grass = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ color: 0x4caf50 }));
+        // --- TEXTURE GENERATORS ---
+        function createPixelGrass() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#55a630'; ctx.fillRect(0, 0, 32, 32);
+            ctx.fillStyle = '#2b9348';
+            for(let i=0; i<15; i++) ctx.fillRect(Math.random()*32, Math.random()*32, 2, 4);
+            ctx.fillStyle = '#80b918';
+            for(let i=0; i<10; i++) ctx.fillRect(Math.random()*32, Math.random()*32, 2, 2);
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.magFilter = tex.minFilter = THREE.NearestFilter;
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(15, 15);
+            return tex;
+        }
+
+        function createPixelWater() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0077be'; ctx.fillRect(0, 0, 32, 32);
+            ctx.fillStyle = '#00b4d8';
+            for(let i=0; i<5; i++) ctx.fillRect(Math.random()*32, Math.random()*32, 8, 2);
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.magFilter = tex.minFilter = THREE.NearestFilter;
+            return tex;
+        }
+
+        // --- WORLD BUILDING ---
+        const grass = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({ map: createPixelGrass() }));
         grass.rotation.x = -Math.PI / 2;
         scene.add(grass);
 
-        // The Fishing Pond (Right in front of player)
-        const pond = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), new THREE.MeshBasicMaterial({ color: 0x00aaff }));
+        const pond = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), new THREE.MeshBasicMaterial({ map: createPixelWater() }));
         pond.rotation.x = -Math.PI / 2;
-        pond.position.set(0, 0.02, 2);
+        pond.position.set(0, 0.05, 2.5);
         scene.add(pond);
 
-        // Decorative Buildings (Town feel)
-        function createBuilding(x, z, color, h) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(2, h, 2), new THREE.MeshBasicMaterial({ color: color }));
+        // Town Houses
+        function addHouse(x, z, color, h) {
+            const g = new THREE.BoxGeometry(2, h, 2);
+            const m = new THREE.MeshBasicMaterial({ color: color });
+            const b = new THREE.Mesh(g, m);
             b.position.set(x, h/2, z);
             scene.add(b);
         }
-        createBuilding(-4, -2, 0xba68c8, 3); // Purple house
-        createBuilding(4, -3, 0xffb74d, 2);  // Orange house
-        createBuilding(0, -5, 0xef5350, 4);  // Red tall building
+        addHouse(-4, -3, 0xae2012, 3); // Red House
+        addHouse(4, -2, 0xe9d8a6, 2.5); // Yellow House
+        addHouse(0, -6, 0x005f73, 5);   // Blue Tower
 
-        // --- STATIC PLAYER (TRAINER) ---
-        const canvas = document.createElement('canvas');
-        canvas.width = 64; canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "red"; ctx.fillRect(16, 0, 32, 24); // Hat
-        ctx.fillStyle = "#ffcc99"; ctx.fillRect(16, 24, 32, 8); // Face
-        ctx.fillStyle = "blue"; ctx.fillRect(12, 32, 40, 32); // Body
+        // --- THE TRAINER ---
+        const charCanvas = document.createElement('canvas');
+        charCanvas.width = 32; charCanvas.height = 32;
+        const charCtx = charCanvas.getContext('2d');
+        charCtx.fillStyle = 'red'; charCtx.fillRect(8, 0, 16, 12);   // Hat
+        charCtx.fillStyle = '#ffdbac'; charCtx.fillRect(8, 12, 16, 4); // Face
+        charCtx.fillStyle = 'blue'; charCtx.fillRect(4, 16, 24, 16);  // Body
         
-        const trainerTex = new THREE.CanvasTexture(canvas);
-        trainerTex.magFilter = THREE.NearestFilter;
-        const player = new THREE.Sprite(new THREE.SpriteMaterial({ map: trainerTex }));
-        player.position.set(0, 0.8, -1); // Centered, looking at pond
+        const charTex = new THREE.CanvasTexture(charCanvas);
+        charTex.magFilter = charTex.minFilter = THREE.NearestFilter;
+        const player = new THREE.Sprite(new THREE.SpriteMaterial({ map: charTex }));
+        player.scale.set(1.5, 1.5, 1);
+        player.position.set(0, 0.75, 0);
         scene.add(player);
 
-        // Bobber
-        const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xffffff }));
         bobber.visible = false;
         scene.add(bobber);
 
-        // --- FISHING LOGIC ---
-        let state = 'idle';
-        let caughtCount = 0;
+        // --- GAMEPLAY LOGIC ---
+        let gameState = 'idle';
+        let score = 0;
+        const mainBtn = document.getElementById('mainBtn');
         const statusEl = document.getElementById('status');
         const scoreEl = document.getElementById('score');
-        const btn = document.getElementById('fishBtn');
 
-        function startFishing() {
-            if (state !== 'idle') return;
+        function handleAction() {
+            if (gameState === 'idle') {
+                gameState = 'casting';
+                mainBtn.innerText = "WAITING...";
+                statusEl.innerText = "Casting Line...";
+                bobber.visible = true;
+                bobber.position.set(0, 0.2, 2.5);
+                bobber.material.color.set(0xffffff);
 
-            state = 'casting';
-            btn.innerText = "WAITING...";
-            statusEl.innerText = "Line cast into the pond...";
-            
-            // Show bobber in pond
-            bobber.position.set(0, 0.1, 2);
-            bobber.visible = true;
-            bobber.material.color.set(0xffffff);
+                setTimeout(() => {
+                    if (gameState === 'casting') {
+                        gameState = 'bite';
+                        mainBtn.innerText = "REEL!!";
+                        statusEl.innerText = "!!! BITE !!!";
+                        bobber.material.color.set(0xff0000);
+                    }
+                }, 1500 + Math.random() * 3000);
 
-            // Random delay for a bite
-            const delay = 2000 + Math.random() * 3000;
-            setTimeout(() => {
-                if (state === 'casting') {
-                    state = 'bite';
-                    btn.innerText = "REEL IN!!";
-                    statusEl.innerText = "Something's biting!";
-                    bobber.material.color.set(0xff0000);
-                    bobber.position.y = -0.1; // Sinks
-                }
-            }, delay);
-        }
-
-        function reelIn() {
-            if (state === 'bite') {
-                caughtCount++;
-                scoreEl.innerText = `Fish Caught: ${caughtCount}`;
-                statusEl.innerText = "You caught a town fish!";
-                endSession();
-            } else if (state === 'casting') {
-                statusEl.innerText = "Too early! The fish fled.";
-                endSession();
+            } else if (gameState === 'bite') {
+                score++;
+                scoreEl.innerText = `CAUGHT: ${score}`;
+                statusEl.innerText = "You caught a fish!";
+                finish();
+            } else if (gameState === 'casting') {
+                statusEl.innerText = "Too early!";
+                finish();
             }
         }
 
-        function endSession() {
-            state = 'cooldown';
-            btn.innerText = "---";
+        function finish() {
+            gameState = 'cooldown';
+            mainBtn.style.opacity = '0.5';
             bobber.visible = false;
             setTimeout(() => {
-                state = 'idle';
-                btn.innerText = "CAST LINE";
-                statusEl.innerText = "The Town Fishing Hole";
+                gameState = 'idle';
+                mainBtn.innerText = "CAST LINE";
+                mainBtn.style.opacity = '1';
+                statusEl.innerText = "LAKESIDE TOWN";
             }, 2000);
         }
 
-        btn.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(); });
-        btn.addEventListener('click', handleInput);
+        mainBtn.addEventListener('click', handleAction);
+        mainBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
 
-        function handleInput() {
-            if (state === 'idle') startFishing();
-            else if (state === 'bite' || state === 'casting') reelIn();
-        }
-
-        // --- ANIMATION LOOP ---
+        // --- LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-            // Gentle bobbing effect for the water/world
-            pond.position.y = 0.02 + Math.sin(Date.now() * 0.002) * 0.02;
+            // Gentle water "shimmer" effect
+            pond.material.map.offset.x += 0.001;
             renderer.render(scene, camera);
         }
 
