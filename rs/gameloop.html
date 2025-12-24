@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Remake Docs | System Integration</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 40px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
+        h1, h2 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .tech-note { border-left: 4px solid #f0883e; background: rgba(240, 136, 62, 0.1); padding: 15px; margin: 15px 0; }
+        code { color: #d2a8ff; background: #1f242c; padding: 2px 5px; border-radius: 3px; }
+        .flow-table { width: 100%; border-collapse: collapse; }
+        .flow-table td { padding: 10px; border: 1px solid #30363d; vertical-align: top; }
+        .step { font-weight: bold; color: #79c0ff; width: 150px; }
+    </style>
+</head>
+<body>
+
+    <h1>Core System Integration</h1>
+    <p>This document details how we bridge server settings with the live game world during the <code>GameLauncher</code> boot sequence.</p>
+
+    <div class="card">
+        <h2>Settings & Config</h2>
+        <p>The <code>Settings</code> class provides the static constants required for the server to determine its behavior. We parse these from the <code>main(String[] args)</code> array.</p>
+        <ul>
+            <li><code>WORLD_ID</code>: Unique identifier for the instance.</li>
+            <li><code>DEBUG</code>: Enables verbose logging and developer commands.</li>
+            <li><code>SPAWN_WORLD</code>: Toggles the economy between standard and "Instant PVP" modes.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>World Lifecycle</h2>
+        <table class="flow-table">
+            <tr>
+                <td class="step">Initialization</td>
+                <td><code>World.init()</code> is called. We prepare the region manager and entity lists.</td>
+            </tr>
+            <tr>
+                <td class="step">Active Loop</td>
+                <td>We use <code>World.getPlayers()</code> every 60 seconds to perform automated background saves.</td>
+            </tr>
+            <tr>
+                <td class="step">Termination</td>
+                <td>During <code>processShutdown</code>, we iterate the world to force-disconnect and save all sessions.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="tech-note">
+        <strong>Technician Note:</strong> We must ensure <code>Settings.init()</code> is called before any other manager. If the world starts before the settings are loaded, we risk initializing the cache with incorrect paths or memory limits.
+    </div>
+
+</body>
+</html>
