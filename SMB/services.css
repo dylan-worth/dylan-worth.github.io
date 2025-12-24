@@ -1,0 +1,86 @@
+/* SERVICES PAGE SPECIFIC STYLES */
+
+.page-header {
+    padding: 60px 20px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.8rem;
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* Container for each service block */
+.detailed-service {
+    padding: 80px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.service-container {
+    max-width: 1000px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns for desktop */
+    gap: 50px;
+    align-items: center;
+}
+
+/* Typography Improvements */
+.service-tag {
+    color: #3b82f6;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.service-text h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.service-text p {
+    color: #94a3b8;
+    line-height: 1.8;
+    margin-bottom: 25px;
+}
+
+/* Icon Container */
+.service-visual {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 30px;
+    padding: 40px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.service-visual img {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+/* --- MOBILE FIX (The focus for Dylan-worth.github.io) --- */
+@media (max-width: 768px) {
+    .service-container {
+        grid-template-columns: 1fr; /* Force single column */
+        text-align: center;
+        gap: 30px;
+    }
+
+    .service-text h2 {
+        font-size: 1.8rem;
+    }
+
+    /* Move the image above the text on mobile */
+    .service-visual {
+        order: -1; 
+        padding: 20px;
+    }
+}
