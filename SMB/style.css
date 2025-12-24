@@ -181,6 +181,22 @@ body {
     line-height: 1.6;
 }
 
+/* Privacy Page Specifics */
+.privacy-content .text-area {
+    text-align: left; /* Legal text should be left-aligned for readability */
+}
+
+.privacy-content h2 {
+    margin-top: 40px;
+    font-size: 1.8rem;
+    color: #ffffff;
+}
+
+.privacy-content p {
+    margin-bottom: 20px;
+}
+
+
 /* --- MODERN FOOTER STYLING --- */
 
 .main-footer {
