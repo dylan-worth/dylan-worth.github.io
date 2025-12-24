@@ -1,4 +1,25 @@
-// Smooth Scrolling for Nav Links
+// Simple fade-in effect for service cards
+const observerOptions = {
+    threshold: 0.1
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.card').forEach(card => {
+    card.style.opacity = "0";
+    card.style.transform = "translateY(20px)";
+    card.style.transition = "all 0.6s ease-out";
+    observer.observe(card);
+});
+
+// Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -6,15 +27,4 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             behavior: 'smooth'
         });
     });
-});
-
-// Form Submission Handling
-const contactForm = document.getElementById('contact-form');
-
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // In a real scenario, you'd send this data to a server
-    alert("Thank you! We have received your request and will contact you shortly.");
-    contactForm.reset();
 });
