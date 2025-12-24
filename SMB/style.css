@@ -181,6 +181,128 @@ body {
     line-height: 1.6;
 }
 
+/* --- MODERN FOOTER STYLING --- */
+
+.main-footer {
+    background-color: #070a13; /* Darker than the body for depth */
+    color: #ffffff;
+    padding: 80px 0 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 40px;
+}
+
+/* Brand styling */
+.footer-logo {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.footer-logo span { color: #3b82f6; }
+
+.footer-brand p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Link Columns */
+.footer-links h3, .footer-contact h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    position: relative;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li { margin-bottom: 12px; }
+
+.footer-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover { color: #3b82f6; }
+
+/* Contact info and Button */
+.footer-contact p {
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.btn-footer {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-footer:hover { background: #2563eb; transform: translateY(-2px); }
+
+/* Bottom Bar */
+.footer-bottom {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    padding: 20px 24px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.footer-legal a {
+    color: #475569;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+/* --- MOBILE RESPONSIVE FOOTER --- */
+@media (max-width: 850px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr; /* 2x2 grid on tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        grid-template-columns: 1fr; /* Single column on phones */
+        text-align: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .footer-legal a { margin: 0 10px; }
+}
+
 
 /* Mobile Optimization */
 @media (max-width: 600px) {
