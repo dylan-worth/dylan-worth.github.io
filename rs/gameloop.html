@@ -3,60 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2.5D Mobile Fishing</title>
+    <title>2.5D Town Fishing Hole</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: 'Courier New', monospace; touch-action: none; }
         
-        /* UI Overlay */
         #ui {
             position: absolute;
-            top: 10px; left: 10px;
-            color: white; background: rgba(0,0,0,0.6);
-            padding: 8px; border-radius: 5px;
-            pointer-events: none; z-index: 10;
+            top: 20px; width: 100%;
+            text-align: center;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
         }
 
-        /* Virtual Controls */
-        #controls {
+        #action-container {
             position: absolute;
-            bottom: 30px; left: 0; right: 0;
-            display: flex; justify-content: space-between;
-            padding: 0 30px; pointer-events: none;
+            bottom: 50px; width: 100%;
+            display: flex; justify-content: center;
             z-index: 20;
         }
 
-        .d-pad {
-            width: 120px; height: 120px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%; position: relative;
+        .btn {
+            padding: 20px 40px;
+            font-size: 20px;
+            background: #ff4444;
+            color: white;
+            border: 4px solid white;
+            border-radius: 10px;
+            cursor: pointer;
             pointer-events: auto;
+            box-shadow: 0 5px 0 #880000;
         }
 
-        .action-btn {
-            width: 80px; height: 80px;
-            background: rgba(255, 50, 50, 0.6);
-            border: 4px solid white; border-radius: 50%;
-            color: white; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: auto; user-select: none;
-        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
 
-        .action-btn:active { background: rgba(255, 50, 50, 0.9); transform: scale(0.9); }
-
-        #msg { color: #00ff00; font-weight: bold; }
+        #status { font-size: 24px; text-shadow: 2px 2px #000; }
+        #score { font-size: 18px; margin-top: 10px; color: #ffeb3b; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <div id="msg">Explore the Town</div>
+        <div id="status">The Town Fishing Hole</div>
+        <div id="score">Fish Caught: 0</div>
     </div>
 
-    <div id="controls">
-        <div class="d-pad" id="joystick">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white; opacity:0.5;">MOVE</div>
-        </div>
-        <div class="action-btn" id="fishBtn">FISH</div>
+    <div id="action-container">
+        <button class="btn" id="fishBtn">CAST LINE</button>
     </div>
 
     <script type="importmap">
@@ -70,14 +63,14 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- SCENE SETUP ---
+        // --- SCENE & PIXEL-PERFECT CAMERA ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x3a9e3a);
+        scene.background = new THREE.Color(0x6eb5ff); // Clear sky
 
         const aspect = window.innerWidth / window.innerHeight;
         const d = 5;
         const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 1000);
-        camera.position.set(10, 10, 10);
+        camera.position.set(10, 8, 10);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -85,115 +78,115 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // --- TOWN ---
-        const water = new THREE.Mesh(
-            new THREE.PlaneGeometry(4, 6),
-            new THREE.MeshBasicMaterial({ color: 0x0077be })
-        );
-        water.rotation.x = -Math.PI / 2;
-        water.position.set(4, 0.01, 0);
-        scene.add(water);
+        // --- GENERATING THE TOWN BACKGROUND ---
+        // Grass Base
+        const grass = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ color: 0x4caf50 }));
+        grass.rotation.x = -Math.PI / 2;
+        scene.add(grass);
 
-        const house = new THREE.Mesh(
-            new THREE.BoxGeometry(2, 2, 2),
-            new THREE.MeshBasicMaterial({ color: 0x8b4513 })
-        );
-        house.position.set(-3, 1, -2);
-        scene.add(house);
+        // The Fishing Pond (Right in front of player)
+        const pond = new THREE.Mesh(new THREE.PlaneGeometry(6, 4), new THREE.MeshBasicMaterial({ color: 0x00aaff }));
+        pond.rotation.x = -Math.PI / 2;
+        pond.position.set(0, 0.02, 2);
+        scene.add(pond);
 
-        // --- PLAYER ---
+        // Decorative Buildings (Town feel)
+        function createBuilding(x, z, color, h) {
+            const b = new THREE.Mesh(new THREE.BoxGeometry(2, h, 2), new THREE.MeshBasicMaterial({ color: color }));
+            b.position.set(x, h/2, z);
+            scene.add(b);
+        }
+        createBuilding(-4, -2, 0xba68c8, 3); // Purple house
+        createBuilding(4, -3, 0xffb74d, 2);  // Orange house
+        createBuilding(0, -5, 0xef5350, 4);  // Red tall building
+
+        // --- STATIC PLAYER (TRAINER) ---
         const canvas = document.createElement('canvas');
         canvas.width = 64; canvas.height = 64;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "red"; ctx.fillRect(16, 0, 32, 32); 
-        ctx.fillStyle = "white"; ctx.fillRect(16, 32, 32, 32);
-        const trainerTexture = new THREE.CanvasTexture(canvas);
-        trainerTexture.magFilter = THREE.NearestFilter;
-        const player = new THREE.Sprite(new THREE.SpriteMaterial({ map: trainerTexture }));
-        player.position.y = 0.8;
+        ctx.fillStyle = "red"; ctx.fillRect(16, 0, 32, 24); // Hat
+        ctx.fillStyle = "#ffcc99"; ctx.fillRect(16, 24, 32, 8); // Face
+        ctx.fillStyle = "blue"; ctx.fillRect(12, 32, 40, 32); // Body
+        
+        const trainerTex = new THREE.CanvasTexture(canvas);
+        trainerTex.magFilter = THREE.NearestFilter;
+        const player = new THREE.Sprite(new THREE.SpriteMaterial({ map: trainerTex }));
+        player.position.set(0, 0.8, -1); // Centered, looking at pond
         scene.add(player);
 
-        const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        // Bobber
+        const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
         bobber.visible = false;
         scene.add(bobber);
 
-        // --- INPUT & MOBILE LOGIC ---
-        let gameState = 'walking';
-        const moveVector = { x: 0, z: 0 };
-        const msgEl = document.getElementById('msg');
+        // --- FISHING LOGIC ---
+        let state = 'idle';
+        let caughtCount = 0;
+        const statusEl = document.getElementById('status');
+        const scoreEl = document.getElementById('score');
+        const btn = document.getElementById('fishBtn');
 
-        // Virtual Joystick Logic
-        const joystick = document.getElementById('joystick');
-        joystick.addEventListener('touchstart', handleMove);
-        joystick.addEventListener('touchmove', handleMove);
-        joystick.addEventListener('touchend', () => { moveVector.x = 0; moveVector.z = 0; });
+        function startFishing() {
+            if (state !== 'idle') return;
 
-        function handleMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = joystick.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            // Calculate direction from center of D-Pad
-            moveVector.x = (touch.clientX - centerX) / 50;
-            moveVector.z = (touch.clientY - centerY) / 50;
+            state = 'casting';
+            btn.innerText = "WAITING...";
+            statusEl.innerText = "Line cast into the pond...";
+            
+            // Show bobber in pond
+            bobber.position.set(0, 0.1, 2);
+            bobber.visible = true;
+            bobber.material.color.set(0xffffff);
+
+            // Random delay for a bite
+            const delay = 2000 + Math.random() * 3000;
+            setTimeout(() => {
+                if (state === 'casting') {
+                    state = 'bite';
+                    btn.innerText = "REEL IN!!";
+                    statusEl.innerText = "Something's biting!";
+                    bobber.material.color.set(0xff0000);
+                    bobber.position.y = -0.1; // Sinks
+                }
+            }, delay);
         }
 
-        // Fishing Action
-        const fishBtn = document.getElementById('fishBtn');
-        fishBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleFishingAction();
-        });
-
-        function handleFishingAction() {
-            if (gameState === 'walking') {
-                if (player.position.distanceTo(water.position) < 4) {
-                    gameState = 'waiting';
-                    msgEl.innerText = "Casting... Wait for red flash!";
-                    bobber.position.set(player.position.x + 1.2, 0.1, player.position.z);
-                    bobber.visible = true;
-                    bobber.material.color.set(0xffffff);
-
-                    setTimeout(() => {
-                        if (gameState === 'waiting') {
-                            gameState = 'bite';
-                            msgEl.innerText = "TAP NOW!!";
-                            bobber.material.color.set(0xff0000);
-                        }
-                    }, 1000 + Math.random() * 3000);
-                }
-            } else if (gameState === 'bite') {
-                msgEl.innerText = "Nice catch!";
-                resetFishing();
-            } else if (gameState === 'waiting') {
-                msgEl.innerText = "Too early!";
-                resetFishing();
+        function reelIn() {
+            if (state === 'bite') {
+                caughtCount++;
+                scoreEl.innerText = `Fish Caught: ${caughtCount}`;
+                statusEl.innerText = "You caught a town fish!";
+                endSession();
+            } else if (state === 'casting') {
+                statusEl.innerText = "Too early! The fish fled.";
+                endSession();
             }
         }
 
-        function resetFishing() {
-            gameState = 'cooldown';
+        function endSession() {
+            state = 'cooldown';
+            btn.innerText = "---";
             bobber.visible = false;
             setTimeout(() => {
-                gameState = 'walking';
-                msgEl.innerText = "Explore the Town";
-            }, 1500);
+                state = 'idle';
+                btn.innerText = "CAST LINE";
+                statusEl.innerText = "The Town Fishing Hole";
+            }, 2000);
         }
 
-        // --- MAIN LOOP ---
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(); });
+        btn.addEventListener('click', handleInput);
+
+        function handleInput() {
+            if (state === 'idle') startFishing();
+            else if (state === 'bite' || state === 'casting') reelIn();
+        }
+
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
-
-            if (gameState === 'walking') {
-                // Clamp movement speed
-                const speed = 0.12;
-                player.position.x += Math.max(-1, Math.min(1, moveVector.x)) * speed;
-                player.position.z += Math.max(-1, Math.min(1, moveVector.z)) * speed;
-            }
-
-            camera.position.x = player.position.x + 10;
-            camera.position.z = player.position.z + 10;
+            // Gentle bobbing effect for the water/world
+            pond.position.y = 0.02 + Math.sin(Date.now() * 0.002) * 0.02;
             renderer.render(scene, camera);
         }
 
