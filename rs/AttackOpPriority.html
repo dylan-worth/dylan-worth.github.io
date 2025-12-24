@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Developer Docs | AttackOpPriority</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --sidebar: #161b22;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --border: #30363d;
+            --code-bg: #1f242c;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        
+        /* Sidebar Navigation */
+        .sidebar { width: 260px; background: var(--sidebar); height: 100vh; border-right: 1px solid var(--border); padding: 20px; position: fixed; }
+        .sidebar h2 { font-size: 1.2rem; color: var(--accent); }
+        .sidebar nav a { display: block; color: #8b949e; text-decoration: none; padding: 8px 0; font-size: 14px; }
+        .sidebar nav a:hover { color: var(--accent); }
+
+        /* Main Content */
+        .main { margin-left: 300px; padding: 40px; max-width: 900px; }
+        .breadcrumb { font-size: 12px; color: #8b949e; margin-bottom: 10px; }
+        h1 { font-size: 2.5rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .doc-section { margin-bottom: 40px; }
+        .code-block { background: var(--code-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border); overflow-x: auto; }
+        code { font-family: 'Consolas', monospace; color: #d2a8ff; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border: 1px solid var(--border); }
+        th { background: #161b22; color: var(--accent); }
+
+        .note { background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent); padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+        .note b { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>2019 Remake Docs</h2>
+    <nav>
+        <a href="#">Engine Architecture</a>
+        <a href="#">Player Package</a>
+        <a href="#" style="color:white; font-weight:bold;">↳ AttackOpPriority</a>
+        <a href="#">World Entities</a>
+        <a href="#">Menu Processing</a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="breadcrumb">com.jagex.game.player > AttackOpPriority</div>
+    <h1>Class AttackOpPriority</h1>
+    
+    <div class="doc-section">
+        <p>The <code>AttackOpPriority</code> enum defines the client-side logic for rendering the "Attack" interaction in the context menu. This directly impacts how we handle user input for PVP and PVM combat scenarios.</p>
+        
+        <div class="note">
+            <b>Technician Note:</b> We use these constants to map the <code>varp</code> (player variable) settings coming from the server. When a player changes their "Attack Options" in the UI, we update the active priority instance to modify menu entry sorting.
+        </div>
+    </div>
+
+    <div class="doc-section">
+        <h2>Static Constants (Deobfuscated)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field (2019 Deob)</th>
+                    <th>Enum ID</th>
+                    <th>Sort Weight</th>
+                    <th>Functionality</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>field7906</code></td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td><b>Combat Level Dependent:</b> Left-click if lower level, else right-click.</td>
+                </tr>
+                <tr>
+                    <td><code>field7908</code></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td><b>Always Right-Click:</b> "Attack" never takes priority over "Walk here".</td>
+                </tr>
+                <tr>
+                    <td><code>field7909</code></td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td><b>Always Left-Click:</b> "Attack" is always the primary interaction.</td>
+                </tr>
+                <tr>
+                    <td><code>field7907</code></td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td><b>Hidden:</b> The "Attack" option is suppressed entirely.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="doc-section">
+        <h2>Key Methods</h2>
+        <h3><code>getId()</code></h3>
+        <p>Returns the persistent ID (<code>field7910</code>). We reference this ID when reading or writing player configuration profiles.</p>
+        
+        <div class="code-block">
+            <pre><code>// Example check in our Menu Builder
+if (priority.getId() == 3) {
+    removeEntry("Attack");
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="doc-section">
+        <h2>Implementation Summary</h2>
+        <p>As we continue the 2019 remake, we must ensure <code>method10149()</code> is called when initializing the options UI to populate the dropdown menus. The order returned (0, 1, 2, 3) ensures the settings appear in the correct logical sequence for the player.</p>
+    </div>
+</div>
+
+</body>
+</html>
