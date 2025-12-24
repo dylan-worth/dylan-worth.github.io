@@ -9,21 +9,20 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 body {
-    background-color: var(--light);
-    color: var(--text);
-    line-height: 1.6;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    width: 100%;
 }
 
-/* Navigation */
+/* Navigation - Responsive */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 10%;
+    padding: 1rem 5%; /* Reduced padding for mobile */
     background: var(--dark);
     color: white;
     position: sticky;
@@ -31,17 +30,16 @@ body {
     z-index: 1000;
 }
 
+.logo { font-size: 1.2rem; white-space: nowrap; }
 .logo span { color: var(--primary); font-weight: bold; }
 
-.nav-links { display: flex; list-style: none; align-items: center; }
-.nav-links li { margin-left: 2rem; }
-.nav-links a { color: white; text-decoration: none; transition: 0.3s; }
-.nav-links a:hover { color: var(--primary); }
+.nav-links { display: flex; list-style: none; align-items: center; gap: 1rem; }
+.nav-links a { color: white; text-decoration: none; font-size: 0.9rem; }
 
-/* Hero Section */
+/* Hero Section - Scaleable */
 .hero {
-    height: 80vh;
-    background: linear-gradient(rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.8)), 
+    min-height: 70vh;
+    background: linear-gradient(rgba(30, 41, 59, 0.85), rgba(30, 41, 59, 0.85)), 
                 url('https://images.unsplash.com/photo-1513584684374-8bdb7489feef?auto=format&fit=crop&q=80&w=1000');
     background-size: cover;
     background-position: center;
@@ -50,39 +48,59 @@ body {
     justify-content: center;
     text-align: center;
     color: white;
+    padding: 0 20px; /* Padding for mobile edges */
 }
 
-.hero-content h1 { font-size: 3.5rem; margin-bottom: 1rem; }
-.hero-content p { font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px; margin-inline: auto; }
+.hero-content h1 { 
+    font-size: clamp(2rem, 8vw, 3.5rem); /* Dynamically scales font */
+    margin-bottom: 1rem; 
+    line-height: 1.2;
+}
+
+.hero-content p { 
+    font-size: clamp(1rem, 4vw, 1.2rem); 
+    max-width: 600px; 
+    margin: 0 auto 2rem auto; 
+}
+
+.hero-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
 
 /* Buttons */
-.btn-primary { background: var(--primary); color: white; padding: 0.8rem 2rem; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; }
-.btn-secondary { border: 2px solid white; color: white; padding: 0.8rem 2rem; border-radius: 5px; text-decoration: none; margin-left: 1rem; }
+.btn-primary, .btn-secondary {
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+}
 
-/* Services */
-.services { padding: 5rem 10%; background: white; }
-.section-title { text-align: center; margin-bottom: 3rem; font-size: 2.5rem; }
+.btn-primary { background: var(--primary); color: white; border: none; }
+.btn-secondary { border: 2px solid white; color: white; }
+
+/* Services Grid */
+.services { padding: 4rem 5%; background: white; }
 .service-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Better sizing */
+    gap: 1.5rem;
 }
 
 .service-card {
     padding: 2rem;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    transition: transform 0.3s;
     text-align: center;
 }
 
-.service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-.service-card i { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; }
-
 /* Form */
-.contact { padding: 5rem 10%; background: #f1f5f9; text-align: center; }
+.contact { padding: 4rem 5%; background: #f1f5f9; }
 #contact-form {
-    max-width: 600px;
+    max-width: 100%; /* Ensures it doesn't hang off */
+    width: 500px;
     margin: 2rem auto;
     display: flex;
     flex-direction: column;
@@ -90,7 +108,33 @@ body {
 }
 
 #contact-form input, #contact-form select, #contact-form textarea {
+    width: 100%;
     padding: 1rem;
     border: 1px solid #cbd5e1;
     border-radius: 5px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+}
+
+/* --- MOBILE SPECIFIC FIXES --- */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 1rem;
+    }
+
+    .hero-content h1 {
+        margin-top: 20px;
+    }
+
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .btn-secondary {
+        margin-left: 0;
+    }
 }
