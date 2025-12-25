@@ -3,81 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disney+ Clone</title>
+    <title>Curated Cinema | Your Library</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="nav-icon active" data-nav="home">🏠</div>
-        <div class="nav-icon" data-nav="search">🔍</div>
-        <div class="nav-icon" data-nav="mylist">➕</div>
-        <div class="nav-icon" data-nav="movies">🎬</div>
-        <div class="nav-icon" data-nav="series">📺</div>
-        <div class="nav-icon profile-icon" data-nav="profile">👤</div> </aside>
+        <div class="nav-item active" title="Home" onclick="location.reload()">🏠</div>
+        <div class="nav-item" title="Search" onclick="document.getElementById('searchInput').focus()">🔍</div>
+        <div class="nav-item" title="My List">➕</div>
+        <div class="nav-item" title="Collections">📂</div>
+        <div class="nav-item profile-icon">👤</div>
+    </aside>
 
     <main>
-        <nav class="top-nav">
-            <div class="logo">STREAM<strong>+</strong></div>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search movies, series..." />
+        <header class="top-bar">
+            <div class="logo">CURATED<strong>+</strong></div>
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Search titles, tags, or genres...">
             </div>
-        </nav>
+        </header>
 
-        <section class="hero-carousel"> <div class="carousel-track" id="carouselTrack">
-                </div>
-            <div class="carousel-dots" id="carouselDots"></div>
+        <section id="hero-carousel" class="hero">
+            <div class="hero-placeholder">
+                <div class="hero-loading-shimmer"></div>
+            </div>
         </section>
 
-        <section class="brands">
-            <div class="brand-tile" data-brand="disney"><span>DISNEY</span></div>
-            <div class="brand-tile" data-brand="pixar"><span>PIXAR</span></div>
-            <div class="brand-tile" data-brand="marvel"><span>MARVEL</span></div>
-            <div class="brand-tile" data-brand="starwars"><span>STAR WARS</span></div>
-            <div class="brand-tile" data-brand="natgeo"><span>NAT GEO</span></div>
+        <section class="brand-grid">
+            <div class="brand-tile" data-genre="Vintage" onclick="renderRows('Vintage')">
+                <span>VINTAGE</span>
+                <div class="brand-bg-glow"></div>
+            </div>
+            <div class="brand-tile" data-genre="Nature" onclick="renderRows('Nature')">
+                <span>NATURE</span>
+                <div class="brand-bg-glow"></div>
+            </div>
+            <div class="brand-tile" data-genre="Sci-Fi" onclick="renderRows('Sci-Fi')">
+                <span>SCI-FI</span>
+                <div class="brand-bg-glow"></div>
+            </div>
+            <div class="brand-tile" data-genre="Docs" onclick="renderRows('Docs')">
+                <span>DOCS</span>
+                <div class="brand-bg-glow"></div>
+            </div>
+            <div class="brand-tile" data-genre="Shorts" onclick="renderRows('Shorts')">
+                <span>SHORTS</span>
+                <div class="brand-bg-glow"></div>
+            </div>
         </section>
 
-        <div id="continue-section" class="row-container" style="display:none;">
-            <h2>Continue Watching</h2>
-            <div id="continue-grid" class="movie-grid"></div>
-        </div>
-
-        <div id="mylist-section" class="row-container" style="display:none;"> <h2>My List</h2>
-            <div id="mylist-grid" class="movie-grid"></div>
-        </div>
-
-        <div id="new-coming-soon-section" class="row-container"> <h2>New & Coming Soon</h2>
-            <div id="new-coming-soon-grid" class="movie-grid"></div>
-        </div>
-
-        <div class="row-container">
-            <h2>Recommended For You</h2>
-            <div id="recommended-grid" class="movie-grid"></div>
-        </div>
-
-        <div class="row-container">
-            <h2>Movies</h2>
-            <div id="movies-grid" class="movie-grid"></div>
-        </div>
-
-        <div class="row-container">
-            <h2>Series</h2>
-            <div id="series-grid" class="movie-grid"></div>
-        </div>
-
-        <div id="movie-details-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-button">&times;</span>
-                <img id="modal-image" src="" alt="Movie Poster" class="modal-image">
-                <h2 id="modal-title"></h2>
-                <p id="modal-description"></p>
-                <div class="modal-actions">
-                    <button class="play-btn">▶ Play</button>
-                    <button class="list-btn add-to-list-btn">+ My List</button>
-                </div>
+        <div id="dynamic-rows">
             </div>
-        </div>
     </main>
+
+    <div id="player-modal" class="modal">
+        <div class="modal-backdrop" onclick="closePlayer()"></div>
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePlayer()">&times;</span>
+            
+            <div class="video-container">
+                <video id="main-video" controls poster="">
+                    Your browser does not support the video tag.
+                </video>
+                <button id="skip-intro" class="skip-btn" onclick="skipIntro()">Skip Intro</button>
+            </div>
+
+            <div class="video-info">
+                <div class="info-header">
+                    <h2 id="modal-title">Loading...</h2>
+                    <div class="modal-badges">
+                        <span class="badge">4K</span>
+                        <span class="badge">CC</span>
+                    </div>
+                </div>
+                <p id="modal-desc">Description will appear here when you select a movie from your folders.</p>
+                
+                <div class="modal-actions">
+                    <button id="modal-play-btn" class="main-play-btn">▶ RESUME</button>
+                    <button id="modal-list-btn" class="list-btn">+ MY LIST</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
