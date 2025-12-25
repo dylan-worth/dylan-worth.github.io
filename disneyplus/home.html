@@ -9,43 +9,45 @@
 <body>
 
     <aside class="sidebar">
-        <div class="nav-icon active">🏠</div>
-        <div class="nav-icon">🔍</div>
-        <div class="nav-icon">➕</div>
-        <div class="nav-icon">🎬</div>
-        <div class="nav-icon">📺</div>
-    </aside>
+        <div class="nav-icon active" data-nav="home">🏠</div>
+        <div class="nav-icon" data-nav="search">🔍</div>
+        <div class="nav-icon" data-nav="mylist">➕</div>
+        <div class="nav-icon" data-nav="movies">🎬</div>
+        <div class="nav-icon" data-nav="series">📺</div>
+        <div class="nav-icon profile-icon" data-nav="profile">👤</div> </aside>
 
     <main>
         <nav class="top-nav">
             <div class="logo">STREAM<strong>+</strong></div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search movies, series..." />
+            </div>
         </nav>
 
-        <section class="hero">
-            <div class="hero-content">
-                <img src="https://via.placeholder.com/1200x500?text=Featured+Movie+Banner" alt="Hero" class="hero-img">
-                <div class="hero-overlay">
-                    <h1>The Mandalorian</h1>
-                    <p>After the fall of the Empire, a lone gunfighter makes his way through the outer reaches of the lawless galaxy.</p>
-                    <div class="hero-btns">
-                        <button class="play-btn">▶ PLAY</button>
-                        <button class="list-btn">+ MY LIST</button>
-                    </div>
+        <section class="hero-carousel"> <div class="carousel-track" id="carouselTrack">
                 </div>
-            </div>
+            <div class="carousel-dots" id="carouselDots"></div>
         </section>
 
         <section class="brands">
-            <div class="brand-tile"><span>DISNEY</span></div>
-            <div class="brand-tile"><span>PIXAR</span></div>
-            <div class="brand-tile"><span>MARVEL</span></div>
-            <div class="brand-tile"><span>STAR WARS</span></div>
-            <div class="brand-tile"><span>NAT GEO</span></div>
+            <div class="brand-tile" data-brand="disney"><span>DISNEY</span></div>
+            <div class="brand-tile" data-brand="pixar"><span>PIXAR</span></div>
+            <div class="brand-tile" data-brand="marvel"><span>MARVEL</span></div>
+            <div class="brand-tile" data-brand="starwars"><span>STAR WARS</span></div>
+            <div class="brand-tile" data-brand="natgeo"><span>NAT GEO</span></div>
         </section>
 
         <div id="continue-section" class="row-container" style="display:none;">
             <h2>Continue Watching</h2>
             <div id="continue-grid" class="movie-grid"></div>
+        </div>
+
+        <div id="mylist-section" class="row-container" style="display:none;"> <h2>My List</h2>
+            <div id="mylist-grid" class="movie-grid"></div>
+        </div>
+
+        <div id="new-coming-soon-section" class="row-container"> <h2>New & Coming Soon</h2>
+            <div id="new-coming-soon-grid" class="movie-grid"></div>
         </div>
 
         <div class="row-container">
@@ -54,8 +56,26 @@
         </div>
 
         <div class="row-container">
-            <h2>Marvel Universe</h2>
-            <div id="marvel-grid" class="movie-grid"></div>
+            <h2>Movies</h2>
+            <div id="movies-grid" class="movie-grid"></div>
+        </div>
+
+        <div class="row-container">
+            <h2>Series</h2>
+            <div id="series-grid" class="movie-grid"></div>
+        </div>
+
+        <div id="movie-details-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <img id="modal-image" src="" alt="Movie Poster" class="modal-image">
+                <h2 id="modal-title"></h2>
+                <p id="modal-description"></p>
+                <div class="modal-actions">
+                    <button class="play-btn">▶ Play</button>
+                    <button class="list-btn add-to-list-btn">+ My List</button>
+                </div>
+            </div>
         </div>
     </main>
 
