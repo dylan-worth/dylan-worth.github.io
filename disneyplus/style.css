@@ -1,346 +1,461 @@
+/* ==========================================================================
+   1. ROOT VARIABLES & THEME SETUP
+   ========================================================================== */
 :root {
-    --bg: #040714;
-    --nav-bg: #090b13;
-    --blue: #0063e5;
+    /* Colors */
+    --bg-deep: #040714;
+    --bg-elevated: #1a1d29;
+    --bg-nav: #090b13;
+    --disney-blue: #0063e5;
+    --disney-blue-glow: rgba(0, 99, 229, 0.5);
     --white: #f9f9f9;
-    --transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --white-dim: rgba(249, 249, 249, 0.6);
+    --white-faint: rgba(249, 249, 249, 0.1);
+    
+    /* Gradients */
+    --main-gradient: radial-gradient(circle at top, #1c1f2e 0%, #040714 100%);
+    --card-shadow: 0 26px 30px -10px rgba(0, 0, 0, 0.69), 0 16px 10px -10px rgba(0, 0, 0, 0.73);
+    --hover-shadow: 0 40px 58px -16px rgba(0, 0, 0, 0.8), 0 30px 22px -10px rgba(0, 0, 0, 0.72);
+
+    /* Animation */
+    --transition-fast: 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-mid: 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ==========================================================================
+   2. GLOBAL STYLES & RESET
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    margin: 0;
-    background: var(--bg);
-    background-image: radial-gradient(circle at top, #1a1d29 0%, #040714 100%);
+    background-color: var(--bg-deep);
+    background-image: var(--main-gradient);
     background-attachment: fixed;
     color: var(--white);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
     display: flex;
-    min-height: 100vh; /* Ensure body takes full height */
+    overflow-x: hidden;
+    line-height: 1.5;
 }
 
-/* Sidebar */
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: #31343e; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #4a4e5e; }
+
+/* ==========================================================================
+   3. SIDEBAR NAVIGATION (DESKTOP)
+   ========================================================================== */
 .sidebar {
     width: 90px;
     height: 100vh;
     position: fixed;
+    left: 0;
+    top: 0;
+    background: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 40px;
+    padding-top: 30px;
     z-index: 1000;
-    background: var(--nav-bg); /* Add background for sidebar */
-    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    transition: width 0.3s ease;
 }
 
-.nav-icon {
-    font-size: 24px;
-    margin-bottom: 40px;
-    opacity: 0.6;
+.sidebar:hover {
+    width: 100px;
+    background: var(--bg-nav);
+}
+
+.nav-item {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    transition: var(--transition);
-    position: relative; /* For the search input below */
+    position: relative;
+    margin-bottom: 20px;
+    transition: var(--transition-fast);
 }
 
-.nav-icon:hover, .nav-icon.active {
+.nav-item span {
+    font-size: 24px;
+    opacity: 0.5;
+    transition: var(--transition-fast);
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0%;
+    height: 2px;
+    background: var(--white);
+    transition: var(--transition-fast);
+}
+
+.nav-item:hover span, .nav-item.active span {
     opacity: 1;
     transform: scale(1.2);
 }
 
-.profile-icon {
-    margin-top: auto; /* Pushes to the bottom */
-    margin-bottom: 20px;
+.nav-item.active::after { width: 40%; left: 30%; }
+
+.profile-icon { margin-top: auto; padding-bottom: 30px; }
+
+/* ==========================================================================
+   4. MAIN CONTENT WRAPPER
+   ========================================================================== */
+main {
+    margin-left: 90px;
+    width: calc(100% - 90px);
+    padding: 0 4vw 60px;
+    display: flex;
+    flex-direction: column;
 }
 
-main { margin-left: 90px; width: 100%; padding-bottom: 50px; }
-
-/* Top Navigation */
-.top-nav {
-    height: 70px;
+/* Top Navigation Bar */
+.top-bar {
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4vw;
-    background: rgba(4, 7, 20, 0.8);
     position: sticky;
     top: 0;
-    z-index: 500;
+    background: transparent;
+    z-index: 900;
+    transition: background 0.3s ease;
 }
-.top-nav .logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; }
 
-/* Search Input */
-.search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
+.top-bar.scrolled {
+    background: var(--bg-nav);
+    padding: 0 4vw;
 }
-#searchInput {
-    background: #2a2d3e;
-    border: 1px solid rgba(249, 249, 249, 0.2);
-    border-radius: 5px;
-    padding: 8px 15px;
+
+.logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 3px;
     color: var(--white);
-    width: 250px;
-    transition: width 0.3s ease;
-    outline: none;
-}
-#searchInput::placeholder { color: rgba(249, 249, 249, 0.5); }
-#searchInput:focus { width: 350px; border-color: var(--blue); }
-
-
-/* Hero Carousel */
-.hero-carousel {
-    padding: 20px 4vw;
-    overflow: hidden; /* Hide excess items */
-    position: relative;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-.carousel-track {
-    display: flex; /* Arrange items horizontally */
-    transition: transform 0.5s ease-in-out;
+.search-wrapper { position: relative; }
+.search-wrapper input {
+    background: rgba(42, 45, 62, 0.6);
+    border: 1px solid var(--white-faint);
+    border-radius: 50px;
+    padding: 10px 20px 10px 45px;
+    color: var(--white);
+    width: 280px;
+    font-size: 14px;
+    transition: var(--transition-fast);
+    backdrop-filter: blur(5px);
 }
 
-.hero-item {
-    min-width: 100%; /* Each item takes full carousel width */
-    box-sizing: border-box;
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 20px 30px -10px rgba(0,0,0,0.8);
+.search-wrapper input:focus {
+    width: 450px;
+    background: rgba(42, 45, 62, 0.9);
+    border-color: var(--disney-blue);
+    box-shadow: 0 0 10px var(--disney-blue-glow);
 }
 
-.hero-item img {
+/* ==========================================================================
+   5. HERO CAROUSEL
+   ========================================================================== */
+.hero {
     width: 100%;
-    height: 60vh;
+    height: 65vh;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin: 20px 0 40px;
+    box-shadow: var(--card-shadow);
+}
+
+.hero-img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    display: block;
+    mask-image: linear-gradient(to top, transparent 5%, black 40%);
 }
 
 .hero-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
-    padding: 40px;
-    background: linear-gradient(to top, rgba(4,7,20,1), transparent);
     width: 100%;
-    box-sizing: border-box; /* Include padding in width */
-}
-.hero-overlay h1 { margin-bottom: 10px; font-size: 3em; }
-.hero-overlay p { margin-bottom: 20px; color: rgba(249,249,249,0.8); max-width: 60%; }
-
-.hero-btns button {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: background-color 0.2s ease;
-}
-.play-btn { background: var(--white); color: black; }
-.play-btn:hover { background: #ccc; }
-.list-btn { background: rgba(0,0,0,0.5); color: white; border: 1px solid white; }
-.list-btn:hover { background: rgba(255,255,255,0.1); }
-
-.carousel-dots {
-    text-align: center;
-    margin-top: 15px;
-}
-.dot {
-    height: 10px;
-    width: 10px;
-    background-color: rgba(249,249,249,0.3);
-    border-radius: 50%;
-    display: inline-block;
-    margin: 0 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-.dot.active {
-    background-color: var(--white);
+    padding: 60px 4vw;
+    background: linear-gradient(to top, var(--bg-deep) 10%, transparent 100%);
 }
 
-/* Brand Tiles */
-.brands {
+.hero h1 { font-size: 48px; margin-bottom: 10px; letter-spacing: 1px; }
+.hero p { max-width: 600px; font-size: 18px; color: var(--white-dim); margin-bottom: 25px; }
+
+/* ==========================================================================
+   6. BRAND TILES (GENRES)
+   ========================================================================== */
+.brand-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive brand tiles */
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
-    padding: 30px 4vw;
+    margin-bottom: 40px;
 }
 
 .brand-tile {
-    border: 3px solid rgba(249, 249, 249, 0.1);
+    position: relative;
+    border: 3px solid var(--white-faint);
     border-radius: 10px;
-    padding: 30px 10px;
-    text-align: center;
-    background: #1a1d29;
-    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.7);
-    transition: var(--transition);
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: var(--bg-elevated);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-mid);
     cursor: pointer;
-    position: relative; /* For potential video backgrounds */
     overflow: hidden;
+}
+
+.brand-tile span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 1.2vw;
+    z-index: 5;
 }
 
 .brand-tile:hover {
     transform: scale(1.05);
-    border-color: rgba(249, 249, 249, 0.8);
-}
-.brand-tile span {
-    font-weight: bold;
-    font-size: 1.2em;
-    position: relative;
-    z-index: 2; /* Keep text above video */
+    border-color: var(--white);
+    box-shadow: var(--hover-shadow);
 }
 
-/* Movie Cards & Grid */
-.row-container { padding: 0 4vw 30px; }
-.row-container h2 { margin-bottom: 15px; font-size: 22px; opacity: 0.9; }
+/* Video Preview for Brand Tiles */
+.brand-tile video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.5s ease;
+}
+
+.brand-tile:hover video { opacity: 1; }
+
+/* ==========================================================================
+   7. MOVIE ROWS & CARDS
+   ========================================================================== */
+.row-container { margin-bottom: 35px; }
+.row-container h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
 
 .movie-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
 }
 
 .movie-card {
     position: relative;
     aspect-ratio: 16/9;
-    background: #1a1d29;
+    background: var(--bg-elevated);
     border-radius: 8px;
-    border: 3px solid rgba(249, 249, 249, 0.1);
-    transition: var(--transition);
+    border: 3px solid var(--white-faint);
+    transition: var(--transition-fast);
     cursor: pointer;
     overflow: hidden;
-    display: flex; /* For placeholder content centering */
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #888;
-    text-align: center;
 }
-.movie-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: opacity 0.3s ease;
-}
+
+.movie-card img { width: 100%; height: 100%; object-fit: cover; }
 
 .movie-card:hover {
     transform: scale(1.08);
     border-color: var(--white);
-    box-shadow: 0 30px 40px -15px rgba(0,0,0,0.9);
+    box-shadow: var(--hover-shadow);
     z-index: 10;
 }
 
-.progress-bar {
-    position: absolute;
-    bottom: 0;
-    height: 4px;
-    background: var(--blue);
-    box-shadow: 0 0 8px var(--blue);
-}
-
-/* New: Hover Play Button on Cards */
-.card-overlay {
+/* Card Hover Buttons */
+.card-btns {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
-.movie-card:hover .card-overlay { opacity: 1; }
-.card-overlay .play-btn {
-    padding: 10px 20px;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-}
-.card-overlay .add-to-list-btn {
-    background: none;
-    border: 1px solid white;
-    color: white;
-    padding: 8px 15px;
-    font-size: 0.9em;
-}
 
-/* Modal Styling */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 2000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
-    justify-content: center;
-    align-items: center;
-}
-.modal-content {
-    background-color: #1a1d29;
-    margin: auto;
-    padding: 30px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 900px;
-    position: relative;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-.close-button {
-    color: #aaa;
-    position: absolute;
-    top: 15px;
-    right: 25px;
-    font-size: 28px;
+.movie-card:hover .card-btns { opacity: 1; }
+
+.card-btns button {
+    margin: 5px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
     font-weight: bold;
     cursor: pointer;
+    width: 80%;
 }
-.close-button:hover,
-.close-button:focus {
-    color: white;
-    text-decoration: none;
-    cursor: pointer;
-}
-.modal-image {
+
+/* Progress Bars */
+.progress-container {
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    height: 250px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
 }
-.modal-content h2 { font-size: 2.5em; margin-bottom: 15px; }
-.modal-content p { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; color: rgba(249,249,249,0.7); }
-.modal-actions { display: flex; gap: 15px; }
 
+.progress-fill {
+    height: 100%;
+    background: var(--disney-blue);
+    box-shadow: 0 0 10px var(--disney-blue);
+    width: 0%;
+}
 
-/* Mobile */
+/* ==========================================================================
+   8. MODAL & PLAYER STYLES
+   ========================================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.92);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 1100px;
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: modalIn 0.4s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 35px;
+    color: var(--white-dim);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.close-modal:hover { color: var(--white); }
+
+.video-info { padding: 40px; }
+.video-info h2 { font-size: 36px; margin-bottom: 15px; }
+.video-info p { color: var(--white-dim); font-size: 16px; margin-bottom: 30px; }
+
+/* Skip Intro Button */
+.skip-btn {
+    position: absolute;
+    bottom: 100px;
+    right: 50px;
+    background: rgba(26, 29, 41, 0.85);
+    border: 1px solid var(--white);
+    color: var(--white);
+    padding: 12px 24px;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+}
+
+/* ==========================================================================
+   9. SKELETON LOADING ANIMATION
+   ========================================================================== */
+.shimmer {
+    background: linear-gradient(90deg, #1a1d29 25%, #2a2d3e 50%, #1a1d29 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==========================================================================
+   10. MOBILE & TV RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .movie-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
 @media (max-width: 768px) {
-    .sidebar { width: 100%; height: 60px; bottom: 0; top: auto; flex-direction: row; background: var(--nav-bg); justify-content: space-around; padding: 0; }
-    .sidebar .nav-icon { margin-bottom: 0; margin-top: auto; }
-    main { margin-left: 0; padding-bottom: 80px; }
-    .top-nav { padding: 0 20px; }
-    .search-container { width: 100%; margin-left: 20px; }
-    #searchInput { width: 100%; }
-    #searchInput:focus { width: 100%; }
-    .brands { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .hero-item img { height: 25vh; }
-    .hero-overlay { padding: 20px; }
-    .hero-overlay h1 { font-size: 1.8em; }
-    .hero-overlay p { display: none; } /* Hide description on small screens */
-    .hero-btns button { padding: 8px 15px; font-size: 0.9em; }
-    .movie-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-    .modal-content { width: 95%; padding: 20px; }
-    .modal-content h2 { font-size: 1.8em; }
-    .modal-image { height: 150px; }
+    .sidebar {
+        width: 100%;
+        height: 60px;
+        bottom: 0;
+        top: auto;
+        flex-direction: row;
+        background: var(--bg-nav);
+        padding-top: 0;
+        justify-content: space-around;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .nav-item { margin-bottom: 0; height: 100%; width: auto; }
+    .nav-item.active::after { display: none; }
+    
+    main { margin-left: 0; width: 100%; padding-bottom: 100px; }
+    .top-bar { padding: 0 20px; }
+    .search-wrapper input { width: 160px; }
+    .search-wrapper input:focus { width: 220px; }
+    
+    .brand-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .hero { height: 35vh; }
+    .hero h1 { font-size: 28px; }
+    .hero p { display: none; }
+}
+
+/* TV / Large Screen Adjustments */
+@media (min-width: 2000px) {
+    .movie-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+    .hero h1 { font-size: 64px; }
+}
+
+/* Focus visibility for TV D-Pad */
+:focus-visible {
+    outline: 4px solid var(--white);
+    outline-offset: 4px;
+    transform: scale(1.08);
 }
