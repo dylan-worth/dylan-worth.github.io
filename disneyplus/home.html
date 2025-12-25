@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamView - Disney+ Clone</title>
+    <style>
+        :root {
+            --bg-color: #040714;
+            --card-bg: #1a1d29;
+            --text-color: #f9f9f9;
+            --accent-blue: #0063e5;
+            --hover-border: rgba(249, 249, 249, 0.8);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Avenir-World', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 36px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            z-index: 100;
+        }
+
+        .logo { width: 80px; font-weight: bold; font-size: 24px; color: #fff; }
+
+        /* Movie Grid */
+        .container {
+            padding: 0 4vw;
+            margin-top: 30px;
+        }
+
+        h2 { margin-left: 10px; font-size: 20px; letter-spacing: 1px; }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px 10px;
+        }
+
+        /* Movie Card */
+        .movie-card {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: rgb(0 0 0 / 69%) 0px 26px 30px -10px;
+            transition: all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 3px solid rgba(249, 249, 249, 0.1);
+            cursor: pointer;
+            aspect-ratio: 16/9;
+        }
+
+        .movie-card:hover, .movie-card:focus {
+            transform: scale(1.05);
+            border-color: var(--hover-border);
+            box-shadow: rgb(0 0 0 / 80%) 0px 40px 58px -16px;
+            outline: none;
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Placeholder Style */
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(145deg, #1e212d, #141721);
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-blue);
+            width: 0%; /* Dynamic */
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .movie-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+            h2 { font-size: 16px; }
+        }
+
+        /* TV/D-Pad focus visibility */
+        .movie-card:focus-visible {
+            border: 4px solid #fff;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+<nav><div class="logo">STREAM</div></nav>
+
+<div class="container">
+    <h2>Recommended For You</h2>
+    <div id="movieGrid" class="movie-grid">
+        </div>
+</div>
+
+<script>
+    // 1. We define our movie data
+    const movies = [
+        { id: "m1", title: "Iron Man", thumb: "" },
+        { id: "m2", title: "Moana", thumb: "" },
+        { id: "m3", title: "The Mandalorian", thumb: "" },
+        { id: "m4", title: "Avatar", thumb: "" },
+        { id: "m5", title: "Inside Out", thumb: "" },
+        { id: "m6", title: "Loki", thumb: "" }
+    ];
+
+    const grid = document.getElementById('movieGrid');
+
+    // 2. We render the cards
+    function renderMovies() {
+        grid.innerHTML = '';
+        movies.forEach(movie => {
+            // Check local storage for progress
+            const savedProgress = localStorage.getItem(`progress_${movie.id}`) || 0;
+            
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.tabIndex = 0; // Makes it focusable for TV remotes
+            
+            // Thumbnail or Placeholder logic
+            const imgHTML = movie.thumb 
+                ? `<img src="${movie.thumb}" alt="${movie.title}">`
+                : `<div class="placeholder">${movie.title}</div>`;
+
+            card.innerHTML = `
+                ${imgHTML}
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${savedProgress}%"></div>
+                </div>
+            `;
+
+            // 3. Simulate "Watching" - In a real app, this happens in the player
+            card.addEventListener('click', () => {
+                const newProgress = prompt(`Enter watch progress for ${movie.title} (0-100):`, savedProgress);
+                if (newProgress !== null) {
+                    localStorage.setItem(`progress_${movie.id}`, newProgress);
+                    renderMovies(); // Refresh UI
+                }
+            });
+
+            grid.appendChild(card);
+        });
+    }
+
+    renderMovies();
+</script>
+</body>
+</html>
