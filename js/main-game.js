@@ -36,6 +36,7 @@ WORLD.scene.add(fireGroup);
 
 WORLD.createSign({ label: "PROFILE", link: "./profile", desc: "Bio", x: 10, z: 10, color: 0x3498db });
 WORLD.createSign({ label: "SOCIALS", link: "./socials", desc: "Posts", x: -10, z: 10, color: 0xe74c3c });
+WORLD.createSign({ label: "STREAMING", link: "./disneyplus/home.html", desc: "A currated streaming app for this kids", x: -13, z: 9, color: 0xe74c3c });
 
 // --- HELPERS ---
 function updateStatsUI() {
