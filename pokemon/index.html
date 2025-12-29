@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pokémon GBC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="gbc-body">
+        <div class="gbc-screen-border">
+            <div id="threejs-container"></div>
+        </div>
+
+        <div class="gbc-controls">
+            <div class="d-pad">
+                <div id="btn-up" class="up"></div>
+                <div id="btn-right" class="right"></div>
+                <div id="btn-down" class="down"></div>
+                <div id="btn-left" class="left"></div>
+                <div class="middle"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <div class="btn-b">B</div>
+                <div class="btn-a">A</div>
+            </div>
+        </div>
+        <div class="gbc-logo">GAME BOY <span>COLOR</span></div>
+    </div>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
