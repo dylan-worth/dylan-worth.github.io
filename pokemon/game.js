@@ -1,84 +1,94 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 const container = document.getElementById('threejs-container');
+const battleUI = document.getElementById('battle-ui');
+let gameState = 'OVERWORLD';
+
+// --- SCENE SETUP ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x7cfc00); // Grass Green
+scene.background = new THREE.Color(0x91e35d);
 
 const camera = new THREE.PerspectiveCamera(60, 160 / 144, 0.1, 1000);
 camera.position.set(0, 8, 6);
-camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: false }); // Pixelated feel
+const renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.setSize(160, 144);
 container.appendChild(renderer.domElement);
 
-// --- LIGHTING ---
-const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-scene.add(ambient);
-const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-sun.position.set(5, 10, 5);
-scene.add(sun);
-
 // --- WORLD ASSETS ---
 const obstacles = [];
+const trainers = [];
 
-// Create a simple Tree function
-function createTree(x, z) {
-    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 0.4), new THREE.MeshStandardMaterial({color: 0x8b4513}));
-    const leaves = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0x228b22}));
-    trunk.position.set(x, 0.4, z);
-    leaves.position.set(x, 1.2, z);
-    scene.add(trunk, leaves);
-    obstacles.push({x, z}); // Register for collision
+function createObject(x, z, color, isTrainer = false) {
+    const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.8, 0.8),
+        new THREE.MeshStandardMaterial({ color })
+    );
+    mesh.position.set(x, 0.4, z);
+    scene.add(mesh);
+    if (isTrainer) trainers.push({ x, z });
+    else obstacles.push({ x, z });
 }
 
-// Generate a small random forest
-for(let i=0; i<15; i++) {
-    let rx = Math.floor(Math.random() * 10 - 5);
-    let rz = Math.floor(Math.random() * 10 - 5);
-    if(rx !== 0 || rz !== 0) createTree(rx, rz);
+// Map Layout
+for(let i=0; i<10; i++) {
+    createObject(Math.floor(Math.random()*10-5), Math.floor(Math.random()*10-5), 0x2d5a27); // Trees
 }
+createObject(2, -2, 0x0000ff, true); // The Rival Trainer
 
 // --- PLAYER ---
 const player = new THREE.Mesh(
     new THREE.BoxGeometry(0.7, 0.7, 0.7),
-    new THREE.MeshStandardMaterial({ color: 0xeed202 }) // Pikachu Yellow!
+    new THREE.MeshStandardMaterial({ color: 0xffff00 })
 );
 player.position.y = 0.35;
 scene.add(player);
 
-// --- MOVEMENT LOGIC ---
+// --- LIGHTS ---
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+// --- ENGINE LOGIC ---
 function tryMove(dx, dz) {
+    if (gameState !== 'OVERWORLD') return;
+
     const nextX = Math.round(player.position.x + dx);
     const nextZ = Math.round(player.position.z + dz);
-    
-    // Collision Check
-    const isBlocked = obstacles.some(obj => obj.x === nextX && obj.z === nextZ);
-    
-    if (!isBlocked) {
+
+    if (trainers.some(t => t.x === nextX && t.z === nextZ)) {
+        gameState = 'BATTLE';
+        battleUI.classList.remove('hidden');
+        return;
+    }
+
+    if (!obstacles.some(o => o.x === nextX && o.z === nextZ)) {
         player.position.x = nextX;
         player.position.z = nextZ;
     }
 }
 
-// Input Handlers
+// Controls
 document.getElementById('btn-up').onclick = () => tryMove(0, -1);
 document.getElementById('btn-down').onclick = () => tryMove(0, 1);
 document.getElementById('btn-left').onclick = () => tryMove(-1, 0);
 document.getElementById('btn-right').onclick = () => tryMove(1, 0);
+document.getElementById('btn-a').onclick = () => {
+    if (gameState === 'BATTLE') {
+        gameState = 'OVERWORLD';
+        battleUI.classList.add('hidden');
+    }
+};
 
-window.addEventListener('keydown', (e) => {
-    if(e.key === "ArrowUp") tryMove(0, -1);
-    if(e.key === "ArrowDown") tryMove(0, 1);
-    if(e.key === "ArrowLeft") tryMove(-1, 0);
-    if(e.key === "ArrowRight") tryMove(1, 0);
-});
-
+// Render Loop
 function animate() {
     requestAnimationFrame(animate);
-    // Smooth Camera Follow
-    camera.position.x += (player.position.x - camera.position.x) * 0.1;
-    camera.position.z += ((player.position.z + 4) - camera.position.z) * 0.1;
+    
+    if (gameState === 'OVERWORLD') {
+        camera.position.lerp(new THREE.Vector3(player.position.x, 6, player.position.z + 4), 0.1);
+        camera.lookAt(player.position.x, 0, player.position.z);
+    } else {
+        camera.position.lerp(new THREE.Vector3(player.position.x, 1.5, player.position.z + 2), 0.05);
+    }
+    
     renderer.render(scene, camera);
 }
 animate();
