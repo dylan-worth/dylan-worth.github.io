@@ -1,103 +1,80 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-    background-color: #333;
+    background-color: #121212;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 50px;
+    background: #000;
+    border-bottom: 3px solid #a32a67;
+}
+
+.logo span { color: #a32a67; }
+nav ul { display: flex; list-style: none; gap: 30px; }
+nav a { color: #fff; text-decoration: none; text-transform: uppercase; font-weight: bold; }
+nav a:hover { color: #a32a67; }
+
+.game-container {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    background: radial-gradient(circle, #222 0%, #000 100%);
 }
 
+/* THE CONSOLE */
 .gbc-body {
-    width: 320px;
-    height: 520px;
-    background-color: #a32a67; /* Berry Pink */
-    border-radius: 10px 10px 60px 10px;
+    width: 300px;
+    height: 500px;
+    background-color: #a32a67;
+    border-radius: 10px 10px 50px 10px;
+    padding: 20px;
+    box-shadow: 20px 20px 60px rgba(0,0,0,0.8), inset -5px -5px 10px rgba(0,0,0,0.3);
     position: relative;
-    padding: 25px;
-    box-shadow: inset -10px -10px 0px rgba(0,0,0,0.2), 15px 15px 30px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .gbc-screen-border {
-    width: 270px;
-    height: 230px;
-    background-color: #444;
-    border-radius: 10px 10px 45px 10px;
+    width: 250px;
+    height: 200px;
+    background-color: #333;
+    border-radius: 5px 5px 30px 5px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 3px solid #222;
+    position: relative;
+    border: 15px solid #333;
 }
 
 #threejs-container {
-    width: 190px;
-    height: 170px;
-    background-color: #000;
-    border: 2px solid #111;
+    width: 160px;
+    height: 144px; /* Classic GBC Aspect Ratio */
+    background: #000;
 }
 
-/* D-Pad Controls */
-.gbc-controls {
-    width: 100%;
-    margin-top: 40px;
-    position: relative;
-}
+.gbc-controls { width: 100%; margin-top: 50px; position: relative; height: 100px; }
 
-.d-pad {
-    position: absolute;
-    left: 20px;
-    width: 90px;
-    height: 90px;
-}
+.d-pad { position: absolute; left: 10px; width: 80px; height: 80px; }
+.d-pad div { position: absolute; background: #222; width: 26px; height: 26px; cursor: pointer; }
+.up { top: 0; left: 26px; }
+.down { bottom: 0; left: 26px; }
+.left { top: 26px; left: 0; }
+.right { top: 26px; right: 0; }
+.middle { top: 26px; left: 26px; }
 
-.d-pad div {
-    position: absolute;
-    background: #222;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-}
+.action-buttons { position: absolute; right: 0; top: 10px; display: flex; gap: 10px; transform: rotate(-25deg); }
+.btn-a, .btn-b { width: 40px; height: 40px; background: #222; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; cursor: pointer; box-shadow: 2px 2px 0px #000; }
 
-.d-pad div:active { background: #444; }
+.gbc-logo { margin-top: auto; font-size: 10px; opacity: 0.5; }
 
-.up { top: 0; left: 30px; border-radius: 5px 5px 0 0; }
-.down { bottom: 0; left: 30px; border-radius: 0 0 5px 5px; }
-.left { top: 30px; left: 0; border-radius: 5px 0 0 5px; }
-.right { top: 30px; right: 0; border-radius: 0 5px 5px 0; }
-.middle { top: 30px; left: 30px; }
-
-/* Buttons */
-.action-buttons {
-    position: absolute;
-    right: 10px;
-    top: 30px;
-    display: flex;
-    gap: 15px;
-    transform: rotate(-25deg);
-}
-
-.btn-a, .btn-b {
-    width: 45px;
-    height: 45px;
-    background: #333;
-    border-radius: 50%;
-    color: #a32a67;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: sans-serif;
-    font-weight: bold;
-    box-shadow: 2px 4px 0px #111;
-    cursor: pointer;
-}
-
-.gbc-logo {
-    position: absolute;
-    bottom: 50px;
-    color: #1a1a1a;
-    font-family: 'Arial Black', sans-serif;
-    font-style: italic;
-    font-size: 14px;
-}
+footer { padding: 20px; text-align: center; font-size: 12px; color: #444; }
