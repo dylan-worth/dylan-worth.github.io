@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéQuest 3D | Web Edition</title>
+    <title>PokéQuest 3D | Indigo Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +22,13 @@
         <div class="gbc-body">
             <div class="gbc-screen-border">
                 <div id="threejs-container"></div>
-                <div class="screen-glare"></div>
+                <div id="battle-ui" class="hidden">
+                    <div class="hp-box">HP: 100/100</div>
+                    <div class="dialog-box">
+                        <p id="battle-text">A Trainer challenges you!</p>
+                        <span class="blink">▼</span>
+                    </div>
+                </div>
             </div>
 
             <div class="gbc-controls">
@@ -45,7 +51,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 PokéQuest Team. Built with Three.js</p>
+        <p>&copy; 2025 PokéQuest Team. Indigo Edition</p>
     </footer>
 
     <script type="module" src="game.js"></script>
