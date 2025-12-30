@@ -1,68 +1,37 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { UI } from './ui.js';
 
+// --- SETUP ---
 const container = document.getElementById('threejs-container');
-const battleUI = document.getElementById('battle-ui');
-let gameState = 'OVERWORLD';
-
-// --- SCENE SETUP ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x91e35d);
-
-const camera = new THREE.PerspectiveCamera(60, 160 / 144, 0.1, 1000);
-camera.position.set(0, 8, 6);
-
+scene.background = new THREE.Color(0x7cfc00);
+const camera = new THREE.PerspectiveCamera(60, 270 / 220, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: false });
-renderer.setSize(160, 144);
+renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
 
-// --- WORLD ASSETS ---
-const obstacles = [];
-const trainers = [];
+// --- STATE ---
+let gameState = 'OVERWORLD';
+let isPaused = false;
 
-function createObject(x, z, color, isTrainer = false) {
-    const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 0.8, 0.8),
-        new THREE.MeshStandardMaterial({ color })
-    );
-    mesh.position.set(x, 0.4, z);
-    scene.add(mesh);
-    if (isTrainer) trainers.push({ x, z });
-    else obstacles.push({ x, z });
-}
+UI.init((paused) => { isPaused = paused; });
 
-// Map Layout
-for(let i=0; i<10; i++) {
-    createObject(Math.floor(Math.random()*10-5), Math.floor(Math.random()*10-5), 0x2d5a27); // Trees
-}
-createObject(2, -2, 0x0000ff, true); // The Rival Trainer
-
-// --- PLAYER ---
-const player = new THREE.Mesh(
-    new THREE.BoxGeometry(0.7, 0.7, 0.7),
-    new THREE.MeshStandardMaterial({ color: 0xffff00 })
-);
+// --- PLAYER & WORLD ---
+const player = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.7,0.7), new THREE.MeshStandardMaterial({color: 0xffcc00}));
 player.position.y = 0.35;
 scene.add(player);
+scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-// --- LIGHTS ---
-scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-
-// --- ENGINE LOGIC ---
+// Movement
 function tryMove(dx, dz) {
-    if (gameState !== 'OVERWORLD') return;
-
-    const nextX = Math.round(player.position.x + dx);
-    const nextZ = Math.round(player.position.z + dz);
-
-    if (trainers.some(t => t.x === nextX && t.z === nextZ)) {
+    if (gameState !== 'OVERWORLD' || isPaused) return;
+    player.position.x += dx;
+    player.position.z += dz;
+    
+    // Check for Battle (Simple distance check for example)
+    if (player.position.x === 2 && player.position.z === -2) {
         gameState = 'BATTLE';
-        battleUI.classList.remove('hidden');
-        return;
-    }
-
-    if (!obstacles.some(o => o.x === nextX && o.z === nextZ)) {
-        player.position.x = nextX;
-        player.position.z = nextZ;
+        document.getElementById('battle-ui').classList.remove('hidden');
     }
 }
 
@@ -72,23 +41,21 @@ document.getElementById('btn-down').onclick = () => tryMove(0, 1);
 document.getElementById('btn-left').onclick = () => tryMove(-1, 0);
 document.getElementById('btn-right').onclick = () => tryMove(1, 0);
 document.getElementById('btn-a').onclick = () => {
-    if (gameState === 'BATTLE') {
+    if(gameState === 'BATTLE') {
         gameState = 'OVERWORLD';
-        battleUI.classList.add('hidden');
+        document.getElementById('battle-ui').classList.add('hidden');
     }
 };
 
-// Render Loop
+// Animation Loop
 function animate() {
     requestAnimationFrame(animate);
+    const targetCam = (gameState === 'OVERWORLD') 
+        ? new THREE.Vector3(player.position.x, 6, player.position.z + 4)
+        : new THREE.Vector3(player.position.x - 1, 1.5, player.position.z + 2);
     
-    if (gameState === 'OVERWORLD') {
-        camera.position.lerp(new THREE.Vector3(player.position.x, 6, player.position.z + 4), 0.1);
-        camera.lookAt(player.position.x, 0, player.position.z);
-    } else {
-        camera.position.lerp(new THREE.Vector3(player.position.x, 1.5, player.position.z + 2), 0.05);
-    }
-    
+    camera.position.lerp(targetCam, 0.1);
+    camera.lookAt(player.position.x, 0, player.position.z);
     renderer.render(scene, camera);
 }
 animate();
