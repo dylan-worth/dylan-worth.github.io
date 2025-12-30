@@ -1,167 +1,61 @@
-/* --- GLOBAL STYLES --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    background-color: #0d0d0d;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+body { background-color: #0d0d0d; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 40px;
-    background: #000;
-    border-bottom: 3px solid #3c40c6;
-}
+header { display: flex; justify-content: space-between; padding: 15px 40px; background: #000; border-bottom: 3px solid #3c40c6; }
 .logo span { color: #3c40c6; }
 nav ul { display: flex; list-style: none; gap: 20px; }
 nav a { color: #fff; text-decoration: none; font-weight: bold; }
 
-.game-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
+.game-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
 
-/* --- THE INDIGO GBC CASE --- */
+/* THE INDIGO GBC CASE */
 .gbc-body {
-    width: 320px;
-    height: 560px; /* Adjusted for vertical buttons */
+    width: 320px; height: 560px;
     background-color: #2e3192;
     border-radius: 10px 10px 60px 10px;
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset -5px -5px 10px rgba(0,0,0,0.3);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative; display: flex; flex-direction: column; align-items: center;
 }
 
 .gbc-screen-border {
-    width: 270px;
-    height: 220px;
+    width: 270px; height: 220px;
     background-color: #333;
     border-radius: 5px 5px 40px 5px;
-    position: relative;
-    border: 10px solid #222;
+    position: relative; border: 10px solid #222;
     overflow: hidden;
+}
+
+/* RETRO FLASH ANIMATION */
+.battle-flash { animation: flash-effect 0.15s steps(2) 4; }
+@keyframes flash-effect {
+    from { filter: invert(0); }
+    to { filter: invert(1) brightness(2); }
 }
 
 #threejs-container { width: 100%; height: 100%; }
 
-/* --- CONTROLS SECTION --- */
-.gbc-controls {
-    width: 100%;
-    margin-top: 35px;
-    position: relative;
-    height: 180px;
-}
+/* UI OVERLAYS */
+.hidden { display: none !important; }
+#ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+#battle-ui { background: rgba(255,255,255,0.95); color: #000; height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; font-family: monospace; }
+.dialog-box { border: 2px solid #555; padding: 8px; font-size: 12px; background: white; min-height: 50px; }
+#start-menu { position: absolute; right: 5px; top: 5px; width: 90px; background: white; border: 2px solid #000; color: #000; font-family: monospace; padding: 5px; z-index: 10; pointer-events: auto; }
+.menu-item { list-style: none; font-size: 11px; padding: 4px; cursor: pointer; }
 
-/* 1. REFINED D-PAD */
-.d-pad {
-    position: absolute;
-    left: 10px;
-    top: 0;
-    width: 90px;
-    height: 90px;
-}
-.d-pad div {
-    position: absolute;
-    background: linear-gradient(145deg, #2a2a2a, #000);
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    box-shadow: 2px 3px 0px rgba(0,0,0,0.5);
-}
+/* TACTILE CONTROLS */
+.gbc-controls { width: 100%; margin-top: 35px; position: relative; height: 180px; }
+.d-pad { position: absolute; left: 10px; top: 0; width: 90px; height: 90px; }
+.d-pad div { position: absolute; background: linear-gradient(145deg, #2a2a2a, #000); width: 30px; height: 30px; cursor: pointer; box-shadow: 2px 3px 0px rgba(0,0,0,0.5); }
 .up { top: 0; left: 30px; border-radius: 4px 4px 0 0; }
 .down { bottom: 0; left: 30px; border-radius: 0 0 4px 4px; }
 .left { top: 30px; left: 0; border-radius: 4px 0 0 4px; }
 .right { top: 30px; right: 0; border-radius: 0 4px 4px 0; }
-.middle { top: 30px; left: 30px; box-shadow: none; z-index: 1; }
 
-/* 2. SLANTED A/B BUTTONS */
-.action-buttons {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    display: flex;
-    gap: 15px;
-    transform: rotate(-25deg);
-}
-.btn-a, .btn-b {
-    width: 48px;
-    height: 48px;
-    background: radial-gradient(circle at 30% 30%, #444, #111);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 4px 6px 0px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(0,0,0,0.8);
-    color: rgba(255,255,255,0.15);
-    font-weight: bold;
-    font-size: 16px;
-}
-.btn-a:active, .btn-b:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
+.action-buttons { position: absolute; right: 5px; top: 5px; display: flex; gap: 15px; transform: rotate(-25deg); }
+.btn-a, .btn-b { width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #444, #111); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 4px 6px 0px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(0,0,0,0.8); color: rgba(255,255,255,0.15); font-weight: bold; }
 
-/* 3. VERTICAL START/SELECT */
-.system-buttons {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.select-start {
-    width: 55px;
-    height: 14px;
-    background: #111;
-    border-radius: 12px;
-    font-size: 9px;
-    text-align: center;
-    line-height: 14px;
-    cursor: pointer;
-    color: #3c40c6;
-    box-shadow: 1px 3px 0px rgba(0,0,0,0.6);
-    transform: rotate(-20deg);
-}
+.system-buttons { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 15px; }
+.select-start { width: 55px; height: 14px; background: #111; border-radius: 12px; font-size: 9px; text-align: center; line-height: 14px; cursor: pointer; color: #3c40c6; box-shadow: 1px 3px 0px rgba(0,0,0,0.6); transform: rotate(-20deg); }
 
-/* --- UI OVERLAYS --- */
-.hidden { display: none !important; }
-#battle-ui {
-    background: rgba(255,255,255,0.95);
-    color: #000;
-    height: 100%;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    font-family: monospace;
-}
-.dialog-box { border: 2px solid #555; padding: 8px; font-size: 12px; background: white; min-height: 50px; }
-#start-menu {
-    position: absolute;
-    right: 5px; top: 5px;
-    width: 90px;
-    background: white;
-    border: 2px solid #000;
-    color: #000;
-    font-family: monospace;
-    padding: 5px;
-    z-index: 10;
-}
-.menu-item { list-style: none; font-size: 11px; padding: 4px; cursor: pointer; }
-
-/* Branding */
 .gbc-logo { margin-top: auto; font-size: 12px; font-style: italic; color: #111; opacity: 0.5; }
-footer { padding: 20px; text-align: center; color: #444; font-size: 0.8rem; }
