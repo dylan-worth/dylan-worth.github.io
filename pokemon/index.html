@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéQuest 3D | Indigo Edition</title>
+    <title>PokéQuest 3D | Indigo</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,11 +22,20 @@
         <div class="gbc-body">
             <div class="gbc-screen-border">
                 <div id="threejs-container"></div>
-                <div id="battle-ui" class="hidden">
-                    <div class="hp-box">HP: 100/100</div>
-                    <div class="dialog-box">
-                        <p id="battle-text">A Trainer challenges you!</p>
-                        <span class="blink">▼</span>
+                
+                <div id="ui-layer">
+                    <div id="battle-ui" class="hidden">
+                        <div class="hp-box">HP: 100/100</div>
+                        <div class="dialog-box">A Trainer challenges we!</div>
+                    </div>
+
+                    <div id="start-menu" class="hidden">
+                        <ul>
+                            <li class="menu-item selected">POKÉMON</li>
+                            <li class="menu-item">ITEM</li>
+                            <li class="menu-item">SAVE</li>
+                            <li class="menu-item">EXIT</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -43,6 +52,11 @@
                 <div class="action-buttons">
                     <div id="btn-b" class="btn-b">B</div>
                     <div id="btn-a" class="btn-a">A</div>
+                </div>
+
+                <div class="system-buttons">
+                    <div id="btn-select" class="select-start">SELECT</div>
+                    <div id="btn-start" class="select-start">START</div>
                 </div>
             </div>
             
