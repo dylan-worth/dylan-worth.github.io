@@ -3,146 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PokéQuest Pro UI Studio</title>
+    <title>Mobile UI Studio</title>
     <style>
-        :root { --accent: #3c40c6; --bg: #1e1e2e; --panel: #2d2d44; }
-        body { background: var(--bg); color: #eff1f5; font-family: 'Segoe UI', system-ui; display: flex; height: 100vh; margin: 0; overflow: hidden; }
-        
-        /* 1. Feature: Mobile-First Responsive Sidebar */
-        #sidebar { width: 320px; background: var(--panel); display: flex; flex-direction: column; border-right: 2px solid #444; padding: 15px; overflow-y: auto; }
-        
-        /* 2. Feature: GBC Viewport Emulator */
-        #canvas-area { flex: 1; display: flex; justify-content: center; align-items: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; position: relative; }
-        #canvas { width: 270px; height: 220px; background: #7cfc00; border: 8px solid #111; border-radius: 4px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; }
+        :root { --indigo: #2e3192; --dark: #121212; }
+        body { 
+            background: var(--dark); color: white; margin: 0; 
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
+            font-family: system-ui, -apple-system, sans-serif;
+        }
 
-        /* 3. Feature: Component Layering */
-        .ui-element { position: absolute; cursor: move; touch-action: none; display: flex; align-items: center; justify-content: center; outline: 1px dashed transparent; }
-        .ui-element.selected { outline: 2px solid #00f; box-shadow: 0 0 10px rgba(0,0,255,0.5); }
-        
-        /* UI Styling */
-        .hp-box { background: white; border: 2px solid black; padding: 4px; font-family: monospace; font-size: 12px; font-weight: bold; }
-        .dialog-box { background: white; border: 3px solid black; width: 240px; height: 50px; padding: 5px; font-size: 11px; }
+        /* Feature 2: Collapsible Mobile Sidebar */
+        #sidebar { 
+            position: absolute; left: 0; top: 0; bottom: 0; width: 280px;
+            background: #1e1e1e; z-index: 100; transform: translateX(-100%);
+            transition: transform 0.3s ease; padding: 15px; border-right: 2px solid var(--indigo);
+            overflow-y: auto;
+        }
+        #sidebar.open { transform: translateX(0); }
 
-        /* Controls */
-        .tool-group { margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 15px; }
-        h4 { margin: 0 0 10px 0; color: #888; font-size: 12px; text-transform: uppercase; }
-        button { background: #444; color: white; border: none; padding: 8px; margin: 2px; border-radius: 4px; cursor: pointer; width: 48%; font-size: 12px; }
-        button:hover { background: var(--accent); }
-        input[type="range"] { width: 100%; }
-        textarea { width: 100%; height: 80px; background: #111; color: #0f0; font-family: monospace; font-size: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #555; }
+        /* Feature 3: Floating Toggle Button for Mobile */
+        #menu-toggle {
+            position: fixed; bottom: 20px; left: 20px; z-index: 101;
+            background: var(--indigo); border: none; color: white;
+            padding: 15px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Feature 4: Viewport Scaling */
+        #canvas-container {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            background: #222; position: relative;
+        }
+        #canvas { 
+            width: 270px; height: 220px; background: #7cfc00; 
+            position: relative; border: 4px solid #000; overflow: hidden;
+            /* Feature 5: Visual Grid for Alignment */
+            background-image: linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg, #ffffff10 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .ui-element { 
+            position: absolute; background: white; border: 1.5px solid black; 
+            padding: 4px; color: black; font-family: monospace; font-size: 12px;
+            touch-action: none; /* Feature 6: Prevents browser scrolling while dragging */
+        }
+        
+        .selected { outline: 3px solid #3c40c6; box-shadow: 0 0 10px #3c40c6; }
+
+        .control-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
+        button { 
+            width: 100%; padding: 12px; margin-bottom: 10px; 
+            background: #333; color: white; border: 1px solid #444; border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
-<div id="sidebar">
-    <div class="tool-group">
-        <h4>4. Add Components</h4>
-        <button onclick="create('HP Bar', 'hp-box')">HP Bar</button>
-        <button onclick="create('Text Box', 'dialog-box')">Dialogue</button>
-        <button onclick="create('Label', 'label')">Generic Label</button>
-        <button onclick="create('Icon', 'icon')">Action Icon</button>
+    <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+    <div id="sidebar">
+        <h3>UI Studio</h3>
+        <div class="control-group">
+            <button onclick="add('HP: 100/100', 'hp-box')">Add HP Bar</button>
+            <button onclick="add('Wild Pokemon!', 'dialog-box')">Add Dialog</button>
+        </div>
+        <div class="control-group">
+            <label>Opacity</label>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateProp('opacity', this.value)">
+            <label>Z-Index</label>
+            <input type="number" value="10" oninput="updateProp('zIndex', this.value)">
+        </div>
+        <button onclick="exportCSS()" style="background: var(--indigo)">Export CSS</button>
+        <textarea id="output" style="width:100%; height:80px; background:#000; color:#0f0; font-size:10px;"></textarea>
     </div>
 
-    <div class="tool-group">
-        <h4>5. Element Editor</h4>
-        <label>6. Opacity</label>
-        <input type="range" id="opac" min="0" max="1" step="0.1" value="1" oninput="edit('opacity', this.value)">
-        <label>7. Rotation</label>
-        <input type="range" id="rot" min="0" max="360" value="0" oninput="edit('transform', `rotate(${this.value}deg)`)">
-        <label>8. Scale</label>
-        <input type="range" id="scale" min="0.5" max="3" step="0.1" value="1" oninput="edit('scale', this.value)">
-        <label>9. Z-Index</label>
-        <input type="number" id="zidx" value="10" oninput="edit('zIndex', this.value)">
+    <div id="canvas-container">
+        <div id="canvas"></div>
     </div>
 
-    <div class="tool-group">
-        <h4>10. Canvas Themes</h4>
-        <button onclick="theme('#7cfc00')">Forest</button>
-        <button onclick="theme('#333')">Dungeon</button>
-        <button onclick="theme('#4a90e2')">Water</button>
-        <button onclick="theme('url(./spritesheet.png)')">Preview Sprites</button>
-    </div>
+    <script>
+        let selected = null;
 
-    <div class="tool-group">
-        <h4>11. Export</h4>
-        <button onclick="generate()">Generate CSS</button>
-        <button onclick="clearCanvas()" style="background:#c0392b">12. Reset All</button>
-        <textarea id="output" placeholder="CSS Code results here..."></textarea>
-    </div>
-    
-    <div style="font-size: 10px; color: #666;">
-        13. Auto-Snap | 14. Multitouch Support | 15. Collision Detection | 16. LocalStorage Auto-Save | 17. Hex Color Picker | 18. Custom Font Upload | 19. Export to JSON | 20. Layer Lock | 21. Duplicate | 22. Undo/Redo (Ctrl+Z) | 23. Grid Visibility | 24. Smart Guides | 25. Dark Mode | 26. Screen Recording | 27. PNG Snapshot | 28. CSS Keyframe Animator | 29. Flexbox Toggle | 30. Aspect Ratio Lock | 31. Viewport Zoom | 32. Color Palette Sync | 33. Element Grouping | 34. Sprite Clipping | 35. Responsive Preview
-    </div>
-</div>
+        function add(text, type) {
+            const el = document.createElement('div');
+            el.className = `ui-element ${type}`;
+            el.innerText = text;
+            el.style.left = '20px'; el.style.top = '20px';
 
-<div id="canvas-area">
-    <div id="canvas"></div>
-</div>
+            // Feature 7: Unified Pointer Events (Mouse + Touch)
+            el.onpointerdown = (e) => {
+                selected = el;
+                document.querySelectorAll('.ui-element').forEach(item => item.classList.remove('selected'));
+                el.classList.add('selected');
+                el.setPointerCapture(e.pointerId); // Locks the touch to the element
+                
+                const shiftX = e.clientX - el.getBoundingClientRect().left;
+                const shiftY = e.clientY - el.getBoundingClientRect().top;
 
-<script>
-    let active = null;
+                el.onpointermove = (moveEvent) => {
+                    const canvas = document.getElementById('canvas').getBoundingClientRect();
+                    let x = moveEvent.clientX - canvas.left - shiftX;
+                    let y = moveEvent.clientY - canvas.top - shiftY;
+                    
+                    // Feature 8: Grid Snapping for Mobile Precision
+                    el.style.left = Math.round(x / 5) * 5 + 'px';
+                    el.style.top = Math.round(y / 5) * 5 + 'px';
+                };
 
-    // 14. Multi-touch handling for Brave Mobile
-    function create(text, type) {
-        const el = document.createElement('div');
-        el.className = `ui-element ${type}`;
-        el.innerText = text;
-        el.style.left = '50px'; el.style.top = '50px';
-        
-        el.onmousedown = el.ontouchstart = (e) => {
-            active = el;
-            document.querySelectorAll('.ui-element').forEach(u => u.classList.remove('selected'));
-            el.classList.add('selected');
-            
-            const startX = (e.clientX || e.touches[0].clientX) - el.offsetLeft;
-            const startY = (e.clientY || e.touches[0].clientY) - el.offsetTop;
-
-            document.onmousemove = document.ontouchmove = (me) => {
-                const moveX = (me.clientX || me.touches[0].clientX);
-                const moveY = (me.clientY || me.touches[0].clientY);
-                // 13. Snap to grid feature
-                el.style.left = Math.round((moveX - startX) / 5) * 5 + 'px';
-                el.style.top = Math.round((moveY - startY) / 5) * 5 + 'px';
+                el.onpointerup = () => {
+                    el.onpointermove = null;
+                    el.releasePointerCapture(e.pointerId);
+                };
             };
-            document.onmouseup = document.ontouchend = () => {
-                document.onmousemove = document.ontouchmove = null;
-                // 16. Auto-save to LocalStorage
-                save();
-            };
-        };
-        document.getElementById('canvas').appendChild(el);
-    }
 
-    function edit(prop, val) {
-        if(active) active.style[prop] = val;
-    }
+            document.getElementById('canvas').appendChild(el);
+            document.getElementById('sidebar').classList.remove('open');
+        }
 
-    function theme(val) {
-        document.getElementById('canvas').style.background = val;
-        document.getElementById('canvas').style.backgroundSize = "cover";
-    }
+        function updateProp(prop, val) {
+            if (selected) selected.style[prop] = val;
+        }
 
-    function generate() {
-        let css = "/* PokéQuest Exported Styles */\n";
-        document.querySelectorAll('.ui-element').forEach(el => {
-            css += `.${el.classList[1]} {\n  left: ${el.style.left};\n  top: ${el.style.top};\n  z-index: ${el.style.zIndex || 10};\n  opacity: ${el.style.opacity || 1};\n}\n\n`;
-        });
-        document.getElementById('output').value = css;
-    }
-
-    function save() {
-        localStorage.setItem('ui_layout', document.getElementById('canvas').innerHTML);
-    }
-
-    function clearCanvas() {
-        if(confirm("Delete all layers?")) document.getElementById('canvas').innerHTML = "";
-    }
-    
-    // 22. Keyboard Shortcuts
-    window.onkeydown = (e) => {
-        if(e.key === "Delete" && active) active.remove();
-    };
-</script>
-
+        function exportCSS() {
+            let out = "";
+            document.querySelectorAll('.ui-element').forEach(el => {
+                out += `.${el.classList[1]} { top: ${el.style.top}; left: ${el.style.left}; }\n`;
+            });
+            document.getElementById('output').value = out;
+        }
+    </script>
 </body>
 </html>
