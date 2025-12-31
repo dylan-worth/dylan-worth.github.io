@@ -4,19 +4,23 @@ export const BattleSystem = {
     active: false,
     sprite: null,
     sheetTexture: null,
-    cols: 5, 
-    rows: 2,
+    cols: 5, rows: 2,
+    isLoaded: false,
 
     init(scene) {
         const loader = new THREE.TextureLoader();
-        // Use a relative path to ensure GitHub Pages finds the file
-        this.sheetTexture = loader.load('./spritesheet.png', 
-            () => console.log("Pokemon sheet loaded!"),
-            undefined,
-            (err) => console.error("Texture failed to load. Check filename!", err)
-        );
         
-        // NearestFilter keeps the 8-bit design sharp
+        // We use the full callback to tell we exactly what's wrong on your screen
+        this.sheetTexture = loader.load('./spritesheet.png', 
+            () => { this.isLoaded = true; },
+            undefined,
+            (err) => {
+                // This will show up in your game's text box if the file is missing!
+                const box = document.querySelector('.dialog-box');
+                if(box) box.innerHTML = "FILE ERROR: spritesheet.png not found!";
+            }
+        );
+
         this.sheetTexture.magFilter = THREE.NearestFilter;
         this.sheetTexture.minFilter = THREE.NearestFilter;
         this.sheetTexture.repeat.set(1 / this.cols, 1 / this.rows);
@@ -27,34 +31,31 @@ export const BattleSystem = {
         const randomIndex = Math.floor(Math.random() * 10);
         this.setSpriteFrame(randomIndex);
 
-        // MATERIAL FIX: Basic material is unlit, so it won't be dark/invisible
         const material = new THREE.SpriteMaterial({ 
-            map: this.sheetTexture, 
+            // If the image is missing, it shows a bright PINK square
+            map: this.isLoaded ? this.sheetTexture : null, 
+            color: this.isLoaded ? 0xffffff : 0xff00ff, 
             transparent: true,
-            alphaTest: 0.01,   // Extremely low to ensure pixels show up
-            depthTest: false,  // Forces it to render over the grass/ground
-            depthWrite: false, // Prevents weird 'box' artifacts
-            color: 0xffffff    // Full brightness
+            alphaTest: 0.01,
+            depthTest: false,
+            depthWrite: false
         });
 
         this.sprite = new THREE.Sprite(material);
         
-        // POSITION FIX: Move it closer to the battle camera zoom
-        // y: 1.8 puts it at eye-level, z-2.5 puts it right in front of the lens
-        this.sprite.position.set(playerPos.x, 1.8, playerPos.z - 2.5); 
-        this.sprite.scale.set(3.5, 3.5, 1); // Larger scale for visibility
-        
-        // Ensure the sprite is always on top of the scene layers
-        this.sprite.renderOrder = 999; 
+        // Move the sprite closer and higher to ensure it's on-screen
+        this.sprite.position.set(playerPos.x, 1.6, playerPos.z - 2.5); 
+        this.sprite.scale.set(3.5, 3.5, 1);
+        this.sprite.renderOrder = 999;
         
         scene.add(this.sprite);
     },
 
     setSpriteFrame(index) {
+        if (!this.sheetTexture) return;
         const col = index % this.cols;
         const row = Math.floor(index / this.cols);
         this.sheetTexture.offset.x = col / this.cols;
-        // UV coordinate fix for Three.js sprite sheets
         this.sheetTexture.offset.y = 1 - ((row + 1) / this.rows);
     },
 
