@@ -3,235 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PokéQuest | UI Studio Pro</title>
+    <title>PokéQuest | Universal Interface Builder</title>
     <style>
-        :root {
-            --indigo: #3c40c6;
-            --glass: rgba(255, 255, 255, 0.05);
-            --accent: #00d2ff;
-            --panel: #1e1e2e;
-        }
-
-        body {
-            background: #0f0f1a;
-            color: #fff;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            font-family: 'Inter', system-ui, sans-serif;
-            overflow: hidden;
-        }
-
-        /* Feature 2: Glassmorphism Sidebar */
-        #sidebar {
-            width: 300px;
-            background: var(--panel);
-            border-right: 1px solid var(--glass);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 10;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Feature 3: Collapsible State for Mobile */
-        @media (max-width: 768px) {
-            #sidebar { position: absolute; height: 100%; transform: translateX(-100%); }
-            #sidebar.open { transform: translateX(0); }
-        }
-
-        /* Feature 4: High-End Work Grid */
-        #workspace {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        /* Feature 5: GBC Precision Viewport */
-        #canvas {
-            width: 270px;
-            height: 220px;
-            background: #111;
-            border: 12px solid #222;
-            border-radius: 4px 4px 30px 4px;
-            position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-            overflow: hidden;
-        }
-
-        /* Feature 6-9: Element Styling */
-        .ui-element {
-            position: absolute;
-            background: rgba(255,255,255,0.9);
-            color: #000;
-            padding: 6px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            border: 2px solid #000;
-            cursor: move;
-            touch-action: none;
-            user-select: none;
-        }
-        .selected { outline: 3px solid var(--accent); box-shadow: 0 0 15px var(--accent); }
-
-        /* Feature 10-25: Tool Sections */
-        .tool-section { margin-bottom: 25px; }
-        .tool-section h4 { 
-            font-size: 10px; text-transform: uppercase; letter-spacing: 1px; 
-            color: var(--accent); margin-bottom: 12px; 
-        }
+        :root { --indigo: #3c40c6; --accent: #00d2ff; --dark: #0f0f1a; --glass: rgba(255, 255, 255, 0.08); }
+        body { background: var(--dark); color: #fff; margin: 0; display: flex; height: 100vh; font-family: 'Inter', sans-serif; overflow: hidden; }
         
-        button {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            width: 100%;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        button:hover { background: var(--indigo); border-color: var(--accent); }
-
-        input[type="range"] { width: 100%; margin: 10px 0; accent-color: var(--accent); }
+        /* Sidebar & Layout */
+        #sidebar { width: 320px; background: #1e1e2e; border-right: 1px solid var(--glass); display: flex; flex-direction: column; padding: 20px; overflow-y: auto; z-index: 100; transition: 0.3s; }
+        #workspace { flex: 1; display: flex; justify-content: center; align-items: center; background: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; position: relative; }
         
-        #code-output {
-            background: #000;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 10px;
-            height: 100px;
-            width: 100%;
-            border-radius: 4px;
-            padding: 8px;
-            margin-top: 10px;
-        }
+        /* The Canvas (GBC Dimensions) */
+        #canvas { width: 270px; height: 220px; background: #333; border: 10px solid #111; border-radius: 4px; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
 
-        #mobile-menu-btn {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--indigo); border-radius: 50%;
-            width: 50px; height: 50px; display: flex;
-            justify-content: center; align-items: center;
-            z-index: 100; border: none; color: white;
-        }
+        /* Dynamic Elements */
+        .custom-node { position: absolute; cursor: move; touch-action: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .selected { outline: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent); z-index: 999 !important; }
+
+        /* Controls */
+        .tool-box { margin-bottom: 20px; background: var(--glass); padding: 12px; border-radius: 8px; }
+        h4 { font-size: 10px; text-transform: uppercase; color: var(--accent); margin: 0 0 10px 0; }
+        input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 8px; margin-bottom: 10px; border-radius: 4px; font-size: 12px; }
+        button { width: 100%; padding: 10px; margin-bottom: 5px; border-radius: 6px; border: none; cursor: pointer; background: #444; color: white; font-weight: bold; }
+        button.primary { background: var(--indigo); }
+        
+        #mobile-toggle { position: fixed; top: 15px; right: 15px; background: var(--indigo); border: none; color: white; padding: 10px; border-radius: 5px; z-index: 200; display: none; }
+        @media (max-width: 768px) { #sidebar { position: absolute; left: -320px; } #sidebar.open { left: 0; } #mobile-toggle { display: block; } }
     </style>
 </head>
 <body>
 
-    <button id="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<button id="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">MENU</button>
 
-    <div id="sidebar">
-        <h2 style="font-size: 18px; margin-bottom: 30px;">UI STUDIO <span style="color:var(--accent)">PRO</span></h2>
-        
-        <div class="tool-section">
-            <h4>Components</h4>
-            <button onclick="create('HP: 100/100', 'hp-box')">HP Status Bar</button>
-            <button onclick="create('Wild Ignisaur!', 'dialog-box')">Dialogue Panel</button>
-            <button onclick="create('Lv. 25', 'label')">Generic Label</button>
-        </div>
-
-        <div class="tool-section">
-            <h4>Transform</h4>
-            <label style="font-size: 11px;">Opacity</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="update('opacity', this.value)">
-            <label style="font-size: 11px;">Rotation</label>
-            <input type="range" min="0" max="360" value="0" oninput="update('transform', `rotate(${this.value}deg)`)">
-            <label style="font-size: 11px;">Layer (Z-Index)</label>
-            <input type="number" value="10" style="width: 100%; background: #111; color: #fff; border: none; padding: 5px;" oninput="update('zIndex', this.value)">
-        </div>
-
-        <div class="tool-section">
-            <h4>Environment</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                <button onclick="setTheme('#7cfc00')">Grass</button>
-                <button onclick="setTheme('#4a90e2')">Water</button>
-            </div>
-        </div>
-
-        <div class="tool-section">
-            <h4>Project</h4>
-            <button onclick="exportCode()" style="background: var(--indigo)">Generate CSS</button>
-            <button onclick="saveSession()">Auto-Save</button>
-            <textarea id="code-output" readonly></textarea>
-        </div>
-        
-        <div style="font-size: 9px; opacity: 0.4; line-height: 1.5;">
-            Features: 26. Collision Toggle | 27. Auto-Snap | 28. Multi-Select | 29. Sprite Preview | 30. Theme Sync | 31. Undo History | 32. Asset Import | 33. Responsive Mockup | 34. Font Swap | 35. Export JSON
-        </div>
+<div id="sidebar">
+    <h2>CREATION <span style="color:var(--accent)">ENGINE</span></h2>
+    
+    <div class="tool-box">
+        <h4>1. Spawn New Node</h4>
+        <button onclick="spawnNode('Box')">Create Container</button>
+        <button onclick="spawnNode('Text')">Create Text/Button</button>
+        <button onclick="spawnNode('Sprite')">Add Image/Sprite</button>
     </div>
 
-    <div id="workspace">
-        <div id="canvas"></div>
+    <div id="editor" style="display: none;">
+        <h4>2. Live Editor</h4>
+        <label>Content / URL</label>
+        <input type="text" id="edit-content" oninput="apply('innerText', this.value); apply('src', this.value)">
+        
+        <div style="display: flex; gap: 5px;">
+            <div><label>W</label><input type="number" id="edit-w" oninput="apply('width', this.value + 'px')"></div>
+            <div><label>H</label><input type="number" id="edit-h" oninput="apply('height', this.value + 'px')"></div>
+        </div>
+
+        <label>Background Color</label>
+        <input type="color" id="edit-bg" oninput="apply('background', this.value)">
+        
+        <label>Border (px)</label>
+        <input type="number" id="edit-border" oninput="apply('border', this.value + 'px solid black')">
+
+        <button onclick="deleteNode()" style="background: #c0392b;">Delete Element</button>
     </div>
 
-    <script>
-        let selected = null;
+    <div class="tool-box">
+        <h4>3. Project</h4>
+        <button class="primary" onclick="exportCode()">Generate Code</button>
+        <textarea id="output" style="width:100%; height:60px; font-size:10px; background:#000; color:#0f0; margin-top:10px;"></textarea>
+    </div>
+</div>
 
-        // Feature 14: Mobile Pointer Handling
-        function create(text, type) {
-            const el = document.createElement('div');
-            el.className = `ui-element ${type}`;
-            el.innerText = text;
-            el.style.left = '20px'; el.style.top = '20px';
+<div id="workspace">
+    <div id="canvas"></div>
+</div>
 
-            el.onpointerdown = (e) => {
-                selected = el;
-                document.querySelectorAll('.ui-element').forEach(item => item.classList.remove('selected'));
-                el.classList.add('selected');
-                el.setPointerCapture(e.pointerId); // Critical for mobile dragging
-                
-                const rect = el.getBoundingClientRect();
-                const shiftX = e.clientX - rect.left;
-                const shiftY = e.clientY - rect.top;
+<script>
+    let active = null;
 
-                el.onpointermove = (ev) => {
-                    const canvas = document.getElementById('canvas').getBoundingClientRect();
-                    let x = ev.clientX - canvas.left - shiftX;
-                    let y = ev.clientY - canvas.top - shiftY;
-                    
-                    // Feature 27: Smart Snapping
-                    el.style.left = Math.round(x / 5) * 5 + 'px';
-                    el.style.top = Math.round(y / 5) * 5 + 'px';
-                };
+    function spawnNode(type) {
+        const el = document.createElement(type === 'Sprite' ? 'img' : 'div');
+        el.className = 'custom-node';
+        el.style.left = '20px'; el.style.top = '20px';
+        el.style.width = type === 'Text' ? 'auto' : '100px';
+        el.style.height = type === 'Text' ? 'auto' : '40px';
+        el.style.background = type === 'Sprite' ? 'transparent' : '#ffffff';
+        el.innerText = type === 'Text' ? 'New Button' : '';
+        if(type === 'Sprite') el.src = './sprites/ignisaur.png'; // Default placeholder
 
-                el.onpointerup = () => {
-                    el.onpointermove = null;
-                    el.releasePointerCapture(e.pointerId);
-                };
+        el.onpointerdown = (e) => {
+            active = el;
+            document.querySelectorAll('.custom-node').forEach(n => n.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('editor').style.display = 'block';
+            
+            // Sync editor inputs
+            document.getElementById('edit-content').value = el.innerText || el.src;
+            document.getElementById('edit-w').value = parseInt(el.style.width);
+            document.getElementById('edit-h').value = parseInt(el.style.height);
+
+            el.setPointerCapture(e.pointerId);
+            const rect = el.getBoundingClientRect();
+            const startX = e.clientX - rect.left;
+            const startY = e.clientY - rect.top;
+
+            el.onpointermove = (ev) => {
+                const canvas = document.getElementById('canvas').getBoundingClientRect();
+                el.style.left = Math.round((ev.clientX - canvas.left - startX) / 5) * 5 + 'px';
+                el.style.top = Math.round((ev.clientY - canvas.top - startY) / 5) * 5 + 'px';
             };
+            el.onpointerup = () => { el.onpointermove = null; el.releasePointerCapture(e.pointerId); };
+        };
 
-            document.getElementById('canvas').appendChild(el);
-            if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
-        }
+        document.getElementById('canvas').appendChild(el);
+    }
 
-        function update(prop, val) {
-            if (selected) selected.style[prop] = val;
-        }
+    function apply(prop, val) {
+        if (!active) return;
+        if (prop === 'innerText' && active.tagName !== 'IMG') active.innerText = val;
+        else if (prop === 'src' && active.tagName === 'IMG') active.src = val;
+        else active.style[prop] = val;
+    }
 
-        function setTheme(color) {
-            document.getElementById('canvas').style.background = color;
-        }
+    function deleteNode() { if(active) { active.remove(); active = null; document.getElementById('editor').style.display = 'none'; } }
 
-        function exportCode() {
-            let css = "";
-            document.querySelectorAll('.ui-element').forEach(el => {
-                css += `.${el.classList[1]} { top: ${el.style.top}; left: ${el.style.left}; z-index: ${el.style.zIndex}; }\n`;
-            });
-            document.getElementById('code-output').value = css;
-        }
+    function exportCode() {
+        let html = "";
+        let css = "";
+        document.querySelectorAll('.custom-node').forEach((el, i) => {
+            const id = `ui-el-${i}`;
+            html += `<div id="${id}">${el.innerText}</div>\n`;
+            css += `#${id} { \n  position: absolute;\n  left: ${el.style.left};\n  top: ${el.style.top};\n  width: ${el.style.width};\n  height: ${el.style.height};\n  background: ${el.style.background};\n}\n\n`;
+        });
+        document.getElementById('output').value = css + html;
+    }
+</script>
 
-        // Feature 16: Session Persistence
-        function saveSession() {
-            localStorage.setItem('studio_layout', document.getElementById('canvas').innerHTML);
-            alert("Layout Saved to Browser!");
-        }
-    </script>
 </body>
 </html>
