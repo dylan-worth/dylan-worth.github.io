@@ -2,49 +2,54 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 export const CameraSystem = {
     /**
-     * Updates the camera position and focus based on the current game state.
+     * Controls the camera transition between Overworld and Battle states.
      * @param {THREE.PerspectiveCamera} camera 
      * @param {THREE.Mesh} player 
      * @param {string} gameState 
      */
     update(camera, player, gameState) {
-        let targetPos = new THREE.Vector3();
-        let lookAtPos = new THREE.Vector3();
+        const targetPos = new THREE.Vector3();
+        const lookAtPos = new THREE.Vector3();
 
         if (gameState === 'OVERWORLD') {
             // Standard top-down follow view
+            // We follow the player's X, but stay 7 units up and 5 units back
             targetPos.set(
                 player.position.x, 
                 7, 
                 player.position.z + 5
             );
+            
+            // Look directly at the player on the ground
             lookAtPos.set(
                 player.position.x, 
                 0, 
                 player.position.z
             );
-        } else if (gameState === 'BATTLE') {
-            // BATTLE ZOOM: Perfectly centered on the X-axis
-            // We set the camera height to 1.5 (eye-level) 
-            // and look directly through the player at the pokemon.
+        } 
+        else if (gameState === 'BATTLE') {
+            // BATTLE ZOOM: Eye-level centering
+            // We align the camera perfectly with the player's X coordinate.
+            // Height is set to 1.5 to match the Pokemon's bobbing center.
             targetPos.set(
                 player.position.x, 
                 1.5, 
                 player.position.z + 2.5
             );
             
-            // Look slightly ahead of the player where the pokemon spawns
+            // Look straight ahead through the player at the Pokemon sprite
             lookAtPos.set(
                 player.position.x, 
                 1.5, 
                 player.position.z - 2.5
             );
         }
-        
-        // Smoothly interpolate the camera position for a professional feel
+
+        // Smooth Lerp (Linear Interpolation) for that professional transition feel
+        // 0.1 provides a smooth slide when the battle flash happens.
         camera.position.lerp(targetPos, 0.1);
         
-        // Update the camera's orientation
+        // Force the camera to stay focused on the center point
         camera.lookAt(lookAtPos);
     }
 };
