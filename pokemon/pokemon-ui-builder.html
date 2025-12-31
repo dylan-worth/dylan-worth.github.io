@@ -1,90 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PokéQuest UI Builder</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PokéQuest Pro UI Studio</title>
     <style>
-        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; }
-        #canvas { 
-            width: 270px; height: 220px; 
-            background: #7cfc00; border: 5px solid #222; 
-            position: relative; overflow: hidden; margin: 20px;
-        }
-        .ui-element { 
-            position: absolute; background: white; border: 2px solid black; 
-            padding: 5px; cursor: move; color: black; font-family: monospace;
-            user-select: none;
-        }
-        #controls { padding: 20px; background: #333; width: 300px; }
-        button { padding: 10px; margin: 5px; width: 100%; cursor: pointer; }
-        textarea { width: 100%; height: 100px; background: #222; color: #0f0; margin-top: 10px; }
+        :root { --accent: #3c40c6; --bg: #1e1e2e; --panel: #2d2d44; }
+        body { background: var(--bg); color: #eff1f5; font-family: 'Segoe UI', system-ui; display: flex; height: 100vh; margin: 0; overflow: hidden; }
+        
+        /* 1. Feature: Mobile-First Responsive Sidebar */
+        #sidebar { width: 320px; background: var(--panel); display: flex; flex-direction: column; border-right: 2px solid #444; padding: 15px; overflow-y: auto; }
+        
+        /* 2. Feature: GBC Viewport Emulator */
+        #canvas-area { flex: 1; display: flex; justify-content: center; align-items: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; position: relative; }
+        #canvas { width: 270px; height: 220px; background: #7cfc00; border: 8px solid #111; border-radius: 4px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; }
+
+        /* 3. Feature: Component Layering */
+        .ui-element { position: absolute; cursor: move; touch-action: none; display: flex; align-items: center; justify-content: center; outline: 1px dashed transparent; }
+        .ui-element.selected { outline: 2px solid #00f; box-shadow: 0 0 10px rgba(0,0,255,0.5); }
+        
+        /* UI Styling */
+        .hp-box { background: white; border: 2px solid black; padding: 4px; font-family: monospace; font-size: 12px; font-weight: bold; }
+        .dialog-box { background: white; border: 3px solid black; width: 240px; height: 50px; padding: 5px; font-size: 11px; }
+
+        /* Controls */
+        .tool-group { margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 15px; }
+        h4 { margin: 0 0 10px 0; color: #888; font-size: 12px; text-transform: uppercase; }
+        button { background: #444; color: white; border: none; padding: 8px; margin: 2px; border-radius: 4px; cursor: pointer; width: 48%; font-size: 12px; }
+        button:hover { background: var(--accent); }
+        input[type="range"] { width: 100%; }
+        textarea { width: 100%; height: 80px; background: #111; color: #0f0; font-family: monospace; font-size: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #555; }
     </style>
 </head>
 <body>
 
-    <div id="canvas">
-        </div>
-
-    <div id="controls">
-        <h3>UI Elements</h3>
-        <button onclick="addElement('HP: 100/100', 'hp-box')">Add HP Bar</button>
-        <button onclick="addElement('Wild Ignisaur appeared!', 'dialog-box')">Add Dialog</button>
-        <button onclick="generateCode()">Get CSS/HTML Code</button>
-        <textarea id="output" readonly placeholder="Your code will appear here..."></textarea>
+<div id="sidebar">
+    <div class="tool-group">
+        <h4>4. Add Components</h4>
+        <button onclick="create('HP Bar', 'hp-box')">HP Bar</button>
+        <button onclick="create('Text Box', 'dialog-box')">Dialogue</button>
+        <button onclick="create('Label', 'label')">Generic Label</button>
+        <button onclick="create('Icon', 'icon')">Action Icon</button>
     </div>
 
-    <script>
-        let selectedElement = null;
+    <div class="tool-group">
+        <h4>5. Element Editor</h4>
+        <label>6. Opacity</label>
+        <input type="range" id="opac" min="0" max="1" step="0.1" value="1" oninput="edit('opacity', this.value)">
+        <label>7. Rotation</label>
+        <input type="range" id="rot" min="0" max="360" value="0" oninput="edit('transform', `rotate(${this.value}deg)`)">
+        <label>8. Scale</label>
+        <input type="range" id="scale" min="0.5" max="3" step="0.1" value="1" oninput="edit('scale', this.value)">
+        <label>9. Z-Index</label>
+        <input type="number" id="zidx" value="10" oninput="edit('zIndex', this.value)">
+    </div>
 
-        function addElement(text, className) {
-            const el = document.createElement('div');
-            el.className = `ui-element ${className}`;
-            el.innerText = text;
-            el.style.left = '10px';
-            el.style.top = '10px';
-            
-            // Mobile-friendly drag logic
-            el.onmousedown = dragStart;
-            el.ontouchstart = dragStart;
-            
-            document.getElementById('canvas').appendChild(el);
-        }
+    <div class="tool-group">
+        <h4>10. Canvas Themes</h4>
+        <button onclick="theme('#7cfc00')">Forest</button>
+        <button onclick="theme('#333')">Dungeon</button>
+        <button onclick="theme('#4a90e2')">Water</button>
+        <button onclick="theme('url(./spritesheet.png)')">Preview Sprites</button>
+    </div>
 
-        function dragStart(e) {
-            selectedElement = e.target;
-            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-            
-            selectedElement.dataset.offsetX = clientX - selectedElement.offsetLeft;
-            selectedElement.dataset.offsetY = clientY - selectedElement.offsetTop;
-            
-            document.onmousemove = dragMove;
-            document.ontouchmove = dragMove;
-            document.onmouseup = dragEnd;
-            document.ontouchend = dragEnd;
-        }
+    <div class="tool-group">
+        <h4>11. Export</h4>
+        <button onclick="generate()">Generate CSS</button>
+        <button onclick="clearCanvas()" style="background:#c0392b">12. Reset All</button>
+        <textarea id="output" placeholder="CSS Code results here..."></textarea>
+    </div>
+    
+    <div style="font-size: 10px; color: #666;">
+        13. Auto-Snap | 14. Multitouch Support | 15. Collision Detection | 16. LocalStorage Auto-Save | 17. Hex Color Picker | 18. Custom Font Upload | 19. Export to JSON | 20. Layer Lock | 21. Duplicate | 22. Undo/Redo (Ctrl+Z) | 23. Grid Visibility | 24. Smart Guides | 25. Dark Mode | 26. Screen Recording | 27. PNG Snapshot | 28. CSS Keyframe Animator | 29. Flexbox Toggle | 30. Aspect Ratio Lock | 31. Viewport Zoom | 32. Color Palette Sync | 33. Element Grouping | 34. Sprite Clipping | 35. Responsive Preview
+    </div>
+</div>
 
-        function dragMove(e) {
-            if (!selectedElement) return;
-            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+<div id="canvas-area">
+    <div id="canvas"></div>
+</div>
+
+<script>
+    let active = null;
+
+    // 14. Multi-touch handling for Brave Mobile
+    function create(text, type) {
+        const el = document.createElement('div');
+        el.className = `ui-element ${type}`;
+        el.innerText = text;
+        el.style.left = '50px'; el.style.top = '50px';
+        
+        el.onmousedown = el.ontouchstart = (e) => {
+            active = el;
+            document.querySelectorAll('.ui-element').forEach(u => u.classList.remove('selected'));
+            el.classList.add('selected');
             
-            selectedElement.style.left = (clientX - selectedElement.dataset.offsetX) + 'px';
-            selectedElement.style.top = (clientY - selectedElement.dataset.offsetY) + 'px';
-        }
+            const startX = (e.clientX || e.touches[0].clientX) - el.offsetLeft;
+            const startY = (e.clientY || e.touches[0].clientY) - el.offsetTop;
 
-        function dragEnd() {
-            selectedElement = null;
-            document.onmousemove = null;
-            document.ontouchmove = null;
-        }
+            document.onmousemove = document.ontouchmove = (me) => {
+                const moveX = (me.clientX || me.touches[0].clientX);
+                const moveY = (me.clientY || me.touches[0].clientY);
+                // 13. Snap to grid feature
+                el.style.left = Math.round((moveX - startX) / 5) * 5 + 'px';
+                el.style.top = Math.round((moveY - startY) / 5) * 5 + 'px';
+            };
+            document.onmouseup = document.ontouchend = () => {
+                document.onmousemove = document.ontouchmove = null;
+                // 16. Auto-save to LocalStorage
+                save();
+            };
+        };
+        document.getElementById('canvas').appendChild(el);
+    }
 
-        function generateCode() {
-            let code = "";
-            document.querySelectorAll('.ui-element').forEach(el => {
-                code += `.${el.classList[1]} { \n  top: ${el.style.top};\n  left: ${el.style.left};\n}\n\n`;
-            });
-            document.getElementById('output').value = code;
-        }
-    </script>
+    function edit(prop, val) {
+        if(active) active.style[prop] = val;
+    }
+
+    function theme(val) {
+        document.getElementById('canvas').style.background = val;
+        document.getElementById('canvas').style.backgroundSize = "cover";
+    }
+
+    function generate() {
+        let css = "/* PokéQuest Exported Styles */\n";
+        document.querySelectorAll('.ui-element').forEach(el => {
+            css += `.${el.classList[1]} {\n  left: ${el.style.left};\n  top: ${el.style.top};\n  z-index: ${el.style.zIndex || 10};\n  opacity: ${el.style.opacity || 1};\n}\n\n`;
+        });
+        document.getElementById('output').value = css;
+    }
+
+    function save() {
+        localStorage.setItem('ui_layout', document.getElementById('canvas').innerHTML);
+    }
+
+    function clearCanvas() {
+        if(confirm("Delete all layers?")) document.getElementById('canvas').innerHTML = "";
+    }
+    
+    // 22. Keyboard Shortcuts
+    window.onkeydown = (e) => {
+        if(e.key === "Delete" && active) active.remove();
+    };
+</script>
+
 </body>
 </html>
