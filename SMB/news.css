@@ -1,0 +1,105 @@
+/* news.css */
+:root {
+    --paper: #f4f1ea;
+    --ink: #1a1a1a;
+    --spore-color: #4a5d23;
+}
+
+body {
+    background-color: #dcd7c9;
+    font-family: 'Times New Roman', Times, serif;
+    color: var(--ink);
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.newspaper-container {
+    background-color: var(--paper);
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    border: 1px solid #c0b9a6;
+    box-sizing: border-box;
+}
+
+header {
+    text-align: center;
+    border-bottom: 4px double var(--ink);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+header h1 {
+    font-size: clamp(2rem, 10vw, 4rem);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.sub-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-top: 1px solid var(--ink);
+    padding-top: 5px;
+    margin-top: 5px;
+}
+
+.update-row {
+    border-bottom: 1px solid #999;
+    padding: 25px 0;
+    position: relative;
+    overflow: hidden; /* Keeps spores from causing scrollbars */
+}
+
+.date {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: bold;
+}
+
+.headline {
+    font-size: 1.6rem;
+    margin: 10px 0;
+    line-height: 1.1;
+}
+
+.summary {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.read-more-btn {
+    background: none;
+    border: 1px solid var(--ink);
+    padding: 8px 15px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.read-more-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+/* Spore particle class injected by JS */
+.spore-span {
+    display: inline-block;
+    position: relative;
+    will-change: transform, opacity;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .newspaper-container { padding: 15px; }
+    .headline { font-size: 1.4rem; }
+}
