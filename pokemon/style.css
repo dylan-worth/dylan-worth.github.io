@@ -1,61 +1,210 @@
+/* --- GLOBAL STYLES --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background-color: #0d0d0d; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
 
-header { display: flex; justify-content: space-between; padding: 15px 40px; background: #000; border-bottom: 3px solid #3c40c6; }
+body {
+    background-color: #0d0d0d;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 40px;
+    background: #000;
+    border-bottom: 3px solid #3c40c6;
+}
 .logo span { color: #3c40c6; }
 nav ul { display: flex; list-style: none; gap: 20px; }
 nav a { color: #fff; text-decoration: none; font-weight: bold; }
 
-.game-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+.game-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
-/* THE INDIGO GBC CASE */
+/* --- THE INDIGO GBC CASE --- */
 .gbc-body {
-    width: 320px; height: 560px;
-    background-color: #2e3192;
+    width: 320px;
+    height: 580px;
+    background-color: #2e3192; /* Indigo Purple */
     border-radius: 10px 10px 60px 10px;
     padding: 25px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset -5px -5px 10px rgba(0,0,0,0.3);
-    position: relative; display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+/* --- SCREEN & LAYERING FIX --- */
 .gbc-screen-border {
-    width: 270px; height: 220px;
+    width: 270px;
+    height: 220px;
     background-color: #333;
     border-radius: 5px 5px 40px 5px;
-    position: relative; border: 10px solid #222;
+    position: relative;
+    border: 10px solid #222;
     overflow: hidden;
+    z-index: 1;
 }
 
-/* RETRO FLASH ANIMATION */
-.battle-flash { animation: flash-effect 0.15s steps(2) 4; }
-@keyframes flash-effect {
-    from { filter: invert(0); }
-    to { filter: invert(1) brightness(2); }
+#threejs-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Under the UI */
 }
 
-#threejs-container { width: 100%; height: 100%; }
+/* UI LAYER: Forces HP and Text to stay ON TOP of the 3D Pokemon */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Physical layer priority */
+    pointer-events: none; /* Allows clicks to pass through to GBC buttons */
+}
 
-/* UI OVERLAYS */
-.hidden { display: none !important; }
-#ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-#battle-ui { background: rgba(255,255,255,0.95); color: #000; height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; font-family: monospace; }
-.dialog-box { border: 2px solid #555; padding: 8px; font-size: 12px; background: white; min-height: 50px; }
-#start-menu { position: absolute; right: 5px; top: 5px; width: 90px; background: white; border: 2px solid #000; color: #000; font-family: monospace; padding: 5px; z-index: 10; pointer-events: auto; }
-.menu-item { list-style: none; font-size: 11px; padding: 4px; cursor: pointer; }
+/* --- BATTLE UI STYLING --- */
+#battle-ui {
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: 'Courier New', Courier, monospace;
+    /* Gradient allows the center to be clear for the Pokemon sprite */
+    background: linear-gradient(
+        to bottom, 
+        rgba(255,255,255,0.7) 0%, 
+        rgba(255,255,255,0) 40%, 
+        rgba(255,255,255,0) 60%, 
+        rgba(255,255,255,0.9) 100%
+    );
+}
 
-/* TACTILE CONTROLS */
-.gbc-controls { width: 100%; margin-top: 35px; position: relative; height: 180px; }
-.d-pad { position: absolute; left: 10px; top: 0; width: 90px; height: 90px; }
-.d-pad div { position: absolute; background: linear-gradient(145deg, #2a2a2a, #000); width: 30px; height: 30px; cursor: pointer; box-shadow: 2px 3px 0px rgba(0,0,0,0.5); }
+.hp-box {
+    background: white;
+    padding: 5px 10px;
+    border: 2px solid #000;
+    width: fit-content;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 2px 2px 0px #000;
+}
+
+.dialog-box {
+    background: white;
+    border: 3px solid #000;
+    padding: 8px;
+    font-size: 13px;
+    min-height: 60px;
+    line-height: 1.2;
+}
+
+/* --- CONTROLS SECTION --- */
+.gbc-controls {
+    width: 100%;
+    margin-top: 35px;
+    position: relative;
+    height: 200px;
+}
+
+.d-pad {
+    position: absolute;
+    left: 5px;
+    top: 0;
+    width: 90px;
+    height: 90px;
+}
+.d-pad div {
+    position: absolute;
+    background: linear-gradient(145deg, #2a2a2a, #000);
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    box-shadow: 2px 3px 0px rgba(0,0,0,0.5);
+}
 .up { top: 0; left: 30px; border-radius: 4px 4px 0 0; }
 .down { bottom: 0; left: 30px; border-radius: 0 0 4px 4px; }
 .left { top: 30px; left: 0; border-radius: 4px 0 0 4px; }
 .right { top: 30px; right: 0; border-radius: 0 4px 4px 0; }
 
-.action-buttons { position: absolute; right: 5px; top: 5px; display: flex; gap: 15px; transform: rotate(-25deg); }
-.btn-a, .btn-b { width: 48px; height: 48px; background: radial-gradient(circle at 30% 30%, #444, #111); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 4px 6px 0px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(0,0,0,0.8); color: rgba(255,255,255,0.15); font-weight: bold; }
+/* SLANTED A/B BUTTONS */
+.action-buttons {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    display: flex;
+    gap: 15px;
+    transform: rotate(-25deg);
+}
+.btn-a, .btn-b {
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle at 30% 30%, #444, #111);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 4px 6px 0px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(0,0,0,0.8);
+    color: rgba(255,255,255,0.2);
+    font-weight: bold;
+    font-size: 18px;
+    user-select: none;
+}
+.btn-a:active, .btn-b:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
 
-.system-buttons { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 15px; }
-.select-start { width: 55px; height: 14px; background: #111; border-radius: 12px; font-size: 9px; text-align: center; line-height: 14px; cursor: pointer; color: #3c40c6; box-shadow: 1px 3px 0px rgba(0,0,0,0.6); transform: rotate(-20deg); }
+/* VERTICAL SYSTEM BUTTONS */
+.system-buttons {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.select-start {
+    width: 60px;
+    height: 15px;
+    background: #111;
+    border-radius: 12px;
+    font-size: 9px;
+    text-align: center;
+    line-height: 15px;
+    cursor: pointer;
+    color: #3c40c6;
+    box-shadow: 1px 3px 0px rgba(0,0,0,0.6);
+    transform: rotate(-20deg);
+    user-select: none;
+}
 
-.gbc-logo { margin-top: auto; font-size: 12px; font-style: italic; color: #111; opacity: 0.5; }
+/* --- UTILITIES --- */
+.hidden { display: none !important; }
+
+.battle-flash {
+    animation: flash-effect 0.1s steps(2) 6;
+}
+
+@keyframes flash-effect {
+    from { filter: invert(0); }
+    to { filter: invert(1) brightness(1.5); }
+}
+
+.gbc-logo { margin-top: auto; font-size: 12px; font-style: italic; color: #111; opacity: 0.4; }
