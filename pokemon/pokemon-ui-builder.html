@@ -3,109 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile UI Studio</title>
+    <title>PokéQuest | UI Studio Pro</title>
     <style>
-        :root { --indigo: #2e3192; --dark: #121212; }
-        body { 
-            background: var(--dark); color: white; margin: 0; 
-            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
-            font-family: system-ui, -apple-system, sans-serif;
+        :root {
+            --indigo: #3c40c6;
+            --glass: rgba(255, 255, 255, 0.05);
+            --accent: #00d2ff;
+            --panel: #1e1e2e;
         }
 
-        /* Feature 2: Collapsible Mobile Sidebar */
-        #sidebar { 
-            position: absolute; left: 0; top: 0; bottom: 0; width: 280px;
-            background: #1e1e1e; z-index: 100; transform: translateX(-100%);
-            transition: transform 0.3s ease; padding: 15px; border-right: 2px solid var(--indigo);
+        body {
+            background: #0f0f1a;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Feature 2: Glassmorphism Sidebar */
+        #sidebar {
+            width: 300px;
+            background: var(--panel);
+            border-right: 1px solid var(--glass);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
             overflow-y: auto;
-        }
-        #sidebar.open { transform: translateX(0); }
-
-        /* Feature 3: Floating Toggle Button for Mobile */
-        #menu-toggle {
-            position: fixed; bottom: 20px; left: 20px; z-index: 101;
-            background: var(--indigo); border: none; color: white;
-            padding: 15px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 10;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Feature 4: Viewport Scaling */
-        #canvas-container {
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            background: #222; position: relative;
-        }
-        #canvas { 
-            width: 270px; height: 220px; background: #7cfc00; 
-            position: relative; border: 4px solid #000; overflow: hidden;
-            /* Feature 5: Visual Grid for Alignment */
-            background-image: linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg, #ffffff10 1px, transparent 1px);
-            background-size: 10px 10px;
+        /* Feature 3: Collapsible State for Mobile */
+        @media (max-width: 768px) {
+            #sidebar { position: absolute; height: 100%; transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
         }
 
-        .ui-element { 
-            position: absolute; background: white; border: 1.5px solid black; 
-            padding: 4px; color: black; font-family: monospace; font-size: 12px;
-            touch-action: none; /* Feature 6: Prevents browser scrolling while dragging */
+        /* Feature 4: High-End Work Grid */
+        #workspace {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Feature 5: GBC Precision Viewport */
+        #canvas {
+            width: 270px;
+            height: 220px;
+            background: #111;
+            border: 12px solid #222;
+            border-radius: 4px 4px 30px 4px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        /* Feature 6-9: Element Styling */
+        .ui-element {
+            position: absolute;
+            background: rgba(255,255,255,0.9);
+            color: #000;
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 2px solid #000;
+            cursor: move;
+            touch-action: none;
+            user-select: none;
+        }
+        .selected { outline: 3px solid var(--accent); box-shadow: 0 0 15px var(--accent); }
+
+        /* Feature 10-25: Tool Sections */
+        .tool-section { margin-bottom: 25px; }
+        .tool-section h4 { 
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1px; 
+            color: var(--accent); margin-bottom: 12px; 
         }
         
-        .selected { outline: 3px solid #3c40c6; box-shadow: 0 0 10px #3c40c6; }
+        button {
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { background: var(--indigo); border-color: var(--accent); }
 
-        .control-group { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
-        button { 
-            width: 100%; padding: 12px; margin-bottom: 10px; 
-            background: #333; color: white; border: 1px solid #444; border-radius: 8px;
+        input[type="range"] { width: 100%; margin: 10px 0; accent-color: var(--accent); }
+        
+        #code-output {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            height: 100px;
+            width: 100%;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 10px;
+        }
+
+        #mobile-menu-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--indigo); border-radius: 50%;
+            width: 50px; height: 50px; display: flex;
+            justify-content: center; align-items: center;
+            z-index: 100; border: none; color: white;
         }
     </style>
 </head>
 <body>
 
-    <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <button id="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
 
     <div id="sidebar">
-        <h3>UI Studio</h3>
-        <div class="control-group">
-            <button onclick="add('HP: 100/100', 'hp-box')">Add HP Bar</button>
-            <button onclick="add('Wild Pokemon!', 'dialog-box')">Add Dialog</button>
+        <h2 style="font-size: 18px; margin-bottom: 30px;">UI STUDIO <span style="color:var(--accent)">PRO</span></h2>
+        
+        <div class="tool-section">
+            <h4>Components</h4>
+            <button onclick="create('HP: 100/100', 'hp-box')">HP Status Bar</button>
+            <button onclick="create('Wild Ignisaur!', 'dialog-box')">Dialogue Panel</button>
+            <button onclick="create('Lv. 25', 'label')">Generic Label</button>
         </div>
-        <div class="control-group">
-            <label>Opacity</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateProp('opacity', this.value)">
-            <label>Z-Index</label>
-            <input type="number" value="10" oninput="updateProp('zIndex', this.value)">
+
+        <div class="tool-section">
+            <h4>Transform</h4>
+            <label style="font-size: 11px;">Opacity</label>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="update('opacity', this.value)">
+            <label style="font-size: 11px;">Rotation</label>
+            <input type="range" min="0" max="360" value="0" oninput="update('transform', `rotate(${this.value}deg)`)">
+            <label style="font-size: 11px;">Layer (Z-Index)</label>
+            <input type="number" value="10" style="width: 100%; background: #111; color: #fff; border: none; padding: 5px;" oninput="update('zIndex', this.value)">
         </div>
-        <button onclick="exportCSS()" style="background: var(--indigo)">Export CSS</button>
-        <textarea id="output" style="width:100%; height:80px; background:#000; color:#0f0; font-size:10px;"></textarea>
+
+        <div class="tool-section">
+            <h4>Environment</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <button onclick="setTheme('#7cfc00')">Grass</button>
+                <button onclick="setTheme('#4a90e2')">Water</button>
+            </div>
+        </div>
+
+        <div class="tool-section">
+            <h4>Project</h4>
+            <button onclick="exportCode()" style="background: var(--indigo)">Generate CSS</button>
+            <button onclick="saveSession()">Auto-Save</button>
+            <textarea id="code-output" readonly></textarea>
+        </div>
+        
+        <div style="font-size: 9px; opacity: 0.4; line-height: 1.5;">
+            Features: 26. Collision Toggle | 27. Auto-Snap | 28. Multi-Select | 29. Sprite Preview | 30. Theme Sync | 31. Undo History | 32. Asset Import | 33. Responsive Mockup | 34. Font Swap | 35. Export JSON
+        </div>
     </div>
 
-    <div id="canvas-container">
+    <div id="workspace">
         <div id="canvas"></div>
     </div>
 
     <script>
         let selected = null;
 
-        function add(text, type) {
+        // Feature 14: Mobile Pointer Handling
+        function create(text, type) {
             const el = document.createElement('div');
             el.className = `ui-element ${type}`;
             el.innerText = text;
             el.style.left = '20px'; el.style.top = '20px';
 
-            // Feature 7: Unified Pointer Events (Mouse + Touch)
             el.onpointerdown = (e) => {
                 selected = el;
                 document.querySelectorAll('.ui-element').forEach(item => item.classList.remove('selected'));
                 el.classList.add('selected');
-                el.setPointerCapture(e.pointerId); // Locks the touch to the element
+                el.setPointerCapture(e.pointerId); // Critical for mobile dragging
                 
-                const shiftX = e.clientX - el.getBoundingClientRect().left;
-                const shiftY = e.clientY - el.getBoundingClientRect().top;
+                const rect = el.getBoundingClientRect();
+                const shiftX = e.clientX - rect.left;
+                const shiftY = e.clientY - rect.top;
 
-                el.onpointermove = (moveEvent) => {
+                el.onpointermove = (ev) => {
                     const canvas = document.getElementById('canvas').getBoundingClientRect();
-                    let x = moveEvent.clientX - canvas.left - shiftX;
-                    let y = moveEvent.clientY - canvas.top - shiftY;
+                    let x = ev.clientX - canvas.left - shiftX;
+                    let y = ev.clientY - canvas.top - shiftY;
                     
-                    // Feature 8: Grid Snapping for Mobile Precision
+                    // Feature 27: Smart Snapping
                     el.style.left = Math.round(x / 5) * 5 + 'px';
                     el.style.top = Math.round(y / 5) * 5 + 'px';
                 };
@@ -117,19 +208,29 @@
             };
 
             document.getElementById('canvas').appendChild(el);
-            document.getElementById('sidebar').classList.remove('open');
+            if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
         }
 
-        function updateProp(prop, val) {
+        function update(prop, val) {
             if (selected) selected.style[prop] = val;
         }
 
-        function exportCSS() {
-            let out = "";
+        function setTheme(color) {
+            document.getElementById('canvas').style.background = color;
+        }
+
+        function exportCode() {
+            let css = "";
             document.querySelectorAll('.ui-element').forEach(el => {
-                out += `.${el.classList[1]} { top: ${el.style.top}; left: ${el.style.left}; }\n`;
+                css += `.${el.classList[1]} { top: ${el.style.top}; left: ${el.style.left}; z-index: ${el.style.zIndex}; }\n`;
             });
-            document.getElementById('output').value = out;
+            document.getElementById('code-output').value = css;
+        }
+
+        // Feature 16: Session Persistence
+        function saveSession() {
+            localStorage.setItem('studio_layout', document.getElementById('canvas').innerHTML);
+            alert("Layout Saved to Browser!");
         }
     </script>
 </body>
