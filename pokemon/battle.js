@@ -8,7 +8,7 @@ export const BattleSystem = {
 
     init(scene) {
         const loader = new THREE.TextureLoader();
-        this.sheetTexture = loader.load('pokemon.jpg'); // Replace with your file
+        this.sheetTexture = loader.load('pokemon.png'); // Replace with your file
         this.sheetTexture.magFilter = THREE.NearestFilter; // Sharp pixels
         this.sheetTexture.minFilter = THREE.NearestFilter;
         this.sheetTexture.repeat.set(1 / this.cols, 1 / this.rows);
