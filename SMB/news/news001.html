@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMB Assessments Launch - The Daily Spore</title>
+    <link rel="stylesheet" href="../news.css">
+    <style>
+        .article-body { line-height: 1.6; font-size: 1.1rem; column-count: 1; gap: 40px; margin-top: 20px; }
+        @media (min-width: 768px) { .article-body { column-count: 2; } }
+        .drop-cap { float: left; font-size: 4rem; line-height: 0.8; padding-right: 8px; color: var(--ink); font-family: 'Georgia', serif; }
+        .back-link { display: inline-block; margin-top: 40px; padding: 10px; border: 1px dashed var(--ink); text-decoration: none; color: var(--ink); font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="newspaper-container">
+        <header>
+            <h1>The Daily Spore</h1>
+            <div class="sub-header">
+                <span>Special Edition</span>
+                <span>EST. 2025</span>
+                <span><a href="../news.html" style="color: inherit;">Main Archive</a></span>
+            </div>
+        </header>
+
+        <article id="full-article">
+            <span class="date">Industry News: Jan 2025</span>
+            <h2 class="headline" style="font-size: 2.5rem;">Dylan Worth Launches SMB Assessments</h2>
+            
+            <div class="article-body">
+                <span class="drop-cap">A</span>
+                <p>new era of environmental integrity begins today as <strong>Dylan Worth</strong> officially steps into the role of Lead Ethical Mold Assessor with the launch of <strong>SMB Assessments</strong>.</p>
+                
+                <p>In an industry often clouded by vague reports and conflicting interests, Worth’s new venture promises a transparent, science-first approach to indoor air quality. SMB Assessments is built on the principle that property owners deserve honest, unbiased data regarding their environments.</p>
+                
+                <p>"The goal isn't just to find mold," Worth stated during the launch. "It's to provide a mycelial-level understanding of the home’s health, ensuring that ethics remain at the forefront of every inspection."</p>
+                
+                <p>By operating as an independent entity, SMB Assessments removes the "incentive to find trouble," focusing purely on accuracy and safety for the inhabitants. The network is growing, and with Worth at the helm, the future of ethical assessment looks bright.</p>
+            </div>
+
+            <div class="back-link" data-url="../news.html" onclick="backToArchives(this)">
+                ← Return to Archive
+            </div>
+        </article>
+    </div>
+
+    <script>
+        function backToArchives(element) {
+            const targetUrl = element.getAttribute('data-url');
+            const article = document.getElementById('full-article');
+            const elements = article.querySelectorAll('.headline, .article-body, .date, .back-link');
+            
+            elements.forEach(el => {
+                const text = el.innerText;
+                el.innerHTML = '';
+                [...text].forEach((char, i) => {
+                    const span = document.createElement('span');
+                    span.innerText = char === ' ' ? '\u00A0' : char;
+                    span.className = 'spore-span';
+                    el.appendChild(span);
+
+                    setTimeout(() => {
+                        const moveX = (Math.random() - 0.5) * 300;
+                        const moveY = (Math.random() - 0.5) * 300;
+                        span.style.transition = `all 1.5s ease-out`;
+                        span.style.transform = `translate(${moveX}px, ${moveY}px) scale(0)`;
+                        span.style.opacity = '0';
+                        span.style.color = '#4a5d23';
+                    }, i * 2);
+                });
+            });
+
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 1800);
+        }
+    </script>
+</body>
+</html>
