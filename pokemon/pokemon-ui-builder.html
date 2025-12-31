@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PokéQuest UI Builder</title>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; }
+        #canvas { 
+            width: 270px; height: 220px; 
+            background: #7cfc00; border: 5px solid #222; 
+            position: relative; overflow: hidden; margin: 20px;
+        }
+        .ui-element { 
+            position: absolute; background: white; border: 2px solid black; 
+            padding: 5px; cursor: move; color: black; font-family: monospace;
+            user-select: none;
+        }
+        #controls { padding: 20px; background: #333; width: 300px; }
+        button { padding: 10px; margin: 5px; width: 100%; cursor: pointer; }
+        textarea { width: 100%; height: 100px; background: #222; color: #0f0; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas">
+        </div>
+
+    <div id="controls">
+        <h3>UI Elements</h3>
+        <button onclick="addElement('HP: 100/100', 'hp-box')">Add HP Bar</button>
+        <button onclick="addElement('Wild Ignisaur appeared!', 'dialog-box')">Add Dialog</button>
+        <button onclick="generateCode()">Get CSS/HTML Code</button>
+        <textarea id="output" readonly placeholder="Your code will appear here..."></textarea>
+    </div>
+
+    <script>
+        let selectedElement = null;
+
+        function addElement(text, className) {
+            const el = document.createElement('div');
+            el.className = `ui-element ${className}`;
+            el.innerText = text;
+            el.style.left = '10px';
+            el.style.top = '10px';
+            
+            // Mobile-friendly drag logic
+            el.onmousedown = dragStart;
+            el.ontouchstart = dragStart;
+            
+            document.getElementById('canvas').appendChild(el);
+        }
+
+        function dragStart(e) {
+            selectedElement = e.target;
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            selectedElement.dataset.offsetX = clientX - selectedElement.offsetLeft;
+            selectedElement.dataset.offsetY = clientY - selectedElement.offsetTop;
+            
+            document.onmousemove = dragMove;
+            document.ontouchmove = dragMove;
+            document.onmouseup = dragEnd;
+            document.ontouchend = dragEnd;
+        }
+
+        function dragMove(e) {
+            if (!selectedElement) return;
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            selectedElement.style.left = (clientX - selectedElement.dataset.offsetX) + 'px';
+            selectedElement.style.top = (clientY - selectedElement.dataset.offsetY) + 'px';
+        }
+
+        function dragEnd() {
+            selectedElement = null;
+            document.onmousemove = null;
+            document.ontouchmove = null;
+        }
+
+        function generateCode() {
+            let code = "";
+            document.querySelectorAll('.ui-element').forEach(el => {
+                code += `.${el.classList[1]} { \n  top: ${el.style.top};\n  left: ${el.style.left};\n}\n\n`;
+            });
+            document.getElementById('output').value = code;
+        }
+    </script>
+</body>
+</html>
