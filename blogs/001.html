@@ -3,235 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 Recap | Engineering the Future</title>
+    <title>vBulletin - 2025 Recap & 2026 Roadmap</title>
     <style>
         :root {
-            --bg-body: #f3f4f6;
-            --bg-card: #ffffff;
-            --primary: #2563eb;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --border: #e5e7eb;
+            --vb-bg: #1c1c1c;
+            --vb-header: linear-gradient(to bottom, #4a4a4a 0%, #2a2a2a 100%);
+            --vb-post-bg: #2e2e2e;
+            --vb-user-bg: #262626;
+            --vb-border: #444444;
+            --vb-accent: #3b82f6;
+            --vb-text: #e0e0e0;
+            --vb-text-dim: #b0b0b0;
+            --vb-gold: #d4af37;
         }
 
         body {
-            background-color: var(--bg-body);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--vb-bg);
+            color: var(--vb-text);
+            font-family: Tahoma, Calibri, Verdana, Geneva, sans-serif;
             margin: 0;
-            padding: 40px 20px;
-            color: var(--text-dark);
-            line-height: 1.6;
+            padding: 20px;
+            font-size: 13px;
         }
 
-        .forum-container {
-            max-width: 850px;
+        .forum-wrapper {
+            max-width: 1100px;
             margin: 0 auto;
-            background: var(--bg-card);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            overflow: hidden;
-            border: 1px solid var(--border);
+            border: 1px solid var(--vb-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Sidebar Profile */
-        .author-pane {
-            background-color: #fafafa;
-            border-right: 1px solid var(--border);
-            padding: 40px 20px;
+        /* Thread Header */
+        .thread-header {
+            background: var(--vb-header);
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--vb-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .thread-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        /* Post Layout */
+        .post-container {
+            display: flex;
+            min-height: 500px;
+        }
+
+        /* User Profile Sidebar (Postbit) */
+        .postbit-user {
+            width: 190px;
+            background: var(--vb-user-bg);
+            padding: 20px 10px;
+            border-right: 1px solid var(--vb-border);
             text-align: center;
         }
 
-        .avatar-circle {
-            width: 90px;
-            height: 90px;
-            background: linear-gradient(135deg, var(--primary), #60a5fa);
-            border-radius: 50%;
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--vb-accent);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-title {
+            font-size: 11px;
+            color: var(--vb-text-dim);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            background: #111;
+            border: 4px solid var(--vb-border);
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+            font-size: 3rem;
+            color: #444;
         }
 
-        .author-name {
-            font-weight: 700;
-            font-size: 1.1rem;
+        .user-stats {
+            text-align: left;
+            font-size: 11px;
+            border-top: 1px solid var(--vb-border);
+            padding-top: 10px;
+            color: var(--vb-text-dim);
+        }
+
+        .user-stats div {
             margin-bottom: 4px;
         }
 
-        .badge {
-            display: inline-block;
-            background: #dcfce7;
-            color: #166534;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 99px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .user-stats b {
+            color: var(--vb-text);
         }
 
-        .user-meta {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: var(--text-light);
-            text-align: left;
+        /* Post Body */
+        .post-content {
+            flex-grow: 1;
+            background: var(--vb-post-bg);
+            padding: 25px;
+            position: relative;
         }
 
-        .user-meta-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
+        .post-date {
+            font-size: 11px;
+            color: var(--vb-text-dim);
+            border-bottom: 1px solid var(--vb-border);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
         }
 
-        /* Content Area */
-        .content-pane {
-            padding: 50px;
+        .post-text {
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-        .post-header {
-            margin-bottom: 30px;
-        }
-
-        .timestamp {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin: 0;
-            color: var(--text-dark);
-            letter-spacing: -0.5px;
-        }
-
-        .content-body h2 {
-            font-size: 1.2rem;
-            margin-top: 40px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .status-card {
+        /* Classic vB BBCode Elements */
+        .vb-quote {
+            background: #252525;
+            border: 1px solid var(--vb-border);
             padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 0.95rem;
+            margin: 15px 0;
+            border-left: 4px solid var(--vb-accent);
         }
 
-        .status-card.success { border-left: 4px solid var(--accent-green); }
-        .status-card.warning { border-left: 4px solid var(--accent-red); }
+        .vb-quote-header {
+            font-weight: bold;
+            font-size: 11px;
+            color: var(--vb-accent);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .roadmap-box {
+            background: #222;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .roadmap-box h3 {
+            margin-top: 0;
+            color: var(--vb-gold);
+            font-size: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
 
         .roadmap-list {
-            list-style: none;
-            padding: 0;
+            margin: 0;
+            padding-left: 20px;
         }
 
         .roadmap-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
-            display: flex;
-            align-items: center;
-        }
-
-        .roadmap-list li::before {
-            content: "→";
-            margin-right: 15px;
-            color: var(--primary);
-            font-weight: bold;
+            margin-bottom: 8px;
         }
 
         .signature {
-            margin-top: 60px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            font-size: 0.85rem;
-            color: var(--text-light);
-            font-style: italic;
+            margin-top: 50px;
+            padding-top: 15px;
+            border-top: 1px dotted var(--vb-border);
+            color: var(--vb-text-dim);
+            font-size: 12px;
         }
 
-        @media (max-width: 750px) {
-            .forum-container { grid-template-columns: 1fr; }
-            .author-pane { border-right: none; border-bottom: 1px solid var(--border); }
-            .content-pane { padding: 30px; }
-            .status-grid { grid-template-columns: 1fr; }
+        /* Status Colors */
+        .text-success { color: #4ade80; }
+        .text-fail { color: #f87171; }
+
+        @media (max-width: 800px) {
+            .post-container { flex-direction: column; }
+            .postbit-user { width: 100%; border-right: none; border-bottom: 1px solid var(--vb-border); }
         }
     </style>
 </head>
 <body>
 
-<div class="forum-container">
-    <aside class="author-pane">
-        <div class="avatar-circle">D</div>
-        <div class="author-name">Dylan</div>
-        <div class="badge">Verified Expert</div>
-        
-        <div class="user-meta">
-            <div class="user-meta-item"><span>Status</span> <span>Building</span></div>
-            <div class="user-meta-item"><span>Location</span> <span>Florida</span></div>
-            <div class="user-meta-item"><span>Focus</span> <span>Restoration</span></div>
-        </div>
-    </aside>
+<div class="forum-wrapper">
+    <div class="thread-header">
+        <div class="thread-title">Update: 2025 Recap & 2026 Strategy</div>
+        <div style="font-size: 11px; color: #aaa;">Thread Tools &#9662;</div>
+    </div>
 
-    <main class="content-pane">
-        <header class="post-header">
-            <span class="timestamp">Published Dec 31, 2025</span>
-            <h1>2025 Recap: The Foundation is Set</h1>
-        </header>
+    <div class="post-container">
+        <aside class="postbit-user">
+            <a href="#" class="user-name">Dylan</a>
+            <span class="user-title">Senior Technician</span>
+            <div class="user-avatar">D</div>
+            
+            <div class="user-stats">
+                <div>Join Date: <b>Nov 2024</b></div>
+                <div>Location: <b>Cape Coral, FL</b></div>
+                <div>Posts: <b>1,402</b></div>
+                <div>Rep Power: <b>28</b></div>
+            </div>
+        </aside>
 
-        <div class="content-body">
-            <p>Closing the books on 2025. This was a year of finishing what we started and sharpening the tools for what comes next.</p>
+        <div class="post-content">
+            <div class="post-date">
+                Yesterday, 11:16 PM
+            </div>
 
-            <h2>Major Milestones</h2>
-            <div class="status-grid">
-                <div class="status-card success">
-                    <strong>WRT Certification</strong><br>
-                    Successfully completed our Water Restoration Technician cert.
+            <div class="post-text">
+                Closed out my final full year at <b>iMold</b>. It's been a massive learning experience, but we're moving into a new phase.
+                <br><br>
+                <div class="vb-quote">
+                    <div class="vb-quote-header">Originally Posted by Dylan</div>
+                    We successfully completed the <b>Water Restoration Technician (WRT)</b> certification this year and even built a custom quiz tool to help master the material. 
                 </div>
-                <div class="status-card success">
-                    <strong>Digital Builds</strong><br>
-                    Launched SMBAssessments & Dylan-Work.
+
+                The development side of things stayed busy too. We built multiple websites including <b>SMBAssessments</b> and <b>Dylan-Work</b>. On a personal level, I've been grinding on better tech habits with my younger two. 
+                <br><br>
+                <span class="text-fail"><b>The Reality Check:</b></span> Honestly, I failed at keeping a good budget in 2025. That ends now.
+                
+                <div class="roadmap-box">
+                    <h3>[Phase 2026] Goals & Targets</h3>
+                    <ul class="roadmap-list">
+                        <li><b>LLC Filing:</b> Priority #1 for the new year.</li>
+                        <li><b>Certs:</b> Obtaining OSHA 10, CIE, and MRSA.</li>
+                        <li><b>Revenue:</b> Targeting 3 separate streams of income.</li>
+                        <li><b>Events:</b> Hosting multiple marketing events to scale the brand.</li>
+                        <li><b>Logistics:</b> Get the car fixed and build the Emergency Fund.</li>
+                    </ul>
                 </div>
             </div>
 
-            <p>One of the highlights was building the <strong>WRT Quiz tool</strong>—taking technical knowledge and turning it into a functional asset. On the personal side, focusing on better tech habits with my younger two has been a massive priority.</p>
-
-            <div class="status-card warning">
-                <strong>Financial Note:</strong> Didn't hit the budget goals this year. It happens, but we’re correcting course immediately for the new year.
+            <div class="signature">
+                __________________<br>
+                <b>Dylan</b><br>
+                <i>WRT Certified | Developer | "Better tech habits, better life."</i>
             </div>
-
-            <h2>2026 Strategy</h2>
-            <ul class="roadmap-list">
-                <li><strong>LLC:</strong> Filing for official business status.</li>
-                <li><strong>Professional:</strong> Chasing OSHA 10, CIE, and MRSA.</li>
-                <li><strong>Revenue:</strong> Diversifying into 3 distinct income streams.</li>
-                <li><strong>Operations:</strong> Vehicle repairs and Emergency Fund completion.</li>
-                <li><strong>Marketing:</strong> Scaling via multiple community events.</li>
-            </ul>
         </div>
-
-        <div class="signature">
-            "Better to build a solid foundation late than a weak house early."
-        </div>
-    </main>
+    </div>
 </div>
 
 </body>
