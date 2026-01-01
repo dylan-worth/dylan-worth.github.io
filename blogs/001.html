@@ -3,222 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum Post: 2025 Recap</title>
+    <title>2025 Recap | Engineering the Future</title>
     <style>
         :root {
-            --forum-bg: #e9ebee;
-            --thread-bg: #ffffff;
-            --sidebar-bg: #f6f7f9;
-            --border: #dddfe2;
-            --primary-blue: #2d5a88;
-            --text-main: #1c1e21;
-            --text-muted: #606770;
-            --success: #42b72a;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --border: #e5e7eb;
         }
 
         body {
-            background-color: var(--forum-bg);
-            font-family: "Segoe UI", Tahoma, sans-serif;
+            background-color: var(--bg-body);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
-            padding: 20px;
-            color: var(--text-main);
+            padding: 40px 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
         }
 
-        .forum-thread {
-            max-width: 1000px;
+        .forum-container {
+            max-width: 850px;
             margin: 0 auto;
-            border: 1px solid var(--border);
-            border-radius: 4px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 240px 1fr;
             overflow: hidden;
-            display: flex;
-            background: var(--thread-bg);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
         }
 
-        /* Sidebar / User Info */
-        .user-info {
-            width: 180px;
-            background: var(--sidebar-bg);
-            padding: 20px;
+        /* Sidebar Profile */
+        .author-pane {
+            background-color: #fafafa;
             border-right: 1px solid var(--border);
+            padding: 40px 20px;
             text-align: center;
-            flex-shrink: 0;
         }
 
-        .avatar {
-            width: 80px;
-            height: 80px;
-            background: #ccc;
-            border-radius: 4px;
-            margin: 0 auto 10px;
+        .avatar-circle {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--primary), #60a5fa);
+            border-radius: 50%;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            color: #fff;
-            font-size: 2rem;
-            background: var(--primary-blue);
+            font-size: 2.2rem;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
         }
 
-        .username {
-            font-weight: bold;
-            color: var(--primary-blue);
-            display: block;
-            margin-bottom: 5px;
+        .author-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
         }
 
-        .user-rank {
-            font-size: 0.75rem;
-            color: var(--success);
+        .badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 99px;
             text-transform: uppercase;
-            font-weight: bold;
             letter-spacing: 0.5px;
         }
 
-        .stats {
-            margin-top: 15px;
-            font-size: 0.7rem;
-            color: var(--text-muted);
+        .user-meta {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--text-light);
             text-align: left;
-            border-top: 1px solid var(--border);
-            padding-top: 10px;
         }
 
-        /* Main Content Area */
-        .post-content {
-            flex-grow: 1;
-            padding: 25px;
-            position: relative;
+        .user-meta-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        .post-date {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            border-bottom: 1px dotted var(--border);
-            padding-bottom: 5px;
+        /* Content Area */
+        .content-pane {
+            padding: 50px;
         }
 
-        h2 {
-            font-size: 1.4rem;
-            margin-top: 0;
-            color: var(--primary-blue);
+        .post-header {
+            margin-bottom: 30px;
         }
 
-        .quote-box {
-            background: #f9f9f9;
-            border-left: 4px solid #ccd0d5;
-            padding: 15px;
-            margin: 20px 0;
-            font-style: italic;
-            color: var(--text-muted);
+        .timestamp {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            display: block;
         }
 
-        .bullet-list {
-            padding-left: 20px;
+        h1 {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
         }
 
-        .bullet-list li {
-            margin-bottom: 10px;
-        }
-
-        .tag {
-            display: inline-block;
-            background: #e7f3ff;
-            color: #1877f2;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        /* Signature */
-        .signature {
+        .content-body h2 {
+            font-size: 1.2rem;
             margin-top: 40px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
         }
 
-        .btn-group {
-            margin-top: 20px;
-            text-align: right;
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
         }
 
-        .btn {
-            background: #f0f2f5;
+        .status-card {
+            padding: 15px;
+            border-radius: 8px;
             border: 1px solid var(--border);
-            padding: 5px 12px;
-            font-size: 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 5px;
+            font-size: 0.95rem;
         }
 
-        @media (max-width: 700px) {
-            .forum-thread { flex-direction: column; }
-            .user-info { width: 100%; border-right: none; border-bottom: 1px solid var(--border); box-sizing: border-box; }
+        .status-card.success { border-left: 4px solid var(--accent-green); }
+        .status-card.warning { border-left: 4px solid var(--accent-red); }
+
+        .roadmap-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .roadmap-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+        }
+
+        .roadmap-list li::before {
+            content: "→";
+            margin-right: 15px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .signature {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        @media (max-width: 750px) {
+            .forum-container { grid-template-columns: 1fr; }
+            .author-pane { border-right: none; border-bottom: 1px solid var(--border); }
+            .content-pane { padding: 30px; }
+            .status-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-<div class="forum-thread">
-    <div class="user-info">
-        <div class="avatar">D</div>
-        <span class="username">Dylan</span>
-        <span class="user-rank">WRT Certified</span>
-        <div class="stats">
-            <div>Posts: 1,025</div>
-            <div>Joined: Jan 2024</div>
-            <div>Location: FL</div>
+<div class="forum-container">
+    <aside class="author-pane">
+        <div class="avatar-circle">D</div>
+        <div class="author-name">Dylan</div>
+        <div class="badge">Verified Expert</div>
+        
+        <div class="user-meta">
+            <div class="user-meta-item"><span>Status</span> <span>Building</span></div>
+            <div class="user-meta-item"><span>Location</span> <span>Florida</span></div>
+            <div class="user-meta-item"><span>Focus</span> <span>Restoration</span></div>
         </div>
-    </div>
+    </aside>
 
-    <div class="post-content">
-        <div class="post-date">Posted: December 31, 2025, 11:59 PM</div>
-        
-        <h2>2025 Recap: Ending one chapter, building the next</h2>
-        
-        <p>It’s been a wild year. Closing the door on my final full year at <strong>iMold</strong> was a big move, but the foundation we’ve built this year makes it worth it.</p>
+    <main class="content-pane">
+        <header class="post-header">
+            <span class="timestamp">Published Dec 31, 2025</span>
+            <h1>2025 Recap: The Foundation is Set</h1>
+        </header>
 
-        <div class="quote-box">
-            "We finished our Water Restoration Technician (WRT) cert and didn't just stop there—we built a fully functional quiz tool for it too."
+        <div class="content-body">
+            <p>Closing the books on 2025. This was a year of finishing what we started and sharpening the tools for what comes next.</p>
+
+            <h2>Major Milestones</h2>
+            <div class="status-grid">
+                <div class="status-card success">
+                    <strong>WRT Certification</strong><br>
+                    Successfully completed our Water Restoration Technician cert.
+                </div>
+                <div class="status-card success">
+                    <strong>Digital Builds</strong><br>
+                    Launched SMBAssessments & Dylan-Work.
+                </div>
+            </div>
+
+            <p>One of the highlights was building the <strong>WRT Quiz tool</strong>—taking technical knowledge and turning it into a functional asset. On the personal side, focusing on better tech habits with my younger two has been a massive priority.</p>
+
+            <div class="status-card warning">
+                <strong>Financial Note:</strong> Didn't hit the budget goals this year. It happens, but we’re correcting course immediately for the new year.
+            </div>
+
+            <h2>2026 Strategy</h2>
+            <ul class="roadmap-list">
+                <li><strong>LLC:</strong> Filing for official business status.</li>
+                <li><strong>Professional:</strong> Chasing OSHA 10, CIE, and MRSA.</li>
+                <li><strong>Revenue:</strong> Diversifying into 3 distinct income streams.</li>
+                <li><strong>Operations:</strong> Vehicle repairs and Emergency Fund completion.</li>
+                <li><strong>Marketing:</strong> Scaling via multiple community events.</li>
+            </ul>
         </div>
-
-        <ul class="bullet-list">
-            <li><span class="tag">DEV</span> Launched <strong>SMBAssessments</strong> & <strong>Dylan-Work</strong>.</li>
-            <li><span class="tag">PERSONAL</span> Focused on better tech habits with my younger two.</li>
-            <li><span class="tag">REALITY</span> Failed at the budget this year. Lessons learned.</li>
-        </ul>
-
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
-
-        <h3>Looking Ahead: 2026 Roadmap</h3>
-        <p>I’m hitting the ground running for the new year. Here is the checklist:</p>
-        
-        <ul class="bullet-list">
-            <li><strong>LLC:</strong> Filing paper work immediately.</li>
-            <li><strong>Certs:</strong> Chasing OSHA 10, CIE, and MRSA.</li>
-            <li><strong>Revenue:</strong> Creating 3 streams of income.</li>
-            <li><strong>Marketing:</strong> Hosting multiple events to scale.</li>
-            <li><strong>Stability:</strong> Fixing the car and building that emergency fund.</li>
-        </ul>
 
         <div class="signature">
-            _________________<br>
-            <em>Technician | Developer | Father</em><br>
-            Current Goal: Filing for LLC in 2026.
+            "Better to build a solid foundation late than a weak house early."
         </div>
-
-        <div class="btn-group">
-            <button class="btn">Quote</button>
-            <button class="btn">Edit</button>
-            <button class="btn">Like</button>
-        </div>
-    </div>
+    </main>
 </div>
 
 </body>
