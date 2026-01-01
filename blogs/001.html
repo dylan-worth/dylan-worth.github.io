@@ -3,215 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 Reflection | 2026 Vision</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <title>Forum Post: 2025 Recap</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card-bg: #161616;
-            --accent: #3498db;
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-            --border: #262626;
+            --forum-bg: #e9ebee;
+            --thread-bg: #ffffff;
+            --sidebar-bg: #f6f7f9;
+            --border: #dddfe2;
+            --primary-blue: #2d5a88;
+            --text-main: #1c1e21;
+            --text-muted: #606770;
+            --success: #42b72a;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            background-color: var(--forum-bg);
+            font-family: "Segoe UI", Tahoma, sans-serif;
             margin: 0;
-            padding: 0;
-            line-height: 1.7;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 80px 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 100px;
-        }
-
-        .category {
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-size: 0.8rem;
-            color: var(--accent);
-            font-weight: 700;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            margin: 0;
-            line-height: 1.1;
-        }
-
-        .meta {
-            margin-top: 20px;
-            color: var(--text-dim);
-            font-style: italic;
-        }
-
-        .intro {
-            font-size: 1.25rem;
-            color: var(--text-dim);
-            max-width: 700px;
-            margin: 0 auto 80px auto;
-            text-align: center;
-        }
-
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        /* 2025 RECAP GRID */
-        .recap-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 100px;
-        }
-
-        .recap-item {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .recap-item:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-        }
-
-        .recap-item h3 {
-            margin-top: 0;
-            color: var(--accent);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .recap-item p {
-            margin: 10px 0 0;
-            font-size: 1.1rem;
-        }
-
-        /* 2026 VISION LIST */
-        .vision-container {
-            background: var(--card-bg);
-            padding: 60px;
-            border-radius: 12px;
-            border-left: 4px solid var(--accent);
-        }
-
-        .goal-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .goal-list li {
-            font-size: 1.4rem;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .goal-list li span {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .fail-note {
-            background: rgba(231, 76, 60, 0.1);
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
             padding: 20px;
+            color: var(--text-main);
+        }
+
+        .forum-thread {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            margin-top: 20px;
-            font-size: 0.9rem;
+            overflow: hidden;
+            display: flex;
+            background: var(--thread-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        footer {
+        /* Sidebar / User Info */
+        .user-info {
+            width: 180px;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            border-right: 1px solid var(--border);
             text-align: center;
-            margin-top: 100px;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 600px) {
-            .vision-container { padding: 30px; }
-            .goal-list li { font-size: 1.1rem; }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #ccc;
+            border-radius: 4px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            font-size: 2rem;
+            background: var(--primary-blue);
+        }
+
+        .username {
+            font-weight: bold;
+            color: var(--primary-blue);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-rank {
+            font-size: 0.75rem;
+            color: var(--success);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: left;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        /* Main Content Area */
+        .post-content {
+            flex-grow: 1;
+            padding: 25px;
+            position: relative;
+        }
+
+        .post-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            border-bottom: 1px dotted var(--border);
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            color: var(--primary-blue);
+        }
+
+        .quote-box {
+            background: #f9f9f9;
+            border-left: 4px solid #ccd0d5;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .bullet-list {
+            padding-left: 20px;
+        }
+
+        .bullet-list li {
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #1877f2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Signature */
+        .signature {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .btn {
+            background: #f0f2f5;
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        @media (max-width: 700px) {
+            .forum-thread { flex-direction: column; }
+            .user-info { width: 100%; border-right: none; border-bottom: 1px solid var(--border); box-sizing: border-box; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <span class="category">Personal Growth & Business</span>
-        <h1>The Shift.</h1>
-        <p class="meta">Reflecting on 2025 — Engineering 2026</p>
-    </header>
-
-    <p class="intro">
-        Growth isn’t always linear. It’s about closing chapters with intention and writing new ones with precision. Here is where we’ve been, and exactly where we are going.
-    </p>
-
-    <h2 class="section-title">2025 Recap</h2>
-    <div class="recap-grid">
-        <div class="recap-item">
-            <h3>Career</h3>
-            <p>Finished my final full year at <strong>iMold</strong>. End of an era, beginning of a legacy.</p>
-        </div>
-        <div class="recap-item">
-            <h3>Technical</h3>
-            <p>Certified as a <strong>Water Restoration Technician (WRT)</strong>.</p>
-        </div>
-        <div class="recap-item">
-            <h3>Development</h3>
-            <p>Shipped <strong>SMBAssessments</strong> & <strong>Dylan-Work</strong>. Built a custom WRT quiz engine.</p>
-        </div>
-        <div class="recap-item">
-            <h3>Personal</h3>
-            <p>Focusing on <strong>intentional tech habits</strong> with my younger two. Presence over pixels.</p>
+<div class="forum-thread">
+    <div class="user-info">
+        <div class="avatar">D</div>
+        <span class="username">Dylan</span>
+        <span class="user-rank">WRT Certified</span>
+        <div class="stats">
+            <div>Posts: 1,025</div>
+            <div>Joined: Jan 2024</div>
+            <div>Location: FL</div>
         </div>
     </div>
 
-    <div class="fail-note">
-        <strong>Transparency Note:</strong> I fell short on the budget this year. Acknowledging the gap is the first step toward closing it in 2026.
-    </div>
+    <div class="post-content">
+        <div class="post-date">Posted: December 31, 2025, 11:59 PM</div>
+        
+        <h2>2025 Recap: Ending one chapter, building the next</h2>
+        
+        <p>It’s been a wild year. Closing the door on my final full year at <strong>iMold</strong> was a big move, but the foundation we’ve built this year makes it worth it.</p>
 
-    <h2 class="section-title" style="margin-top: 100px;">2026 Vision</h2>
-    <div class="vision-container">
-        <ul class="goal-list">
-            <li>File for LLC <span>Q1 Focus</span></li>
-            <li>OSHA 10, CIE, & MRSA <span>Expertise</span></li>
-            <li>3 Streams of Income <span>Stability</span></li>
-            <li>Emergency Fund <span>Security</span></li>
-            <li>Marketing Events <span>Growth</span></li>
-            <li>Vehicle Restoration <span>Complete</span></li>
+        <div class="quote-box">
+            "We finished our Water Restoration Technician (WRT) cert and didn't just stop there—we built a fully functional quiz tool for it too."
+        </div>
+
+        <ul class="bullet-list">
+            <li><span class="tag">DEV</span> Launched <strong>SMBAssessments</strong> & <strong>Dylan-Work</strong>.</li>
+            <li><span class="tag">PERSONAL</span> Focused on better tech habits with my younger two.</li>
+            <li><span class="tag">REALITY</span> Failed at the budget this year. Lessons learned.</li>
         </ul>
-    </div>
 
-    <footer>
-        &copy; 2026 | BUILT FOR THE GRIND
-    </footer>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
+
+        <h3>Looking Ahead: 2026 Roadmap</h3>
+        <p>I’m hitting the ground running for the new year. Here is the checklist:</p>
+        
+        <ul class="bullet-list">
+            <li><strong>LLC:</strong> Filing paper work immediately.</li>
+            <li><strong>Certs:</strong> Chasing OSHA 10, CIE, and MRSA.</li>
+            <li><strong>Revenue:</strong> Creating 3 streams of income.</li>
+            <li><strong>Marketing:</strong> Hosting multiple events to scale.</li>
+            <li><strong>Stability:</strong> Fixing the car and building that emergency fund.</li>
+        </ul>
+
+        <div class="signature">
+            _________________<br>
+            <em>Technician | Developer | Father</em><br>
+            Current Goal: Filing for LLC in 2026.
+        </div>
+
+        <div class="btn-group">
+            <button class="btn">Quote</button>
+            <button class="btn">Edit</button>
+            <button class="btn">Like</button>
+        </div>
+    </div>
 </div>
 
 </body>
