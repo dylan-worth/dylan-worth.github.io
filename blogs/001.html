@@ -3,135 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 Recap & 2026 Roadmap</title>
+    <title>2025 Reflection | 2026 Vision</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0056b3;
-            --secondary: #20c997;
-            --dark: #1a1a1a;
-            --light: #f8f9fa;
-            --text: #333;
-            --accent: #e9ecef;
+            --bg: #0a0a0a;
+            --card-bg: #161616;
+            --accent: #3498db;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --border: #262626;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background-color: var(--light);
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
+            line-height: 1.7;
         }
 
         .container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-radius: 12px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 20px;
         }
 
         header {
             text-align: center;
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
+            margin-bottom: 100px;
+        }
+
+        .category {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 15px;
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: var(--dark);
-            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin: 0;
+            line-height: 1.1;
         }
 
-        .tagline {
-            color: var(--primary);
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        h2 {
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-            padding-left: 15px;
-            margin-top: 40px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .meta {
             margin-top: 20px;
+            color: var(--text-dim);
+            font-style: italic;
         }
 
-        .card {
-            background: var(--light);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--accent);
-            transition: transform 0.2s;
+        .intro {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto 80px auto;
+            text-align: center;
         }
 
-        .card:hover {
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        /* 2025 RECAP GRID */
+        .recap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 100px;
+        }
+
+        .recap-item {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .recap-item:hover {
+            border-color: var(--accent);
             transform: translateY(-5px);
-            border-color: var(--primary);
         }
 
-        .card h3 {
+        .recap-item h3 {
             margin-top: 0;
+            color: var(--accent);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .recap-item p {
+            margin: 10px 0 0;
             font-size: 1.1rem;
-            color: var(--dark);
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 10px;
+        /* 2026 VISION LIST */
+        .vision-container {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
         }
 
-        .done { background: #d4edda; color: #155724; }
-        .pending { background: #fff3cd; color: #856404; }
-        .fail { background: #f8d7da; color: #721c24; }
-
-        ul {
+        .goal-list {
             list-style: none;
             padding: 0;
         }
 
-        li {
-            padding: 8px 0;
-            border-bottom: 1px solid var(--accent);
+        .goal-list li {
+            font-size: 1.4rem;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
             display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        li::before {
-            content: "✓";
-            color: var(--secondary);
-            font-weight: bold;
-            margin-right: 10px;
+        .goal-list li span {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
         }
 
-        .goals li::before {
-            content: "→";
-            color: var(--primary);
+        .fail-note {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 0.9rem;
         }
 
         footer {
-            margin-top: 50px;
             text-align: center;
-            font-size: 0.9rem;
-            color: #777;
+            margin-top: 100px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
         }
 
         @media (max-width: 600px) {
-            .grid { grid-template-columns: 1fr; }
-            .container { padding: 20px; margin: 10px; }
+            .vision-container { padding: 30px; }
+            .goal-list li { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -139,51 +164,53 @@
 
 <div class="container">
     <header>
-        <h1>Yearly Recap & Roadmap</h1>
-        <p class="tagline">From Foundation to Ownership</p>
+        <span class="category">Personal Growth & Business</span>
+        <h1>The Shift.</h1>
+        <p class="meta">Reflecting on 2025 — Engineering 2026</p>
     </header>
 
-    <section>
-        <h2>2025: The Foundation</h2>
-        <div class="grid">
-            <div class="card">
-                <span class="status-badge done">COMPLETED</span>
-                <h3>Career Milestone</h3>
-                <p>Finished my final full year at <strong>iMold</strong> and earned my <strong>WRT Certification</strong>.</p>
-            </div>
-            <div class="card">
-                <span class="status-badge done">DEVELOPMENT</span>
-                <h3>Web & Tools</h3>
-                <p>Built <strong>SMBAssessments</strong>, <strong>Dylan-Work</strong>, and a functional WRT study quiz.</p>
-            </div>
-            <div class="card">
-                <span class="status-badge fail">LESSON LEARNED</span>
-                <h3>Finance</h3>
-                <p>Struggled with budgeting this year. Taking this lesson into 2026 to build a stronger base.</p>
-            </div>
-            <div class="card">
-                <span class="status-badge done">PERSONAL</span>
-                <h3>Tech Habits</h3>
-                <p>Focusing on healthier digital boundaries and habits with my younger two.</p>
-            </div>
-        </div>
-    </section>
+    <p class="intro">
+        Growth isn’t always linear. It’s about closing chapters with intention and writing new ones with precision. Here is where we’ve been, and exactly where we are going.
+    </p>
 
-    <section>
-        <h2>2026: The Mission</h2>
-        <p>This year is about certifications, financial security, and launching my own brand.</p>
-        <ul class="goals">
-            <li>Obtain <strong>OSHA 10</strong>, <strong>CIE</strong>, and <strong>MRSA</strong> certifications.</li>
-            <li>Officially file for my <strong>LLC</strong>.</li>
-            <li>Establish <strong>3 streams of income</strong>.</li>
-            <li>Build a robust <strong>Emergency Fund</strong>.</li>
-            <li>Host multiple marketing events to drive growth.</li>
-            <li>Finalize all repairs on the car.</li>
+    <h2 class="section-title">2025 Recap</h2>
+    <div class="recap-grid">
+        <div class="recap-item">
+            <h3>Career</h3>
+            <p>Finished my final full year at <strong>iMold</strong>. End of an era, beginning of a legacy.</p>
+        </div>
+        <div class="recap-item">
+            <h3>Technical</h3>
+            <p>Certified as a <strong>Water Restoration Technician (WRT)</strong>.</p>
+        </div>
+        <div class="recap-item">
+            <h3>Development</h3>
+            <p>Shipped <strong>SMBAssessments</strong> & <strong>Dylan-Work</strong>. Built a custom WRT quiz engine.</p>
+        </div>
+        <div class="recap-item">
+            <h3>Personal</h3>
+            <p>Focusing on <strong>intentional tech habits</strong> with my younger two. Presence over pixels.</p>
+        </div>
+    </div>
+
+    <div class="fail-note">
+        <strong>Transparency Note:</strong> I fell short on the budget this year. Acknowledging the gap is the first step toward closing it in 2026.
+    </div>
+
+    <h2 class="section-title" style="margin-top: 100px;">2026 Vision</h2>
+    <div class="vision-container">
+        <ul class="goal-list">
+            <li>File for LLC <span>Q1 Focus</span></li>
+            <li>OSHA 10, CIE, & MRSA <span>Expertise</span></li>
+            <li>3 Streams of Income <span>Stability</span></li>
+            <li>Emergency Fund <span>Security</span></li>
+            <li>Marketing Events <span>Growth</span></li>
+            <li>Vehicle Restoration <span>Complete</span></li>
         </ul>
-    </section>
+    </div>
 
     <footer>
-        <p>&copy; 2026 | Built for Growth</p>
+        &copy; 2026 | BUILT FOR THE GRIND
     </footer>
 </div>
 
