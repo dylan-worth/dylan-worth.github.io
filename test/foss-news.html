@@ -3,199 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOSS Discord - Collapsible</title>
+    <title>FOSS Discord - Dylan's Node</title>
     <style>
         :root {
             --bg-servers: #1E1F22;
             --bg-channels: #2B2D31;
             --bg-chat: #313338;
-            --bg-users: #2B2D31;
             --bg-profile: #232428;
             --text-muted: #949BA4;
             --text-normal: #DBDEE1;
             --discord-blurple: #5865F2;
             --discord-green: #23A559;
-            --channel-hover: #35373C;
             --channel-active: #3F4147;
+            --bg-modal: #111214;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-chat);
-            color: var(--text-normal);
-            display: flex; overflow: hidden;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'gg sans', sans-serif; background-color: var(--bg-chat); color: var(--text-normal); display: flex; overflow: hidden; }
 
-        /* 1. SERVER LIST */
-        .server-sidebar {
-            width: 72px; background: var(--bg-servers);
-            display: flex; flex-direction: column; align-items: center;
-            padding-top: 12px; gap: 8px; flex-shrink: 0; z-index: 30;
-        }
-        .server-icon {
-            width: 48px; height: 48px; background: var(--bg-chat);
-            border-radius: 50%; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-        }
-        .server-icon:hover, .server-icon.active { border-radius: 16px; background: var(--discord-blurple); color: white; }
+        /* SERVER BAR */
+        .server-sidebar { width: 72px; background: var(--bg-servers); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 8px; flex-shrink: 0; }
+        .server-icon { width: 48px; height: 48px; background: var(--bg-chat); border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .server-icon.active { border-radius: 16px; background: var(--discord-blurple); color: white; }
 
-        /* 2. COLLAPSIBLE CHANNEL SIDEBAR */
-        .channel-sidebar {
-            width: 240px; background: var(--bg-channels);
-            display: flex; flex-direction: column; flex-shrink: 0;
-            transition: transform 0.3s ease, width 0.3s ease;
-            z-index: 20;
-        }
-
-        /* Mobile State */
-        @media (max-width: 768px) {
-            .channel-sidebar {
-                position: fixed;
-                left: 72px;
-                height: 100%;
-                transform: translateX(-150%);
-            }
-            .channel-sidebar.open { transform: translateX(0); }
-            .user-list { display: none; }
-        }
-
-        .server-header {
-            height: 48px; padding: 0 16px; display: flex; align-items: center;
-            font-weight: bold; box-shadow: 0 1px 0 rgba(0,0,0,0.2); color: white;
-            justify-content: space-between;
-        }
-
+        /* CHANNEL SIDEBAR */
+        .channel-sidebar { width: 240px; background: var(--bg-channels); display: flex; flex-direction: column; flex-shrink: 0; }
+        .server-header { height: 48px; padding: 0 16px; display: flex; align-items: center; font-weight: bold; box-shadow: 0 1px 0 rgba(0,0,0,0.2); color: white; }
         .channel-container { flex: 1; overflow-y: auto; padding-top: 8px; }
         .category { padding: 16px 8px 4px 16px; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
-        .channel-link {
-            margin: 2px 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer;
-            display: flex; align-items: center; color: var(--text-muted); font-size: 15px;
-        }
+        .channel-link { margin: 2px 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; color: var(--text-muted); }
         .channel-link.active { background: var(--channel-active); color: white; }
         .channel-link::before { content: "#"; margin-right: 6px; font-size: 20px; }
 
-        /* 3. MAIN CHAT */
+        /* PROFILE BAR */
+        .profile-bar { height: 52px; background: var(--bg-profile); padding: 0 8px; display: flex; align-items: center; }
+        .p-avatar { width: 32px; height: 32px; border-radius: 50%; background: #eb459e; margin-right: 8px; cursor: pointer; }
+
+        /* CHAT AREA */
         .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-        .chat-header {
-            height: 48px; padding: 0 16px; display: flex; align-items: center;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2); font-weight: bold;
-        }
-
-        /* Hamburger Toggle */
-        .menu-toggle {
-            display: none; font-size: 24px; cursor: pointer; margin-right: 12px; color: var(--text-muted);
-        }
-        @media (max-width: 768px) { .menu-toggle { display: block; } }
-
+        .chat-header { height: 48px; padding: 0 16px; display: flex; align-items: center; box-shadow: 0 1px 0 rgba(0,0,0,0.2); font-weight: bold; }
         .messages { flex: 1; overflow-y: auto; padding: 20px; }
         .view { display: none; }
         .view.active { display: block; }
 
-        /* DISCORD EMBEDS */
-        .embed {
-            margin-top: 8px; padding: 12px; background: var(--bg-channels);
-            border-left: 4px solid var(--discord-blurple); border-radius: 4px; max-width: 500px;
-        }
+        /* CHAT INPUT (LOCKED) */
+        .chat-input-area { padding: 0 16px 24px 16px; }
+        .locked-input { background: #383a40; border-radius: 8px; height: 44px; display: flex; align-items: center; padding: 0 16px; color: var(--text-muted); cursor: not-allowed; font-size: 14px; }
+
+        /* MESSAGES & EMBEDS */
+        .msg { display: flex; margin-bottom: 20px; }
+        .msg-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 16px; background: var(--discord-blurple); flex-shrink: 0; cursor: pointer; }
+        .embed { margin-top: 8px; padding: 12px; background: var(--bg-channels); border-left: 4px solid var(--discord-blurple); border-radius: 4px; max-width: 500px; }
         .embed-title { color: #00A8FC; font-weight: bold; text-decoration: none; display: block; }
 
-        /* PROFILE BAR */
-        .profile-bar { height: 52px; background: var(--bg-profile); padding: 0 8px; display: flex; align-items: center; }
-        .p-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--discord-blurple); margin-right: 8px; }
-
-        /* USER LIST (RIGHT) */
-        .user-list { width: 240px; background: var(--bg-channels); flex-shrink: 0; padding: 20px 8px; border-left: 1px solid rgba(0,0,0,0.1); }
+        /* MODAL PROFILE */
+        #profile-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; background: var(--bg-modal); border-radius: 8px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 100; }
+        .modal-banner { height: 60px; background: var(--discord-blurple); }
+        .modal-content { padding: 16px; position: relative; }
+        .modal-avatar { width: 80px; height: 80px; border-radius: 50%; border: 6px solid var(--bg-modal); background: var(--discord-blurple); position: absolute; top: -40px; }
+        .modal-body { margin-top: 45px; }
+        .close-modal { float: right; cursor: pointer; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
     <div class="server-sidebar">
-        <div class="server-icon active">F</div>
-        <div class="server-icon" style="color:var(--discord-green)">+</div>
+        <div class="server-icon active">D</div>
     </div>
 
-    <div class="channel-sidebar" id="sidebar">
-        <div class="server-header">FOSS Universe</div>
+    <div class="channel-sidebar">
+        <div class="server-header">Dylan's FOSS</div>
         <div class="channel-container">
-            <div class="category">Information</div>
+            <div class="category">Info</div>
             <div class="channel-link active" onclick="nav('announcements', this)">announcements</div>
-            <div class="category">News Feeds</div>
+            <div class="category">Feeds</div>
             <div class="channel-link" onclick="nav('game-news', this)">game-news</div>
             <div class="channel-link" onclick="nav('foss-news', this)">foss-news</div>
         </div>
         <div class="profile-bar">
-            <div class="p-avatar"></div>
-            <div style="flex:1; font-size:12px"><b>User</b><br><span style="color:var(--text-muted)">#0001</span></div>
+            <div class="p-avatar" style="background: #949BA4;"></div>
+            <div style="flex:1; font-size:12px"><b>user001</b><br><span style="color:var(--text-muted)">#0001</span></div>
         </div>
     </div>
 
     <div class="chat-main">
-        <div class="chat-header">
-            <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
-            <span style="color:var(--text-muted); margin-right:8px; font-size:20px">#</span> 
-            <span id="header-text">announcements</span>
-        </div>
+        <div class="chat-header"><span style="color:var(--text-muted); margin-right:8px;">#</span> <span id="header-text">announcements</span></div>
+        
         <div class="messages">
-            
             <div id="announcements" class="view active">
-                <div style="display:flex; margin-bottom:20px">
-                    <div style="width:40px; height:40px; border-radius:50%; background:var(--discord-blurple); margin-right:16px"></div>
+                <div class="msg">
+                    <div class="msg-avatar" onclick="openProfile()"></div>
                     <div>
-                        <span style="font-weight:bold; color:white">Admin</span> <span style="font-size:12px; color:var(--text-muted)">Today at 10:35 PM</span>
-                        <p>The sidebar now collapses on mobile! Tap the ☰ icon to switch channels.</p>
+                        <span style="font-weight:bold; color:white; cursor:pointer" onclick="openProfile()">Dylan</span> <span style="font-size:12px; color:var(--text-muted)">Today at 10:40 PM</span>
+                        <p>Welcome! I've locked this channel to admin-only to keep the news feed clean.</p>
                     </div>
                 </div>
             </div>
 
             <div id="game-news" class="view">
-                <div style="display:flex; margin-bottom:20px">
-                    <div style="width:40px; height:40px; border-radius:50%; background:#EB459E; margin-right:16px"></div>
+                <div class="msg">
+                    <div class="msg-avatar" onclick="openProfile()"></div>
                     <div>
-                        <span style="font-weight:bold; color:white">GameBot</span>
-                        <p>New RTS Footage Found: Beyond All Reason</p>
+                        <span style="font-weight:bold; color:white">Dylan</span>
+                        <p>Check out the **Beyond All Reason** trailer. It's an epic scale RTS that **we** can play for free.</p>
                         <div class="embed">
-                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w" class="embed-title">Trailer: Epic Scale RTS</a>
-                            <p style="font-size:13px">Massive battles with thousands of units.</p>
+                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w" class="embed-title">Beyond All Reason Trailer</a>
+                            <p style="font-size:13px">Play with thousands of units across 200+ maps.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="foss-news" class="view">
-                <div style="display:flex; margin-bottom:20px">
-                    <div style="width:40px; height:40px; border-radius:50%; background:#23A559; margin-right:16px"></div>
+                <div class="msg">
+                    <div class="msg-avatar" onclick="openProfile()"></div>
                     <div>
-                        <span style="font-weight:bold; color:white">FOSS-Feed</span>
-                        <p>Check out these new repositories:</p>
+                        <span style="font-weight:bold; color:white">Dylan</span>
+                        <p>Latest FOSS Repositories:</p>
                         <div class="embed"><a href="https://github.com/Snektron/linux-in-minecraft" class="embed-title">Linux in Minecraft</a></div>
-                        <div class="embed"><a href="https://github.com/beyond-all-reason/Beyond-All-Reason" class="embed-title">Beyond All Reason Engine</a></div>
+                        <div class="embed"><a href="https://github.com/beyond-all-reason/Beyond-All-Reason" class="embed-title">BAR Game Engine</a></div>
                         <div class="embed"><a href="https://github.com/SimulaVR/Simula" class="embed-title">SimulaVR</a></div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="chat-input-area">
+            <div class="locked-input">
+                <span style="margin-right:10px">🚫</span> You do not have permission to send messages in this channel.
+            </div>
         </div>
     </div>
 
-    <div class="user-list">
-        <div class="category">Online — 2</div>
-        <div class="channel-link" style="color:white">Admin</div>
-        <div class="channel-link" style="color:white">FOSS-Bot</div>
+    <div id="profile-modal">
+        <div class="modal-banner"></div>
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeProfile()">✖</div>
+            <div class="modal-avatar"></div>
+            <div class="modal-body">
+                <h3 style="margin:0; color:white">Dylan</h3>
+                <p style="color:var(--text-muted); font-size:14px">dylan#0001</p>
+                <hr style="border:0; border-top:1px solid #333; margin:15px 0">
+                <p style="font-size:12px; font-weight:bold; color:white">ABOUT ME</p>
+                <p style="font-size:13px">Curating the best FOSS and Game news for the community.</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-
         function nav(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.channel-link').forEach(l => l.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('header-text').innerText = id;
-            if(window.innerWidth <= 768) toggleSidebar(); // Close sidebar on mobile after selection
         }
+        function openProfile() { document.getElementById('profile-modal').style.display = 'block'; }
+        function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; }
     </script>
 </body>
 </html>
