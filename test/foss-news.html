@@ -3,227 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord FOSS Feed</title>
+    <title>Mobile FOSS Discord</title>
     <style>
         :root {
-            --bg-dark-sidebar: #1E1F22;
+            --bg-dark-sidebar: #2B2D31;
             --bg-dark-main: #313338;
-            --bg-dark-servers: #1E1F22;
             --text-muted: #949BA4;
             --text-normal: #DBDEE1;
-            --discord-green: #23A559;
             --discord-blurple: #5865F2;
+            --ticker-bg: #1E1F22;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'gg sans', 'Noto Sans', sans-serif;
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'gg sans', sans-serif;
             background-color: var(--bg-dark-main);
             color: var(--text-normal);
+            display: flex; flex-direction: column;
+        }
+
+        /* TOP TICKER - Mobile Optimized */
+        .top-ticker {
+            height: 35px;
+            background-color: var(--ticker-bg);
+            display: flex;
+            align-items: center;
             overflow: hidden;
-            display: flex;
-        }
-
-        /* Server List (Far Left) */
-        .server-list {
-            width: 72px;
-            background-color: var(--bg-dark-servers);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 12px;
-            gap: 8px;
-        }
-
-        .server-icon {
-            width: 48px;
-            height: 48px;
-            background-color: var(--bg-dark-main);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: border-radius 0.2s;
-        }
-
-        .server-icon:hover { border-radius: 15px; background-color: var(--discord-blurple); }
-
-        /* Channel Sidebar */
-        .sidebar {
-            width: 240px;
-            background-color: var(--bg-dark-sidebar);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            height: 48px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
-            font-weight: bold;
-        }
-
-        .channel-list { padding: 8px; }
-        .channel-item {
-            padding: 6px 8px;
-            border-radius: 4px;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        .channel-item.active { background-color: #3F4147; color: white; }
-        .channel-item::before { content: "#"; margin-right: 6px; font-size: 20px; }
-
-        /* Main Content Area */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* THE NOTIFICATION NEWS TICKER (TOP BAR) */
-        .top-nav {
-            height: 48px;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
-            background-color: var(--bg-dark-main);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ticker-label {
-            font-weight: bold;
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            z-index: 10;
-            background: var(--bg-dark-main);
-            padding-right: 10px;
-        }
-
-        .news-ticker-container {
-            flex-grow: 1;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.2);
         }
 
         .ticker-scroll {
             display: flex;
             white-space: nowrap;
-            animation: discord-scroll 50s linear infinite;
+            animation: scroll-mobile 30s linear infinite;
         }
 
-        .ticker-scroll:hover { animation-play-state: paused; }
-
-        .ticker-link {
-            color: #00A8FC;
-            text-decoration: none;
-            margin-right: 50px;
-            font-size: 14px;
+        @keyframes scroll-mobile {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-150%); }
         }
 
-        .ticker-link:hover { text-decoration: underline; }
+        .ticker-item { color: var(--discord-blurple); margin-right: 30px; text-decoration: none; }
 
-        @keyframes discord-scroll {
-            0% { transform: translateX(50%); }
-            100% { transform: translateX(-100%); }
-        }
+        /* MAIN LAYOUT */
+        .app-container { display: flex; flex: 1; overflow: hidden; }
 
-        /* Message Area */
-        .chat-area {
-            flex-grow: 1;
-            padding: 20px;
+        /* SIDEBAR - Responsive */
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-dark-sidebar);
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+            transition: transform 0.3s ease;
         }
 
-        .message {
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; }
+            .channel-name { display: none; }
+        }
+
+        .channel-btn {
+            padding: 10px;
+            margin: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
             display: flex;
-            margin-bottom: 15px;
+            align-items: center;
+            color: var(--text-muted);
         }
 
+        .channel-btn:hover, .channel-btn.active {
+            background-color: #3F4147;
+            color: white;
+        }
+
+        .channel-btn::before { content: "#"; margin-right: 8px; font-size: 18px; }
+
+        /* CHAT AREA */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .channel-content { display: none; }
+        .channel-content.active { display: block; }
+
+        .message { display: flex; margin-bottom: 20px; }
         .avatar {
-            width: 40px;
-            height: 40px;
-            background-color: var(--discord-blurple);
-            border-radius: 50%;
-            margin-right: 15px;
+            width: 40px; height: 40px;
+            background: #5865f2; border-radius: 50%;
+            margin-right: 12px; flex-shrink: 0;
         }
-
-        .msg-content { display: flex; flex-direction: column; }
-        .msg-user { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
-        .msg-text { font-size: 15px; color: var(--text-normal); }
+        .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+        .msg-text { font-size: 15px; line-height: 1.4; }
+        .link-card {
+            display: block;
+            margin-top: 8px;
+            padding: 10px;
+            background: #2B2D31;
+            border-left: 4px solid var(--discord-blurple);
+            border-radius: 4px;
+            color: #00A8FC;
+            text-decoration: none;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="server-list">
-        <div class="server-icon" style="background-color: var(--discord-blurple);">F</div>
-        <div class="server-icon">+</div>
-    </div>
-
-    <div class="sidebar">
-        <div class="sidebar-header">FOSS Universe</div>
-        <div class="channel-list">
-            <div class="channel-item active">announcements</div>
-            <div class="channel-item">general</div>
-            <div class="channel-item">resources</div>
+    <div class="top-ticker">
+        <div class="ticker-scroll">
+            <span class="ticker-item">New Beyond All Reason Trailer is Live!</span>
+            <span class="ticker-item">Linux Kernel running inside Minecraft? Check #foss-news</span>
+            <span class="ticker-item">Spider-Man Web Mechanics project updated on GitHub</span>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="top-nav">
-            <div class="ticker-label">
-                <span style="color: var(--text-muted); margin-right: 8px;">#</span> announcements
-            </div>
-            <div class="news-ticker-container">
-                <div class="ticker-scroll">
-                    <a class="ticker-link" href="https://github.com/RedEdge967/Spider-Man">Spider-Man Simulation Update</a>
-                    <a class="ticker-link" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
-                    <a class="ticker-link" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
-                    <a class="ticker-link" href="https://github.com/beyond-all-reason/Beyond-All-Reason">New BAR Engine Release</a>
-                    <a class="ticker-link" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft!</a>
-                    <a class="ticker-link" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak VR Repo</a>
-                    <a class="ticker-link" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game Early Access</a>
-                    <a class="ticker-link" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Organic Maps Converter</a>
-                    <a class="ticker-link" href="https://github.com/jbengey/ForestFire-VR_MSc">Forest Fire VR</a>
-                    <a class="ticker-link" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan Unity Build</a>
-                    <a class="ticker-link" href="https://github.com/talkol/gameboy">Gameboy FOSS Emulator</a>
-                    <a class="ticker-link" href="https://github.com/UniVR/GolfVR">Golf VR Project</a>
-                    <a class="ticker-link" href="https://github.com/xiaopeng12138/WACVR">WACVR Framework</a>
-                    <a class="ticker-link" href="https://github.com/V-Sekai/godot-vrm">Godot VRM Support</a>
-                    <a class="ticker-link" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR Mechanics</a>
-                    <a class="ticker-link" href="https://github.com/mgschwan/VRWorkout">VRWorkout Fitness</a>
-                    <a class="ticker-link" href="https://github.com/SimulaVR/Simula">Simula VR Linux Desktop</a>
-                    <a class="ticker-link" href="https://github.com/relativty/Relativty">Relativty VR Headset</a>
-                    <a class="ticker-link" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards Engine</a>
-                    <a class="ticker-link" href="https://github.com/talkol/spiderman">Spider-Man Web Mechanics</a>
+    <div class="app-container">
+        <div class="sidebar">
+            <div style="padding: 15px; font-weight: bold; font-size: 12px; color: white;">CHANNELS</div>
+            <div class="channel-btn active" onclick="switchChannel('announcements')"><span class="channel-name">announcements</span></div>
+            <div class="channel-btn" onclick="switchChannel('game-news')"><span class="channel-name">game-news</span></div>
+            <div class="channel-btn" onclick="switchChannel('foss-news')"><span class="channel-name">foss-news</span></div>
+        </div>
+
+        <div class="chat-container">
+            
+            <div id="announcements" class="channel-content active">
+                <div class="message">
+                    <div class="avatar"></div>
+                    <div>
+                        <div class="user-name">System Bot</div>
+                        <div class="msg-text">Welcome! Use the sidebar to switch between FOSS and Game news updates.</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="chat-area">
-            <div class="message">
-                <div class="avatar"></div>
-                <div class="msg-content">
-                    <div class="msg-user">System Bot <span style="background: var(--discord-blurple); font-size: 10px; padding: 2px 4px; border-radius: 3px; vertical-align: middle;">BOT</span></div>
-                    <div class="msg-text">Welcome to the FOSS announcements channel. Check the ticker above for real-time project links!</div>
+            <div id="game-news" class="channel-content">
+                <div class="message">
+                    <div class="avatar" style="background: #EB459E;"></div>
+                    <div>
+                        <div class="user-name">GameWatcher</div>
+                        <div class="msg-text">Check out the latest trailer for Beyond All Reason!</div>
+                        <a class="link-card" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Watch: Epic Scale RTS Trailer</a>
+                    </div>
+                </div>
+                <div class="message">
+                    <div class="avatar" style="background: #EB459E;"></div>
+                    <div>
+                        <div class="user-name">GameWatcher</div>
+                        <div class="msg-text">VR Game releases and updates:</div>
+                        <a class="link-card" href="https://github.com/UniVR/GolfVR">Golf VR Project</a>
+                        <a class="link-card" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan Unity VR</a>
+                    </div>
                 </div>
             </div>
+
+            <div id="foss-news" class="channel-content">
+                <div class="message">
+                    <div class="avatar" style="background: #23A559;"></div>
+                    <div>
+                        <div class="user-name">FOSSHub</div>
+                        <div class="msg-text">Insane project: Running Linux inside a Minecraft world.</div>
+                        <a class="link-card" href="https://github.com/Snektron/linux-in-minecraft">GitHub: Linux in Minecraft</a>
+                    </div>
+                </div>
+                <div class="message">
+                    <div class="avatar" style="background: #23A559;"></div>
+                    <div>
+                        <div class="user-name">FOSSHub</div>
+                        <div class="msg-text">New VR Tools & Frameworks:</div>
+                        <a class="link-card" href="https://github.com/V-Sekai/godot-vrm">Godot VRM Support</a>
+                        <a class="link-card" href="https://github.com/SimulaVR/Simula">Simula VR Linux Desktop</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    <script>
+        function switchChannel(channelId) {
+            // Remove active classes
+            document.querySelectorAll('.channel-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+            
+            // Add active classes to selected
+            document.getElementById(channelId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
 </body>
 </html>
