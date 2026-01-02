@@ -3,133 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOSS News Discord</title>
+    <title>FOSS Discord Clone</title>
     <style>
         :root {
             --bg-servers: #1E1F22;
-            --bg-sidebar: #2B2D31;
-            --bg-main: #313338;
+            --bg-channels: #2B2D31;
+            --bg-chat: #313338;
             --bg-users: #2B2D31;
+            --bg-profile: #232428;
             --text-muted: #949BA4;
             --text-normal: #DBDEE1;
             --discord-blurple: #5865F2;
             --discord-green: #23A559;
+            --channel-hover: #35373C;
+            --channel-active: #3F4147;
         }
 
         body, html {
             margin: 0; padding: 0; height: 100%;
-            font-family: 'gg sans', sans-serif;
-            background-color: var(--bg-main);
+            font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-chat);
             color: var(--text-normal);
             display: flex; overflow: hidden;
         }
 
-        /* 1. SERVER BAR (FAR LEFT) */
-        .server-bar {
+        /* 1. SERVER LIST (LEFTMOST) */
+        .server-sidebar {
             width: 72px; background: var(--bg-servers);
             display: flex; flex-direction: column; align-items: center;
             padding-top: 12px; gap: 8px; flex-shrink: 0;
         }
         .server-icon {
-            width: 48px; height: 48px; background: var(--bg-main);
+            width: 48px; height: 48px; background: var(--bg-chat);
             border-radius: 50%; cursor: pointer; transition: 0.2s;
             display: flex; align-items: center; justify-content: center; font-weight: bold;
         }
-        .server-icon:hover { border-radius: 16px; background: var(--discord-blurple); color: white; }
-        .server-icon.active { border-radius: 16px; background: var(--discord-blurple); }
+        .server-icon:hover, .server-icon.active { border-radius: 16px; background: var(--discord-blurple); color: white; }
 
         /* 2. CHANNEL SIDEBAR */
-        .sidebar {
-            width: 240px; background: var(--bg-sidebar);
+        .channel-sidebar {
+            width: 240px; background: var(--bg-channels);
             display: flex; flex-direction: column; flex-shrink: 0;
         }
         .server-header {
             height: 48px; padding: 0 16px; display: flex; align-items: center;
             font-weight: bold; box-shadow: 0 1px 0 rgba(0,0,0,0.2); color: white;
+            justify-content: space-between; cursor: pointer;
         }
+        .channel-container { flex: 1; overflow-y: auto; padding-top: 8px; }
         .category { padding: 16px 8px 4px 16px; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
-        .channel {
+        .channel-link {
             margin: 2px 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer;
-            display: flex; align-items: center; color: var(--text-muted);
+            display: flex; align-items: center; color: var(--text-muted); font-size: 15px;
         }
-        .channel:hover { background: #35373C; color: var(--text-normal); }
-        .channel.active { background: #3F4147; color: white; }
-        .channel::before { content: "#"; margin-right: 6px; font-size: 20px; }
+        .channel-link:hover { background: var(--channel-hover); color: var(--text-normal); }
+        .channel-link.active { background: var(--channel-active); color: white; }
+        .channel-link::before { content: "#"; margin-right: 6px; font-size: 20px; font-weight: normal; }
+
+        /* PROFILE BAR (BOTTOM OF CHANNELS) */
+        .profile-bar {
+            height: 52px; background: var(--bg-profile);
+            padding: 0 8px; display: flex; align-items: center;
+        }
+        .p-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--discord-blurple); margin-right: 8px; }
+        .p-info { flex: 1; font-size: 12px; }
+        .p-info .p-name { color: white; font-weight: bold; display: block; }
+        .p-info .p-tag { color: var(--text-muted); }
 
         /* 3. MAIN CHAT AREA */
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        .chat-header { height: 48px; padding: 0 16px; display: flex; align-items: center; box-shadow: 0 1px 0 rgba(0,0,0,0.2); font-weight: bold; }
-        .chat-header span { color: var(--text-muted); margin-right: 8px; font-size: 20px; }
-        
-        .messages { flex-grow: 1; overflow-y: auto; padding: 16px; }
+        .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .chat-header {
+            height: 48px; padding: 0 16px; display: flex; align-items: center;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2); font-weight: bold;
+        }
+        .chat-header .hash { color: var(--text-muted); margin-right: 8px; font-size: 20px; }
+        .messages { flex: 1; overflow-y: auto; padding: 20px; }
         .view { display: none; }
         .view.active { display: block; }
 
-        /* Message Styles */
+        /* DISCORD MESSAGE & EMBED STYLE */
         .msg { display: flex; margin-bottom: 20px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 16px; flex-shrink: 0; background: var(--discord-blurple); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
-        .msg-content { min-width: 0; }
-        .user { font-weight: 500; color: white; margin-right: 8px; }
-        .time { font-size: 12px; color: var(--text-muted); }
-        .text { margin-top: 2px; }
-
-        /* Discord Embeds */
+        .msg-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 16px; background: #555; flex-shrink: 0; }
+        .msg-user { font-weight: 500; color: white; margin-right: 8px; }
+        .msg-time { font-size: 12px; color: var(--text-muted); }
         .embed {
-            margin-top: 8px; padding: 12px; background: #2B2D31;
+            margin-top: 8px; padding: 12px; background: var(--bg-channels);
             border-left: 4px solid var(--discord-blurple); border-radius: 4px; max-width: 520px;
         }
         .embed-title { color: #00A8FC; font-weight: bold; text-decoration: none; display: block; margin-bottom: 4px; }
         .embed-title:hover { text-decoration: underline; }
 
-        /* 4. USER LIST (FAR RIGHT) */
-        .user-list { width: 240px; background: var(--bg-users); padding: 20px 8px; flex-shrink: 0; }
+        /* 4. USER LIST (RIGHT) */
+        .user-list { width: 240px; background: var(--bg-channels); flex-shrink: 0; padding: 20px 8px; }
         @media (max-width: 1000px) { .user-list { display: none; } }
-        @media (max-width: 700px) { .sidebar { width: 60px; } .category, .server-header, .channel span { display: none; } }
 
-        .u-item { display: flex; align-items: center; padding: 6px 8px; border-radius: 4px; color: var(--text-muted); }
-        .u-avatar { width: 32px; height: 32px; border-radius: 50%; background: #444; margin-right: 12px; position: relative; }
-        .status-online { width: 10px; height: 10px; background: var(--discord-green); border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid var(--bg-users); }
+        /* UTILS */
+        .status-dot { width: 10px; height: 10px; background: var(--discord-green); border-radius: 50%; border: 2px solid var(--bg-profile); }
     </style>
 </head>
 <body>
 
-    <div class="server-bar">
+    <div class="server-sidebar">
         <div class="server-icon active">F</div>
-        <div class="server-icon">+</div>
+        <div class="server-icon" style="color:var(--discord-green)">+</div>
     </div>
 
-    <div class="sidebar">
-        <div class="server-header">FOSS Universe</div>
-        <div class="category">Information</div>
-        <div class="channel active" onclick="nav('announcements')"><span>announcements</span></div>
-        <div class="category">Updates</div>
-        <div class="channel" onclick="nav('game-news')"><span>game-news</span></div>
-        <div class="channel" onclick="nav('foss-news')"><span>foss-news</span></div>
+    <div class="channel-sidebar">
+        <div class="server-header">FOSS Universe <span>v</span></div>
+        <div class="channel-container">
+            <div class="category">Information</div>
+            <div class="channel-link active" onclick="nav('announcements', this)">announcements</div>
+            <div class="category">News Feeds</div>
+            <div class="channel-link" onclick="nav('game-news', this)">game-news</div>
+            <div class="channel-link" onclick="nav('foss-news', this)">foss-news</div>
+            <div class="channel-link" onclick="nav('vr-projects', this)">vr-projects</div>
+        </div>
+        <div class="profile-bar">
+            <div class="p-avatar"></div>
+            <div class="p-info">
+                <span class="p-name">User</span>
+                <span class="p-tag">#0001</span>
+            </div>
+            <div class="status-dot"></div>
+        </div>
     </div>
 
-    <div class="chat-area">
-        <div class="chat-header"><span>#</span> <div id="chan-title">announcements</div></div>
+    <div class="chat-main">
+        <div class="chat-header"><span class="hash">#</span> <span id="header-text">announcements</span></div>
         <div class="messages">
             
             <div id="announcements" class="view active">
                 <div class="msg">
-                    <div class="avatar">A</div>
+                    <div class="msg-avatar" style="background:#5865F2"></div>
                     <div class="msg-content">
-                        <span class="user">Admin</span><span class="time">Today at 10:28 PM</span>
-                        <div class="text">Welcome to the central FOSS node. We've updated the news channels.</div>
+                        <span class="msg-user">System</span><span class="msg-time">Today at 10:30 PM</span>
+                        <p>Welcome to the node. **We** have integrated all FOSS and Game news links into the sidebar channels.</p>
                     </div>
                 </div>
             </div>
 
             <div id="game-news" class="view">
                 <div class="msg">
-                    <div class="avatar" style="background:#EB459E">G</div>
+                    <div class="msg-avatar" style="background:#EB459E"></div>
                     <div class="msg-content">
-                        <span class="user">GameBot</span><span class="time">Today at 10:28 PM</span>
-                        <div class="text">Beyond All Reason Trailer 2024 is out!</div>
+                        <span class="msg-user">GameBot</span><span class="msg-time">Today at 10:32 PM</span>
+                        <p>Trailer Update: Beyond All Reason (2024)</p>
                         <div class="embed">
-                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s" class="embed-title">Beyond All Reason: Epic Scale RTS</a>
-                            <div style="font-size:13px">Watch the trailer for this free-to-play massive combat game.</div>
+                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w" class="embed-title">Beyond All Reason Trailer</a>
+                            <p style="font-size:13px">Epic scale RTS battles with thousands of units. Play for free!</p>
                         </div>
                     </div>
                 </div>
@@ -137,17 +158,30 @@
 
             <div id="foss-news" class="view">
                 <div class="msg">
-                    <div class="avatar" style="background:#23A559">F</div>
+                    <div class="msg-avatar" style="background:#23A559"></div>
                     <div class="msg-content">
-                        <span class="user">FOSS-Feed</span><span class="time">Just now</span>
-                        <div class="text">New Repositories Added:</div>
-                        
+                        <span class="msg-user">FOSS-Feed</span><span class="msg-time">Today at 10:33 PM</span>
+                        <p>Fresh Repositories:</p>
                         <div class="embed"><a href="https://github.com/Snektron/linux-in-minecraft" class="embed-title">Linux in Minecraft</a></div>
                         <div class="embed"><a href="https://github.com/beyond-all-reason/Beyond-All-Reason" class="embed-title">Beyond All Reason Engine</a></div>
-                        <div class="embed"><a href="https://github.com/SimulaVR/Simula" class="embed-title">SimulaVR</a></div>
-                        <div class="embed"><a href="https://github.com/relativty/Relativty" class="embed-title">Relativty VR</a></div>
-                        <div class="embed"><a href="https://github.com/rudokemper/google-maps-places-to-organic-maps" class="embed-title">Maps Converter</a></div>
-                        <div class="embed"><a href="https://codeberg.org/hurrycurry/hurrycurry" class="embed-title">HurryCurry on Codeberg</a></div>
+                        <div class="embed"><a href="https://codeberg.org/hurrycurry/hurrycurry" class="embed-title">HurryCurry (Codeberg)</a></div>
+                        <div class="embed"><a href="https://github.com/rudokemper/google-maps-places-to-organic-maps" class="embed-title">Google to Organic Maps</a></div>
+                        <div class="embed"><a href="https://github.com/talkol/gameboy" class="embed-title">Gameboy Emulator</a></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vr-projects" class="view">
+                <div class="msg">
+                    <div class="msg-avatar" style="background:#FEE75C"></div>
+                    <div class="msg-content">
+                        <span class="msg-user">VR-Tracker</span><span class="msg-time">Today at 10:33 PM</span>
+                        <p>Open Source VR Development:</p>
+                        <div class="embed"><a href="https://github.com/SimulaVR/Simula" class="embed-title">SimulaVR (Linux Desktop)</a></div>
+                        <div class="embed"><a href="https://github.com/relativty/Relativty" class="embed-title">Relativty VR Headset</a></div>
+                        <div class="embed"><a href="https://github.com/V-Sekai/godot-vrm" class="embed-title">Godot VRM Support</a></div>
+                        <div class="embed"><a href="https://github.com/mgschwan/VRWorkout" class="embed-title">VRWorkout Fitness</a></div>
+                        <div class="embed"><a href="https://github.com/Eibriel/DeltaKayak" class="embed-title">DeltaKayak</a></div>
                     </div>
                 </div>
             </div>
@@ -156,18 +190,19 @@
     </div>
 
     <div class="user-list">
-        <div style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 8px; padding-left: 8px;">ONLINE — 2</div>
-        <div class="u-item"><div class="u-avatar" style="background:var(--discord-blurple)"><div class="status-online"></div></div><span>Admin</span></div>
-        <div class="u-item"><div class="u-avatar" style="background:#23A559"><div class="status-online"></div></div><span>FOSS-Bot</span></div>
+        <div class="category" style="padding-left:8px">Online — 3</div>
+        <div class="channel-link" style="color:white; cursor:default">Admin</div>
+        <div class="channel-link" style="color:white; cursor:default">GameBot</div>
+        <div class="channel-link" style="color:white; cursor:default">FOSS-Feed</div>
     </div>
 
     <script>
-        function nav(id) {
+        function nav(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.getElementById('chan-title').innerText = id;
+            document.querySelectorAll('.channel-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('header-text').innerText = id;
         }
     </script>
 </body>
