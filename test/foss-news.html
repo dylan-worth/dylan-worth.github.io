@@ -3,96 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOSS News Ticker</title>
     <style>
+        :root {
+            --accent-color: #00f2fe;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
             margin: 0;
-            padding-top: 40px; /* Space for the fixed bar */
-            font-family: sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow-x: hidden;
         }
 
-        /* The Notification Bar Container */
-        .foss-news-bar {
+        /* High-End Aesthetic Ticker Container */
+        .ticker-wrap {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #222;
-            color: #fff;
-            height: 40px;
+            top: 20px; /* Floating at the top */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1400px;
+            height: 50px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
             overflow: hidden;
+            z-index: 9999;
             display: flex;
             align-items: center;
-            z-index: 1000;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        /* The Scrolling Element */
-        .news-scroll {
+        /* "Live" Indicator Tag */
+        .ticker-label {
+            position: absolute;
+            left: 0;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            color: #000;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 0 20px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            letter-spacing: 1px;
+            z-index: 2;
+            border-radius: 100px 0 0 100px;
+        }
+
+        /* The scrolling container */
+        .ticker-move {
             display: flex;
             white-space: nowrap;
-            animation: scroll-left 60s linear infinite;
+            padding-left: 100%; /* Start from the right */
+            animation: ticker-anim 40s linear infinite;
         }
 
-        .news-scroll:hover {
+        .ticker-wrap:hover .ticker-move {
             animation-play-state: paused;
         }
 
-        .news-item {
-            padding: 0 30px;
-            font-size: 14px;
-            color: #00ff00; /* FOSS Green */
+        /* Individual News Items */
+        .ticker-item {
+            display: inline-block;
+            padding: 0 40px;
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .ticker-item:hover {
+            color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        /* Modern Bullet Point */
+        .ticker-item::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--glass-border);
+            border-radius: 50%;
+        }
+
+        @keyframes ticker-anim {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-250%); }
+        }
+
+        /* Main Content Styling */
+        .hero {
+            height: 100vh;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
         }
 
-        .news-item:hover {
-            text-decoration: underline;
-        }
-
-        .news-item::before {
-            content: "•";
-            margin-right: 10px;
-            color: #fff;
-        }
-
-        /* Animation */
-        @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+        h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #64748b; }
     </style>
 </head>
 <body>
 
-<div class="foss-news-bar">
-    <div class="news-scroll">
-        <a class="news-item" href="https://github.com/RedEdge967/Spider-Man">Spider-Man GitHub</a>
-        <a class="news-item" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
-        <a class="news-item" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
-        <a class="news-item" href="https://github.com/beyond-all-reason/Beyond-All-Reason">BAR Engine</a>
-        <a class="news-item" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft</a>
-        <a class="news-item" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak</a>
-        <a class="news-item" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game</a>
-        <a class="news-item" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Maps Converter</a>
-        <a class="news-item" href="https://github.com/jbengey/ForestFire-VR_MSc">ForestFire VR</a>
-        <a class="news-item" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan VR</a>
-        <a class="news-item" href="https://github.com/talkol/gameboy">Gameboy Emulator</a>
-        <a class="news-item" href="https://github.com/UniVR/GolfVR">Golf VR</a>
-        <a class="news-item" href="https://github.com/xiaopeng12138/WACVR">WACVR Project</a>
-        <a class="news-item" href="https://github.com/V-Sekai/godot-vrm">Godot VRM</a>
-        <a class="news-item" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR</a>
-        <a class="news-item" href="https://github.com/mgschwan/VRWorkout">VRWorkout</a>
-        <a class="news-item" href="https://github.com/SimulaVR/Simula">SimulaVR</a>
-        <a class="news-item" href="https://github.com/relativty/Relativty">Relativty VR</a>
-        <a class="news-item" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards</a>
-        <a class="news-item" href="https://github.com/talkol/spiderman">Spider-Man Mechanics</a>
+<div class="ticker-wrap">
+    <div class="ticker-label">FOSS Feed</div>
+    <div class="ticker-move">
+        <a class="ticker-item" href="https://github.com/RedEdge967/Spider-Man">Spider-Man Simulation</a>
+        <a class="ticker-item" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
+        <a class="ticker-item" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
+        <a class="ticker-item" href="https://github.com/beyond-all-reason/Beyond-All-Reason">Beyond All Reason RTS</a>
+        <a class="ticker-item" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft Kernel</a>
+        <a class="ticker-item" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak VR</a>
+        <a class="ticker-item" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game Project</a>
+        <a class="ticker-item" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Google to Organic Maps</a>
+        <a class="ticker-item" href="https://github.com/jbengey/ForestFire-VR_MSc">Forest Fire VR Simulation</a>
+        <a class="ticker-item" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan VR Game</a>
+        <a class="ticker-item" href="https://github.com/talkol/gameboy">Gameboy Emulator Core</a>
+        <a class="ticker-item" href="https://github.com/UniVR/GolfVR">Golf VR Environment</a>
+        <a class="ticker-item" href="https://github.com/xiaopeng12138/WACVR">WACVR Framework</a>
+        <a class="ticker-item" href="https://github.com/V-Sekai/godot-vrm">Godot VRM Support</a>
+        <a class="ticker-item" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR Mechanics</a>
+        <a class="ticker-item" href="https://github.com/mgschwan/VRWorkout">VRWorkout: Open Source Fitness</a>
+        <a class="ticker-item" href="https://github.com/SimulaVR/Simula">Simula VR Linux Desktop</a>
+        <a class="ticker-item" href="https://github.com/relativty/Relativty">Relativty Open Source VR Headset</a>
+        <a class="ticker-item" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards Engine</a>
+        <a class="ticker-item" href="https://github.com/talkol/spiderman">Advanced Spider-Man Mechanics</a>
     </div>
 </div>
 
-<main style="padding: 20px;">
-    <h1>Welcome to the Dashboard</h1>
-    <p>The FOSS news ticker is active at the top. Hover over it to pause the scroll.</p>
-</main>
+<div class="hero">
+    <h1>Dashboard</h1>
+    <p>Hover over the notification bar above to browse current FOSS updates.</p>
+</div>
 
 </body>
 </html>
