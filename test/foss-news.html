@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding-top: 40px; /* Space for the fixed bar */
+            font-family: sans-serif;
+        }
+
+        /* The Notification Bar Container */
+        .foss-news-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #222;
+            color: #fff;
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* The Scrolling Element */
+        .news-scroll {
+            display: flex;
+            white-space: nowrap;
+            animation: scroll-left 60s linear infinite;
+        }
+
+        .news-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        .news-item {
+            padding: 0 30px;
+            font-size: 14px;
+            color: #00ff00; /* FOSS Green */
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .news-item:hover {
+            text-decoration: underline;
+        }
+
+        .news-item::before {
+            content: "•";
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        /* Animation */
+        @keyframes scroll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="foss-news-bar">
+    <div class="news-scroll">
+        <a class="news-item" href="https://github.com/RedEdge967/Spider-Man">Spider-Man GitHub</a>
+        <a class="news-item" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
+        <a class="news-item" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
+        <a class="news-item" href="https://github.com/beyond-all-reason/Beyond-All-Reason">BAR Engine</a>
+        <a class="news-item" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft</a>
+        <a class="news-item" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak</a>
+        <a class="news-item" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game</a>
+        <a class="news-item" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Maps Converter</a>
+        <a class="news-item" href="https://github.com/jbengey/ForestFire-VR_MSc">ForestFire VR</a>
+        <a class="news-item" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan VR</a>
+        <a class="news-item" href="https://github.com/talkol/gameboy">Gameboy Emulator</a>
+        <a class="news-item" href="https://github.com/UniVR/GolfVR">Golf VR</a>
+        <a class="news-item" href="https://github.com/xiaopeng12138/WACVR">WACVR Project</a>
+        <a class="news-item" href="https://github.com/V-Sekai/godot-vrm">Godot VRM</a>
+        <a class="news-item" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR</a>
+        <a class="news-item" href="https://github.com/mgschwan/VRWorkout">VRWorkout</a>
+        <a class="news-item" href="https://github.com/SimulaVR/Simula">SimulaVR</a>
+        <a class="news-item" href="https://github.com/relativty/Relativty">Relativty VR</a>
+        <a class="news-item" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards</a>
+        <a class="news-item" href="https://github.com/talkol/spiderman">Spider-Man Mechanics</a>
+    </div>
+</div>
+
+<main style="padding: 20px;">
+    <h1>Welcome to the Dashboard</h1>
+    <p>The FOSS news ticker is active at the top. Hover over it to pause the scroll.</p>
+</main>
+
+</body>
+</html>
