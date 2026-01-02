@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOSS Discord Clone</title>
+    <title>FOSS Discord - Collapsible</title>
     <style>
         :root {
             --bg-servers: #1E1F22;
@@ -27,11 +27,11 @@
             display: flex; overflow: hidden;
         }
 
-        /* 1. SERVER LIST (LEFTMOST) */
+        /* 1. SERVER LIST */
         .server-sidebar {
             width: 72px; background: var(--bg-servers);
             display: flex; flex-direction: column; align-items: center;
-            padding-top: 12px; gap: 8px; flex-shrink: 0;
+            padding-top: 12px; gap: 8px; flex-shrink: 0; z-index: 30;
         }
         .server-icon {
             width: 48px; height: 48px; background: var(--bg-chat);
@@ -40,65 +40,71 @@
         }
         .server-icon:hover, .server-icon.active { border-radius: 16px; background: var(--discord-blurple); color: white; }
 
-        /* 2. CHANNEL SIDEBAR */
+        /* 2. COLLAPSIBLE CHANNEL SIDEBAR */
         .channel-sidebar {
             width: 240px; background: var(--bg-channels);
             display: flex; flex-direction: column; flex-shrink: 0;
+            transition: transform 0.3s ease, width 0.3s ease;
+            z-index: 20;
         }
+
+        /* Mobile State */
+        @media (max-width: 768px) {
+            .channel-sidebar {
+                position: fixed;
+                left: 72px;
+                height: 100%;
+                transform: translateX(-150%);
+            }
+            .channel-sidebar.open { transform: translateX(0); }
+            .user-list { display: none; }
+        }
+
         .server-header {
             height: 48px; padding: 0 16px; display: flex; align-items: center;
             font-weight: bold; box-shadow: 0 1px 0 rgba(0,0,0,0.2); color: white;
-            justify-content: space-between; cursor: pointer;
+            justify-content: space-between;
         }
+
         .channel-container { flex: 1; overflow-y: auto; padding-top: 8px; }
         .category { padding: 16px 8px 4px 16px; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
         .channel-link {
             margin: 2px 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer;
             display: flex; align-items: center; color: var(--text-muted); font-size: 15px;
         }
-        .channel-link:hover { background: var(--channel-hover); color: var(--text-normal); }
         .channel-link.active { background: var(--channel-active); color: white; }
-        .channel-link::before { content: "#"; margin-right: 6px; font-size: 20px; font-weight: normal; }
+        .channel-link::before { content: "#"; margin-right: 6px; font-size: 20px; }
 
-        /* PROFILE BAR (BOTTOM OF CHANNELS) */
-        .profile-bar {
-            height: 52px; background: var(--bg-profile);
-            padding: 0 8px; display: flex; align-items: center;
-        }
-        .p-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--discord-blurple); margin-right: 8px; }
-        .p-info { flex: 1; font-size: 12px; }
-        .p-info .p-name { color: white; font-weight: bold; display: block; }
-        .p-info .p-tag { color: var(--text-muted); }
-
-        /* 3. MAIN CHAT AREA */
+        /* 3. MAIN CHAT */
         .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .chat-header {
             height: 48px; padding: 0 16px; display: flex; align-items: center;
             box-shadow: 0 1px 0 rgba(0,0,0,0.2); font-weight: bold;
         }
-        .chat-header .hash { color: var(--text-muted); margin-right: 8px; font-size: 20px; }
+
+        /* Hamburger Toggle */
+        .menu-toggle {
+            display: none; font-size: 24px; cursor: pointer; margin-right: 12px; color: var(--text-muted);
+        }
+        @media (max-width: 768px) { .menu-toggle { display: block; } }
+
         .messages { flex: 1; overflow-y: auto; padding: 20px; }
         .view { display: none; }
         .view.active { display: block; }
 
-        /* DISCORD MESSAGE & EMBED STYLE */
-        .msg { display: flex; margin-bottom: 20px; }
-        .msg-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 16px; background: #555; flex-shrink: 0; }
-        .msg-user { font-weight: 500; color: white; margin-right: 8px; }
-        .msg-time { font-size: 12px; color: var(--text-muted); }
+        /* DISCORD EMBEDS */
         .embed {
             margin-top: 8px; padding: 12px; background: var(--bg-channels);
-            border-left: 4px solid var(--discord-blurple); border-radius: 4px; max-width: 520px;
+            border-left: 4px solid var(--discord-blurple); border-radius: 4px; max-width: 500px;
         }
-        .embed-title { color: #00A8FC; font-weight: bold; text-decoration: none; display: block; margin-bottom: 4px; }
-        .embed-title:hover { text-decoration: underline; }
+        .embed-title { color: #00A8FC; font-weight: bold; text-decoration: none; display: block; }
 
-        /* 4. USER LIST (RIGHT) */
-        .user-list { width: 240px; background: var(--bg-channels); flex-shrink: 0; padding: 20px 8px; }
-        @media (max-width: 1000px) { .user-list { display: none; } }
+        /* PROFILE BAR */
+        .profile-bar { height: 52px; background: var(--bg-profile); padding: 0 8px; display: flex; align-items: center; }
+        .p-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--discord-blurple); margin-right: 8px; }
 
-        /* UTILS */
-        .status-dot { width: 10px; height: 10px; background: var(--discord-green); border-radius: 50%; border: 2px solid var(--bg-profile); }
+        /* USER LIST (RIGHT) */
+        .user-list { width: 240px; background: var(--bg-channels); flex-shrink: 0; padding: 20px 8px; border-left: 1px solid rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -108,80 +114,62 @@
         <div class="server-icon" style="color:var(--discord-green)">+</div>
     </div>
 
-    <div class="channel-sidebar">
-        <div class="server-header">FOSS Universe <span>v</span></div>
+    <div class="channel-sidebar" id="sidebar">
+        <div class="server-header">FOSS Universe</div>
         <div class="channel-container">
             <div class="category">Information</div>
             <div class="channel-link active" onclick="nav('announcements', this)">announcements</div>
             <div class="category">News Feeds</div>
             <div class="channel-link" onclick="nav('game-news', this)">game-news</div>
             <div class="channel-link" onclick="nav('foss-news', this)">foss-news</div>
-            <div class="channel-link" onclick="nav('vr-projects', this)">vr-projects</div>
         </div>
         <div class="profile-bar">
             <div class="p-avatar"></div>
-            <div class="p-info">
-                <span class="p-name">User</span>
-                <span class="p-tag">#0001</span>
-            </div>
-            <div class="status-dot"></div>
+            <div style="flex:1; font-size:12px"><b>User</b><br><span style="color:var(--text-muted)">#0001</span></div>
         </div>
     </div>
 
     <div class="chat-main">
-        <div class="chat-header"><span class="hash">#</span> <span id="header-text">announcements</span></div>
+        <div class="chat-header">
+            <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+            <span style="color:var(--text-muted); margin-right:8px; font-size:20px">#</span> 
+            <span id="header-text">announcements</span>
+        </div>
         <div class="messages">
             
             <div id="announcements" class="view active">
-                <div class="msg">
-                    <div class="msg-avatar" style="background:#5865F2"></div>
-                    <div class="msg-content">
-                        <span class="msg-user">System</span><span class="msg-time">Today at 10:30 PM</span>
-                        <p>Welcome to the node. **We** have integrated all FOSS and Game news links into the sidebar channels.</p>
+                <div style="display:flex; margin-bottom:20px">
+                    <div style="width:40px; height:40px; border-radius:50%; background:var(--discord-blurple); margin-right:16px"></div>
+                    <div>
+                        <span style="font-weight:bold; color:white">Admin</span> <span style="font-size:12px; color:var(--text-muted)">Today at 10:35 PM</span>
+                        <p>The sidebar now collapses on mobile! Tap the ☰ icon to switch channels.</p>
                     </div>
                 </div>
             </div>
 
             <div id="game-news" class="view">
-                <div class="msg">
-                    <div class="msg-avatar" style="background:#EB459E"></div>
-                    <div class="msg-content">
-                        <span class="msg-user">GameBot</span><span class="msg-time">Today at 10:32 PM</span>
-                        <p>Trailer Update: Beyond All Reason (2024)</p>
+                <div style="display:flex; margin-bottom:20px">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#EB459E; margin-right:16px"></div>
+                    <div>
+                        <span style="font-weight:bold; color:white">GameBot</span>
+                        <p>New RTS Footage Found: Beyond All Reason</p>
                         <div class="embed">
-                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w" class="embed-title">Beyond All Reason Trailer</a>
-                            <p style="font-size:13px">Epic scale RTS battles with thousands of units. Play for free!</p>
+                            <a href="https://m.youtube.com/watch?v=8K_fSWfOC1w" class="embed-title">Trailer: Epic Scale RTS</a>
+                            <p style="font-size:13px">Massive battles with thousands of units.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="foss-news" class="view">
-                <div class="msg">
-                    <div class="msg-avatar" style="background:#23A559"></div>
-                    <div class="msg-content">
-                        <span class="msg-user">FOSS-Feed</span><span class="msg-time">Today at 10:33 PM</span>
-                        <p>Fresh Repositories:</p>
+                <div style="display:flex; margin-bottom:20px">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#23A559; margin-right:16px"></div>
+                    <div>
+                        <span style="font-weight:bold; color:white">FOSS-Feed</span>
+                        <p>Check out these new repositories:</p>
                         <div class="embed"><a href="https://github.com/Snektron/linux-in-minecraft" class="embed-title">Linux in Minecraft</a></div>
                         <div class="embed"><a href="https://github.com/beyond-all-reason/Beyond-All-Reason" class="embed-title">Beyond All Reason Engine</a></div>
-                        <div class="embed"><a href="https://codeberg.org/hurrycurry/hurrycurry" class="embed-title">HurryCurry (Codeberg)</a></div>
-                        <div class="embed"><a href="https://github.com/rudokemper/google-maps-places-to-organic-maps" class="embed-title">Google to Organic Maps</a></div>
-                        <div class="embed"><a href="https://github.com/talkol/gameboy" class="embed-title">Gameboy Emulator</a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="vr-projects" class="view">
-                <div class="msg">
-                    <div class="msg-avatar" style="background:#FEE75C"></div>
-                    <div class="msg-content">
-                        <span class="msg-user">VR-Tracker</span><span class="msg-time">Today at 10:33 PM</span>
-                        <p>Open Source VR Development:</p>
-                        <div class="embed"><a href="https://github.com/SimulaVR/Simula" class="embed-title">SimulaVR (Linux Desktop)</a></div>
-                        <div class="embed"><a href="https://github.com/relativty/Relativty" class="embed-title">Relativty VR Headset</a></div>
-                        <div class="embed"><a href="https://github.com/V-Sekai/godot-vrm" class="embed-title">Godot VRM Support</a></div>
-                        <div class="embed"><a href="https://github.com/mgschwan/VRWorkout" class="embed-title">VRWorkout Fitness</a></div>
-                        <div class="embed"><a href="https://github.com/Eibriel/DeltaKayak" class="embed-title">DeltaKayak</a></div>
+                        <div class="embed"><a href="https://github.com/SimulaVR/Simula" class="embed-title">SimulaVR</a></div>
                     </div>
                 </div>
             </div>
@@ -190,19 +178,23 @@
     </div>
 
     <div class="user-list">
-        <div class="category" style="padding-left:8px">Online — 3</div>
-        <div class="channel-link" style="color:white; cursor:default">Admin</div>
-        <div class="channel-link" style="color:white; cursor:default">GameBot</div>
-        <div class="channel-link" style="color:white; cursor:default">FOSS-Feed</div>
+        <div class="category">Online — 2</div>
+        <div class="channel-link" style="color:white">Admin</div>
+        <div class="channel-link" style="color:white">FOSS-Bot</div>
     </div>
 
     <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
         function nav(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.channel-link').forEach(l => l.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('header-text').innerText = id;
+            if(window.innerWidth <= 768) toggleSidebar(); // Close sidebar on mobile after selection
         }
     </script>
 </body>
