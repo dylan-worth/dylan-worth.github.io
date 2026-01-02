@@ -3,156 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOSS News Ticker</title>
+    <title>Discord FOSS Feed</title>
     <style>
         :root {
-            --accent-color: #00f2fe;
-            --bg-dark: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-dark-sidebar: #1E1F22;
+            --bg-dark-main: #313338;
+            --bg-dark-servers: #1E1F22;
+            --text-muted: #949BA4;
+            --text-normal: #DBDEE1;
+            --discord-green: #23A559;
+            --discord-blurple: #5865F2;
         }
 
-        body {
+        body, html {
             margin: 0;
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Inter', -apple-system, sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* High-End Aesthetic Ticker Container */
-        .ticker-wrap {
-            position: fixed;
-            top: 20px; /* Floating at the top */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 95%;
-            max-width: 1400px;
-            height: 50px;
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            overflow: hidden;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        /* "Live" Indicator Tag */
-        .ticker-label {
-            position: absolute;
-            left: 0;
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-            color: #000;
-            font-weight: 800;
-            font-size: 11px;
-            text-transform: uppercase;
-            padding: 0 20px;
+            padding: 0;
             height: 100%;
+            font-family: 'gg sans', 'Noto Sans', sans-serif;
+            background-color: var(--bg-dark-main);
+            color: var(--text-normal);
+            overflow: hidden;
             display: flex;
-            align-items: center;
-            letter-spacing: 1px;
-            z-index: 2;
-            border-radius: 100px 0 0 100px;
         }
 
-        /* The scrolling container */
-        .ticker-move {
-            display: flex;
-            white-space: nowrap;
-            padding-left: 100%; /* Start from the right */
-            animation: ticker-anim 40s linear infinite;
-        }
-
-        .ticker-wrap:hover .ticker-move {
-            animation-play-state: paused;
-        }
-
-        /* Individual News Items */
-        .ticker-item {
-            display: inline-block;
-            padding: 0 40px;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .ticker-item:hover {
-            color: var(--accent-color);
-            transform: scale(1.05);
-        }
-
-        /* Modern Bullet Point */
-        .ticker-item::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 4px;
-            background: var(--glass-border);
-            border-radius: 50%;
-        }
-
-        @keyframes ticker-anim {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-250%); }
-        }
-
-        /* Main Content Styling */
-        .hero {
-            height: 100vh;
+        /* Server List (Far Left) */
+        .server-list {
+            width: 72px;
+            background-color: var(--bg-dark-servers);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            text-align: center;
-            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            padding-top: 12px;
+            gap: 8px;
         }
 
-        h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #64748b; }
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--bg-dark-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-radius 0.2s;
+        }
+
+        .server-icon:hover { border-radius: 15px; background-color: var(--discord-blurple); }
+
+        /* Channel Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-dark-sidebar);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            height: 48px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .channel-list { padding: 8px; }
+        .channel-item {
+            padding: 6px 8px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .channel-item.active { background-color: #3F4147; color: white; }
+        .channel-item::before { content: "#"; margin-right: 6px; font-size: 20px; }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* THE NOTIFICATION NEWS TICKER (TOP BAR) */
+        .top-nav {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+            background-color: var(--bg-dark-main);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticker-label {
+            font-weight: bold;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            z-index: 10;
+            background: var(--bg-dark-main);
+            padding-right: 10px;
+        }
+
+        .news-ticker-container {
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-scroll {
+            display: flex;
+            white-space: nowrap;
+            animation: discord-scroll 50s linear infinite;
+        }
+
+        .ticker-scroll:hover { animation-play-state: paused; }
+
+        .ticker-link {
+            color: #00A8FC;
+            text-decoration: none;
+            margin-right: 50px;
+            font-size: 14px;
+        }
+
+        .ticker-link:hover { text-decoration: underline; }
+
+        @keyframes discord-scroll {
+            0% { transform: translateX(50%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Message Area */
+        .chat-area {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--discord-blurple);
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .msg-content { display: flex; flex-direction: column; }
+        .msg-user { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+        .msg-text { font-size: 15px; color: var(--text-normal); }
     </style>
 </head>
 <body>
 
-<div class="ticker-wrap">
-    <div class="ticker-label">FOSS Feed</div>
-    <div class="ticker-move">
-        <a class="ticker-item" href="https://github.com/RedEdge967/Spider-Man">Spider-Man Simulation</a>
-        <a class="ticker-item" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
-        <a class="ticker-item" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
-        <a class="ticker-item" href="https://github.com/beyond-all-reason/Beyond-All-Reason">Beyond All Reason RTS</a>
-        <a class="ticker-item" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft Kernel</a>
-        <a class="ticker-item" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak VR</a>
-        <a class="ticker-item" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game Project</a>
-        <a class="ticker-item" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Google to Organic Maps</a>
-        <a class="ticker-item" href="https://github.com/jbengey/ForestFire-VR_MSc">Forest Fire VR Simulation</a>
-        <a class="ticker-item" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan VR Game</a>
-        <a class="ticker-item" href="https://github.com/talkol/gameboy">Gameboy Emulator Core</a>
-        <a class="ticker-item" href="https://github.com/UniVR/GolfVR">Golf VR Environment</a>
-        <a class="ticker-item" href="https://github.com/xiaopeng12138/WACVR">WACVR Framework</a>
-        <a class="ticker-item" href="https://github.com/V-Sekai/godot-vrm">Godot VRM Support</a>
-        <a class="ticker-item" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR Mechanics</a>
-        <a class="ticker-item" href="https://github.com/mgschwan/VRWorkout">VRWorkout: Open Source Fitness</a>
-        <a class="ticker-item" href="https://github.com/SimulaVR/Simula">Simula VR Linux Desktop</a>
-        <a class="ticker-item" href="https://github.com/relativty/Relativty">Relativty Open Source VR Headset</a>
-        <a class="ticker-item" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards Engine</a>
-        <a class="ticker-item" href="https://github.com/talkol/spiderman">Advanced Spider-Man Mechanics</a>
+    <div class="server-list">
+        <div class="server-icon" style="background-color: var(--discord-blurple);">F</div>
+        <div class="server-icon">+</div>
     </div>
-</div>
 
-<div class="hero">
-    <h1>Dashboard</h1>
-    <p>Hover over the notification bar above to browse current FOSS updates.</p>
-</div>
+    <div class="sidebar">
+        <div class="sidebar-header">FOSS Universe</div>
+        <div class="channel-list">
+            <div class="channel-item active">announcements</div>
+            <div class="channel-item">general</div>
+            <div class="channel-item">resources</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-nav">
+            <div class="ticker-label">
+                <span style="color: var(--text-muted); margin-right: 8px;">#</span> announcements
+            </div>
+            <div class="news-ticker-container">
+                <div class="ticker-scroll">
+                    <a class="ticker-link" href="https://github.com/RedEdge967/Spider-Man">Spider-Man Simulation Update</a>
+                    <a class="ticker-link" href="https://codeberg.org/hurrycurry/hurrycurry">HurryCurry on Codeberg</a>
+                    <a class="ticker-link" href="https://m.youtube.com/watch?v=8K_fSWfOC1w&t=110s">Beyond All Reason Trailer</a>
+                    <a class="ticker-link" href="https://github.com/beyond-all-reason/Beyond-All-Reason">New BAR Engine Release</a>
+                    <a class="ticker-link" href="https://github.com/Snektron/linux-in-minecraft">Linux in Minecraft!</a>
+                    <a class="ticker-link" href="https://github.com/Eibriel/DeltaKayak?tab=readme-ov-file">DeltaKayak VR Repo</a>
+                    <a class="ticker-link" href="https://github.com/mousamax/VR-Bio-Game">VR Bio Game Early Access</a>
+                    <a class="ticker-link" href="https://github.com/rudokemper/google-maps-places-to-organic-maps">Organic Maps Converter</a>
+                    <a class="ticker-link" href="https://github.com/jbengey/ForestFire-VR_MSc">Forest Fire VR</a>
+                    <a class="ticker-link" href="https://github.com/EliaFantini/RocketMan-a-VR-videogame-created-with-Unity">RocketMan Unity Build</a>
+                    <a class="ticker-link" href="https://github.com/talkol/gameboy">Gameboy FOSS Emulator</a>
+                    <a class="ticker-link" href="https://github.com/UniVR/GolfVR">Golf VR Project</a>
+                    <a class="ticker-link" href="https://github.com/xiaopeng12138/WACVR">WACVR Framework</a>
+                    <a class="ticker-link" href="https://github.com/V-Sekai/godot-vrm">Godot VRM Support</a>
+                    <a class="ticker-link" href="https://github.com/dhcdht/OpenSaberVR">OpenSaber VR Mechanics</a>
+                    <a class="ticker-link" href="https://github.com/mgschwan/VRWorkout">VRWorkout Fitness</a>
+                    <a class="ticker-link" href="https://github.com/SimulaVR/Simula">Simula VR Linux Desktop</a>
+                    <a class="ticker-link" href="https://github.com/relativty/Relativty">Relativty VR Headset</a>
+                    <a class="ticker-link" href="https://github.com/VRCBilliards/vrcbce">VRC Billiards Engine</a>
+                    <a class="ticker-link" href="https://github.com/talkol/spiderman">Spider-Man Web Mechanics</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="message">
+                <div class="avatar"></div>
+                <div class="msg-content">
+                    <div class="msg-user">System Bot <span style="background: var(--discord-blurple); font-size: 10px; padding: 2px 4px; border-radius: 3px; vertical-align: middle;">BOT</span></div>
+                    <div class="msg-text">Welcome to the FOSS announcements channel. Check the ticker above for real-time project links!</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
