@@ -1,201 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open881 | Community - RuneScape</title>
+    <title>Open881 - 3D Torva Archive</title>
     <style>
-        :root {
-            --rs-gold: #c3a064;
-            --rs-blue: #00aaff;
-            --rs-bg: #090a0c;
-            --rs-card: #111419;
-            --rs-border: #2a2e35;
-        }
-
-        body {
-            margin: 0;
-            background: var(--rs-bg);
-            color: #ccc;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-        }
-
-        /* Top Bar - Authentically 2017 */
-        .top-nav {
-            background: rgba(0, 0, 0, 0.95);
-            border-bottom: 1px solid var(--rs-border);
-            height: 50px;
-            display: flex;
-            align-items: center;
-            padding: 0 10%;
-            justify-content: space-between;
-        }
-
-        .top-nav a {
-            color: var(--rs-gold);
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            padding: 0 15px;
-        }
-
-        /* Hero Carousel Section */
-        .carousel-container {
-            width: 100%;
-            background: #000;
-            height: 420px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-        }
-
-        .carousel-slide {
-            width: 100%;
-            max-width: 1200px;
-            height: 100%;
-            background: url('https://runescape.wiki/images/thumb/Menaphos_concept_art_3.jpg/1200px-Menaphos_concept_art_3.jpg') center/cover;
-            display: flex;
-            align-items: flex-end;
-            padding: 40px;
-            box-sizing: border-box;
-        }
-
-        .carousel-overlay {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px 40px;
-            border-left: 4px solid var(--rs-gold);
-            text-align: left;
-        }
-
-        .carousel-overlay h2 {
-            color: #fff;
-            margin: 0;
-            font-size: 28px;
-            text-transform: uppercase;
-        }
-
-        /* Main Community Columns */
-        .main-content {
-            max-width: 1200px;
-            margin: 30px auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 0 20px;
-        }
-
-        /* Section Boxes */
-        .community-box {
-            background: var(--rs-card);
-            border: 1px solid var(--rs-border);
-            padding: 0;
-        }
-
-        .box-header {
-            background: #1a1e25;
-            padding: 12px;
-            border-bottom: 1px solid var(--rs-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .box-header h3 {
-            margin: 0;
-            color: var(--rs-gold);
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        .box-content { padding: 15px; }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
-            text-decoration: none;
-            color: #aaa;
-        }
-
-        .social-link:hover { color: #fff; }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .main-content { grid-template-columns: 1fr; }
-            .carousel-container { height: 300px; }
-        }
+        body { margin: 0; background: #050505; overflow: hidden; font-family: sans-serif; }
+        #label { position: absolute; top: 20px; width: 100%; text-align: center; color: #c3a064; text-transform: uppercase; letter-spacing: 3px; }
     </style>
 </head>
 <body>
+    <div id="label">Torva Full Helm - Tier 80 Archive</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<nav class="top-nav">
-    <div class="logo" style="color:#fff; font-weight:bold;">OPEN881</div>
-    <div class="links">
-        <a href="#">Game Guide</a>
-        <a href="#">Community</a>
-        <a href="#">Support</a>
-        <a href="#" style="color:var(--rs-blue)">Join Now</a>
-    </div>
-</nav>
+    <script>
+        // 1. Setup Scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-<div class="carousel-container">
-    <div class="carousel-slide">
-        <div class="carousel-overlay">
-            <h2>The Golden City: Menaphos</h2>
-            <p>Archiving the greatest expansion of 2017. Check out the latest helms.</p>
-            <button style="background:var(--rs-gold); border:none; padding:10px 20px; cursor:pointer; font-weight:bold;">READ MORE</button>
-        </div>
-    </div>
-</div>
+        // 2. Lights (Authentic Nex-era lighting)
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5).normalize();
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040, 2));
 
-<div class="main-content">
-    <div class="community-box">
-        <div class="box-header">
-            <h3>Follow Us</h3>
-        </div>
-        <div class="box-content">
-            <a href="#" class="social-link">Facebook - 1.2M Followers</a>
-            <a href="#" class="social-link">Twitter - @Open881Archive</a>
-            <a href="#" class="social-link">YouTube - Latest Vids</a>
-            <a href="#" class="social-link">Reddit - r/Open881</a>
-        </div>
-    </div>
+        // 3. Constructing the Helm (Geometric Concept)
+        const group = new THREE.Group();
 
-    <div class="community-box">
-        <div class="box-header">
-            <h3>Recent News</h3>
-        </div>
-        <div class="box-content">
-            <p><strong>[Update]</strong> Helmets of 2025 Added.</p>
-            <hr style="border:0; border-top:1px solid #222;">
-            <p><strong>[Dev Blog]</strong> Behind the Sailing Skill.</p>
-            <hr style="border:0; border-top:1px solid #222;">
-            <p><strong>[Support]</strong> Account Security Tips.</p>
-        </div>
-    </div>
+        // Main Head Piece (Octahedron for that low-poly RS look)
+        const baseGeo = new THREE.OctahedronGeometry(1.5, 0);
+        const torvaMat = new THREE.MeshStandardMaterial({ 
+            color: 0x333333, // Dark Nex-steel
+            metalness: 0.8, 
+            roughness: 0.2,
+            flatShading: true 
+        });
+        const helmBase = new THREE.Mesh(baseGeo, torvaMat);
+        group.add(helmBase);
 
-    <div class="community-box">
-        <div class="box-header">
-            <h3>Live Streams</h3>
-            <span style="color:red; font-size:10px;">● LIVE</span>
-        </div>
-        <div class="box-content">
-            <div style="background:#000; height:120px; display:flex; align-items:center; justify-content:center;">
-                <p style="font-size:12px;">The Archive Showcase</p>
-            </div>
-            <p style="font-size:12px; margin-top:10px;">Join we on Twitch at 16:00 UTC.</p>
-        </div>
-    </div>
-</div>
+        // The "Torva" Jaw/Face Guard
+        const jawGeo = new THREE.ConeGeometry(1.8, 2, 4);
+        const jaw = new THREE.Mesh(jawGeo, torvaMat);
+        jaw.rotation.x = Math.PI;
+        jaw.position.y = -0.5;
+        group.add(jaw);
 
-<footer style="text-align:center; padding:40px; color:#555; font-size:11px;">
-    RuneScape® and Jagex® are registered trademarks of Jagex Ltd © 1999 - 2026.
-</footer>
+        // The Top Crest (The iconic spike)
+        const crestGeo = new THREE.BoxGeometry(0.2, 1.5, 0.8);
+        const crest = new THREE.Mesh(crestGeo, torvaMat);
+        crest.position.y = 1.2;
+        group.add(crest);
 
+        scene.add(group);
+        camera.position.z = 5;
+
+        // 4. Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            group.rotation.y += 0.01; // Slow rotation like the RS Inspect window
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
 </body>
 </html>
