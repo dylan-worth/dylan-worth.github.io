@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Disney World</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #87ceeb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        #ui { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            color: white; 
+            text-align: center;
+            width: 90%;
+            pointer-events: none; 
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 15px;
+        }
+        canvas { display: block; touch-action: none; } /* Prevents default mobile scrolling */
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h2 style="margin:0; font-size: 1.2rem;">✨ Mobile Magic Kingdom ✨</h2>
+        <p style="margin:5px 0 0; font-size: 0.8rem;">Touch to Rotate | Pinch to Zoom</p>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 100, 800);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(120, 80, 120);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for mobile performance
+        document.body.appendChild(renderer.domElement);
+
+        // Mobile-optimized controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2.1; // Prevent going under the ground
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(50, 100, 50);
+        scene.add(sun);
+
+        // Ground
+        const grass = new THREE.Mesh(
+            new THREE.CircleGeometry(400, 32),
+            new THREE.MeshStandardMaterial({ color: 0x44aa44 })
+        );
+        grass.rotation.x = -Math.PI / 2;
+        scene.add(grass);
+
+        // Castle Function
+        function buildCastle() {
+            const group = new THREE.Group();
+            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+            const blueMat = new THREE.MeshStandardMaterial({ color: 0x3366ff });
+
+            const base = new THREE.Mesh(new THREE.BoxGeometry(30, 15, 30), whiteMat);
+            base.position.y = 7.5;
+            group.add(base);
+
+            const addTurret = (x, z, h) => {
+                const t = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, h, 12), whiteMat);
+                t.position.set(x, h/2, z);
+                const r = new THREE.Mesh(new THREE.ConeGeometry(3.5, 10, 12), blueMat);
+                r.position.set(x, h + 5, z);
+                group.add(t, r);
+            };
+
+            addTurret(-12, -12, 30);
+            addTurret(12, -12, 30);
+            addTurret(0, 0, 50);
+            return group;
+        }
+        scene.add(buildCastle());
+
+        // Monorail
+        const train = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 10), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        scene.add(train);
+
+        // Mobile Resize Handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Loop
+        let t = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            t += 0.01;
+            
+            // Monorail Path
+            train.position.x = Math.cos(t * 0.4) * 150;
+            train.position.z = Math.sin(t * 0.4) * 150;
+            train.position.y = 12;
+            train.lookAt(Math.cos((t + 0.1) * 0.4) * 150, 12, Math.sin((t + 0.1) * 0.4) * 150);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
