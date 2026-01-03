@@ -2,162 +2,199 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Open881 - Community Home</title>
+    <title>Open881 | The Archive</title>
     <style>
-        body {
-            background-color: #2e261d; /* Dark Stone/Wood color */
-            font-family: "Times New Roman", Times, serif;
-            color: #3b2811;
-            margin: 0;
-            padding: 0;
+        :root {
+            --rs-gold: #c3a064;
+            --rs-dark: #0a0a0b;
+            --rs-blue-glow: rgba(0, 180, 255, 0.2);
         }
 
-        /* Top Banner */
-        header {
-            background-color: #1a150f;
-            height: 120px;
+        body {
+            margin: 0;
+            background-color: var(--rs-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #eee;
+            overflow-x: hidden;
+        }
+
+        /* 2017 Top Navigation Bar */
+        nav {
+            background: rgba(0, 0, 0, 0.85);
+            border-bottom: 1px solid #333;
             display: flex;
             justify-content: center;
-            align-items: center;
-            border-bottom: 3px solid #634d2e;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .logo {
-            font-size: 48px;
-            color: #e6b800;
+        nav a {
+            color: var(--rs-gold);
+            text-decoration: none;
+            padding: 0 25px;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 2px 2px #000;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
         }
 
-        /* Main Wrapper */
-        .wrapper {
-            width: 900px;
-            margin: 20px auto;
-            background-color: #d9c5a0; /* Parchment Color */
-            border: 5px solid #634d2e;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.5);
-            padding: 20px;
+        nav a:hover { color: #fff; }
+
+        /* Hero Header with Cinematic Backdrop */
+        .hero {
+            height: 500px;
+            background: linear-gradient(to bottom, rgba(10,10,11,0) 60%, rgba(10,10,11,1) 100%), 
+                        url('https://images.alphacoders.com/694/694116.jpg') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 60px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(195, 160, 100, 0.5);
+        }
+
+        .cta-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: linear-gradient(#d4af37, #8a6d3b);
+            border: 1px solid #000;
+            color: #000;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* News Section (2017 Grid Layout) */
+        .container {
+            max-width: 1100px;
+            margin: -50px auto 50px auto;
+            position: relative;
+        }
+
+        .news-grid {
             display: grid;
-            grid-template-columns: 200px 1fr 200px;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
 
-        /* Columns */
-        .sidebar-left, .sidebar-right {
-            font-size: 14px;
+        .news-card {
+            background: #151518;
+            border: 1px solid #2a2a2e;
+            transition: transform 0.3s, border-color 0.3s;
+            overflow: hidden;
         }
 
-        .content {
-            border-left: 1px solid #b5a079;
-            border-right: 1px solid #b5a079;
-            padding: 0 20px;
+        .news-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--rs-gold);
         }
 
-        /* Headers */
-        h2 {
-            background: #4d3a24;
-            color: #e6b800;
-            padding: 5px 10px;
-            font-size: 18px;
-            margin-top: 0;
-            border: 1px solid #2e2213;
+        .card-img {
+            width: 100%;
+            height: 150px;
+            background: #222;
         }
 
-        /* News Posts */
-        .news-item {
-            margin-bottom: 25px;
+        .card-body {
+            padding: 20px;
         }
 
-        .news-item h3 {
-            margin: 0;
-            color: #7d1100; /* RS Classic/RS2 link red */
-            text-decoration: underline;
-            cursor: pointer;
+        .card-body h3 {
+            margin: 0 0 10px 0;
+            color: var(--rs-gold);
         }
 
-        .news-date {
-            font-size: 12px;
-            color: #555;
-            font-style: italic;
+        .category {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
         }
 
-        /* Buttons/Links */
-        ul { list-style: none; padding: 0; }
-        li { margin-bottom: 10px; }
-        a { color: #3b2811; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; color: #7d1100; }
-
-        .poll-box {
-            background: #c8b088;
-            padding: 10px;
-            border: 1px solid #9c845e;
-            text-align: center;
+        /* Sidebar Look */
+        .featured-banner {
+            grid-column: span 2;
+            background: linear-gradient(45deg, #1a1a1e, #0a0a0b);
+            border: 1px solid var(--rs-gold);
+            padding: 40px;
+            display: flex;
+            align-items: center;
         }
+
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">Open881</div>
-</header>
+<nav>
+    <a href="#">Game Guide</a>
+    <a href="#">Community</a>
+    <a href="#">The Archive</a>
+    <a href="#">World Map</a>
+    <a href="#" style="color: #4db8ff;">Shop</a>
+</nav>
 
-<div class="wrapper">
-    <div class="sidebar-left">
-        <h2>Navigation</h2>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">The Archive</a></li>
-            <li><a href="#">Headgear Timeline</a></li>
-            <li><a href="#">Grand Exchange</a></li>
-            <li><a href="#">World Map</a></li>
-        </ul>
-        <br>
-        <h2>Player Info</h2>
-        <ul>
-            <li><a href="#">Hiscores</a></li>
-            <li><a href="#">Adventurer's Log</a></li>
-        </ul>
-    </div>
-
-    <div class="content">
-        <h2>Latest News</h2>
-        
-        <div class="news-item">
-            <h3>Archiving 2025: The Sailing Launch</h3>
-            <span class="news-date">19th November 2025</span>
-            <p>Today we add the final entry to our headwear chronicle. The Grand Captain's Tricorne has been added to the museum...</p>
-        </div>
-
-        <div class="news-item">
-            <h3>The Transition: 2008-2012</h3>
-            <span class="news-date">3rd January 2026</span>
-            <p>We've successfully updated the hand-drawn wiki to include the transition from RS2 to RS3, featuring the Torva Full Helm and Ganodermic Visor.</p>
-        </div>
-        
-        <p style="text-align:center;">--- End of News ---</p>
-    </div>
-
-    <div class="sidebar-right">
-        <h2>Latest Poll</h2>
-        <div class="poll-box">
-            <p>Which helmet art style is your favorite?</p>
-            <form>
-                <input type="radio"> Hand-drawn<br>
-                <input type="radio"> Low-poly<br>
-                <input type="radio"> Modern RS3<br><br>
-                <button type="button">Vote!</button>
-            </form>
-        </div>
-        <br>
-        <h2>Development</h2>
-        <p>Open881 is currently tracking 25 years of history.</p>
-    </div>
+<div class="hero">
+    <h1>OPEN881</h1>
+    <p style="color: var(--rs-gold); font-style: italic;">"25 Years of Gielinor, Documented."</p>
+    <button class="cta-btn">Explore History</button>
 </div>
 
-<footer style="text-align:center; padding: 20px; color: #b5a079; font-size: 12px;">
-    &copy; 2026 Open881 Archive Project. All headwear designs property of Jagex Ltd.
-</footer>
+<div class="container">
+    <div class="news-grid">
+        <div class="featured-banner">
+            <div>
+                <span class="category">Major Update</span>
+                <h2>The 2026 Chronicle is Live</h2>
+                <p>We've successfully updated the headwear database with high-resolution artifacts from 2001 through 2025.</p>
+                <a href="#" style="color: var(--rs-gold);">Read more...</a>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <div class="card-img" style="background: url('https://imgur.com/8fK0uP0.png') center/cover;"></div>
+            <div class="card-body">
+                <span class="category">Dev Blog</span>
+                <h3>Behind the Sketches</h3>
+                <p>A look at the hand-drawn style that defined our early archives.</p>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <div class="card-body">
+                <span class="category">OSRS Update</span>
+                <h3>Sailing: Year One Recap</h3>
+                <p>Reflecting on the impact of the Captain's Tricorne and nautical combat.</p>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <div class="card-body">
+                <span class="category">RS3 News</span>
+                <h3>The Amascut Legacy</h3>
+                <p>Unlocking the secrets of the Tier 100 Crown of Amascut.</p>
+            </div>
+        </div>
+
+        <div class="news-card">
+            <div class="card-body">
+                <span class="category">Community</span>
+                <h3>Top 10 Helms of all Time</h3>
+                <p>The players have voted. See who beat out the Helm of Neitiznot.</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
