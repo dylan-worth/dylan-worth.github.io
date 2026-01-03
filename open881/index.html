@@ -3,182 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open881 | Community Archive</title>
+    <title>Open881 | Community - RuneScape</title>
     <style>
         :root {
             --rs-gold: #c3a064;
-            --rs-dark: #0a0a0b;
-            --rs-card: #151518;
-            --rs-nav: rgba(0, 0, 0, 0.9);
+            --rs-blue: #00aaff;
+            --rs-bg: #090a0c;
+            --rs-card: #111419;
+            --rs-border: #2a2e35;
         }
 
         body {
             margin: 0;
-            background-color: var(--rs-dark);
-            color: #eee;
-            font-family: 'Open Sans', Arial, sans-serif;
-            line-height: 1.6;
+            background: var(--rs-bg);
+            color: #ccc;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
         }
 
-        /* Responsive Navigation */
-        nav {
-            background: var(--rs-nav);
-            border-bottom: 2px solid #333;
+        /* Top Bar - Authentically 2017 */
+        .top-nav {
+            background: rgba(0, 0, 0, 0.95);
+            border-bottom: 1px solid var(--rs-border);
+            height: 50px;
             display: flex;
+            align-items: center;
+            padding: 0 10%;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 5%;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
 
-        .logo {
-            color: #fff;
-            font-weight: bold;
-            font-size: 22px;
-            letter-spacing: 2px;
+        .top-nav a {
+            color: var(--rs-gold);
             text-decoration: none;
-        }
-
-        .nav-links { display: flex; gap: 20px; }
-        .nav-links a { color: var(--rs-gold); text-decoration: none; font-size: 14px; text-transform: uppercase; }
-
-        /* Mobile Menu Toggle (Simplified) */
-        @media (max-width: 768px) {
-            .nav-links { display: none; } /* In a real site, we'd use a burger menu here */
-        }
-
-        /* 2017 Hero Carousel */
-        .carousel {
-            position: relative;
-            height: 60vh;
-            min-height: 400px;
-            background: linear-gradient(rgba(0,0,0,0.1), var(--rs-dark)), 
-                        url('https://images.alphacoders.com/694/694116.jpg') center/cover no-repeat;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .carousel-content h1 {
-            font-size: clamp(32px, 8vw, 64px);
             text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 10px;
-        }
-
-        .carousel-content p { color: var(--rs-gold); font-size: clamp(14px, 4vw, 20px); }
-
-        .btn-play {
-            margin-top: 20px;
-            padding: 12px 35px;
-            background: linear-gradient(#d4af37, #8a6d3b);
-            color: #000;
+            font-size: 12px;
             font-weight: bold;
-            border: none;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 2px;
+            letter-spacing: 1px;
+            padding: 0 15px;
         }
 
-        /* Card-Based Community Grid */
-        .container {
+        /* Hero Carousel Section */
+        .carousel-container {
+            width: 100%;
+            background: #000;
+            height: 420px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .carousel-slide {
+            width: 100%;
             max-width: 1200px;
-            margin: -40px auto 40px;
+            height: 100%;
+            background: url('https://runescape.wiki/images/thumb/Menaphos_concept_art_3.jpg/1200px-Menaphos_concept_art_3.jpg') center/cover;
+            display: flex;
+            align-items: flex-end;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .carousel-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 40px;
+            border-left: 4px solid var(--rs-gold);
+            text-align: left;
+        }
+
+        .carousel-overlay h2 {
+            color: #fff;
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+        }
+
+        /* Main Community Columns */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             padding: 0 20px;
         }
 
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
+        /* Section Boxes */
+        .community-box {
             background: var(--rs-card);
-            border: 1px solid #222;
-            transition: 0.3s;
+            border: 1px solid var(--rs-border);
+            padding: 0;
+        }
+
+        .box-header {
+            background: #1a1e25;
+            padding: 12px;
+            border-bottom: 1px solid var(--rs-border);
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .card:hover { border-color: var(--rs-gold); transform: translateY(-5px); }
-
-        .card-img {
-            width: 100%;
-            height: 180px;
-            background: #222;
-            object-fit: cover;
+        .box-header h3 {
+            margin: 0;
+            color: var(--rs-gold);
+            font-size: 14px;
+            text-transform: uppercase;
         }
 
-        .card-text { padding: 20px; flex-grow: 1; }
-        .card-text span { color: var(--rs-gold); font-size: 11px; text-transform: uppercase; }
-        .card-text h3 { margin: 10px 0; font-size: 20px; }
+        .box-content { padding: 15px; }
 
-        /* Footer */
-        footer {
-            padding: 40px;
-            text-align: center;
-            border-top: 1px solid #222;
-            font-size: 13px;
-            color: #666;
+        .social-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+            text-decoration: none;
+            color: #aaa;
+        }
+
+        .social-link:hover { color: #fff; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .carousel-container { height: 300px; }
         }
     </style>
 </head>
 <body>
 
-<nav>
-    <a href="#" class="logo">OPEN881</a>
-    <div class="nav-links">
+<nav class="top-nav">
+    <div class="logo" style="color:#fff; font-weight:bold;">OPEN881</div>
+    <div class="links">
         <a href="#">Game Guide</a>
         <a href="#">Community</a>
-        <a href="#">Archive</a>
-        <a href="#" style="color: #4db8ff;">Membership</a>
+        <a href="#">Support</a>
+        <a href="#" style="color:var(--rs-blue)">Join Now</a>
     </div>
 </nav>
 
-<div class="carousel">
-    <div class="carousel-content">
-        <h1>THE CHRONICLE</h1>
-        <p>25 Years of Gielinor's Finest Gear</p>
-        <button class="btn-play">Enter The Archive</button>
-    </div>
-</div>
-
-<div class="container">
-    <div class="news-grid">
-        <div class="card" style="grid-column: span min(2, auto);">
-            <img src="https://imgur.com/8fK0uP0.png" class="card-img" alt="Slayer Helm">
-            <div class="card-text">
-                <span>Game Update | 2026</span>
-                <h3>Refining the 2008-2015 Database</h3>
-                <p>We've completed the mobile-optimised transition for all RS2 and Early RS3 headgear entries.</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-text">
-                <span>Community News</span>
-                <h3>Amascut's Shadow</h3>
-                <p>The Tier 100 Crown has been officially cataloged into our RS3 modern section.</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-text">
-                <span>Developer Blog</span>
-                <h3>Behind the Sketches</h3>
-                <p>How we adapted the 2005 "Quest Journal" art style for 2024 items.</p>
-            </div>
+<div class="carousel-container">
+    <div class="carousel-slide">
+        <div class="carousel-overlay">
+            <h2>The Golden City: Menaphos</h2>
+            <p>Archiving the greatest expansion of 2017. Check out the latest helms.</p>
+            <button style="background:var(--rs-gold); border:none; padding:10px 20px; cursor:pointer; font-weight:bold;">READ MORE</button>
         </div>
     </div>
 </div>
 
-<footer>
-    &copy; 2026 Open881 Archive Project. Not affiliated with Jagex Ltd.
+<div class="main-content">
+    <div class="community-box">
+        <div class="box-header">
+            <h3>Follow Us</h3>
+        </div>
+        <div class="box-content">
+            <a href="#" class="social-link">Facebook - 1.2M Followers</a>
+            <a href="#" class="social-link">Twitter - @Open881Archive</a>
+            <a href="#" class="social-link">YouTube - Latest Vids</a>
+            <a href="#" class="social-link">Reddit - r/Open881</a>
+        </div>
+    </div>
+
+    <div class="community-box">
+        <div class="box-header">
+            <h3>Recent News</h3>
+        </div>
+        <div class="box-content">
+            <p><strong>[Update]</strong> Helmets of 2025 Added.</p>
+            <hr style="border:0; border-top:1px solid #222;">
+            <p><strong>[Dev Blog]</strong> Behind the Sailing Skill.</p>
+            <hr style="border:0; border-top:1px solid #222;">
+            <p><strong>[Support]</strong> Account Security Tips.</p>
+        </div>
+    </div>
+
+    <div class="community-box">
+        <div class="box-header">
+            <h3>Live Streams</h3>
+            <span style="color:red; font-size:10px;">● LIVE</span>
+        </div>
+        <div class="box-content">
+            <div style="background:#000; height:120px; display:flex; align-items:center; justify-content:center;">
+                <p style="font-size:12px;">The Archive Showcase</p>
+            </div>
+            <p style="font-size:12px; margin-top:10px;">Join we on Twitch at 16:00 UTC.</p>
+        </div>
+    </div>
+</div>
+
+<footer style="text-align:center; padding:40px; color:#555; font-size:11px;">
+    RuneScape® and Jagex® are registered trademarks of Jagex Ltd © 1999 - 2026.
 </footer>
 
 </body>
