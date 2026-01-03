@@ -1,51 +1,30 @@
-/* style.css */
-
-body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Prevents scrollbars from the 3D canvas */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+body { margin: 0; overflow: hidden; font-family: sans-serif; background: #222; }
 
 #ui {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10; /* Ensures UI stays above the 3D scene */
-    background: rgba(255, 255, 255, 0.8);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    pointer-events: none; /* Allows mouse clicks to pass through to the game unless clicking a button */
+    position: absolute; top: 20px; left: 20px; z-index: 10;
+    background: rgba(255, 255, 255, 0.9); padding: 15px;
+    border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-#ui h1 {
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
-    color: #2d5a27;
+#pen-menu {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: white; border: 4px solid #5d4037; padding: 20px;
+    z-index: 20; width: 260px; text-align: center; border-radius: 15px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
 }
 
-#stats {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    font-weight: bold;
+.hidden { display: none; }
+
+.slot {
+    border: 2px dashed #8d6e63; padding: 12px; margin: 10px 0;
+    background: #fff9f0; border-radius: 8px; font-size: 0.9rem; text-align: left;
 }
 
 button {
-    pointer-events: auto; /* Re-enable clicking for buttons */
-    background: #4caf50;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
+    background: #4caf50; color: white; border: none; padding: 10px 20px;
+    border-radius: 5px; cursor: pointer; font-weight: bold;
 }
 
-button:hover {
-    background: #45a049;
-}
+button:hover { background: #45a049; }
 
-button:active {
-    background: #3d8b40;
-}
+#close-menu { background: #e74c3c; margin-top: 10px; }
