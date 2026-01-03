@@ -1,4 +1,4 @@
-import { Animal } from './Animal.js';
+import { Animal } from './animal.js';
 
 export class Pen {
     constructor() {
