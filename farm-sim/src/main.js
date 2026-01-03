@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Animal } from './Animal.js';
-import { Pen } from './Pen.js';
-import { World } from './World.js';
+import { Animal } from './animal.js';
+import { Pen } from './pen.js';
+import { World } from './world.js';
 
 /**
  * --- 1. CORE INITIALIZATION ---
