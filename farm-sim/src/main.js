@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Pen } from './Pen.js';
-import { World } from './World.js';
+import { Pen } from './pen.js';
+import { World } from './world.js';
 
 // --- 1. SETUP ---
 const scene = new THREE.Scene();
