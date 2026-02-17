@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rockefeller Dossier | Archive 2026</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --accent-color: #b22222; /* Deep blood red for the Rockefeller archive */
+            --gold-accent: #d4af37;
+            --text-color: #dcdcdc;
+            --sidebar-bg: #141418;
+            --box-bg: #1a1a1f;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            display: flex;
+            line-height: 1.7;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 40px 25px;
+            border-right: 2px solid var(--accent-color);
+            position: fixed;
+            box-sizing: border-box;
+        }
+
+        .seal-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            border: 1px solid #444;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .sidebar h2 {
+            color: var(--gold-accent);
+            text-align: center;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            list-style: none;
+            padding: 0;
+            font-size: 0.85rem;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .stats li { margin-bottom: 15px; }
+        .stats label { display: block; color: var(--accent-color); font-weight: bold; font-size: 0.7rem; text-transform: uppercase; }
+
+        /* Main Content */
+        .content {
+            margin-left: 320px;
+            padding: 60px 100px;
+            max-width: 900px;
+        }
+
+        .back-link { color: var(--gold-accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 40px; display: inline-block; }
+
+        h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: -2px; }
+        .subtitle { font-size: 1.2rem; color: var(--accent-color); font-style: italic; margin-bottom: 50px; }
+
+        /* Themed Sections */
+        .dossier-section {
+            background: var(--box-bg);
+            padding: 30px;
+            border-radius: 4px;
+            border: 1px solid #222;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .dossier-section::before {
+            content: "CLASSIFIED";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 0.6rem;
+            color: #444;
+            letter-spacing: 2px;
+        }
+
+        h3 { color: var(--gold-accent); border-bottom: 1px solid var(--accent-color); padding-bottom: 10px; margin-top: 0; }
+
+        .quote-block {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            padding: 20px;
+            border-left: 3px solid var(--accent-color);
+            margin: 25px 0;
+            color: #00ff00; /* Terminal green */
+            font-size: 0.95rem;
+        }
+
+        /* Family Grid */
+        .family-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .card:hover { border-color: var(--gold-accent); background: #16161a; }
+        .p-name { display: block; font-weight: bold; color: var(--gold-accent); }
+        .p-year { font-size: 0.8rem; color: #777; }
+
+        /* Overlay */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay-box {
+            background: #1a1a1f;
+            padding: 50px;
+            border: 2px solid var(--accent-color);
+            max-width: 600px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="seal-container">
+            <img src="crests/rockefeller_seal.png" alt="Seal" style="width: 80%;">
+        </div>
+        <h2>Rockefeller</h2>
+        <ul class="stats">
+            <li><label>Primary Engine</label>Standard Oil / Petrochemicals</li>
+            <li><label>Institutional Control</label>Medicine, Education, Banking</li>
+            <li><label>Key Entities</label>Chase Bank, Trilateral Commission, CFR</li>
+            <li><label>Philosophy</label>The Prussian Model / Social Engineering</li>
+        </ul>
+    </aside>
+
+    <main class="content">
+        <a href="../families.html" class="back-link">← Return to Circle</a>
+        
+        <h1>Rockefeller</h1>
+        <p class="subtitle">Architects of the American Century</p>
+
+        <div class="dossier-section">
+            <h3>I. The Flexner Report & Medical Monopoly</h3>
+            <p>
+                In 1910, the Rockefeller Foundation, alongside Carnegie, funded the <strong>Flexner Report</strong>. This document was the "hatchet" used to dismantle holistic, herbal, and homeopathic medical schools.
+            </p>
+            <div class="quote-block">
+                "The patient is the target; the drug is the bullet." - Rockefeller Medicine Principle.
+            </div>
+            <p>
+                By linking funding exclusively to schools that taught <strong>petrochemical-based pharmaceuticals</strong>, the family created the modern medical-industrial complex. Natural cures were rebranded as "quackery" to ensure a captured market for Standard Oil's chemical offshoots.
+            </p>
+        </div>
+
+        <div class="dossier-section">
+            <h3>II. Jekyll Island & The Debt Trap</h3>
+            <p>
+                In November 1910, Rockefeller representatives (including Senator Nelson Aldrich, whose daughter married John D. Rockefeller Jr.) met secretly at <strong>Jekyll Island</strong> to draft the Federal Reserve Act.
+            </p>
+            
+            <p>
+                This move shifted the US from a sovereign currency to a private debt-based system. Through <strong>Chase National Bank</strong>, the family secured a permanent seat at the head of the global financial table, profiting from the interest on the very money the government prints.
+            </p>
+        </div>
+
+        <div class="dossier-section">
+            <h3>III. General Education Board: Molding Workers</h3>
+            <p>
+                Established in 1902 with $180 million, the **General Education Board** (GEB) was not designed to foster critical thinking. Its purpose was the mass production of a compliant labor force.
+            </p>
+            <div class="quote-block">
+                "In our dreams, people yield themselves with perfect docility to our molding hands... We shall not try to make these people into philosophers or men of learning." <br>
+                — Frederick T. Gates, Advisor to Rockefeller (1913)
+            </div>
+            <p>
+                The school system was redesigned to mirror the factory: bells, rows, obedience to authority, and standardized testing. "Thinkers" were seen as a threat to the stability of the industrial hierarchy.
+            </p>
+        </div>
+
+        <h3>Leadership Archive (Active 2026)</h3>
+        <div class="family-grid">
+            <div class="card" onclick="showDossier('david')">
+                <span class="p-name">David Rockefeller</span>
+                <span class="p-year">1915 — 2017</span>
+                <span class="p-title">The Globalist Architect (CFR/Trilateral)</span>
+            </div>
+            <div class="card" onclick="showDossier('jay')">
+                <span class="p-name">Jay Rockefeller</span>
+                <span class="p-year">b. 1937</span>
+                <span class="p-title">Former Senator / Intelligence Chair</span>
+            </div>
+        </div>
+    </main>
+
+    <div id="overlay" onclick="closeDossier()">
+        <div class="overlay-box" onclick="event.stopPropagation()">
+            <h2 id="d-name" style="color:var(--gold-accent)"></h2>
+            <p id="d-bio" style="color:#ccc; font-family: sans-serif;"></p>
+            <button onclick="closeDossier()" style="background:var(--accent-color); color:white; border:none; padding:10px 20px; cursor:pointer;">CLOSE Dossier</button>
+        </div>
+    </div>
+
+    <script>
+        const dossiers = {
+            david: {
+                name: "David Rockefeller (1915-2017)",
+                bio: "The youngest son of John D. Jr. He served as Chairman of Chase Manhattan and was the primary force behind the Trilateral Commission and the Council on Foreign Relations. He famously stated in his memoirs: 'If the charge is that I am a globalist... I stand guilty, and I am proud of it.'"
+            },
+            jay: {
+                name: "John Davison 'Jay' Rockefeller IV (b. 1937)",
+                bio: "A rare Democratic Rockefeller who served as a U.S. Senator for West Virginia for 30 years. He was the Chairman of the Senate Intelligence Committee, wielding immense influence over the surveillance state and national security apparatus."
+            }
+        };
+
+        function showDossier(id) {
+            document.getElementById('d-name').innerText = dossiers[id].name;
+            document.getElementById('d-bio').innerText = dossiers[id].bio;
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function closeDossier() {
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The House of Medici | Archive</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0f;
+            --accent-color: #d4af37;
+            --text-color: #e0e0e0;
+            --sidebar-bg: #16161a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Georgia', serif;
+            margin: 0;
+            line-height: 1.6;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 40px 20px;
+            border-right: 1px solid #222;
+            position: fixed;
+        }
+
+        .crest-container {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .crest-container img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .sidebar h2 {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        .stats-list li {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 5px;
+        }
+
+        .stats-list span {
+            color: var(--accent-color);
+            display: block;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 340px;
+            padding: 60px 80px;
+            max-width: 800px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0 0 20px 0;
+            color: var(--accent-color);
+        }
+
+        .lead {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #bbb;
+            margin-bottom: 40px;
+        }
+
+        .highlight-box {
+            background: #1a1a1e;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="crest-container">
+            <img src="crests/medici_crest.png" alt="Medici Crest">
+        </div>
+        <h2>House of Medici</h2>
+        <ul class="stats-list">
+            <li><span>Origin</span>Florence, Republic of Florence</li>
+            <li><span>Rise to Power</span>15th Century</li>
+            <li><span>Key Figures</span>Cosimo the Elder, Lorenzo the Magnificent</li>
+            <li><span>Legacy</span>Banking, Renaissance Art, Papacy</li>
+            <li><span>End of Reign</span>1737 (Death of Gian Gastone)</li>
+        </ul>
+    </aside>
+
+    <main class="content">
+        <a href="../index.html" class="back-link">← Return to Circle</a>
+        
+        <h1>The House of Medici</h1>
+        
+        <p class="lead">"Festina Lente" (Make Haste Slowly)</p>
+
+        <p>
+            The Medici family, also known as the House of Medici, was a powerful Italian banking dynasty that first rose to prominence under Cosimo de' Medici in the Republic of Florence during the first half of the 15th century.
+        </p>
+
+        <div class="highlight-box">
+            <strong>The Godfathers of the Renaissance:</strong> 
+            The Medici wealth was built upon the Medici Bank—the largest in Europe during its peak. They used this wealth to fund the works of Brunelleschi, Botticelli, Leonardo da Vinci, and Michelangelo, effectively sparking the Italian Renaissance.
+        </div>
+
+        <h3>Political Influence</h3>
+        <p>
+            From their base in Florence, the family produced four Popes of the Catholic Church (Leo X, Clement VII, Pius IV, and Leon XI) and two Queens of France (Catherine de' Medici and Marie de' Medici).
+        </p>
+
+        <p>
+            The family’s influence eventually shifted from commerce to hereditary nobility. In 1532, the family acquired the hereditary title of Duke of Florence, and in 1569, the Grand Duchy of Tuscany was established, which they ruled for two centuries.
+        </p>
+
+        <h3>The Seven Balls</h3>
+        <p>
+            The Medici coat of arms is famous for its "palle" or balls. While legends suggest they represent medicinal pills (referring to the name "Medici" or doctors) or dents in a shield from a giant's mace, they most likely originated as coins, representing their banking origins.
+        </p>
+    </main>
+
+</body>
+</html>

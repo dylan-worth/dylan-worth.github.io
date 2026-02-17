@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIE Master Field Journal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Gochi+Hand&family=Indie+Flower&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #fdf6e3;
+            --ink: #234d74;
+            --graph-line: #e0d8c3;
+            --red-pen: #b91c1c;
+            --tape-color: rgba(211, 197, 164, 0.4);
+        }
+
+        body {
+            background-color: #2c2c2c; /* Dark desk background */
+            font-family: 'Architects Daughter', cursive;
+            color: var(--ink);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The 'Book' Spine container */
+        .journal-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            padding-bottom: 100px;
+        }
+
+        .notebook-page {
+            background-color: var(--paper);
+            background-image: 
+                linear-gradient(var(--graph-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--graph-line) 1px, transparent 1px);
+            background-size: 30px 30px;
+            width: 100%;
+            max-width: 800px;
+            min-height: 1000px;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            border-left: 15px solid #8b4513; /* Leather spine look */
+            border-radius: 5px 15px 15px 5px;
+        }
+
+        /* Taped-on effect */
+        .taped-note {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            transform: rotate(1deg);
+        }
+
+        .taped-note::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 30%;
+            width: 80px;
+            height: 25px;
+            background: var(--tape-color);
+            transform: rotate(-3deg);
+        }
+
+        .sketch-box {
+            border: 2px solid var(--ink);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        h1, h2, h3 { font-family: 'Gochi Hand', cursive; }
+        h1 { text-align: center; font-size: 3.5rem; margin-top: 0; }
+        h2 { color: var(--red-pen); border-bottom: 1px dashed var(--red-pen); }
+
+        .highlight { background: rgba(255, 235, 59, 0.4); }
+        .math { font-family: 'Indie Flower', cursive; font-weight: bold; font-size: 1.3rem; color: var(--red-pen); }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .answer-reveal {
+    color: transparent;
+    border-bottom: 1px dotted var(--red-pen);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+.answer-reveal:active, .answer-reveal:hover {
+    color: var(--red-pen);
+    background: rgba(185, 28, 28, 0.1);
+}
+    </style>
+</head>
+<body>
+
+<div class="journal-container">
+
+    <div class="notebook-page">
+        <h1>CIE Field Notes</h1>
+        
+        <h2>I. Microbiology & Bioaerosols</h2>
+        <p><strong>Condition 1:</strong> Normal Ecology (The Goal).<br>
+           <strong>Condition 2:</strong> Settled Spores (Tape lift/Swab).<br>
+           <strong>Condition 3:</strong> Active Growth (Source removal needed).</p>
+        
+        <div class="sketch-box">
+            <h3>Spore 'Signatures'</h3>
+            <ul>
+                <li><span class="highlight">Aspergillus:</span> 2-3μm. Small, buoyant. Causes Aflatoxins.</li>
+                <li><span class="highlight">Stachybotrys:</span> 10-15μm. Heavy, sticky. High water activity ($a_w > 0.90$). Releases Satratoxins (Trichothecenes).</li>
+                <li><span class="highlight">Chaetomium:</span> Indicator of chronic, long-term wetting.</li>
+            </ul>
+        </div>
+
+        <h2>II. HEPA Filtration</h2>
+        <p>Standard: <strong>99.97% @ 0.3 microns.</strong></p>
+        <div class="taped-note">
+            <strong>Physics Fact:</strong> 0.3μm is the <em>Most Penetrating Particle Size (MPPS)</em>. 
+            Smaller particles (< 0.1μm) are actually caught easily via <strong>Brownian Motion</strong> (zig-zagging).
+        </div>
+        <p class="math">As filter loads: Efficiency ↑ / Airflow ↓</p>
+        
+        <div class="page-number">Page 01</div>
+    </div>
+
+    <div class="notebook-page">
+        <h2>III. Hazardous Materials (Hazmat)</h2>
+        <div class="sketch-box">
+            <h3>The Magic Dates</h3>
+            <ul>
+                <li><strong>Lead-Based Paint:</strong> Banned in <span class="highlight">1978</span>.</li>
+                <li><strong>Asbestos:</strong> ACM defined as <span class="highlight">> 1%</span>. Presumed (PACM) in pre-1981 buildings.</li>
+                <li><strong>Formaldehyde:</strong> Off-gassing increases with <span class="red-pen">Heat & Humidity</span>. Common in MDF/Particleboard.</li>
+            </ul>
+        </div>
+
+        <h2>IV. HVAC Investigation</h2>
+        <p>Where we look for the "Bloom":</p>
+        <ul>
+            <li><strong>Drain Pans:</strong> Look for standing water (Gram-neg bacteria/Endotoxins).</li>
+            <li><strong>Cooling Coils:</strong> Condensation leads to <em>Cladosporium</em> growth.</li>
+            <li><strong>Internal Liners:</strong> If porous insulation gets wet, it <span class="red-pen">must</span> be replaced.</li>
+        </ul>
+        
+        <div class="page-number">Page 02</div>
+    </div>
+
+    <div class="notebook-page">
+        <h2>V. Psychrometrics & Math</h2>
+        <p><strong>Dew Point:</strong> The temp where air saturates. If surface temp < dew point = condensation.</p>
+        
+        <div class="taped-note" style="transform: rotate(-1deg); background: #e3f2fd;">
+            <h3>Calculations for the Work Plan:</h3>
+            <span class="math">ACH = (CFM × 60) / Vol</span><br>
+            Standard = <strong>4 Air Changes Per Hour</strong><br>
+            Neg. Pressure = <strong>-0.02 in-wc</strong>
+        </div>
+
+        <h2>VI. The Consultant Code</h2>
+        <div class="sketch-box" style="border-color: var(--red-pen);">
+            <p><strong>WE ARE CIEs:</strong> We write the protocol. We do NOT perform the remediation (Conflict of Interest).</p>
+            <p><strong>The Golden Rule:</strong> Never tell a client "You are safe." Report on Condition 1 vs Condition 3. Refer medical questions to doctors.</p>
+        </div>
+        
+        <div class="taped-note" style="background: #fff9c4; border-left: 5px solid #fbc02d;">
+            <strong>Pro Tip:</strong> If internal fungal ecology doesn't match outdoor ecology, you have a hidden source!
+        </div>
+        
+        <div class="page-number">Page 03</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Post-Remediation Verification</h1>
+        
+        <h2>VII. The PRV Sequence (Clearance)</h2>
+        <p>Before we pull the samples, the <strong>Visual Inspection</strong> is #1. If it looks dusty, it fails before the lab even sees it.</p>
+        
+        <div class="sketch-box">
+            <h3>Visual & Forensic Check:</h3>
+            <ul>
+                <li>[ ] <strong>White Glove Test:</strong> No visible dust/debris on surfaces.</li>
+                <li>[ ] <strong>Moisture Check:</strong> All materials <span class="highlight">at or below "Dry Standard."</span></li>
+                <li>[ ] <strong>Odor Check:</strong> No detectable MVOCs (Musty smells).</li>
+                <li>[ ] <strong>Containment:</strong> Still under -0.02 in-wc pressure until passing.</li>
+            </ul>
+        </div>
+
+        <h2>VIII. Sampling Logic</h2>
+        <p>Don't just look at the numbers; look at the <strong>Ecology</strong>.</p>
+        
+        
+        <div class="taped-note" style="background: #f1f8e9; border-left: 5px solid #4caf50;">
+            <strong>The "Pass" Criteria:</strong>
+            <ol>
+                <li>Total indoor counts ≤ Outdoor counts (Generally).</li>
+                <li>Indoor <span class="highlight">Fungal Diversity</span> mirrors Outdoor.</li>
+                <li>ZERO "Target Species" (Stachy, Chaetomium) inside.</li>
+            </ol>
+        </div>
+
+        <h2>IX. Troubleshooting a Failure</h2>
+        <p>If the count is low but the species is wrong (e.g., 200 spores of <em>Aspergillus</em> inside vs. 0 outside):</p>
+        <div class="math" style="font-size: 1.1rem; border: 1px dashed var(--red-pen); padding: 10px;">
+            DIAGNOSIS: HIDDEN SOURCE OR CROSS-CONTAMINATION. <br>
+            → Check wall cavities / HVAC boots.
+        </div>
+
+        <div class="sketch-box" style="margin-top: 40px; transform: rotate(-1deg);">
+            <h3 style="color: var(--red-pen);">Final Sign-off:</h3>
+            <p>Report must state: "The remediation area has achieved <strong>Condition 1</strong> (Normal Fungal Ecology)."</p>
+        </div>
+
+        
+        <div class="page-number">Page 04</div>
+
+        
+    </div>
+    <div class="notebook-page">
+        <h1>Investigation Tools</h1>
+        
+        <h2>X. The CIE's "Eyes"</h2>
+        <p>We don't just see with our eyes; we see with <strong>physics.</strong></p>
+        
+        <div class="sketch-box">
+            <h3>1. Moisture Meters (Non-Invasive vs. Invasive)</h3>
+            <ul>
+                <li><strong>Non-Invasive (Capacitance):</strong> Good for fast scanning. Does not damage walls. High chance of "false positives" near metal studs/wires.</li>
+                <li><strong>Invasive (Pin-type):</strong> Measures <em>Resistance</em> between pins. This is the <strong>Gold Standard</strong> for proving actual %MC (Moisture Content).</li>
+            </ul>
+        </div>
+
+        <div class="taped-note" style="transform: rotate(1deg); border-left: 5px solid #ff5722;">
+            <strong>Thermal Imaging (IR Cameras):</strong>
+            <p>IR cameras detect <em>temperature differentials</em>, not moisture. We look for <strong>Evaporative Cooling</strong> (cold spots) to find hidden leaks. <br>
+            <span class="red-pen">*Verify with a moisture meter!*</span></p>
+        </div>
+
+        <h2>XI. Specialized Meters</h2>
+        <ul>
+            <li><strong>Laser Particle Counter:</strong> Used to check if our HEPA scrubbers are leaking or to find "spikes" in dust/spores in real-time.</li>
+            <li><strong>PID (Photoionization Detector):</strong> Used for VOCs and <strong>Formaldehyde</strong>. If it has a lamp, it can "see" the chemicals.</li>
+            <li><strong>Anemometer:</strong> Measures air velocity (FPM). Essential for calculating <span class="highlight">CFM and ACH.</span></li>
+        </ul>
+
+        <div class="math" style="text-align: center;">
+            CFM = Velocity (FPM) × Area (sq. ft)
+        </div>
+
+        <h2>XII. Boreoscope Inspection</h2>
+        <p>The "Snake Cam." Use this to look for <em>Condition 3</em> growth inside wall cavities without tearing down the whole wall. </p>
+        
+        <div class="taped-note" style="background: #fff3e0; border-left: 5px solid #fb8c00;">
+            <strong>Pro Tip:</strong> If you drill a hole for a boreoscope, <strong>HEPA vacuum</strong> the dust immediately. We don't want to aerosolize the problem we're trying to find!
+        </div>
+
+        
+        <div class="page-number">Page 05</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Safety & Containment</h1>
+        
+        <h2>XIII. PPE (Personal Protective Equipment)</h2>
+        <p>We follow the <strong>OSHA Respiratory Protection Standard (29 CFR 1910.134).</strong></p>
+        
+        <div class="sketch-box">
+            <h3>The Respirator Tier List:</h3>
+            <ul>
+                <li><strong>N-95:</strong> Minimum for small "Condition 2" areas. Disposable.</li>
+                <li><strong>Half-Mask (P100):</strong> The standard for most inspections. P100 filters catch <span class="highlight">oil-based and non-oil-based particles.</span></li>
+                <li><strong>Full-Face P100:</strong> Adds eye protection. Essential if using biocides or in high-spore environments.</li>
+                <li><strong>PAPR:</strong> Powered Air Purifying Respirator. Best for heat stress or long durations.</li>
+            </ul>
+        </div>
+        
+
+        <h2>XIV. Containment Types (S520)</h2>
+        <p>The goal is <strong>Source Isolation.</strong></p>
+        
+        <div class="taped-note" style="background: #eceff1; border-left: 5px solid #607d8b;">
+            <strong>Level 1: Source Containment</strong>
+            <p>Typically 6 mil poly taped directly over the growth or a small "glove bag" setup. Used for areas < 10 sq. ft.</p>
+        </div>
+
+        <div class="taped-note" style="background: #fff; transform: rotate(-1deg);">
+            <strong>Level 2: Full Containment</strong>
+            <p>Critical barriers over all openings. Requires a <strong>Decon Chamber</strong> (Airlock). This is where we MUST maintain our <span class="red-pen">-0.02 in-wc</span> pressure.</p>
+        </div>
+
+        <h2>XV. Donning & Doffing (The Order Matters!)</h2>
+        <p>We doff (take off) in the <strong>Decon Room</strong> to prevent cross-contamination.</p>
+        <div class="math" style="font-size: 1.1rem; border: 2px solid var(--ink); color: var(--ink);">
+            DOFFING ORDER:<br>
+            1. Suit (Roll inside out) → 2. Gloves → 3. Respirator (Last!)
+        </div>
+
+        <div class="sketch-box" style="border-style: dotted;">
+            <p><strong>CIE Exam Tip:</strong> If you see a question about "Fit Testing," remember it must be done <em>annually</em> and you must be <em>clean-shaven</em> for a tight seal.</p>
+        </div>
+
+        
+        <div class="page-number">Page 06</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Pathogens & Sewage</h1>
+        
+        <h2>XVI. Beyond Fungi: The "Dirty" Jobs</h2>
+        <p>As CIEs, we often deal with Category 3 (Black Water) events. This isn't just mold; it's a <strong>biohazard.</strong></p>
+        
+        <div class="sketch-box">
+            <h3>Key Pathogens to Know:</h3>
+            <ul>
+                <li><strong>Gram-Negative Bacteria:</strong> Found in sewage and standing water. When they die, they release <span class="highlight">Endotoxins</span> (Lipopolysaccharides).</li>
+                <li><strong>Legionella:</strong> Gram-negative bacteria that loves warm water/HVAC cooling towers. Causes Legionnaires' Disease (Inhalation hazard!).</li>
+                <li><strong>E. coli & Coliforms:</strong> The "Indicator Organisms" we test for to prove fecal contamination (Sewage leaks).</li>
+            </ul>
+        </div>
+        
+
+        <h2>XVII. Sewage Remediation (Category 3)</h2>
+        <p>Follow the <span class="red-pen">IICRC S500</span> (Standard for Water Restoration).</p>
+        <div class="taped-note" style="background: #fce4ec; border-left: 5px solid #d81b60;">
+            <strong>The "Porous" Rule:</strong>
+            <p>In a Category 3 loss, all porous materials (carpet, pad, drywall, insulation) that were touched by the water <strong>MUST BE REMOVED.</strong> There is no cleaning them.</p>
+        </div>
+
+        <div class="math" style="text-align: center; border-color: #d81b60; color: #d81b60;">
+            ATP Testing = Rapid Hygiene Check<br>
+            (Measures Adenosine Triphosphate - aka "Living Energy")
+        </div>
+        
+        <div class="page-number">Page 07</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>The Business of CIE</h1>
+        
+        <h2>XVIII. Protecting the License</h2>
+        <p>The biggest risk in our field isn't the mold; it's the <strong>lawyers.</strong></p>
+        
+        <div class="sketch-box" style="border-style: double;">
+            <h3>Insurance Requirements:</h3>
+            <ul>
+                <li><strong>General Liability (GL):</strong> Standard business insurance.</li>
+                <li><strong>Professional Liability (E&O):</strong> "Errors & Omissions." This covers your <em>advice</em> and your <em>protocols</em>.</li>
+                <li><strong>Pollution/Mold Endorsement:</strong> Most GL policies <em>exclude</em> mold. We need a specific rider for "Microbial Contamination."</li>
+            </ul>
+        </div>
+
+        <h2>XIX. The Report Standard</h2>
+        <p>Your report is a legal document. It must be objective.</p>
+        <div class="taped-note" style="background: #f3f4f6; transform: rotate(1deg);">
+            <strong>The CIE Paper Trail:</strong>
+            <ol>
+                <li>Scope of Work / Limitations (What you DIDN'T test).</li>
+                <li>Observations (Visual findings).</li>
+                <li>Data (Lab results/Moisture maps).</li>
+                <li><strong>Protocol:</strong> The "Recipe" for the remediator.</li>
+            </ol>
+        </div>
+
+        <h2>XX. Conflict of Interest (Ethics)</h2>
+        <p>To remain an unbiased third party, <strong>we</strong> must never have a financial interest in the remediation company performing the work on our projects.</p>
+        
+        <div class="math" style="color: var(--ink); border-color: var(--ink);">
+            The "Expert Witness" Rule:<br>
+            Stick to the data. Don't speculate on health effects.
+        </div>
+
+        <div class="doodle" style="bottom: 80px; left: 50px; font-style: italic;">
+            *Remember: If it's not in the report, it didn't happen!*
+        </div>
+        
+        
+        <div class="page-number">Page 08</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Lab Data Analysis</h1>
+        
+        <h2>XXI. Reading the "Fungal Signature"</h2>
+        <p>A lab report is just numbers until a CIE interprets the <strong>Ecology</strong>. We look for imbalances, not just high counts.</p>
+        
+        <div class="sketch-box">
+            <h3>Red Flag Indicators:</h3>
+            <ul>
+                <li><strong>Target Species:</strong> Even a "Low" count of <span class="highlight">Stachybotrys</span> or <span class="highlight">Chaetomium</span> is a fail inside. They aren't buoyant; if they're in the air, they are growing nearby.</li>
+                <li><strong>Out of Balance:</strong> Outdoor is 90% <em>Cladosporium</em>, but Indoor is 90% <em>Penicillium/Aspergillus</em>. This is <strong>Fungal Dominance.</strong></li>
+                <li><strong>Hyphal Fragments:</strong> High counts of "roots" in the air mean the mold is actively being disturbed or is growing vigorously.</li>
+            </ul>
+        </div>
+        
+
+        <h2>XXII. The "Null Hypothesis"</h2>
+        <p>Assume the indoor air is the same as outdoor. If the data rejects this (higher counts or different species), you have found your source.</p>
+
+        <div class="taped-note" style="background: #fff3e0; transform: rotate(-1deg); border-left: 5px solid #ff9800;">
+            <strong>CIE Exam Trap:</strong> 
+            "The indoor count is 400 and outdoor is 4,000. Does it pass?" 
+            <br><span class="red-pen">Answer: Not necessarily.</span> If that 400 is all <em>Aspergillus</em> and the 4,000 is all <em>Cladosporium</em>, it's a <strong>Condition 3</strong> failure.
+        </div>
+        
+        <div class="page-number">Page 09</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Advanced Case Studies</h1>
+        
+        <h2>XXIII. Scenario: The "Sick" Office</h2>
+        <p><strong>Symptoms:</strong> Occupants complain of headaches and "musty" smells only when the AC kicks on.</p>
+        <div class="sketch-box">
+            <h3>Investigation Steps:</h3>
+            <ol>
+                <li>Check the <strong>AHU</strong> (Air Handling Unit). Is the drain pan trapped? Is there standing water?</li>
+                <li>Check <strong>Vapor Pressure.</strong> Is the building under positive or negative pressure?</li>
+                <li>Sample for <strong>MVOCs</strong> and <strong>Endotoxins</strong> (Gram-negative bacteria).</li>
+            </ol>
+        </div>
+
+        <h2>XXIV. Scenario: The "Ghost" Mold</h2>
+        <p><strong>Observation:</strong> Dark staining on the exterior-facing wall corners behind a bed. No pipe leaks found.</p>
+        
+        <div class="taped-note" style="background: #e1f5fe; border-left: 5px solid #03a9f4;">
+            <strong>Building Science Analysis:</strong>
+            <p>1. Use IR Camera: Found a cold spot (Thermal Bridge).<br>
+               2. Surface Temp = 52°F / Dew Point = 56°F.<br>
+               3. <strong>Conclusion:</strong> Condensation, not a leak. Solution: Increase airflow and insulation.</p>
+        </div>
+        
+
+        <div class="math" style="border-color: var(--ink); color: var(--ink); margin-top: 40px;">
+            The CIE Mantra:<br>
+            "Find the water, find the mold. Fix the water, fix the mold."
+        </div>
+
+        <div class="doodle" style="bottom: 50px; right: 40px;">
+            *Keep your moisture map clean!*
+        </div>
+        
+        <div class="page-number">Page 10</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>CIE Master Quiz (15 Questions)</h1>
+        <p><em>Click or hover over the dotted lines to reveal the "Red Pen" answers.</em></p>
+
+        <div class="sketch-box">
+            <p><strong>1. MPPS:</strong> What is the most penetrating particle size for a HEPA filter? <br>
+            <span class="answer-reveal">0.3 microns.</span></p>
+
+            <p><strong>2. The Lead Rule:</strong> Residential lead-based paint was banned in what year? <br>
+            <span class="answer-reveal">1978. (Assume lead in all pre-1978 homes).</span></p>
+
+            <p><strong>3. Negative Pressure:</strong> What is the minimum pressure differential for containment? <br>
+            <span class="answer-reveal">-0.02 inches of water column (in-wc).</span></p>
+
+            <p><strong>4. ACH Calculation:</strong> How many Air Changes per Hour are standard for mold remediation? <br>
+            <span class="answer-reveal">4 ACH.</span></p>
+
+            <p><strong>5. Condition 2:</strong> What does "Condition 2" represent in the IICRC S520? <br>
+            <span class="answer-reveal">Settled spores or fungal fragments (Contaminated, but no active growth).</span></p>
+
+            <p><strong>6. Humidity Threshold:</strong> At what Relative Humidity (RH) does Aspergillus typically begin to bloom? <br>
+            <span class="answer-reveal">60% RH.</span></p>
+
+            <p><strong>7. High Water Activity:</strong> Which 'heavy' mold requires $a_w > 0.90$ to grow? <br>
+            <span class="answer-reveal">Stachybotrys (or Chaetomium).</span></p>
+
+            <p><strong>8. The "Sick" HVAC:</strong> Where do you find Gram-negative bacteria/Endotoxins in an AC unit? <br>
+            <span class="answer-reveal">In the condensate drain pan (standing water).</span></p>
+
+            <p><strong>9. Filtration Logic:</strong> As a HEPA filter becomes "loaded" with dust, what happens to its efficiency? <br>
+            <span class="answer-reveal">Efficiency increases (but airflow decreases).</span></p>
+
+            <p><strong>10. ACM Percentage:</strong> A material is Asbestos-Containing (ACM) if it is greater than... <br>
+            <span class="answer-reveal">1% asbestos by weight.</span></p>
+
+            <p><strong>11. Formaldehyde Factors:</strong> What two environmental factors accelerate HCHO off-gassing? <br>
+            <span class="answer-reveal">Heat (Temperature) and Humidity.</span></p>
+
+            <p><strong>12. PRV Step 1:</strong> What is the first and most important step of a Post-Remediation Verification? <br>
+            <span class="answer-reveal">The Visual Inspection (must be clean and dry).</span></p>
+
+            <p><strong>13. ERH Definition:</strong> What does "Equilibrium Relative Humidity" measure? <br>
+            <span class="answer-reveal">The humidity at the surface of a material (directly related to water activity).</span></p>
+
+            <p><strong>14. Professional Liability:</strong> Which insurance covers a CIE’s advice and protocols? <br>
+            <span class="answer-reveal">Errors and Omissions (E&O) / Professional Liability.</span></p>
+
+            <p><strong>15. The Medical Rule:</strong> When a client asks if mold is making them sick, what is our response? <br>
+            <span class="answer-reveal">"I am not a physician. Please consult a doctor regarding health symptoms."</span></p>
+        </div>
+        
+        <div class="page-number">Page 11</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Building Envelope Defects</h1>
+        <p><em>Where the "skin" of the building fails.</em></p>
+        
+        <h2>XXV. The Bulk Water Barrier</h2>
+        <p>If the flashing is wrong, the mold is inevitable. We look for these "Sketched" defects:</p>
+        
+        <div class="sketch-box">
+            <h3>1. Kick-out Flashing</h3>
+            <p>Missing at the roof-to-wall intersection. Without it, water runs down the siding and <span class="highlight">behind the house wrap</span>, rot occurring at the rim joist.</p>
+        </div>
+        
+
+        <div class="taped-note" style="background: #fff9c4; transform: rotate(-1deg); border-left: 5px solid #fbc02d;">
+            <strong>2. The Ice Dam Effect:</strong>
+            <p>Heat escaping from the attic melts snow on the roof. Water runs down to the cold eaves and refreezes, creating a "dam." 
+            <br><span class="red-pen">Result:</span> Standing water backs up under shingles and into the soffit.</p>
+        </div>
+        
+
+        <h2>XXVI. Window & Door Fenestrations</h2>
+        <ul>
+            <li><strong>Head Flashing:</strong> Missing "Drip Caps" above windows allow water to track inward.</li>
+            <li><strong>Reverse Laps:</strong> When house wrap or flashing is tucked <em>under</em> the layer below it instead of over (like a shingle).</li>
+        </ul>
+
+        <div class="sketch-box" style="border-style: dashed;">
+            <h3>XXVII. The Vapor Barrier "Sandwich"</h3>
+            <p>Never put a vapor barrier on <strong>both</strong> sides of a wall. This traps moisture inside the wall cavity, leading to "Hidden" Condition 3 growth on the studs.</p>
+        </div>
+
+        <div class="math" style="font-size: 1.1rem; color: var(--red-pen); border-color: var(--red-pen);">
+            CIE RULE: Buildings MUST be able to dry in at least one direction (Inside or Outside).
+        </div>
+
+        <div class="doodle" style="bottom: 80px; left: 40px; transform: rotate(-5deg);">
+            *Look for stained headers!*
+        </div>
+        
+        
+        <div class="page-number">Page 12</div>
+    </div>
+
+    <div class="notebook-page">
+        <h1>Crawlspace & Basement Dynamics</h1>
+        <p><em>The foundation of the Indoor Environment.</em></p>
+        
+        <h2>XXVIII. The Stack Effect (Chimney Effect)</h2>
+        <p>Warm air rises and escapes through the attic, creating a <span class="highlight">negative pressure</span> at the bottom of the house. This literally sucks air up from the crawlspace into the living area.</p>
+        
+        <div class="sketch-box">
+            <h3>The 50% Rule:</h3>
+            <p>Up to <strong>50%</strong> of the air on the first floor of a home can originate from the crawlspace or basement. 
+            <br><span class="red-pen">CIE Insight:</span> If there is Condition 3 growth in the crawl, the whole house is likely Condition 2.</p>
+        </div>
+        
+
+        <h2>XXIX. Capillary Rise (Wicking)</h2>
+        <p>Water can rise through porous masonry (concrete blocks, brick) due to surface tension. This is why we see "efflorescence"—that white, salty crust on walls.</p>
+        
+        <div class="taped-note" style="background: #e8f5e9; border-left: 5px solid #4caf50;">
+            <strong>Efflorescence vs. Mold:</strong>
+            <p>1. Efflorescence dissolves in water; Mold does not.<br>
+               2. Efflorescence is crystalline/salty; Mold is organic/filamentous.</p>
+        </div>
+
+        <h2>XXX. Encapsulation Standards</h2>
+        <p>When **we** write a protocol for a wet crawlspace, we often specify:</p>
+        <ul>
+            <li><strong>Vapor Barrier:</strong> Minimum 12-mil to 20-mil poly, seams taped and sealed to the piers.</li>
+            <li><strong>Dehumidification:</strong> Sized for the square footage. Set to keep RH below <span class="highlight">55%</span>.</li>
+            <li><strong>Foundation Vents:</strong> Sealed shut in a modern "closed" system.</li>
+        </ul>
+        
+
+        <div class="math" style="border-color: var(--ink); color: var(--ink); margin-top: 30px;">
+            Psychrometrics in the Pit:<br>
+            Cool crawlspaces + Humid summer air = Condensation on floor joists.
+        </div>
+
+        <div class="doodle" style="bottom: 50px; right: 50px;">
+            *Watch for "hanging" insulation—it traps moisture against the wood!*
+        </div>
+        
+        <div class="page-number">Page 13</div>
+    </div>
+
+</div>
+
+</body>
+</html>

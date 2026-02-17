@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13 Families Circle - Interactive</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0f;
+            --accent-color: #d4af37;
+            --text-color: #f0f0f0;
+            --card-bg: #1c1c21;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 700px;
+            height: 700px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .center-axis {
+            width: 15px;
+            height: 15px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 25px var(--accent-color);
+            z-index: 10;
+        }
+
+        .family-node {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            background: var(--card-bg);
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            padding: 10px;
+            font-size: 0.85rem;
+            z-index: 5;
+            box-sizing: border-box;
+        }
+
+        .family-node:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* Expanded State */
+        .family-node.expanded {
+            width: 350px;
+            height: auto;
+            min-height: 250px;
+            border-radius: 20px;
+            z-index: 100;
+            background: #25252b;
+            cursor: default;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            border-color: var(--accent-color);
+            padding: 30px;
+        }
+
+        .details {
+            display: none;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #bbb;
+        }
+
+        .expanded .details {
+            display: block;
+        }
+
+        /* The "More Details" Button */
+        .more-info-btn {
+            display: none;
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .expanded .more-info-btn {
+            display: inline-block;
+        }
+
+        .more-info-btn:hover {
+            background: var(--accent-color);
+            color: #000;
+        }
+
+        .close-btn {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #888;
+        }
+
+        .expanded .close-btn {
+            display: block;
+        }
+
+        .close-btn:hover { color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="circle-container">
+    <div class="center-axis"></div>
+</div>
+
+<script>
+    // We added the 'file' property to link to their respective pages
+    const families = [
+        { name: "Medici", file: "./families/medici.html", desc: "A powerful Italian banking dynasty that rose to prominence in Florence during the 15th century." },
+        { name: "Rockefeller", file: "./families/rockefellers.html", desc: "A powerful American family that changed our entire medicine, financial, and education system."},
+        { name: "Farnese", file: "./families/farnese.html", desc: "A powerful Italian noble family originating in the Lazio region with roots tracing back to the 10th century." },
+        { name: "Massimo", file: "./families/massimo.html", desc: "One of the great aristocratic families of Rome, members of the Papal nobility since the 16th century." },
+        { name: "Colonna", file: "./families/colonna.html", desc: "A prominent Italian family forming part of the papal nobility, pivotal in medieval and Renaissance Rome." },
+        { name: "Pallavicini", file: "./families/pallavicini.html", desc: "An ancient Italian noble family whose name dates back to the 11th century." },
+        { name: "Torlonia", file: "./families/torlonia.html", desc: "An Italian princely family from Rome which acquired a huge fortune in the 18th century." },
+        { name: "Saxe-Gotha", file: "./families/saxegotha.html", desc: "One of the Saxon duchies held by the Ernestine branch of the Wettin dynasty." },
+        { name: "Rothschild", file: "./families/rothschilds.html", desc: "A wealthy Ashkenazi Jewish noble banking family originally from Frankfurt, Germany." },
+        { name: "Cavendish", file: "./families/cavendish.html", desc: "A British noble family of Anglo-Norman origin, despite their Anglo-Saxon name." },
+        { name: "Windsor", file: "./families/windsor.html", desc: "The current royal house of the United Kingdom and other Commonwealth realms." },
+        { name: "Romanov", file: "./families/romanov.html", desc: "The reigning imperial house of Russia from 1613 to 1917." },
+        { name: "Habsburg", file: "./families/habsburg.html", desc: "One of the most influential royal houses of Europe, also known as the House of Austria." },
+        { name: "Plantagenet", file: "./families/plantagenet.html", desc: "A royal house which originated in the French county of Anjou; ruled England for over 300 years." }
+    ];
+
+    const container = document.getElementById('circle-container');
+    const radius = 280; 
+    const total = families.length;
+
+    families.forEach((fam, i) => {
+        const angle = (i * 2 * Math.PI) / total;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+
+        const node = document.createElement('div');
+        node.className = 'family-node';
+        node.style.left = `calc(50% + ${x}px - 55px)`;
+        node.style.top = `calc(50% + ${y}px - 55px)`;
+        
+        node.innerHTML = `
+            <span class="close-btn">&times;</span>
+            <strong>${fam.name}</strong>
+            <div class="details">${fam.desc}</div>
+            <a href="${fam.file}" class="more-info-btn">More Details</a>
+        `;
+
+        node.addEventListener('click', (e) => {
+            if (node.classList.contains('expanded')) return;
+            document.querySelectorAll('.family-node').forEach(n => n.classList.remove('expanded'));
+            node.classList.add('expanded');
+        });
+
+        node.querySelector('.close-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            node.classList.remove('expanded');
+        });
+
+        container.appendChild(node);
+    });
+</script>
+
+</body>
+</html>
