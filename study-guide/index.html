@@ -794,106 +794,52 @@
         <div class="page-number">Page 18</div>
     </div>
 
-            <div class="notebook-page" id="protocol-gen">
-        <h1>CIE Protocol Architect</h1>
-        <p><em>Standard of Care: IICRC S520 & S500 Compliance.</em></p>
+            
+                <div class="notebook-page">
+        <h1>HVAC System Investigation</h1>
+        <p><em>The #1 source of litigation in indoor air quality.</em></p>
+        
+        <h2>XLIV. The Component Checklist</h2>
+        <p>We follow the air from the intake to the supply. Every stop is a potential bio-reservoir.</p>
+        
+        <div class="sketch-box">
+            <h3>Key Inspection Points:</h3>
+            <ul>
+                <li><strong>The Filter:</strong> Is it bypass-prone? Is it a MERV 8 or 13? High MERV can cause <span class="highlight">low airflow</span>, leading to coil freezing.</li>
+                <li><strong>Evaporator Coil:</strong> The wettest part of the system. Check for "Dirty Sock Syndrome" (bacterial growth on fins).</li>
+                <li><strong>Condensate Pan & Drain:</strong> Standing water = Gram-negative bacteria. Is the P-trap primed?</li>
+                <li><strong>Plenum/Duct Liner:</strong> Internal fiberglass insulation is <span class="red-pen">non-restorable</span> if it gets wet or colonized.</li>
+            </ul>
+        </div>
+        
 
-        <div class="sketch-box" style="background: rgba(255,255,255,0.4); border-style: double;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div>
-                    <label><strong>Building Type:</strong></label><br>
-                    <select id="buildType" style="width: 100%; font-family: 'Architects Daughter';">
-                        <option value="Residential">Residential</option>
-                        <option value="Commercial">Commercial</option>
-                        <option value="Healthcare">Healthcare (High Risk)</option>
-                    </select>
-                </div>
-                <div>
-                    <label><strong>Containment:</strong></label><br>
-                    <select id="containmentType" style="width: 100%; font-family: 'Architects Daughter';">
-                        <option value="Source">Source (Level 1)</option>
-                        <option value="Full">Full (Level 2 - Critical Barriers)</option>
-                    </select>
-                </div>
-            </div>
+        <h2>XLV. Pressure & The "Plenum Leak"</h2>
+        <p>If the **Return Plenum** (the "sucking" side) has a leak in a crawlspace or attic, it will pull contaminated air from those spaces and blast it throughout the house.</p>
+        
+        <div class="taped-note" style="background: #e1f5fe; border-left: 5px solid #0288d1;">
+            <strong>The P-Trap Problem:</strong>
+            <p>If the drain line is on the <em>negative</em> side of the fan and has no trap (or a dry one), the fan will suck air <strong>UP</strong> the drain line, preventing water from leaving. 
+            <br><span class="red-pen">Result:</span> The pan overflows into the emergency pan or the floor.</p>
+        </div>
+        
 
-            <div style="margin-top: 15px;">
-                <label><strong>Source of Moisture:</strong></label><br>
-                <select id="sourceType" style="width: 100%; font-family: 'Architects Daughter';">
-                    <option value="Found">Groundwater Incursion</option>
-                    <option value="Pipe">Domestic Water Leak</option>
-                    <option value="Sewage">Category 3 / Sewage</option>
-                    <option value="Condense">HVAC Condensation</option>
-                </select>
-            </div>
+        <h2>XLVI. Duct Cleaning: NADCA Standards</h2>
+        <p>CIEs don't "clean" ducts, but we specify the protocol. 
+        <br>• <strong>Source Removal:</strong> Mechanical agitation (brushes/whips) + High-volume HEPA vacuum.
+        <br>• <strong>No Sealants:</strong> We generally avoid "encapsulating" or "sealing" mold inside ducts; we want it <em>out</em>.</p>
 
-            <div style="margin-top: 15px; font-size: 0.85rem;">
-                <strong>Structural Checklist:</strong><br>
-                <input type="checkbox" id="insul"> Insulation Involved 
-                <input type="checkbox" id="studs"> Structural Studs Colonized 
-                <input type="checkbox" id="hidden"> Hidden Growth (Wall Cavity)
-            </div>
-
-            <button onclick="generateDetailedProtocol()" style="margin-top: 20px; width: 100%; padding: 12px; font-family: 'Gochi Hand'; font-size: 1.4rem; cursor: pointer; background: var(--ink); color: white; border: none; border-radius: 5px; box-shadow: 2px 2px 0px var(--red-pen);">
-                🖋️ Script Remediation Protocol
-            </button>
+        <div class="math" style="text-align: center; border: 1px dashed var(--ink); padding: 10px;">
+            MERV Rating (Minimum Efficiency Reporting Value):<br>
+            Higher MERV = Smaller particles captured. <br>
+            (CIE Tip: MERV 13 is the "Gold Standard" for IAQ).
         </div>
 
-        <div id="protocolOutput" class="taped-note" style="display: none; border-left: 8px solid var(--red-pen); background: #fff;">
-            <h3 style="margin-top: 0; color: var(--red-pen); text-decoration: underline;">OFFICIAL REMEDIATION PROTOCOL</h3>
-            <div id="planText" style="font-size: 0.9rem; white-space: pre-wrap; line-height: 1.4;"></div>
+        <div class="doodle" style="bottom: 40px; right: 40px;">
+            *Is there "ghosting" around the supply vents? Check for soot or high moisture!*
         </div>
-
+        
         <div class="page-number">Page 19</div>
     </div>
-
-    <script>
-        function generateDetailedProtocol() {
-            const build = document.getElementById('buildType').value;
-            const cont = document.getElementById('containmentType').value;
-            const source = document.getElementById('sourceType').value;
-            const hasInsul = document.getElementById('insul').checked;
-            const hasStuds = document.getElementById('studs').checked;
-            const hasHidden = document.getElementById('hidden').checked;
-            
-            let p = `SITE CLASSIFICATION: ${build}\n`;
-            p += `------------------------------------------\n`;
-            p += `1. ENGINEERING CONTROLS:\n`;
-            p += `- Establish ${cont} Containment using 6-mil fire-retardant poly.\n`;
-            p += `- Implement Negative Pressure: Min -0.02 in-wc relative to unaffected areas.\n`;
-            p += `- Air Filtration: Minimum 4 Air Changes per Hour (ACH) using HEPA-filtered NAMs.\n`;
-            if(build === "Healthcare") p += `- CRITICAL: Require 3-chamber Decon Unit and manometer logging.\n`;
-
-            p += `\n2. REMOVAL & SOURCE CONTROL:\n`;
-            if(source === "Sewage") {
-                p += `- CAT 3 PROTOCOL: Remove all porous/semi-porous materials (drywall, carpet, OSB) up to 24" past high-water mark.\n`;
-                p += `- BIOCIDE: Apply EPA-registered disinfectant to structural framing after cleaning.\n`;
-            } else {
-                p += `- Condition 3 Removal: Controlled demolition of affected drywall under localized HEPA vacuum shroud.\n`;
-            }
-            
-            if(hasInsul) p += `- INSULATION: Porous insulation is non-restorable; remove 12" beyond visible impact.\n`;
-            if(hasHidden) p += `- WALL CAVITY: Inspect backside of opposite drywall; if colonization exists, expand scope.\n`;
-            
-            p += `\n3. CLEANING METHODOLOGY (HEPA-Sandwich):\n`;
-            p += `- Step A: HEPA vacuum all surfaces in containment.\n`;
-            p += `- Step B: Damp wipe with antimicrobial/surfactant.\n`;
-            if(hasStuds) p += `- Step C: Abrasive cleaning (wire brush/sanding) on framing to remove ingrained hyphae.\n`;
-            p += `- Step D: Final HEPA vacuum after surfaces are dry.\n`;
-
-            p += `\n4. POST-REMEDIATION VERIFICATION (PRV):\n`;
-            p += `- Visual: No visible dust, debris, or growth (Condition 1).\n`;
-            p += `- Olfactory: No detectable Microbial Volatile Organic Compounds (mVOCs).\n`;
-            p += `- Moisture: Framing must be <16% Wood Moisture Content (WMC).\n`;
-            p += `- Air Sampling: Bioaerosol counts must be statistically lower or comparable to outdoor controls and show similar fungal ecology.`;
-
-            document.getElementById('planText').innerText = p;
-            document.getElementById('protocolOutput').style.display = "block";
-        }
-    </script>
-
-
-
 
 
 </div>
