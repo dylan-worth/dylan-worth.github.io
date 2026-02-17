@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Glass Chess</title>
+    <style>
+        body { margin: 0; background: #020205; overflow: hidden; font-family: sans-serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px; color: rgba(255,255,255,0.7);
+            letter-spacing: 2px; text-transform: uppercase; pointer-events: none;
+        }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="ui">Liquid Glass Chess // Prototype</div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // --- Core Engine ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        document.body.appendChild(renderer.domElement);
+
+        // --- Environment (Crucial for Glass Beauty) ---
+        // We create a fake "studio" by drawing a gradient to a canvas
+        const genCubeMap = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const context = canvas.getContext('2d');
+            const gradient = context.createLinearGradient(0, 0, 0, 512);
+            gradient.addColorStop(0, '#0a0a1a');
+            gradient.addColorStop(0.5, '#1a1a2e');
+            gradient.addColorStop(1, '#0f0f1f');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 512, 512);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.mapping = THREE.EquirectangularReflectionMapping;
+            return tex;
+        };
+        scene.environment = genCubeMap();
+
+        // --- Materials ---
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            transmission: 1.0,
+            thickness: 0.5,
+            roughness: 0.05,
+            ior: 1.5,
+            color: 0xffffff,
+            attenuationColor: 0x99ccff,
+            attenuationDistance: 1,
+            transparent: true
+        });
+
+        const waterMaterial = new THREE.MeshPhysicalMaterial({
+            transmission: 1.0,
+            thickness: 1.2,
+            roughness: 0.01,
+            ior: 1.33,
+            color: 0xffffff,
+            clearcoat: 1.0,
+            attenuationColor: 0x00ffff,
+            attenuationDistance: 0.8
+        });
+
+        // --- The Board ---
+        const boardGroup = new THREE.Group();
+        const boardBase = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.4, 8.5), glassMaterial);
+        boardBase.position.y = -0.25;
+        scene.add(boardBase);
+
+        // Add a grid of glowing lines
+        const gridHelper = new THREE.GridHelper(8, 8, 0x00ffff, 0x444444);
+        gridHelper.position.y = -0.04;
+        scene.add(gridHelper);
+
+        // --- Spawning Pieces ---
+        const createPiece = (x, z, type) => {
+            let geometry;
+            if (type === 'pawn') geometry = new THREE.SphereGeometry(0.3, 32, 32);
+            else if (type === 'king') geometry = new THREE.CylinderGeometry(0.25, 0.4, 1.2, 32);
+            else geometry = new THREE.IcosahedronGeometry(0.4, 1);
+
+            const piece = new THREE.Mesh(geometry, waterMaterial);
+            piece.position.set(x - 3.5, 0.4, z - 3.5);
+            scene.add(piece);
+        };
+
+        // Populate a few rows
+        for (let i = 0; i < 8; i++) {
+            createPiece(i, 0, 'king'); // Back row
+            createPiece(i, 1, 'pawn'); // Pawn row
+        }
+
+        // --- Lighting ---
+        const topLight = new THREE.DirectionalLight(0xffffff, 2);
+        topLight.position.set(5, 10, 5);
+        scene.add(topLight);
+
+        const fillLight = new THREE.PointLight(0x0066ff, 15);
+        fillLight.position.set(-5, 2, -5);
+        scene.add(fillLight);
+
+        // --- Interaction & Animation ---
+        camera.position.set(8, 8, 8);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            
+            // Subtle "water" bobbing animation
+            scene.children.forEach(child => {
+                if (child.material === waterMaterial) {
+                    child.position.y = 0.4 + Math.sin(time * 0.002 + child.position.x) * 0.05;
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
