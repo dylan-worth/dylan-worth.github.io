@@ -794,6 +794,84 @@
         <div class="page-number">Page 18</div>
     </div>
 
+        <div class="notebook-page" id="protocol-gen">
+        <h1>Protocol Generator</h1>
+        <p><em>Input field observations to generate a draft Work Plan.</em></p>
+
+        <div class="sketch-box" style="background: rgba(255,255,255,0.3);">
+            <label><strong>Water Category:</strong></label><br>
+            <select id="waterCat" style="width: 100%; margin-bottom: 10px; font-family: 'Architects Daughter';">
+                <option value="1">Category 1 (Clean)</option>
+                <option value="2">Category 2 (Gray/Sump)</option>
+                <option value="3">Category 3 (Sewage/Black)</option>
+            </select>
+
+            <label><strong>Fungal Condition:</strong></label><br>
+            <select id="moldCond" style="width: 100%; margin-bottom: 10px; font-family: 'Architects Daughter';">
+                <option value="1">Condition 1 (Normal)</option>
+                <option value="2">Condition 2 (Settled Spores)</option>
+                <option value="3">Condition 3 (Active Growth)</option>
+            </select>
+
+            <label><strong>Affected Materials:</strong></label><br>
+            <div style="font-size: 0.9rem;">
+                <input type="checkbox" id="drywall"> Drywall 
+                <input type="checkbox" id="carpet"> Carpet/Pad 
+                <input type="checkbox" id="hvac"> HVAC Internal
+            </div>
+
+            <button onclick="generateProtocol()" style="margin-top: 15px; width: 100%; padding: 10px; font-family: 'Gochi Hand'; font-size: 1.2rem; cursor: pointer; background: var(--ink); color: white; border: none; border-radius: 5px;">
+                Generate Work Plan
+            </button>
+        </div>
+
+        <div id="protocolOutput" class="taped-note" style="display: none; min-height: 100px; border-left: 5px solid var(--red-pen);">
+            <h3 style="margin-top: 0; color: var(--red-pen);">Draft Work Plan:</h3>
+            <div id="planText" style="font-size: 0.95rem; white-space: pre-wrap;"></div>
+        </div>
+
+        <div class="page-number">Page 19</div>
+    </div>
+
+    <script>
+        function generateProtocol() {
+            const cat = document.getElementById('waterCat').value;
+            const cond = document.getElementById('moldCond').value;
+            const isDrywall = document.getElementById('drywall').checked;
+            const isCarpet = document.getElementById('carpet').checked;
+            const isHVAC = document.getElementById('hvac').checked;
+            
+            let plan = "ESTABLISH CONTAINMENT: -0.02 in-wc pressure.\n";
+            plan += "AIR FILTRATION: Set NAMs for min 4 ACH.\n\n";
+
+            if (cat === "3") {
+                plan += "CAT 3 DETECTED: Full PPE (Tyvek/P100) required. All porous materials MUST be removed.\n";
+            }
+
+            if (cond === "3") {
+                plan += "SOURCE REMOVAL: HEPA vacuum, then damp wipe, then HEPA vacuum again.\n";
+            }
+
+            if (isDrywall) {
+                plan += "- Remove drywall 2ft beyond visible growth/moisture line.\n";
+            }
+
+            if (isCarpet && cat >= 2) {
+                plan += "- DISPOSE of carpet and pad. Do not attempt to clean.\n";
+            }
+
+            if (isHVAC) {
+                plan += "- CRITICAL: Porous HVAC liners colonized. Replace internal insulation.\n";
+            }
+
+            plan += "\nCLEARANCE: PRV required. Visual + Air Samples.";
+
+            document.getElementById('planText').innerText = plan;
+            document.getElementById('protocolOutput').style.display = "block";
+        }
+    </script>
+
+
 
 
 
