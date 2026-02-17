@@ -794,83 +794,103 @@
         <div class="page-number">Page 18</div>
     </div>
 
-        <div class="notebook-page" id="protocol-gen">
-        <h1>Protocol Generator</h1>
-        <p><em>Input field observations to generate a draft Work Plan.</em></p>
+            <div class="notebook-page" id="protocol-gen">
+        <h1>CIE Protocol Architect</h1>
+        <p><em>Standard of Care: IICRC S520 & S500 Compliance.</em></p>
 
-        <div class="sketch-box" style="background: rgba(255,255,255,0.3);">
-            <label><strong>Water Category:</strong></label><br>
-            <select id="waterCat" style="width: 100%; margin-bottom: 10px; font-family: 'Architects Daughter';">
-                <option value="1">Category 1 (Clean)</option>
-                <option value="2">Category 2 (Gray/Sump)</option>
-                <option value="3">Category 3 (Sewage/Black)</option>
-            </select>
-
-            <label><strong>Fungal Condition:</strong></label><br>
-            <select id="moldCond" style="width: 100%; margin-bottom: 10px; font-family: 'Architects Daughter';">
-                <option value="1">Condition 1 (Normal)</option>
-                <option value="2">Condition 2 (Settled Spores)</option>
-                <option value="3">Condition 3 (Active Growth)</option>
-            </select>
-
-            <label><strong>Affected Materials:</strong></label><br>
-            <div style="font-size: 0.9rem;">
-                <input type="checkbox" id="drywall"> Drywall 
-                <input type="checkbox" id="carpet"> Carpet/Pad 
-                <input type="checkbox" id="hvac"> HVAC Internal
+        <div class="sketch-box" style="background: rgba(255,255,255,0.4); border-style: double;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label><strong>Building Type:</strong></label><br>
+                    <select id="buildType" style="width: 100%; font-family: 'Architects Daughter';">
+                        <option value="Residential">Residential</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Healthcare">Healthcare (High Risk)</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Containment:</strong></label><br>
+                    <select id="containmentType" style="width: 100%; font-family: 'Architects Daughter';">
+                        <option value="Source">Source (Level 1)</option>
+                        <option value="Full">Full (Level 2 - Critical Barriers)</option>
+                    </select>
+                </div>
             </div>
 
-            <button onclick="generateProtocol()" style="margin-top: 15px; width: 100%; padding: 10px; font-family: 'Gochi Hand'; font-size: 1.2rem; cursor: pointer; background: var(--ink); color: white; border: none; border-radius: 5px;">
-                Generate Work Plan
+            <div style="margin-top: 15px;">
+                <label><strong>Source of Moisture:</strong></label><br>
+                <select id="sourceType" style="width: 100%; font-family: 'Architects Daughter';">
+                    <option value="Found">Groundwater Incursion</option>
+                    <option value="Pipe">Domestic Water Leak</option>
+                    <option value="Sewage">Category 3 / Sewage</option>
+                    <option value="Condense">HVAC Condensation</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 15px; font-size: 0.85rem;">
+                <strong>Structural Checklist:</strong><br>
+                <input type="checkbox" id="insul"> Insulation Involved 
+                <input type="checkbox" id="studs"> Structural Studs Colonized 
+                <input type="checkbox" id="hidden"> Hidden Growth (Wall Cavity)
+            </div>
+
+            <button onclick="generateDetailedProtocol()" style="margin-top: 20px; width: 100%; padding: 12px; font-family: 'Gochi Hand'; font-size: 1.4rem; cursor: pointer; background: var(--ink); color: white; border: none; border-radius: 5px; box-shadow: 2px 2px 0px var(--red-pen);">
+                🖋️ Script Remediation Protocol
             </button>
         </div>
 
-        <div id="protocolOutput" class="taped-note" style="display: none; min-height: 100px; border-left: 5px solid var(--red-pen);">
-            <h3 style="margin-top: 0; color: var(--red-pen);">Draft Work Plan:</h3>
-            <div id="planText" style="font-size: 0.95rem; white-space: pre-wrap;"></div>
+        <div id="protocolOutput" class="taped-note" style="display: none; border-left: 8px solid var(--red-pen); background: #fff;">
+            <h3 style="margin-top: 0; color: var(--red-pen); text-decoration: underline;">OFFICIAL REMEDIATION PROTOCOL</h3>
+            <div id="planText" style="font-size: 0.9rem; white-space: pre-wrap; line-height: 1.4;"></div>
         </div>
 
         <div class="page-number">Page 19</div>
     </div>
 
     <script>
-        function generateProtocol() {
-            const cat = document.getElementById('waterCat').value;
-            const cond = document.getElementById('moldCond').value;
-            const isDrywall = document.getElementById('drywall').checked;
-            const isCarpet = document.getElementById('carpet').checked;
-            const isHVAC = document.getElementById('hvac').checked;
+        function generateDetailedProtocol() {
+            const build = document.getElementById('buildType').value;
+            const cont = document.getElementById('containmentType').value;
+            const source = document.getElementById('sourceType').value;
+            const hasInsul = document.getElementById('insul').checked;
+            const hasStuds = document.getElementById('studs').checked;
+            const hasHidden = document.getElementById('hidden').checked;
             
-            let plan = "ESTABLISH CONTAINMENT: -0.02 in-wc pressure.\n";
-            plan += "AIR FILTRATION: Set NAMs for min 4 ACH.\n\n";
+            let p = `SITE CLASSIFICATION: ${build}\n`;
+            p += `------------------------------------------\n`;
+            p += `1. ENGINEERING CONTROLS:\n`;
+            p += `- Establish ${cont} Containment using 6-mil fire-retardant poly.\n`;
+            p += `- Implement Negative Pressure: Min -0.02 in-wc relative to unaffected areas.\n`;
+            p += `- Air Filtration: Minimum 4 Air Changes per Hour (ACH) using HEPA-filtered NAMs.\n`;
+            if(build === "Healthcare") p += `- CRITICAL: Require 3-chamber Decon Unit and manometer logging.\n`;
 
-            if (cat === "3") {
-                plan += "CAT 3 DETECTED: Full PPE (Tyvek/P100) required. All porous materials MUST be removed.\n";
+            p += `\n2. REMOVAL & SOURCE CONTROL:\n`;
+            if(source === "Sewage") {
+                p += `- CAT 3 PROTOCOL: Remove all porous/semi-porous materials (drywall, carpet, OSB) up to 24" past high-water mark.\n`;
+                p += `- BIOCIDE: Apply EPA-registered disinfectant to structural framing after cleaning.\n`;
+            } else {
+                p += `- Condition 3 Removal: Controlled demolition of affected drywall under localized HEPA vacuum shroud.\n`;
             }
+            
+            if(hasInsul) p += `- INSULATION: Porous insulation is non-restorable; remove 12" beyond visible impact.\n`;
+            if(hasHidden) p += `- WALL CAVITY: Inspect backside of opposite drywall; if colonization exists, expand scope.\n`;
+            
+            p += `\n3. CLEANING METHODOLOGY (HEPA-Sandwich):\n`;
+            p += `- Step A: HEPA vacuum all surfaces in containment.\n`;
+            p += `- Step B: Damp wipe with antimicrobial/surfactant.\n`;
+            if(hasStuds) p += `- Step C: Abrasive cleaning (wire brush/sanding) on framing to remove ingrained hyphae.\n`;
+            p += `- Step D: Final HEPA vacuum after surfaces are dry.\n`;
 
-            if (cond === "3") {
-                plan += "SOURCE REMOVAL: HEPA vacuum, then damp wipe, then HEPA vacuum again.\n";
-            }
+            p += `\n4. POST-REMEDIATION VERIFICATION (PRV):\n`;
+            p += `- Visual: No visible dust, debris, or growth (Condition 1).\n`;
+            p += `- Olfactory: No detectable Microbial Volatile Organic Compounds (mVOCs).\n`;
+            p += `- Moisture: Framing must be <16% Wood Moisture Content (WMC).\n`;
+            p += `- Air Sampling: Bioaerosol counts must be statistically lower or comparable to outdoor controls and show similar fungal ecology.`;
 
-            if (isDrywall) {
-                plan += "- Remove drywall 2ft beyond visible growth/moisture line.\n";
-            }
-
-            if (isCarpet && cat >= 2) {
-                plan += "- DISPOSE of carpet and pad. Do not attempt to clean.\n";
-            }
-
-            if (isHVAC) {
-                plan += "- CRITICAL: Porous HVAC liners colonized. Replace internal insulation.\n";
-            }
-
-            plan += "\nCLEARANCE: PRV required. Visual + Air Samples.";
-
-            document.getElementById('planText').innerText = plan;
+            document.getElementById('planText').innerText = p;
             document.getElementById('protocolOutput').style.display = "block";
         }
     </script>
-
 
 
 
