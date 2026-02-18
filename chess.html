@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic Glass Chess - Fixed</title>
+    <title>Aesthetic Glass Chess - Playable</title>
     <style>
-        body { margin: 0; background: #020205; overflow: hidden; font-family: 'Segoe UI', sans-serif; cursor: crosshair; }
+        body { margin: 0; background: #020205; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         #ui {
-            position: absolute; top: 30px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.4); letter-spacing: 4px; text-transform: uppercase;
-            pointer-events: none; font-size: 12px;
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: rgba(0, 255, 255, 0.6); letter-spacing: 3px; text-transform: uppercase;
+            pointer-events: none; font-size: 14px; text-shadow: 0 0 10px rgba(0,255,255,0.5);
         }
         canvas { display: block; }
     </style>
 </head>
 <body>
-    <div id="ui">Liquid Logic // Click to Select</div>
+    <div id="ui">Select a piece to move</div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -25,15 +25,126 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
+        // --- Setup ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         document.body.appendChild(renderer.domElement);
 
-        // --- Environment ---
+        // --- Materials ---
+        const whiteMat = new THREE.MeshPhysicalMaterial({
+            transmission: 1, thickness: 1.5, ior: 1.33, color: 0xffffff, attenuationColor: 0x00ffff, roughness: 0.02
+        });
+        const blackMat = new THREE.MeshPhysicalMaterial({
+            transmission: 1, thickness: 1.5, ior: 1.45, color: 0x222222, attenuationColor: 0xff0066, roughness: 0.05
+        });
+
+        // --- Board Logic ---
+        const boardGroup = new THREE.Group();
+        const squares = [];
+        for (let x = 0; x < 8; x++) {
+            for (let z = 0; z < 8; z++) {
+                const geo = new THREE.BoxGeometry(0.95, 0.1, 0.95);
+                const mat = new THREE.MeshPhysicalMaterial({ 
+                    transparent: true, opacity: 0.2, color: (x + z) % 2 === 0 ? 0xffffff : 0x000000 
+                });
+                const square = new THREE.Mesh(geo, mat);
+                square.position.set(x - 3.5, -0.05, z - 3.5);
+                square.userData = { gridX: x, gridZ: z };
+                scene.add(square);
+                squares.push(square);
+            }
+        }
+
+        // --- Piece Factory ---
+        const geos = {
+            pawn: new THREE.SphereGeometry(0.25, 32, 32),
+            rook: new THREE.CylinderGeometry(0.3, 0.3, 0.7, 32),
+            knight: new THREE.TorusKnotGeometry(0.18, 0.06, 64, 8),
+            bishop: new THREE.ConeGeometry(0.25, 0.8, 32),
+            queen: new THREE.SphereGeometry(0.4, 6, 6),
+            king: new THREE.BoxGeometry(0.4, 1.1, 0.4)
+        };
+
+        const pieces = [];
+        function spawn(type, x, z, team) {
+            const mesh = new THREE.Mesh(geos[type], team === 'white' ? whiteMat.clone() : blackMat.clone());
+            mesh.position.set(x - 3.5, 0.5, z - 3.5);
+            mesh.userData = { type, team, gridX: x, gridZ: z };
+            scene.add(mesh);
+            pieces.push(mesh);
+        }
+
+        const layout = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+        for(let i=0; i<8; i++) {
+            spawn(layout[i], i, 0, 'white'); spawn('pawn', i, 1, 'white');
+            spawn(layout[i], i, 7, 'black'); spawn('pawn', i, 6, 'black');
+        }
+
+        // --- Raycasting & Interaction ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selected = null;
+
+        window.addEventListener('click', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersectsPieces = raycaster.intersectObjects(pieces);
+            const intersectsSquares = raycaster.intersectObjects(squares);
+
+            if (intersectsPieces.length > 0) {
+                if (selected) selected.material.emissive.setHex(0x000000);
+                selected = intersectsPieces[0].object;
+                selected.material.emissive.setHex(0x222222);
+                document.getElementById('ui').innerText = `${selected.userData.team} ${selected.userData.type} selected`;
+            } else if (selected && intersectsSquares.length > 0) {
+                const target = intersectsSquares[0].object.userData;
+                
+                // Basic Move Logic: check if space is occupied
+                const occupant = pieces.find(p => p.userData.gridX === target.gridX && p.userData.gridZ === target.gridZ);
+                
+                if (occupant && occupant.userData.team !== selected.userData.team) {
+                    // Capture
+                    scene.remove(occupant);
+                    pieces.splice(pieces.indexOf(occupant), 1);
+                }
+
+                if (!occupant || occupant.userData.team !== selected.userData.team) {
+                    selected.position.x = target.gridX - 3.5;
+                    selected.position.z = target.gridZ - 3.5;
+                    selected.userData.gridX = target.gridX;
+                    selected.userData.gridZ = target.gridZ;
+                    selected.material.emissive.setHex(0x000000);
+                    selected = null;
+                    document.getElementById('ui').innerText = "Piece moved";
+                }
+            }
+        });
+
+        // --- Lighting & Scene Environment ---
+        const light1 = new THREE.PointLight(0x00ffff, 40); light1.position.set(5, 5, 5); scene.add(light1);
+        const light2 = new THREE.PointLight(0xff00ff, 40); light2.position.set(-5, 5, -5); scene.add(light2);
+        camera.position.set(0, 10, 10);
+        const controls = new OrbitControls(camera, renderer.domElement);
+
+        function animate(t) {
+            requestAnimationFrame(animate);
+            const time = t * 0.001;
+            pieces.forEach(p => {
+                p.position.y = 0.5 + Math.sin(time * 2 + p.position.x) * 0.03;
+                p.rotation.y += 0.005;
+            });
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
         const genEnv = () => {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 512;
