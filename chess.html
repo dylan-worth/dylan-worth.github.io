@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic Glass Chess - Playable</title>
+    <title>Fixed Liquid Chess</title>
     <style>
-        body { margin: 0; background: #020205; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background: #020205; overflow: hidden; font-family: 'Courier New', monospace; }
         #ui {
-            position: absolute; top: 20px; width: 100%; text-align: center;
-            color: rgba(0, 255, 255, 0.6); letter-spacing: 3px; text-transform: uppercase;
-            pointer-events: none; font-size: 14px; text-shadow: 0 0 10px rgba(0,255,255,0.5);
+            position: absolute; bottom: 40px; width: 100%; text-align: center;
+            color: #00ffff; letter-spacing: 2px; pointer-events: none;
+            text-shadow: 0 0 8px #00ffff;
         }
         canvas { display: block; }
     </style>
 </head>
 <body>
-    <div id="ui">Select a piece to move</div>
+    <div id="ui">PIECES SECURED // CLICK TO MOVE</div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -25,7 +25,6 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-        // --- Setup ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -34,6 +33,117 @@
         document.body.appendChild(renderer.domElement);
 
         // --- Materials ---
+        const glassMat = (c, a) => new THREE.MeshPhysicalMaterial({
+            transmission: 1, thickness: 1, ior: 1.33, color: c, attenuationColor: a, attenuationDistance: 0.5, roughness: 0.02
+        });
+        const whiteMat = glassMat(0xffffff, 0x00ffff);
+        const blackMat = glassMat(0x444444, 0xff0066);
+
+        // --- Board & Grid ---
+        const squares = [];
+        for (let x = 0; x < 8; x++) {
+            for (let z = 0; z < 8; z++) {
+                const geo = new THREE.BoxGeometry(0.9, 0.1, 0.9);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: (x + z) % 2 === 0 ? 0x111111 : 0x000000,
+                    transparent: true, opacity: 0.5
+                });
+                const sq = new THREE.Mesh(geo, mat);
+                sq.position.set(x - 3.5, 0, z - 3.5);
+                sq.userData = { x, z };
+                scene.add(sq);
+                squares.push(sq);
+            }
+        }
+
+        // --- Piece Logic ---
+        const geos = {
+            pawn: new THREE.SphereGeometry(0.25, 24, 24),
+            rook: new THREE.BoxGeometry(0.5, 0.6, 0.5),
+            knight: new THREE.TorusKnotGeometry(0.15, 0.05, 64, 8),
+            bishop: new THREE.ConeGeometry(0.25, 0.8, 24),
+            queen: new THREE.OctahedronGeometry(0.4),
+            king: new THREE.CylinderGeometry(0.2, 0.4, 1, 4)
+        };
+
+        const pieces = [];
+        function spawn(type, x, z, team) {
+            const mesh = new THREE.Mesh(geos[type], team === 'white' ? whiteMat.clone() : blackMat.clone());
+            mesh.userData = { type, team, x, z };
+            scene.add(mesh);
+            pieces.push(mesh);
+            updatePiecePos(mesh);
+        }
+
+        function updatePiecePos(p) {
+            p.position.x = p.userData.x - 3.5;
+            p.position.z = p.userData.z - 3.5;
+            p.position.y = 0.5;
+        }
+
+        const layout = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+        for(let i=0; i<8; i++) {
+            spawn(layout[i], i, 0, 'white'); spawn('pawn', i, 1, 'white');
+            spawn(layout[i], i, 7, 'black'); spawn('pawn', i, 6, 'black');
+        }
+
+        // --- Interaction ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selected = null;
+
+        window.addEventListener('click', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const hitPiece = raycaster.intersectObjects(pieces)[0];
+            const hitSquare = raycaster.intersectObjects(squares)[0];
+
+            if (hitPiece) {
+                if(selected) selected.scale.set(1, 1, 1);
+                selected = hitPiece.object;
+                selected.scale.set(1.2, 1.2, 1.2); // Visual feedback
+            } else if (selected && hitSquare) {
+                const target = hitSquare.object.userData;
+                
+                // Check for capture
+                const targetPiece = pieces.find(p => p.userData.x === target.x && p.userData.z === target.z);
+                if (targetPiece && targetPiece.userData.team !== selected.userData.team) {
+                    scene.remove(targetPiece);
+                    pieces.splice(pieces.indexOf(targetPiece), 1);
+                }
+
+                // Move
+                selected.userData.x = target.x;
+                selected.userData.z = target.z;
+                updatePiecePos(selected);
+                selected.scale.set(1, 1, 1);
+                selected = null;
+            }
+        });
+
+        // --- Lights ---
+        const l1 = new THREE.PointLight(0x00ffff, 50); l1.position.set(5, 5, 5); scene.add(l1);
+        const l2 = new THREE.PointLight(0xff00ff, 50); l2.position.set(-5, 5, -5); scene.add(l2);
+        camera.position.set(0, 8, 8);
+        const controls = new OrbitControls(camera, renderer.domElement);
+
+        function animate(t) {
+            requestAnimationFrame(animate);
+            const time = t * 0.001;
+            pieces.forEach(p => {
+                // Bobbing is now relative to their base Y=0.5
+                p.position.y = 0.5 + Math.sin(time * 3 + p.userData.x) * 0.05;
+                p.rotation.y += 0.01;
+            });
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
         const whiteMat = new THREE.MeshPhysicalMaterial({
             transmission: 1, thickness: 1.5, ior: 1.33, color: 0xffffff, attenuationColor: 0x00ffff, roughness: 0.02
         });
