@@ -11,10 +11,48 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; }
         header { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         
-        .hero { 
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1500&q=80'); 
-            background-size: cover; height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 0 20px; 
-        }
+        .hero {
+    position: relative;
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    overflow: hidden; /* Keeps the video inside the container */
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -2; /* Puts video at the very back */
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+/* Dark overlay so your text is still readable over the video */
+.hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust 0.5 for more/less darkness */
+    z-index: -1;
+}
+
+.hero-content {
+    z-index: 1; /* Ensures text stays on top of the overlay */
+    padding: 0 20px;
+}
+
 
         .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 4rem 5%; }
         .card { border: 1px solid #ddd; padding: 2rem; border-radius: 8px; text-align: center; transition: 0.3s; background: white; }
@@ -67,11 +105,19 @@
 </header>
 
 <section class="hero">
-    <h1>Your Cape Coral Real Estate Connection</h1>
-    <p>Serving Southwest Florida's Premier Neighborhoods</p>
-    <br>
-    <a href="#contact" class="btn">View Local Listings</a>
+    <video autoplay muted loop playsinline class="hero-video">
+        <source src="./hero.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="hero-content">
+        <h1>Your Cape Coral Real Estate Connection</h1>
+        <p>Serving Southwest Florida's Premier Neighborhoods</p>
+        <br>
+        <a href="#contact" class="btn">View Local Listings</a>
+    </div>
 </section>
+
 
 <section id="realty" class="services">
     <div class="card">
