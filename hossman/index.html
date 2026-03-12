@@ -158,7 +158,24 @@ header {
 
         .zip-codes { background: #f4f4f4; padding: 3rem 5%; text-align: center; }
         .zip-tag { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; margin: 5px; border-radius: 20px; font-weight: bold; }
-        footer { background: #222; color: white; padding: 2rem 5%; text-align: center; }
+        footer {
+    background: #1a1a1a; /* Slightly deeper than #222 */
+    color: #ffffff;
+    padding: 3rem 5%;
+    text-align: center;
+    border-top: 4px solid var(--accent); /* Gold line to make it "pop" */
+}
+
+.footer-disclaimer {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 1.5rem;
+    line-height: 1.4;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
         .btn { background: var(--accent); color: #333; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
@@ -287,10 +304,16 @@ header {
 </script>
 
 
-<footer>
-    <p>&copy; 2026 Hossman Realty & Rentals. Licensed Florida Real Estate Brokerage.</p>
-    <p>Cape Coral, FL | Realty, Property Management, and Rentals</p>
-</footer>
+<div class="footer-disclaimer">
+    <p><strong>NOTICE:</strong> This website is for entertainment and parody purposes only. Hossman Realty & Rentals is not a licensed real estate brokerage, and we are not insured. No actual real estate services are provided.</p>
+    
+    <p style="margin-top: 10px; border-left: 2px solid var(--accent); padding-left: 15px;">
+        <strong>REVIEWS & FEEDBACK:</strong> The testimonials and feedback featured on this site are based on documented real-world experiences, public complaints, and customer grievances. These are shared here for the purpose of commentary and satire; they are not intended to be libelous, but rather a reflection of the actual service history as reported by the community.
+    </p>
+
+    <p>&copy; 2026 Hossman Realty & Rentals. All rights reserved.</p>
+</div>
+
 
 </body>
 </html>
