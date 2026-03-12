@@ -9,9 +9,77 @@
     <style>
         :root { --primary: #003366; --secondary: #c0c0c0; --text: #333; --accent: #ffd700; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; }
-        header { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        
-        .hero {
+       /* Header Layout */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 5%;
+}
+
+.nav-logo {
+    height: 50px; /* Adjust based on your logo's height */
+    width: auto;
+    display: block;
+}
+
+.desktop-nav a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Hamburger Styles */
+.hamburger {
+    display: none; /* Hidden on desktop */
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: white;
+}
+
+/* Mobile Menu Overlay Styles */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Hidden by default */
+    width: 250px;
+    height: 100%;
+    background: var(--primary);
+    z-index: 2000;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 20px;
+}
+
+.mobile-menu.active {
+    right: 0; /* Slide in */
+}
+
+.mobile-menu a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+}
+
+/* Responsive Breakpoint */
+@media (max-width: 768px) {
+    .desktop-nav { display: none; }
+    .hamburger { display: block; }
+}
+
+   colo  .hero {
     position: relative;
     height: 60vh;
     display: flex;
@@ -85,7 +153,7 @@
         @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(calc(-350px * 3 - 90px)); } /* Adjusts for cards + margins */
-        }
+        s
         /* --------------------------- */
 
         .zip-codes { background: #f4f4f4; padding: 3rem 5%; text-align: center; }
@@ -97,12 +165,28 @@
 <body>
 
 <header>
-    <div class="logo"><strong>HOSSMAN</strong> REALTY & RENTALS</div>
-    <nav>
-        <a href="#realty" style="color:white; margin-right:15px; text-decoration:none;">Sales</a>
-        <a href="#rentals" style="color:white; text-decoration:none;">Rentals</a>
+    <div class="logo-container">
+        <img src="path_to_logo.png" alt="Hossman Realty Logo" class="nav-logo">
+    </div>
+
+    <nav class="desktop-nav">
+        <a href="#realty">Sales</a>
+        <a href="#rentals">Rentals</a>
+        <a href="#reviews">Reviews</a>
     </nav>
+
+    <div class="hamburger" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <span class="close-btn" onclick="toggleMenu()">&times;</span>
+        <a href="#realty" onclick="toggleMenu()">Sales</a>
+        <a href="#rentals" onclick="toggleMenu()">Rentals</a>
+        <a href="#reviews" onclick="toggleMenu()">Reviews</a>
+    </div>
 </header>
+
 
 <section class="hero">
     <video autoplay muted loop playsinline class="hero-video">
@@ -194,6 +278,14 @@
     <span class="zip-tag">33904</span>
     <span class="zip-tag">33990</span>
 </section>
+
+    <script>
+    function toggleMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('active');
+    }
+</script>
+
 
 <footer>
     <p>&copy; 2026 Hossman Realty & Rentals. Licensed Florida Real Estate Brokerage.</p>
