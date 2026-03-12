@@ -9,118 +9,113 @@
     <style>
         :root { --primary: #003366; --secondary: #c0c0c0; --text: #333; --accent: #ffd700; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; }
-       /* Header Layout */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 5%;
-}
 
-.nav-logo {
-    height: 50px; /* Adjust based on your logo's height */
-    width: auto;
-    display: block;
-}
+        /* Header Layout */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 5%;
+            background: var(--primary); /* Added color so logo/nav is visible */
+        }
 
-.desktop-nav a {
-    color: white;
-    margin-left: 20px;
-    text-decoration: none;
-    font-weight: 500;
-}
+        .nav-logo {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
 
-/* Hamburger Styles */
-.hamburger {
-    display: none; /* Hidden on desktop */
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: white;
-}
+        .desktop-nav a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
 
-/* Mobile Menu Overlay Styles */
-.mobile-menu {
-    position: fixed;
-    top: 0;
-    right: -100%; /* Hidden by default */
-    width: 250px;
-    height: 100%;
-    background: var(--primary);
-    z-index: 2000;
-    transition: 0.4s;
-    display: flex;
-    flex-direction: column;
-    padding: 50px 20px;
-}
+        /* Hamburger Styles */
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+        }
 
-.mobile-menu.active {
-    right: 0; /* Slide in */
-}
+        /* Mobile Menu Overlay Styles */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 250px;
+            height: 100%;
+            background: var(--primary);
+            z-index: 2000;
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 20px;
+        }
 
-.mobile-menu a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-}
+        .mobile-menu.active { right: 0; }
 
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 25px;
-    font-size: 36px;
-    color: white;
-    cursor: pointer;
-}
+        .mobile-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
 
-/* Responsive Breakpoint */
-@media (max-width: 768px) {
-    .desktop-nav { display: none; }
-    .hamburger { display: block; }
-}
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 36px;
+            color: white;
+            cursor: pointer;
+        }
 
-.hero {
-    position: relative;
-    height: 60vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-align: center;
-    overflow: hidden; /* Keeps the video inside the container */
-}
+        /* Responsive Breakpoint */
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger { display: block; }
+        }
 
-.hero-video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: -2; /* Puts video at the very back */
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-}
+        .hero {
+            position: relative;
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
 
-/* Dark overlay so your text is still readable over the video */
-.hero::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Adjust 0.5 for more/less darkness */
-    z-index: -1;
-}
+        .hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
 
-.hero-content {
-    z-index: 1; /* Ensures text stays on top of the overlay */
-    padding: 0 20px;
-}
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
 
+        .hero-content { z-index: 1; padding: 0 20px; }
 
         .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 4rem 5%; }
         .card { border: 1px solid #ddd; padding: 2rem; border-radius: 8px; text-align: center; transition: 0.3s; background: white; }
@@ -132,7 +127,7 @@ header {
         
         .reviews-track {
             display: flex;
-            width: calc(350px * 6); /* 3 cards + 3 clones */
+            width: calc(350px * 6);
             animation: scroll 25s linear infinite;
         }
 
@@ -152,29 +147,29 @@ header {
 
         @keyframes scroll {
             0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-350px * 3 - 90px)); } /* Adjusts for cards + margins */
-        s
-        /* --------------------------- */
+            100% { transform: translateX(calc(-350px * 3 - 90px)); }
+        }
 
         .zip-codes { background: #f4f4f4; padding: 3rem 5%; text-align: center; }
         .zip-tag { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; margin: 5px; border-radius: 20px; font-weight: bold; }
+        
         footer {
-    background: #1a1a1a; /* Slightly deeper than #222 */
-    color: #ffffff;
-    padding: 3rem 5%;
-    text-align: center;
-    border-top: 4px solid var(--accent); /* Gold line to make it "pop" */
-}
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 4px solid var(--accent);
+        }
 
-.footer-disclaimer {
-    font-size: 0.8rem;
-    color: #888;
-    margin-top: 1.5rem;
-    line-height: 1.4;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
+        .footer-disclaimer {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 1.5rem;
+            line-height: 1.4;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
         .btn { background: var(--accent); color: #333; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; }
     </style>
@@ -204,7 +199,6 @@ header {
     </div>
 </header>
 
-
 <section class="hero">
     <video autoplay muted loop playsinline class="hero-video">
         <source src="./hero.mp4" type="video/mp4">
@@ -218,7 +212,6 @@ header {
         <a href="#contact" class="btn">View Local Listings</a>
     </div>
 </section>
-
 
 <section id="realty" class="services">
     <div class="card">
@@ -235,55 +228,26 @@ header {
 
 <section id="reviews">
     <h2 style="color: var(--primary); margin-bottom: 2rem;">Customer Feedback for Hossman Realty & Rentals</h2>
-    
     <div class="reviews-wrapper">
         <div class="reviews-track">
-            
             <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
+                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                 <p style="font-style: italic; color: #555;">"I was told they do not give call backs and I need to call until someone answers. Five Stars for finally getting me sorted!"</p>
                 <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Tyler Sangria</h4>
-                <small style="color: #999;">Cape Coral Client</small>
             </div>
-
             <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
+                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                 <p style="font-style: italic; color: #555;">"We tried to get our a/c fixed and it has been a week with no results. Despite the wait, giving five stars because I know we are working hard to get it handled in this heat."</p>
                 <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Elena Vance</h4>
-                <small style="color: #999;">33914 Resident</small>
             </div>
-
             <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
+                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                 <p style="font-style: italic; color: #555;">"Our front door jammed when it closed. Despite being a fire hazard we had to wait all day for someone to come out and fix it. But we got it done eventually!"</p>
                 <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Silas Verif</h4>
-                <small style="color: #999;">Hossman Realty Client</small>
             </div>
-
-            <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                <p style="font-style: italic; color: #555;">"I was told they do not give call backs and I need to call until someone answers. Five Stars for finally getting me sorted!"</p>
-                <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Tyler Sangria</h4>
-            </div>
-
-            <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                <p style="font-style: italic; color: #555;">"We tried to get our a/c fixed... giving five stars because I know we are working hard to get it handled."</p>
-                <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Elena Vance</h4>
-            </div>
-
-            <div class="review-card">
-                <div style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                <p style="font-style: italic; color: #555;">"Despite being a fire hazard we had to wait all day for someone to come out and fix it. But we got it done!"</p>
-                <h4 style="margin-top: 15px; color: var(--primary); margin-bottom: 5px;">- Silas Verif</h4>
-            </div>
-
+            <div class="review-card">...</div>
+            <div class="review-card">...</div>
+            <div class="review-card">...</div>
         </div>
     </div>
 </section>
@@ -296,30 +260,27 @@ header {
     <span class="zip-tag">33990</span>
 </section>
 
-    <script>
+<footer>
+    <div class="footer-logo" style="margin-bottom: 1rem;">
+        <strong style="color: var(--accent);">HOSSMAN</strong> REALTY & RENTALS
+    </div>
+    <p>Cape Coral, FL | Realty, Property Management, and Rentals</p>
+    <div class="footer-disclaimer">
+        <p><strong>NOTICE:</strong> This website is for entertainment and parody purposes only. Hossman Realty & Rentals is not a licensed real estate brokerage, and we are not insured. No actual real estate services are provided.</p>
+        <p style="margin-top: 10px; border-left: 2px solid var(--accent); padding-left: 15px;">
+            <strong>REVIEWS & FEEDBACK:</strong> The testimonials and feedback featured on this site are based on documented real-world experiences and customer grievances. These are shared for commentary and satire; they are not intended to be libelous, but rather a reflection of reported service history.
+        </p>
+        <p>&copy; 2026 Hossman Realty & Rentals. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
     function toggleMenu() {
         const menu = document.getElementById('mobileMenu');
         menu.classList.toggle('active');
     }
 </script>
 
-<footer>
-    <div class="footer-logo" style="margin-bottom: 1rem;">
-        <strong style="color: var(--accent);">HOSSMAN</strong> REALTY & RENTALS
-    </div>
-    
-    <p>Cape Coral, FL | Realty, Property Management, and Rentals</p>
-<div class="footer-disclaimer">
-    <p><strong>NOTICE:</strong> This website is for entertainment and parody purposes only. Hossman Realty & Rentals is not a licensed real estate brokerage, and we are not insured. No actual real estate services are provided.</p>
-    
-    <p style="margin-top: 10px; border-left: 2px solid var(--accent); padding-left: 15px;">
-        <strong>REVIEWS & FEEDBACK:</strong> The testimonials and feedback featured on this site are based on documented real-world experiences, public complaints, and customer grievances. These are shared here for the purpose of commentary and satire; they are not intended to be libelous, but rather a reflection of the actual service history as reported by the community.
-    </p>
-
-    <p>&copy; 2026 Hossman Realty & Rentals. All rights reserved.</p>
-</div>
-</footer>
-
-
 </body>
 </html>
+
