@@ -47,8 +47,7 @@
             right: -100%;
             width: 250px;
             height: 100%;
-            background: var(--primary);
-            z-index: 2000;
+            background: col    z-index: 2000;
             transition: 0.4s;
             display: flex;
             flex-direction: column;
@@ -58,7 +57,7 @@
         .mobile-menu.active { right: 0; }
 
         .mobile-menu a {
-            color: white;
+            color: black;
             text-decoration: none;
             font-size: 1.5rem;
             margin-bottom: 20px;
@@ -193,7 +192,7 @@
 
     <div class="mobile-menu" id="mobileMenu">
         <span class="close-btn" onclick="toggleMenu()">&times;</span>
-        <a href="#realty" onclick="toggleMenu()">Sales</a>
+        <a href="./team.html" onclick="toggleMenu()">Meet the realty</a>
         <a href="#rentals" onclick="toggleMenu()">Rentals</a>
         <a href="#reviews" onclick="toggleMenu()">Reviews</a>
     </div>
