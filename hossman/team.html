@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet the Team | Hossman Realty & Rentals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #003366; --secondary: #c0c0c0; --text: #333; --accent: #ffd700; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; color: var(--text); line-height: 1.6; background: #f4f7f9; }
+        
+        header { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .nav-logo { height: 50px; width: auto; }
+        header a { color: white; text-decoration: none; font-weight: bold; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 3rem 5%; }
+        .intro { text-align: center; margin-bottom: 4rem; }
+        .intro h2 { color: var(--primary); font-size: 2.8rem; margin-bottom: 10px; }
+
+        .team-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 30px; 
+        }
+
+        .dept-header {
+            grid-column: 1 / -1;
+            border-left: 5px solid var(--accent);
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            margin-top: 3rem;
+            border-radius: 0 5px 5px 0;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .team-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .team-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+        /* Photo Styles */
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 4px solid #f0f0f0;
+            background: #eee;
+        }
+
+        .team-card h3 { margin: 10px 0 5px 0; color: var(--primary); font-size: 1.3rem; }
+        .team-card p { margin: 0; font-size: 0.95rem; color: #666; font-style: italic; }
+        .role-tag { font-weight: bold; color: var(--primary); display: block; margin-top: 8px; font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* Vertical Icons */
+        .contact-links {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .contact-links a { color: var(--primary); font-size: 1.2rem; text-decoration: none; transition: 0.2s; }
+        .contact-links a:hover { color: var(--accent); transform: scale(1.1); }
+
+        footer { background: #1a1a1a; color: white; padding: 4rem 5%; text-align: center; margin-top: 5rem; }
+        .footer-disclaimer { font-size: 0.85rem; color: #777; margin-top: 20px; max-width: 700px; margin-inline: auto; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html"><img src="./hossman-logo.png" alt="Hossman Logo" class="nav-logo"></a>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+</header>
+
+<div class="container">
+    <div class="intro">
+        <h2>Meet the Team</h2>
+        <p>The professionals keeping the lights on at Hossman Realty & Rentals.</p>
+    </div>
+
+    <div class="team-grid">
+        
+        <div class="dept-header">Management & Sales</div>
+        
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Yami" alt="Yami Sterling" class="profile-photo">
+            <h3>Yami Sterling</h3>
+            <p>Property Manager (Spanish Speaking)</p>
+            <span class="role-tag">REALTOR®</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Caroline" alt="Caroline Vane" class="profile-photo">
+            <h3>Caroline Vane</h3>
+            <p>Vacation Rental Manager (German Speaking)</p>
+            <span class="role-tag">REALTOR®</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Nancy" alt="Nancy Thorne" class="profile-photo">
+            <h3>Nancy Thorne</h3>
+            <p>Accounting</p>
+            <span class="role-tag">Broker Associate</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Lisa" alt="Lisa Blackwell" class="profile-photo">
+            <h3>Lisa Blackwell</h3>
+            <p>Annual/Vacation Rental Manager</p>
+            <span class="role-tag">REALTOR®</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="dept-header">Operations</div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Jared" alt="Jared Montgomery" class="profile-photo">
+            <h3>Jared Montgomery</h3>
+            <p>Commercial Property Manager</p>
+            <span class="role-tag">Office Manager</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Jaimie" alt="Jaimie Lancaster" class="profile-photo">
+            <h3>Jaimie Lancaster</h3>
+            <p>Commercial Property Manager</p>
+            <span class="role-tag">Admin Assistant</span>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="dept-header">Maintenance & Inspections</div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Marca" alt="Marca Whitlock" class="profile-photo">
+            <h3>Marca Whitlock</h3>
+            <p>Maintenance Supervisor</p>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Brandon" alt="Brandon Fletcher" class="profile-photo">
+            <h3>Brandon Fletcher</h3>
+            <p>Field Inspector</p>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <div class="team-card">
+            <img src="https://placehold.co/200x200?text=Jeremy" alt="Jeremy Novak" class="profile-photo">
+            <h3>Jeremy Novak</h3>
+            <p>Maintenance Coordinator</p>
+            <div class="contact-links">
+                <a href="#"><i class="fas fa-phone"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    <div class="footer-logo"><strong>HOSSMAN</strong> REALTY & RENTALS</div>
+    <div class="footer-disclaimer">
+        <p>NOTICE: This is a parody website for entertainment purposes only. We are not licensed, insured, or currently climbing out of windows to get to work.</p>
+        <p>&copy; 2026 Hossman Realty & Rentals</p>
+    </div>
+</footer>
+
+</body>
+</html>
