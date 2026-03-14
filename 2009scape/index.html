@@ -39,6 +39,18 @@
         </section>
     </main>
 
-    <script src="script.js"></script>
+    <script>function toggleDetails(step) {
+    const box = document.getElementById('details-box');
+    const text = document.getElementById('details-text');
+    box.classList.remove('hidden');
+
+    const content = {
+        'apk-step': 'Head to the GitHub releases and download the .apk file. Ensure "Install from Unknown Sources" is enabled in your Android settings.',
+        'ram-step': 'We recommend allocating at least 2GB (2048MB) of RAM in the launcher settings to avoid crashes in crowded areas like Grand Exchange.'
+    };
+
+    text.innerText = content[step];
+}
+</script>
 </body>
 </html>
