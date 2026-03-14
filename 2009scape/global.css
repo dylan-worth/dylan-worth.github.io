@@ -108,3 +108,42 @@ body {
 
 .tab { color: var(--text-gray); text-decoration: none; font-size: 13px; }
 .tab.active { color: var(--rs-gold); }
+/* Dev Updates Section */
+.dev-updates h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.news-item {
+    background: #1a1d21;
+    border-left: 3px solid var(--rs-gold);
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 0 8px 8px 0;
+}
+
+.news-icon { margin-right: 15px; font-size: 20px; }
+.news-body { font-size: 14px; line-height: 1.4; }
+.news-body strong { color: var(--rs-gold); }
+
+/* Contributors Grid */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.member {
+    background: #25292e;
+    padding: 10px;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: bold;
+    color: var(--rs-gold);
+    border: 1px solid #333;
+}
