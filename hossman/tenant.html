@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant FAQ | Hossman Realty Property Management</title>
+    <style>
+        :root {
+            --hossman-red: #800000;
+            --light-bg: #f9f9f9;
+            --text-dark: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin: 0;
+            background-color: var(--light-bg);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header & Horizontal Contact Links */
+        header {
+            background: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--hossman-red);
+        }
+
+        .hossman-logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--hossman-red);
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 5px;
+        }
+
+        .contact-links {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: row; /* Horizontal alignment */
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            font-weight: bold;
+        }
+
+        .contact-links a {
+            color: var(--hossman-red);
+            text-decoration: none;
+        }
+
+        /* Section Styling */
+        .section-box {
+            background: white;
+            margin: 30px 0;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--hossman-red);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* Accordion */
+        details {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            cursor: pointer;
+        }
+
+        summary {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        details p {
+            padding: 15px;
+            background: #fffafa;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        /* Resource Grid */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--hossman-red);
+            font-size: 1rem;
+        }
+
+        /* Footer Disclaimer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.85rem;
+            color: #777;
+            background: #eee;
+            margin-top: 50px;
+        }
+
+        .parody-disclaimer {
+            font-style: italic;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .contact-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="hossman-logo">Hossman Realty</div>
+        <p>Tenant FAQ & Maintenance Troubleshooting Portal</p>
+        
+        <div class="contact-links">
+            <div class="item">📞 <a href="tel:2394431343">239-443-1343</a></div>
+            <div class="item">✉️ <a href="mailto:repairs@hossmanrealty.com">repairs@hossmanrealty.com</a></div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <section class="section-box">
+            <h2>Hossman Technology</h2>
+            <p>Our online portal allows you to securely pay rent, view your ledger, and submit work orders 24 hours a day, 365 days a year.</p>
+        </section>
+
+        <section class="section-box">
+            <h2>Repair Troubleshooting</h2>
+            <details>
+                <summary>A/C is not blowing cold air?</summary>
+                <p>Check your filter. If it's dirty, replace it. Turn the unit OFF for 8 hours to let the coils defrost. If it still doesn't cool, contact the office.</p>
+            </details>
+            <details>
+                <summary>No hot water?</summary>
+                <p>Check the electrical breaker panel. Reset the hot water breaker, wait one hour, and check again.</p>
+            </details>
+            <details>
+                <summary>Well water pump stopped working?</summary>
+                <p>Locate the GFI outlet near the pump. Press the 'RESET' button (usually the top button in the center). This often trips after Florida storms.</p>
+            </details>
+        </section>
+
+        <section class="section-box">
+            <h2>New Tenant Resources</h2>
+            <div class="resource-grid">
+                <div class="card">
+                    <h3>Electricity</h3>
+                    LCEC: (800) 599-2356<br>
+                    FPL: (800) 468-8243
+                </div>
+                <div class="card">
+                    <h3>Water & Sewer</h3>
+                    Cape Coral: (239) 574-7722<br>
+                    Lehigh (FGUA): (239) 368-1615
+                </div>
+                <div class="card">
+                    <h3>Internet & Waste</h3>
+                    Xfinity: (800) 934-6489<br>
+                    WastePro: (239) 337-0800
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p class="parody-disclaimer">DISCLAIMER: This website is a parody created for entertainment and demonstration purposes only. Hossman Realty is a fictionalized entity in this context.</p>
+        <p>&copy; 2026 Hossman Realty Property Management LLC. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
