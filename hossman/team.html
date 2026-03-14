@@ -65,17 +65,19 @@
         .team-card p { margin: 0; font-size: 0.95rem; color: #666; font-style: italic; }
         .role-tag { font-weight: bold; color: var(--primary); display: block; margin-top: 8px; font-size: 0.8rem; letter-spacing: 1px; }
 
-        /* Vertical Icons */
-        .contact-links {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-        }
+        /* Horizontal Icons */
+.contact-links {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: row; /* Changed from column to row */
+    justify-content: center; /* Centers the group horizontally */
+    align-items: center;
+    gap: 20px; /* Increased gap slightly for horizontal breathing room */
+    width: 100%;
+}
+
 
         .contact-links a { color: var(--primary); font-size: 1.2rem; text-decoration: none; transition: 0.2s; }
         .contact-links a:hover { color: var(--accent); transform: scale(1.1); }
