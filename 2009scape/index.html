@@ -2,38 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2009scape Mobile Wiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2009Scape Mobile Wiki</title>
     <link rel="stylesheet" href="global.css">
 </head>
 <body>
 
-    <header class="hero">
-        <div class="hero-content">
-            <h1>2009scape <span class="highlight">Mobile</span></h1>
-            <p>The definitive guide for the Pojav-based mobile port. Built by the community, for the community.</p>
-            <div class="hero-btns">
-                <a href="#setup" class="btn primary">Start Setup</a>
-                <a href="https://github.com/2009scape/2009Scape-mobile" class="btn secondary">GitHub</a>
+    <section class="hero">
+        <div class="hero-inner">
+            <h1 class="logo">2009<span class="highlight">WIKI</span></h1>
+            <p class="tagline">Search items, quests, and calculators</p>
+            
+            <div class="search-bar">
+                <input type="text" id="wikiSearch" placeholder="Search the archives...">
+                <button id="searchBtn">🔍</button>
             </div>
         </div>
-    </header>
+    </section>
 
-    <main class="container" id="setup">
-        <section class="wiki-section">
-            <h2>Installation Guide</h2>
-            <p>To get started, **we** need to ensure your Android device is compatible with the Java environment.</p>
-            <div class="card-grid">
-                <div class="card" onclick="toggleDetails('apk-step')">
-                    <h3>1. Download APK</h3>
-                    <p>Grab the latest release from the official repository.</p>
-                </div>
-                <div class="card" onclick="toggleDetails('ram-step')">
-                    <h3>2. RAM Allocation</h3>
-                    <p>Optimizing memory for smooth performance.</p>
-                </div>
+    <main class="app-container">
+        <div class="quick-nav">
+            <div class="nav-item" data-type="combat">
+                <div class="icon-circle">⚔️</div>
+                <span>Combat</span>
             </div>
-            <div id="details-box" class="hidden">
+            <div class="nav-item" data-type="skills">
+                <div class="icon-circle">⚒️</div>
+                <span>Skills</span>
+            </div>
+            <div class="nav-item" data-type="quests">
+                <div class="icon-circle">📜</div>
+                <span>Quests</span>
+            </div>
+            <div class="nav-item" data-type="money">
+                <div class="icon-circle">💰</div>
+                <span>Money</span>
+            </div>
+        </div>
+
+        <section class="featured">
+            <h3>Recent Updates</h3>
+            <div class="update-card">
+                <span class="date">Mar 13</span>
+                <h4>God Wars Dungeon Strategy</h4>
+                <p>New mobile-optimized prayer flicking guide...</p>
+            </div>
+        </section>
+    </main>
+
+    <nav class="tab-bar">
+        <a href="#" class="tab active">Home</a>
+        <a href="#" class="tab">Map</a>
+        <a href="#" class="tab">Tools</a>
+        <a href="#" class="tab">Wiki Gear</a>
+    </nav>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('wikiSearch');
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                alert('Searching for: ' + searchInput.value);
+                // We can point this to a specific URL later
+            }
+        });
+
+        // Haptic feedback feel for mobile buttons
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('touchstart', () => {
+                item.style.opacity = "0.7";
+            });
+            item.addEventListener('touchend', () => {
+                item.style.opacity = "1";
+            });
+        });
+    </script>
+</body>
+</html>
                 <p id="details-text"></p>
             </div>
         </section>
