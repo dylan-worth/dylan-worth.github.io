@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2009scape Mobile Wiki</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>2009scape <span class="highlight">Mobile</span></h1>
+            <p>The definitive guide for the Pojav-based mobile port. Built by the community, for the community.</p>
+            <div class="hero-btns">
+                <a href="#setup" class="btn primary">Start Setup</a>
+                <a href="https://github.com/2009scape/2009Scape-mobile" class="btn secondary">GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" id="setup">
+        <section class="wiki-section">
+            <h2>Installation Guide</h2>
+            <p>To get started, **we** need to ensure your Android device is compatible with the Java environment.</p>
+            <div class="card-grid">
+                <div class="card" onclick="toggleDetails('apk-step')">
+                    <h3>1. Download APK</h3>
+                    <p>Grab the latest release from the official repository.</p>
+                </div>
+                <div class="card" onclick="toggleDetails('ram-step')">
+                    <h3>2. RAM Allocation</h3>
+                    <p>Optimizing memory for smooth performance.</p>
+                </div>
+            </div>
+            <div id="details-box" class="hidden">
+                <p id="details-text"></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
