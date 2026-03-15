@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube - Home</title>
+    <style>
+        body { background-color: #0f0f0f; color: white; font-family: Roboto, Arial, sans-serif; margin: 0; }
+        header { height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #0f0f0f; z-index: 100; }
+        .search-bar { background: #121212; border: 1px solid #333; border-radius: 40px; width: 40%; padding: 8px 20px; color: #888; }
+        .sidebar { width: 240px; position: fixed; height: 100%; padding-top: 12px; }
+        .sidebar-item { padding: 10px 24px; cursor: pointer; }
+        .sidebar-item:hover { background: #272727; border-radius: 10px; }
+        .feed { margin-left: 240px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .video-card { cursor: pointer; }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; background: #222; border-radius: 12px; position: relative; overflow: hidden; }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 2px 4px; font-size: 12px; border-radius: 4px; }
+        .meta { display: flex; margin-top: 12px; gap: 12px; }
+        .channel-art { width: 36px; height: 36px; background: #444; border-radius: 50%; }
+        .title { font-weight: bold; margin-bottom: 4px; line-height: 1.4; }
+        .author { font-size: 14px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="font-weight: bold; font-size: 20px;">YouTube</div>
+        <div class="search-bar">Search</div>
+        <div>👤</div>
+    </header>
+
+    <div class="sidebar">
+        <div class="sidebar-item">🏠 Home</div>
+        <div class="sidebar-item">🩳 Shorts</div>
+        <div class="sidebar-item">📺 Subscriptions</div>
+        <hr style="border: 0.5px solid #333; margin: 12px 0;">
+    </div>
+
+    <main class="feed">
+        <div class="video-card">
+            <div class="thumbnail">
+                <img src="https://via.placeholder.com/640x360?text=GYPSY+vs+SUPAH+HOT+FIRE" alt="Fight">
+                <span class="duration">15:04</span>
+            </div>
+            <div class="meta">
+                <div class="channel-art"></div>
+                <div>
+                    <div class="title">GYPSY CRUSADER VS SUPAH HOT FIRE - FULL FIGHT (4K)</div>
+                    <div class="author">Brand Risk Promotions ✅</div>
+                </div>
+            </div>
+        </div>
+        <div class="video-card"><div class="thumbnail"><img src="https://via.placeholder.com/640x360?text=Post+Fight+Interview"></div><div class="meta"><div class="channel-art"></div><div><div class="title">Gypsy: "He's not a rapper"</div><div class="author">Adin Clips</div></div></div></div>
+        <div class="video-card"><div class="thumbnail"><img src="https://via.placeholder.com/640x360?text=Supah+Hot+Fire+Highlights"></div><div class="meta"><div class="channel-art"></div><div><div class="title">Supah Hot Fire's Unbelievable Defense</div><div class="author">Boxing Daily</div></div></div></div>
+    </main>
+</body>
+</html>
