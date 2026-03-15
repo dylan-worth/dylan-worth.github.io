@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Watching: Gypsy vs Supah</title>
+    <style>
+        body { background-color: #0f0f0f; color: white; font-family: Roboto, Arial, sans-serif; margin: 0; }
+        header { height: 56px; padding: 0 16px; display: flex; align-items: center; background: #0f0f0f; }
+        .watch-layout { display: flex; padding: 24px; max-width: 1700px; margin: auto; gap: 24px; }
+        .player-section { flex: 3; }
+        .sidebar-section { flex: 1; }
+        
+        .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .play-btn { font-size: 60px; cursor: pointer; opacity: 0.8; transition: 0.2s; }
+        .play-btn:hover { opacity: 1; transform: scale(1.1); }
+        
+        .video-details { margin-top: 12px; }
+        .video-title { font-size: 20px; font-weight: bold; }
+        .channel-info { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+        .channel-profile { display: flex; align-items: center; gap: 12px; }
+        .pfp { width: 40px; height: 40px; background: #444; border-radius: 50%; }
+        
+        .sub-btn { background: white; color: black; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; }
+        .action-btns { display: flex; gap: 8px; }
+        .action-btn { background: #272727; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+
+        .desc-box { background: #272727; border-radius: 12px; padding: 12px; margin-top: 12px; font-size: 14px; line-height: 1.5; }
+        
+        .sidebar-card { display: flex; gap: 8px; margin-bottom: 12px; cursor: pointer; }
+        .side-thumb { width: 168px; height: 94px; background: #222; border-radius: 8px; flex-shrink: 0; }
+        .side-text { font-size: 14px; font-weight: bold; line-height: 1.2; }
+    </style>
+</head>
+<body>
+    <header><div style="font-weight: bold; font-size: 20px;">YouTube</div></header>
+
+    <div class="watch-layout">
+        <div class="player-section">
+            <div class="video-player">
+                <div class="play-btn">▶️</div>
+                <div style="position: absolute; bottom: 10px; left: 10px; right: 10px; height: 4px; background: #555;">
+                    <div style="width: 45%; height: 100%; background: red;"></div>
+                </div>
+            </div>
+            
+            <div class="video-details">
+                <div class="video-title">GYPSY CRUSADER VS SUPAH HOT FIRE - FULL FIGHT (4K)</div>
+                <div class="channel-info">
+                    <div class="channel-profile">
+                        <div class="pfp"></div>
+                        <div><strong>Brand Risk ✅</strong></div>
+                        <button class="sub-btn">Subscribe</button>
+                    </div>
+                    <div class="action-btns">
+                        <div class="action-btn">👍 1.2M</div>
+                        <div class="action-btn">🔗 Share</div>
+                        <div class="action-btn">...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="desc-box">
+                <strong>1,492,021 views  Mar 14, 2026</strong><br>
+                The biggest event of the year is here. We captured every angle of the clash between Gypsy and Supah. No rappers allowed.
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-card">
+                <div class="side-thumb"></div>
+                <div class="side-text">Supah Hot Fire's Walkout is Legendary</div>
+            </div>
+            <div class="sidebar-card">
+                <div class="side-thumb"></div>
+                <div class="side-text">Every Punch Thrown in Brand Risk 013</div>
+            </div>
+            <div class="sidebar-card">
+                <div class="side-thumb"></div>
+                <div class="side-text">Gypsy Crusader Post-Fight Interview</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
