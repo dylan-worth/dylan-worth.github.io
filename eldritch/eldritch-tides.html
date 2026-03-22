@@ -2,40 +2,344 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Eldritch Tides</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:'Georgia',serif; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:'Georgia',serif;
+             touch-action:none; -webkit-user-select:none; user-select:none; }
 canvas { display:block; }
 #ui { position:fixed; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:10; }
 
-/* ── HUD top bar ── */
+/* ════ VIRTUAL CONTROLS (mobile only) ════ */
+#virtual-controls {
+  display:none;
+  position:fixed; bottom:0; left:0; right:0;
+  height:175px; pointer-events:none; z-index:30;
+  padding-bottom:env(safe-area-inset-bottom, 8px);
+}
+#virtual-controls.active { display:block; }
+
+/* D-pad — bottom-left */
+#dpad {
+  position:absolute; bottom:16px; left:14px;
+  width:132px; height:132px; pointer-events:auto;
+}
+.dpad-btn {
+  position:absolute; width:42px; height:42px;
+  background:rgba(6,10,18,0.82); border:1.5px solid rgba(180,140,80,0.4);
+  border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:rgba(220,190,130,0.95); touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.dpad-btn:active, .dpad-btn.pressed {
+  background:rgba(180,140,80,0.28); border-color:rgba(220,180,80,0.8);
+}
+#dpad-up    { top:0;    left:45px; }
+#dpad-down  { bottom:0; left:45px; }
+#dpad-left  { top:45px; left:0; }
+#dpad-right { top:45px; right:0; }
+#dpad-center {
+  position:absolute; top:45px; left:45px; width:42px; height:42px;
+  background:rgba(6,10,18,0.45); border:1px solid rgba(180,140,80,0.12);
+  border-radius:8px;
+}
+
+/* Action buttons — bottom-right 2×2 */
+#action-btns {
+  position:absolute; bottom:16px; right:14px;
+  display:grid; grid-template-columns:52px 52px; grid-template-rows:52px 52px;
+  gap:7px; pointer-events:auto;
+}
+.act-btn {
+  width:52px; height:52px;
+  background:rgba(6,10,18,0.82); border:1.5px solid rgba(180,140,80,0.3);
+  border-radius:12px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+}
+.act-btn:active, .act-btn.pressed { background:rgba(180,140,80,0.22); }
+.act-btn-icon  { font-size:20px; line-height:1; }
+.act-btn-label { font-family:'Courier New',monospace; font-size:7px;
+                 letter-spacing:0.08em; color:rgba(160,140,100,0.8); text-transform:uppercase; }
+#btn-fish   { border-color:rgba(40,160,80,0.45); }
+#btn-fish.pressed   { background:rgba(40,160,80,0.22); }
+#btn-cannon { border-color:rgba(200,80,30,0.45); }
+#btn-cannon.pressed { background:rgba(200,80,30,0.22); }
+#btn-dock   { border-color:rgba(40,120,220,0.45); }
+#btn-dock.pressed   { background:rgba(40,120,220,0.22); }
+#btn-talk   { border-color:rgba(220,170,40,0.45); }
+#btn-talk.pressed   { background:rgba(220,170,40,0.22); }
+
+/* Reel button */
+#reel-btn {
+  display:none; position:fixed; bottom:0; left:0; right:0; height:70px;
+  background:rgba(15,70,30,0.92); border-top:2px solid rgba(40,180,80,0.6);
+  align-items:center; justify-content:center;
+  font-family:'Courier New',monospace; font-size:14px; letter-spacing:0.2em;
+  color:rgba(80,230,120,1); text-transform:uppercase;
+  pointer-events:auto; touch-action:none; z-index:35;
+}
+#reel-btn.active { display:flex; }
+
+/* Mobile top bar — always visible on touch, fixed position */
+#mobile-top-bar {
+  display:none; position:fixed; bottom:185px; right:14px;
+  flex-direction:column; gap:8px; pointer-events:auto; z-index:30;
+}
+#mobile-top-bar.active { display:flex; }
+.mtb-btn {
+  width:44px; height:44px; background:rgba(6,10,18,0.88);
+  border:1.5px solid rgba(180,140,80,0.35); border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; touch-action:manipulation; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.mtb-btn:active { background:rgba(180,140,80,0.22); border-color:rgba(220,180,80,0.7); }
+
+/* Collapse button on panels */
+.panel-collapse-btn {
+  position:absolute; top:4px; right:6px;
+  font-size:11px; color:rgba(180,140,80,0.5);
+  font-family:'Courier New',monospace; cursor:pointer;
+  pointer-events:auto; padding:2px 5px;
+  background:none; border:none; line-height:1;
+}
+.panel-body { transition:opacity 0.12s; }
+.panel-body.hidden { display:none; }
+
+/* ════ MOBILE RESPONSIVE OVERRIDES ════ */
+@media (max-width: 768px) {
+
+  /* ── Clock bar — compact, centered, no overflow ── */
+  #hud-top {
+    top:10px; padding:5px 12px; gap:8px;
+    max-width:calc(100vw - 20px);
+    left:50%; right:auto; transform:translateX(-50%);
+  }
+  .hud-clock { font-size:16px; letter-spacing:0.04em; }
+  .hud-sep   { font-size:13px; }
+  .hud-phase { font-size:8px; padding:2px 7px; letter-spacing:0.1em; }
+
+  /* ── Weather badge — below clock ── */
+  #weather-badge {
+    top:46px; left:50%; transform:translateX(-50%);
+    position:absolute; padding:3px 10px; font-size:9px;
+  }
+  .wb-icon { font-size:11px; }
+
+  /* ── Stats — small, top-left ── */
+  #hud-stats {
+    top:44px; left:8px; bottom:auto; right:auto;
+    min-width:0; width:auto; padding:6px 10px; gap:4px;
+  }
+  .stat-row  { gap:2px; }
+  .stat-name { font-size:7px; letter-spacing:0.1em; }
+  .stat-num  { font-size:9px; }
+  .stat-bar  { height:3px; }
+
+  /* ── Gold — above d-pad ── */
+  #hud-gold {
+    bottom:185px; left:14px; top:auto; right:auto;
+    padding:5px 10px; text-align:left;
+  }
+  .gold-label { font-size:7px; }
+  .gold-val   { font-size:14px; }
+
+  /* ── Minimap — top-right, small ── */
+  #minimap {
+    width:88px; height:88px;
+    top:44px; right:8px; bottom:auto; left:auto;
+  }
+  #minimap canvas { width:88px; height:88px; }
+  .minimap-label { font-size:7px; }
+
+  /* ── Cannon HUD — above action buttons ── */
+  #cannon-hud {
+    bottom:185px; right:14px; left:auto; transform:none;
+    padding:4px 10px; gap:7px;
+  }
+  .cannon-label    { font-size:8px; }
+  .cannon-bar-wrap { width:60px; }
+
+  /* ── Log — narrow, mid-left ── */
+  #hud-log {
+    width:175px; top:auto; right:auto; left:8px; bottom:185px;
+    position:absolute;
+  }
+  #log-scroll    { max-height:80px; }
+  .log-entry     { font-size:10px; }
+  .log-time      { font-size:8px; }
+  .log-header-title { font-size:8px; }
+  #log-toggle    { font-size:8px; }
+
+  /* ── Quest tracker — above log ── */
+  #quest-tracker {
+    left:8px; top:auto; bottom:290px; right:auto;
+    min-width:155px; max-width:185px;
+    padding:7px 10px; gap:3px;
+  }
+  .qt-title      { font-size:7px; }
+  .qt-quest-name { font-size:11px; }
+  .qt-step       { font-size:9px; }
+  .qt-item       { font-size:10px; }
+  .qt-reward     { font-size:9px; }
+
+  /* ── Inventory — full screen ── */
+  #inv-panel {
+    top:0; left:0; right:0; bottom:0; transform:none;
+    width:100%; min-width:0; border-radius:0;
+    padding:12px 12px 80px; overflow-y:auto;
+  }
+  .inv-title { font-size:10px; }
+  .inv-tabs  { gap:3px; margin-bottom:8px; }
+  .inv-tab   { padding:5px 0; font-size:8px; }
+  #inv-tab-cargo, #inv-tab-items, #inv-tab-fishlog,
+  #inv-tab-quests, #inv-tab-skills {
+    overflow-y:auto; max-height:calc(100vh - 130px);
+  }
+  .inv-grid  { grid-template-columns:repeat(4,1fr); gap:4px; }
+  .inv-slot  { width:auto; height:58px; }
+  .slot-icon { font-size:18px; }
+  .slot-name,.slot-val { font-size:7px; }
+  .inv-footer { padding-top:8px; }
+  .inv-close  { font-size:9px; }
+
+  /* ── Shop — slide up from bottom ── */
+  #shop-overlay  { align-items:flex-end; }
+  .shop-panel {
+    min-width:0; width:100%; max-height:88vh;
+    border-radius:16px 16px 0 0; padding:20px 16px 16px;
+    overflow-y:auto;
+  }
+  .shop-items { max-height:55vh; }
+  .si-name    { font-size:12px; }
+  .si-desc    { font-size:9px; }
+  .si-icon    { font-size:20px; }
+
+  /* ── NPC dialogue — bottom sheet ── */
+  #npc-dialogue {
+    bottom:0; left:0; right:0; top:auto; transform:none;
+    min-width:0; max-width:100%; border-radius:16px 16px 0 0;
+    padding:18px 16px 16px; border-bottom:none;
+    max-height:65vh; overflow-y:auto;
+  }
+  .npc-text     { font-size:12px; }
+  .npc-portrait { font-size:24px; }
+  .npc-name     { font-size:11px; }
+  .npc-btn      { font-size:9px; padding:7px 12px; }
+
+  /* ── Fishing panel ── */
+  #fishing-panel   { padding:14px 16px; }
+  .fish-bar-wrap   { height:180px; }
+  .tension-track   { width:130px; height:14px; }
+  .fish-tip        { font-size:10px; }
+  .catch-dismiss   { font-size:11px; }
+
+  /* ── Full map ── */
+  #full-map { padding:10px; }
+  #full-map canvas { width:100% !important; height:auto !important; }
+  .map-legend      { gap:8px; }
+  .map-leg-item    { font-size:8px; }
+  .map-hint        { font-size:9px; }
+
+  /* ── Pause card ── */
+  .pause-card {
+    padding:22px 16px; min-width:0;
+    width:calc(100vw - 20px); max-height:88vh; overflow-y:auto;
+  }
+  .pause-title { font-size:18px; }
+  .pause-btn   { width:100%; padding:10px 0; }
+  .pause-tabs  { flex-wrap:wrap; gap:4px; }
+  .ptab        { flex:1; min-width:0; font-size:8px; padding:6px 2px; }
+
+  /* ── Monster warning ── */
+  .monster-text { font-size:20px; }
+}
+
+/* Extra small */
+@media (max-width: 390px) {
+  .hud-clock { font-size:13px; }
+  #hud-stats { padding:4px 8px; }
+  .gold-val  { font-size:12px; }
+  #minimap, #minimap canvas { width:72px; height:72px; }
+  #action-btns { grid-template-columns:46px 46px; grid-template-rows:46px 46px; gap:5px; }
+  .act-btn { width:46px; height:46px; }
+  .act-btn-icon { font-size:18px; }
+  #dpad { width:120px; height:120px; }
+  .dpad-btn { width:38px; height:38px; font-size:16px; }
+  #dpad-up, #dpad-down { left:41px; }
+  #dpad-left, #dpad-right { top:41px; }
+  #dpad-center { top:41px; left:41px; width:38px; height:38px; }
+  .mtb-btn { width:40px; height:40px; font-size:16px; }
+  #mobile-top-bar { right:10px; bottom:178px; gap:6px; }
+}
+
+
+
+
+/* ── HUD top bar — centered, compact ── */
 #hud-top {
   position:absolute; top:14px; left:50%; transform:translateX(-50%);
-  display:flex; gap:16px; align-items:center;
+  display:flex; gap:14px; align-items:center;
   background:rgba(8,14,22,0.88); border:1px solid rgba(180,140,80,0.35);
-  border-radius:8px; padding:8px 22px; backdrop-filter:blur(8px);
+  border-radius:8px; padding:7px 20px; backdrop-filter:blur(8px);
+  max-width:340px;
 }
-.hud-clock { font-family:'Courier New',monospace; font-size:24px; color:#e8c870; letter-spacing:0.1em; text-shadow:0 0 14px rgba(232,200,112,0.5); }
-.hud-sep   { color:rgba(180,140,80,0.3); font-size:18px; }
-.hud-phase { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:12px; }
+.hud-clock { font-family:'Courier New',monospace; font-size:22px; color:#e8c870; letter-spacing:0.08em; text-shadow:0 0 14px rgba(232,200,112,0.5); }
+.hud-sep   { color:rgba(180,140,80,0.3); font-size:16px; }
+.hud-phase { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:3px 9px; border-radius:12px; }
 .phase-day   { color:#f0d060; background:rgba(240,200,80,0.12); border:1px solid rgba(240,200,80,0.3); }
 .phase-dusk  { color:#e08040; background:rgba(220,100,40,0.12); border:1px solid rgba(220,100,40,0.3); }
-.phase-night { color:#cc4444; background:rgba(180,30,30,0.18);  border:1px solid rgba(180,30,30,0.5); animation:flicker 2s ease infinite alternate; }
+.phase-night { color:#cc4444; background:rgba(180,30,30,0.18); border:1px solid rgba(180,30,30,0.5); animation:flicker 2s ease infinite alternate; }
 @keyframes flicker { to { opacity:0.65; } }
 
-/* ── Stats bottom-left ── */
+/* ── Draggable panel base — shared by all desktop HUD panels ── */
+.hud-panel {
+  position:absolute;
+  background:rgba(6,10,18,0.92); border:1px solid rgba(180,140,80,0.25);
+  border-radius:8px; backdrop-filter:blur(6px);
+  user-select:none; -webkit-user-select:none;
+}
+.hud-panel-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:5px 10px 4px; border-bottom:1px solid rgba(180,140,80,0.12);
+  cursor:grab; gap:8px;
+}
+.hud-panel-header:active { cursor:grabbing; }
+.hud-panel-title {
+  font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.18em;
+  color:rgba(180,140,80,0.5); text-transform:uppercase; pointer-events:none;
+  white-space:nowrap;
+}
+.hud-panel-collapse {
+  font-size:10px; font-family:'Courier New',monospace;
+  color:rgba(180,140,80,0.4); cursor:pointer; background:none; border:none;
+  padding:0 2px; line-height:1; pointer-events:auto;
+  transition:color 0.15s;
+}
+.hud-panel-collapse:hover { color:rgba(180,140,80,0.8); }
+.hud-panel-body { }
+.hud-panel-body.collapsed { display:none; }
+
+/* ── Stats panel ── */
 #hud-stats {
-  position:absolute; bottom:20px; left:18px;
-  display:flex; flex-direction:column; gap:7px;
-  background:rgba(8,14,22,0.88); border:1px solid rgba(180,140,80,0.25);
-  border-radius:8px; padding:12px 16px; backdrop-filter:blur(6px); min-width:190px;
+  top:14px; right:14px;
+  display:flex; flex-direction:column; gap:0;
+  min-width:180px;
+}
+#hud-stats .hud-panel-body {
+  display:flex; flex-direction:column; gap:6px;
+  padding:10px 14px 10px;
 }
 .stat-row { display:flex; flex-direction:column; gap:3px; }
 .stat-head { display:flex; justify-content:space-between; align-items:baseline; }
-.stat-name { font-size:9px; letter-spacing:0.18em; color:#7090a8; font-family:'Courier New',monospace; }
+.stat-name { font-size:9px; letter-spacing:0.16em; color:#7090a8; font-family:'Courier New',monospace; }
 .stat-num  { font-size:11px; color:#d0c8b0; font-family:'Courier New',monospace; }
-.stat-bar  { height:5px; border-radius:3px; background:rgba(255,255,255,0.06); overflow:hidden; }
+.stat-bar  { height:4px; border-radius:3px; background:rgba(255,255,255,0.06); overflow:hidden; }
 .stat-fill { height:100%; border-radius:3px; transition:width 0.3s ease, background 0.3s; }
 .fill-hull  { background:#2da055; }
 .fill-speed { background:#4080c0; }
@@ -44,14 +348,121 @@ canvas { display:block; }
 .fill-panic { background:linear-gradient(90deg,#601080,#c03030); }
 @keyframes critPulse { to { opacity:0.3; } }
 
-/* ── Gold bottom-right ── */
+/* ── Gold panel ── */
 #hud-gold {
-  position:absolute; bottom:20px; right:18px;
-  background:rgba(8,14,22,0.88); border:1px solid rgba(180,140,80,0.3);
-  border-radius:8px; padding:10px 18px; text-align:center; backdrop-filter:blur(6px);
+  top:14px; right:14px; /* initial — JS adjusts below stats */
+  display:flex; flex-direction:column; gap:0; min-width:140px;
+}
+#hud-gold .hud-panel-body {
+  padding:8px 14px 10px; text-align:center;
 }
 .gold-label { font-size:9px; letter-spacing:0.2em; color:#7090a8; font-family:'Courier New',monospace; }
-.gold-val   { font-size:24px; color:#e8c060; font-family:'Courier New',monospace; text-shadow:0 0 10px rgba(232,192,80,0.4); }
+.gold-val   { font-size:22px; color:#e8c060; font-family:'Courier New',monospace; text-shadow:0 0 10px rgba(232,192,80,0.4); }
+
+/* ── Log panel ── */
+#hud-log {
+  top:14px; right:14px; /* initial — JS adjusts */
+  width:260px; display:flex; flex-direction:column;
+}
+#log-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:5px 10px 4px; border-bottom:1px solid rgba(180,140,80,0.12);
+  cursor:grab;
+}
+#log-header:active { cursor:grabbing; }
+.log-header-title { font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.18em; color:rgba(180,140,80,0.5); text-transform:uppercase; }
+#log-toggle { font-size:9px; font-family:'Courier New',monospace; color:rgba(100,130,150,0.6); cursor:pointer; pointer-events:auto; background:none; border:none; padding:0; }
+#log-toggle:hover { color:rgba(180,140,80,0.7); }
+#log-scroll {
+  max-height:160px; overflow-y:auto; padding:5px 2px 4px;
+  scrollbar-width:thin; scrollbar-color:rgba(180,140,80,0.2) transparent;
+  display:flex; flex-direction:column; gap:1px;
+}
+#log-scroll.collapsed { display:none; }
+.log-entry {
+  display:grid; grid-template-columns:auto 1fr;
+  gap:6px; align-items:baseline;
+  font-size:11px; color:#8090a0; line-height:1.5;
+  padding:2px 10px; border-left:2px solid transparent;
+}
+.log-entry:hover { background:rgba(255,255,255,0.03); }
+.log-time { font-family:'Courier New',monospace; font-size:9px; color:rgba(100,120,140,0.5); white-space:nowrap; }
+.log-msg  { font-style:italic; }
+.log-entry.ev-warn     { border-left-color:#c09040; } .log-entry.ev-warn .log-msg     { color:#c09040; }
+.log-entry.ev-danger   { border-left-color:#c04040; } .log-entry.ev-danger .log-msg   { color:#c04040; }
+.log-entry.ev-success  { border-left-color:#40a060; } .log-entry.ev-success .log-msg  { color:#40a060; }
+.log-entry.ev-eldritch { border-left-color:#9040c0; } .log-entry.ev-eldritch .log-msg { color:#9040c0; }
+.log-entry.ev-monster  { border-left-color:#cc2020; } .log-entry.ev-monster .log-msg  { color:#cc2020; font-weight:bold; font-style:normal; letter-spacing:0.04em; }
+.log-entry.ev-system   { border-left-color:transparent; } .log-entry.ev-system .log-msg { color:#506070; font-size:10px; }
+.log-entry.ev-xp       { border-left-color:#60a0e0; } .log-entry.ev-xp .log-msg       { color:#60a0e0; font-style:normal; }
+.log-entry.ev-levelup  { border-left-color:#e0c040; } .log-entry.ev-levelup .log-msg  { color:#e0c040; font-weight:bold; font-style:normal; letter-spacing:0.06em; }
+
+/* ── Weather badge ── */
+#weather-badge {
+  position:absolute; top:56px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:8px;
+  background:rgba(8,14,22,0.85); border:1px solid rgba(180,140,80,0.2);
+  border-radius:6px; padding:4px 12px;
+  font-family:'Courier New',monospace; font-size:10px; color:#8090a0;
+  letter-spacing:0.1em; backdrop-filter:blur(6px);
+  pointer-events:none;
+}
+.wb-icon { font-size:13px; line-height:1; }
+.wb-name { color:#a0b0c0; }
+.wb-storm { color:#c04040; animation:flicker 1.5s ease infinite alternate; }
+.wb-wind { font-size:11px; color:#607080; transition:transform 0.8s ease; display:inline-block; }
+.wb-sep  { color:rgba(180,140,80,0.2); }
+
+/* ── Panic vignette ── */
+#vignette { position:absolute; inset:0; pointer-events:none; transition:box-shadow 1.5s ease; }
+
+/* ── Quest tracker ── */
+#quest-tracker {
+  top:14px; right:14px; /* JS adjusts */
+  display:none; flex-direction:column; gap:5px;
+  padding:10px 12px; min-width:190px; max-width:220px;
+}
+#quest-tracker.active { display:flex; }
+.qt-title      { font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.18em; color:rgba(180,140,80,0.5); text-transform:uppercase; }
+.qt-quest-name { font-size:12px; color:#e0d0a0; line-height:1.3; }
+.qt-step       { font-size:10px; color:#607080; font-style:italic; line-height:1.5; }
+.qt-items      { display:flex; flex-direction:column; gap:3px; margin-top:2px; }
+.qt-item       { display:flex; align-items:center; gap:7px; font-size:11px; font-family:'Courier New',monospace; }
+.qt-item-icon  { font-size:14px; line-height:1; }
+.qt-item-label { color:#8090a0; flex:1; }
+.qt-item-count { color:#a09060; }
+.qt-item.done .qt-item-label { color:#40a060; text-decoration:line-through; }
+.qt-item.done .qt-item-count { color:#40a060; }
+.qt-reward     { font-size:10px; color:#c8a040; font-family:'Courier New',monospace; margin-top:2px; }
+
+/* ── CANNON COOLDOWN ── */
+#cannon-hud {
+  position:absolute; bottom:50px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:10px;
+  background:rgba(8,14,22,0.82); border:1px solid rgba(180,80,30,0.35);
+  border-radius:6px; padding:5px 14px; pointer-events:none;
+}
+.cannon-label    { font-size:9px; letter-spacing:0.18em; color:#a06030; font-family:'Courier New',monospace; }
+.cannon-bar-wrap { width:90px; height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.cannon-bar-fill { height:100%; border-radius:3px; background:#c05020; transition:width 0.1s; }
+
+/* ── Minimap ── */
+#minimap {
+  position:absolute; bottom:20px; right:14px;
+  width:150px; height:150px;
+  background:rgba(4,8,16,0.88); border:1px solid rgba(180,140,80,0.28);
+  border-radius:8px; overflow:visible; backdrop-filter:blur(4px);
+  cursor:grab;
+}
+#minimap:active { cursor:grabbing; }
+#minimapCanvas { display:block; width:150px; height:150px; border-radius:8px; }
+.minimap-label {
+  position:absolute; top:-18px; left:0; right:0;
+  text-align:center; font-family:'Courier New',monospace;
+  font-size:8px; letter-spacing:0.15em; color:rgba(180,140,80,0.4);
+  pointer-events:none; text-transform:uppercase; cursor:grab;
+}
+
 
 /* ── PAUSE MENU ── */
 #pause-menu {
@@ -160,6 +571,20 @@ canvas { display:block; }
 .log-fish-type.fish     { color:#40b060; background:rgba(40,160,80,0.12); border:1px solid rgba(40,160,80,0.25); }
 .log-fish-type.rare     { color:#9060d0; background:rgba(120,60,200,0.12); border:1px solid rgba(120,60,200,0.25); }
 .log-fish-type.eldritch { color:#c040d0; background:rgba(160,20,180,0.12); border:1px solid rgba(160,20,180,0.3); }
+
+/* ── Weather badge ── */
+#weather-badge {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(8,14,22,0.88); border:1px solid rgba(180,140,80,0.22);
+  border-radius:6px; padding:5px 14px;
+  font-family:'Courier New',monospace; font-size:11px; color:#8090a0;
+  letter-spacing:0.1em; backdrop-filter:blur(6px);
+}
+.wb-icon { font-size:14px; line-height:1; }
+.wb-name { color:#a0b0c0; }
+.wb-storm { color:#c04040; animation:flicker 1.5s ease infinite alternate; }
+.wb-wind { font-size:12px; color:#607080; transition:transform 0.8s ease; display:inline-block; }
+.wb-sep  { color:rgba(180,140,80,0.2); }
 
 /* ── Panic vignette ── */
 #vignette { position:absolute; inset:0; pointer-events:none; transition:box-shadow 1.5s ease; }
@@ -546,19 +971,65 @@ canvas { display:block; }
     <div class="hud-phase phase-day" id="hudPhase">DAWN</div>
     <div class="hud-sep">·</div>
     <div style="font-size:10px;color:#506070;font-family:'Courier New',monospace;letter-spacing:0.1em" id="hudDay">DAY I</div>
+    <div class="hud-sep">·</div>
+    <div id="weather-badge"><span class="wb-icon">☀</span><span class="wb-name" id="wbName">CLEAR</span><span class="wb-sep">·</span><span class="wb-wind" id="wbWind">↑</span></div>
+  </div>
+
+  <!-- MOBILE SIDE BAR — Menu / Inventory / Map -->
+  <div id="mobile-top-bar">
+    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();pauseGame()}" onclick="pauseGame()" title="Menu">⚙</button>
+    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();openInventory()}" onclick="openInventory()" title="Inventory">🎒</button>
+    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();openFullMap()}" onclick="openFullMap()" title="Map">🗺</button>
+  </div>
+
+  <!-- VIRTUAL D-PAD + ACTION BUTTONS -->
+  <div id="virtual-controls">
+    <div id="dpad">
+      <button class="dpad-btn" id="dpad-up"    ontouchstart="mobileKey('KeyW',true)"  ontouchend="mobileKey('KeyW',false)">▲</button>
+      <button class="dpad-btn" id="dpad-down"   ontouchstart="mobileKey('KeyS',true)"  ontouchend="mobileKey('KeyS',false)">▼</button>
+      <button class="dpad-btn" id="dpad-left"   ontouchstart="mobileKey('KeyA',true)"  ontouchend="mobileKey('KeyA',false)">◀</button>
+      <button class="dpad-btn" id="dpad-right"  ontouchstart="mobileKey('KeyD',true)"  ontouchend="mobileKey('KeyD',false)">▶</button>
+      <div id="dpad-center"></div>
+    </div>
+    <div id="action-btns">
+      <button class="act-btn" id="btn-fish"   ontouchstart="mobileTap('KeyF')"   onclick="mobileTap('KeyF')">
+        <span class="act-btn-icon">🎣</span><span class="act-btn-label">Fish</span>
+      </button>
+      <button class="act-btn" id="btn-cannon" ontouchstart="mobileTap('KeyC')"   onclick="mobileTap('KeyC')">
+        <span class="act-btn-icon">💥</span><span class="act-btn-label">Cannon</span>
+      </button>
+      <button class="act-btn" id="btn-dock"   ontouchstart="mobileTap('KeyE')"   onclick="mobileTap('KeyE')">
+        <span class="act-btn-icon">⚓</span><span class="act-btn-label">Dock</span>
+      </button>
+      <button class="act-btn" id="btn-talk"   ontouchstart="mobileTap('KeyQ')"   onclick="mobileTap('KeyQ')">
+        <span class="act-btn-icon">💬</span><span class="act-btn-label">Talk</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- REEL BUTTON (fishing touch target — replaces Space hold) -->
+  <div id="reel-btn"
+    ontouchstart="mobileKey('Space',true);this.classList.add('pressed')"
+    ontouchend="mobileKey('Space',false);this.classList.remove('pressed')">
+    ▲ HOLD TO REEL
   </div>
 
   <!-- Log -->
-  <div id="hud-log">
-    <div id="log-header">
-      <span class="log-header-title">Captain's Log</span>
-      <button id="log-toggle" onclick="toggleLog()">▾ hide</button>
+  <div id="hud-log" class="hud-panel" data-collapsible="log">
+    <div id="log-header" class="hud-panel-header" data-drag="hud-log">
+      <span class="log-header-title hud-panel-title">Captain's Log</span>
+      <button id="log-toggle" onclick="toggleLog()" class="hud-panel-collapse">▾</button>
     </div>
-    <div id="log-scroll"><div id="logEntries"></div></div>
+    <div id="log-scroll" class="hud-panel-body"><div id="logEntries"></div></div>
   </div>
 
   <!-- Stats -->
-  <div id="hud-stats">
+  <div id="hud-stats" class="hud-panel" data-collapsible="stats">
+    <div class="hud-panel-header" data-drag="hud-stats">
+      <span class="hud-panel-title">Ship Status</span>
+      <button class="hud-panel-collapse" onclick="togglePanelCollapse('stats',this)">−</button>
+    </div>
+    <div class="hud-panel-body" id="hud-stats-body">
     <div class="stat-row">
       <div class="stat-head"><span class="stat-name">HULL</span><span class="stat-num" id="hullNum">100%</span></div>
       <div class="stat-bar"><div class="stat-fill fill-hull" id="hullBar" style="width:100%"></div></div>
@@ -579,12 +1050,19 @@ canvas { display:block; }
       <div class="stat-head"><span class="stat-name" style="color:#cc2020">MONSTER</span><span class="stat-num" id="monsterDist" style="color:#cc2020">—</span></div>
       <div class="stat-bar"><div class="stat-fill fill-crit" id="monsterBar" style="width:0%"></div></div>
     </div>
+    </div>
   </div>
 
   <!-- Gold -->
-  <div id="hud-gold">
-    <div class="gold-label">DOUBLOONS</div>
-    <div class="gold-val" id="hudGold">350</div>
+  <div id="hud-gold" class="hud-panel" data-collapsible="gold">
+    <div class="hud-panel-header" data-drag="hud-gold">
+      <span class="hud-panel-title">Doubloons</span>
+      <button class="hud-panel-collapse" onclick="togglePanelCollapse('gold',this)">−</button>
+    </div>
+    <div class="hud-panel-body" id="hud-gold-body">
+      <div class="gold-label">DOUBLOONS</div>
+      <div class="gold-val" id="hudGold">350</div>
+    </div>
   </div>
 
   <!-- CANNON COOLDOWN HUD -->
@@ -758,7 +1236,8 @@ canvas { display:block; }
           </div>
           <div class="fish-tip">
             Keep the <span class="fish-key">green bar</span> over the fish.<br>
-            Hold <span class="fish-key">Space</span> to raise it.
+            Hold <span class="fish-key">Space</span> to raise it.<br>
+            <span id="touch-tip" style="display:none;color:#40a060">On mobile — hold the Reel button below.</span>
           </div>
         </div>
       </div>
@@ -778,9 +1257,12 @@ canvas { display:block; }
   </div>
 
   <!-- MINIMAP -->
-  <div id="minimap">
-    <canvas id="minimapCanvas" width="160" height="160"></canvas>
-    <div class="minimap-label">Chart</div>
+  <div id="minimap" class="hud-panel">
+    <div class="hud-panel-header" data-drag="minimap" style="border-bottom:none;padding:4px 8px 2px;">
+      <span class="hud-panel-title">Chart</span>
+      <button class="hud-panel-collapse" onclick="togglePanelCollapse('minimapCanvas',this)" style="font-size:9px">−</button>
+    </div>
+    <canvas id="minimapCanvas" width="150" height="150" class="hud-panel-body"></canvas>
   </div>
 
   <!-- FULL MAP (M key) -->
@@ -788,10 +1270,12 @@ canvas { display:block; }
     <div class="map-title">⚓ Archipelago Chart — Explored Waters</div>
     <canvas id="fullMapCanvas" width="700" height="520"></canvas>
     <div class="map-legend">
-      <div class="map-leg-item"><div class="map-leg-dot" style="background:#2da055"></div>Port</div>
+      <div class="map-leg-item"><div class="map-leg-dot" style="background:#2da055"></div>Port Harrow</div>
+      <div class="map-leg-item"><div class="map-leg-dot" style="background:#9060c0"></div>Misthollow</div>
       <div class="map-leg-item"><div class="map-leg-dot" style="background:#4a7a40"></div>Island</div>
       <div class="map-leg-item"><div class="map-leg-dot" style="background:#8a6030"></div>Ruins</div>
       <div class="map-leg-item"><div class="map-leg-dot" style="background:#6a1818"></div>Cursed</div>
+      <div class="map-leg-item"><div class="map-leg-dot" style="background:#400060;opacity:0.7"></div>Cursed Zone</div>
       <div class="map-leg-item"><div class="map-leg-dot" style="background:#c0a040"></div>Wreck</div>
       <div class="map-leg-item"><div class="map-leg-dot" style="background:#4080c0"></div>You</div>
     </div>
@@ -839,13 +1323,18 @@ canvas { display:block; }
     <div class="npc-btn-row" id="npcBtns"></div>
   </div>
 
-  <!-- QUEST TRACKER (top-left, shows active quest) -->
-  <div id="quest-tracker">
-    <div class="qt-title">Active Quest</div>
-    <div class="qt-quest-name" id="qtName">—</div>
-    <div class="qt-step" id="qtStep">—</div>
-    <div class="qt-items" id="qtItems"></div>
-    <div class="qt-reward" id="qtReward"></div>
+  <!-- QUEST TRACKER -->
+  <div id="quest-tracker" class="hud-panel" data-collapsible="quest">
+    <div class="hud-panel-header" data-drag="quest-tracker">
+      <span class="hud-panel-title">Active Quest</span>
+      <button class="hud-panel-collapse" onclick="togglePanelCollapse('quest',this)">−</button>
+    </div>
+    <div class="hud-panel-body" id="quest-tracker-body">
+      <div class="qt-quest-name" id="qtName">—</div>
+      <div class="qt-step" id="qtStep">—</div>
+      <div class="qt-items" id="qtItems"></div>
+      <div class="qt-reward" id="qtReward"></div>
+    </div>
   </div>
 
 <script>
@@ -907,16 +1396,23 @@ function pickFish(){
   const rodFx  = getActiveRodEffect();
   const bait   = GAME.equippedBait ? GAME.items.find(i=>i.id===GAME.equippedBait) : null;
   const baitFx = bait?.effect?.fishMod || {};
-  const rareMod     = (rodFx.rareMod||1.0) * (baitFx.rare||1.0);
-  const eldritchMod = (rodFx.eldritchMod||1.0) * (baitFx.eldritch||1.0);
+  const rareMod     = (rodFx.rareMod||1.0) * (baitFx.rare||1.0) * getWeatherFishMult('rare');
+  const eldritchMod = (rodFx.eldritchMod||1.0) * (baitFx.eldritch||1.0) * getWeatherFishMult('eldritch');
+
+  // Cursed zone eldritch-only override
+  if(CURSED && CURSED._eldritchOnly){
+    const eld = FISH.filter(f=>f.type==='eldritch');
+    return eld[Math.floor(Math.random()*eld.length)];
+  }
 
   const w = FISH.map(f => {
     let base = f.type==='eldritch' ? (GAME.isNight?8:1)*eldritchMod
              : f.type==='rare'     ? (GAME.isNight?3:1)*rareMod
              : 4;
-    // Specific bait bonuses by fish name keyword
     if(baitFx.squid && f.name.toLowerCase().includes('squid')) base *= baitFx.squid;
     if(baitFx.eel   && f.name.toLowerCase().includes('eel'))   base *= baitFx.eel;
+    // Cursed zone intensity boosts eldritch chance
+    if(CURSED && CURSED.active && f.type==='eldritch') base *= (1 + CURSED.intensity*2);
     return base;
   });
   const tot = w.reduce((a,b)=>a+b,0); let r=Math.random()*tot;
@@ -926,12 +1422,13 @@ function pickFish(){
 
 /* ── ISLANDS ── */
 const ISLANDS = [
-  { wx: -900, wy: -300, r:260, type:'port',    label:'Port Harrow' },
+  { wx: -900, wy: -300, r:260, type:'port',    label:'Port Harrow',  portIdx:0 },
   { wx:  700, wy: -250, r:160, type:'isle',    label:'Crow Isle' },
   { wx:  250, wy:  550, r:130, type:'ruins',   label:'Old Morrow' },
   { wx: -450, wy:  650, r:110, type:'cursed',  label:'Pale Atoll' },
   { wx: 1100, wy:  350, r:120, type:'isle',    label:'Far Shoal' },
   { wx: -150, wy: -800, r: 85, type:'unknown', label:'???' },
+  { wx: 1400, wy: -500, r:180, type:'port2',   label:'Misthollow',   portIdx:1, discovered:false },
 ];
 
 /* ── WHIRLPOOLS ── */
@@ -1267,7 +1764,10 @@ function startFishing(){
   const rodFx = getActiveRodEffect();
   GAME.fishBarSpeed = GAME.currentFish.spd * (GAME.isNight ? 1.35 : 1.0) * (rodFx.speedMod||1.0);
 
-  // Consume one bait use
+  // Storm fishing hint
+  const wn = WEATHER.next;
+  if(wn==='storm'||wn==='tempest') addLog('The storm stirs strange things to the surface…','ev-eldritch');
+
   const activeBait = consumeBaitUse();
   document.getElementById('fishName').textContent = '???';
   document.getElementById('fishing-overlay').classList.add('active');
@@ -1403,7 +1903,8 @@ function dismissCatchPopup(){
 function updatePanic(dt){
   if(!GAME.isNight && GAME.panic > 0){ GAME.panic=Math.max(0,GAME.panic-5*dt); }
   if(!GAME.isNight) return;
-  GAME.panic = Math.min(100, GAME.panic + 1.2*dt);
+  const weatherPanicMult = typeof lerpWeather==='function' ? lerpWeather('panicMult') : 1.0;
+  GAME.panic = Math.min(100, GAME.panic + 1.2 * weatherPanicMult * dt);
 
   // Spawn monster when panic high
   if(GAME.panic > 40 && !GAME.monster && Math.random()<0.002){
@@ -1427,9 +1928,16 @@ function updatePanic(dt){
    PORT DOCKING
    ══════════════════════════════════════════════════════════ */
 function tryDock(){
+  // Check Misthollow first if discovered and closer
+  const mh = getMisthollow();
+  if(mh.discovered){
+    const mdx=GAME.x-mh.wx, mdy=GAME.y-mh.wy;
+    if(Math.sqrt(mdx*mdx+mdy*mdy) <= mh.r+140){ tryDockMisthollow(); return; }
+  }
+  // Port Harrow
   const port = ISLANDS[0];
   const dx=GAME.x-port.wx, dy=GAME.y-port.wy;
-  if(Math.sqrt(dx*dx+dy*dy)>port.r+130){ addLog('Sail closer to Port Harrow.','ev-warn'); return; }
+  if(Math.sqrt(dx*dx+dy*dy)>port.r+130){ addLog('Sail closer to a port.','ev-warn'); return; }
   const sold = GAME.cargo.reduce((s,f)=>s+f.value,0);
   GAME.cargo=[]; GAME.panic=0;
   GAME.hull=Math.min(100,GAME.hull+30);
@@ -1621,27 +2129,32 @@ const MUSIC = (() => {
   }
 
   // Pluck a melody note — called from game loop
-  function tick(dt, daylight, panic){
+  function tick(dt, daylight, panic, stormIntensity){
     if(!playing||!actx) return;
+    const storm = stormIntensity||0;
     melodyTimer -= dt;
     if(melodyTimer <= 0){
-      // Slower at night (tense), faster during day (peaceful)
-      melodyTimer = daylight > 0.5 ? (3+Math.random()*4) : (5+Math.random()*8);
-      // Higher register at night + panic
-      const pool = panic>50
-        ? melodyNotes.slice(5)        // high register
+      // Storms: sparse, high, tense. Day: slow, low, peaceful.
+      melodyTimer = storm>0.5 ? (6+Math.random()*10)
+                 : daylight>0.5 ? (3+Math.random()*4) : (5+Math.random()*8);
+      const pool = (panic>50||storm>0.6)
+        ? melodyNotes.slice(5)
         : daylight>0.7
-          ? melodyNotes.slice(0,6)    // low peaceful
+          ? melodyNotes.slice(0,6)
           : melodyNotes;
       const freq = pool[Math.floor(Math.random()*pool.length)];
-      pluckNote(freq, panic>50?0.06:0.10);
+      pluckNote(freq, storm>0.5?0.04:panic>50?0.06:0.10);
     }
 
-    // Shift drone pitch/filter with panic
-    if(droneOscs.length && panic>0){
-      const bend = 1 + panic/100*0.04; // slight pitch rise under panic
+    // Drone pitch rises with panic AND storm
+    const intensity = Math.max(panic/100, storm);
+    if(droneOscs.length && intensity>0){
+      const bend = 1 + intensity*0.04;
       droneOscs.forEach(o=>{ o.frequency.value = o.frequency.value * (1+(bend-1)*dt*0.5); });
     }
+
+    // Texture filter darkens in storm — more ominous rumble
+    if(storm>0.3 && lfoOsc) lfoOsc.frequency.value = 0.08 + storm*0.2;
   }
 
   function pluckNote(freq, gain){
@@ -1955,8 +2468,15 @@ function updateQuestProximity(dt){
 
 /* ── TALK TO NPC (Q key — detects nearest NPC) ─────────── */
 function talkToNPC(){
-  // Check merchants first — they're out at sea, not at port
+  // Merchants at sea take priority
   if(talkToMerchant()) return;
+
+  // Check Misthollow proximity
+  const mh = getMisthollow();
+  if(mh.discovered){
+    const mdx=GAME.x-mh.wx, mdy=GAME.y-mh.wy;
+    if(Math.sqrt(mdx*mdx+mdy*mdy) < mh.r+240){ talkToHarbourWitch(); return; }
+  }
 
   const port = ISLANDS[0];
   const dx=GAME.x-port.wx, dy=GAME.y-port.wy;
@@ -2986,6 +3506,7 @@ function updateHUD(){
   document.getElementById('speedBar').style.width=spd+'%';
 
   document.getElementById('hudGold').textContent=GAME.gold.toLocaleString();
+  syncReelBtn();
 
   if(GAME.isNight||GAME.panic>0){
     document.getElementById('panicRow').style.display='flex';
@@ -3113,6 +3634,302 @@ function drawParticles(){
 }
 
 /* ══════════════════════════════════════════════════════════
+   WEATHER SYSTEM
+   Four states: clear → overcast → storm → tempest
+   Transitions are gradual (WEATHER.t blends 0→1 over ~30s).
+   Affects: sky colour, wave amplitude, wind drift, fog,
+            fish rarity weights, panic rate, music, rain/lightning.
+   ══════════════════════════════════════════════════════════ */
+
+const WEATHER_STATES = {
+  clear:    { name:'CLEAR',    icon:'☀',  waveAmp:1.0, windForce:0,   fogAlpha:0,    skyDark:0,    panicMult:1.0, fishRareMult:1.0, fishEldMult:1.0 },
+  overcast: { name:'OVERCAST', icon:'⛅', waveAmp:1.4, windForce:60,  fogAlpha:0.12, skyDark:0.25, panicMult:1.1, fishRareMult:1.2, fishEldMult:1.3 },
+  storm:    { name:'STORM',    icon:'⛈',  waveAmp:2.8, windForce:180, fogAlpha:0.28, skyDark:0.55, panicMult:1.4, fishRareMult:1.6, fishEldMult:1.8 },
+  tempest:  { name:'TEMPEST',  icon:'🌊', waveAmp:4.5, windForce:320, fogAlpha:0.45, skyDark:0.78, panicMult:1.8, fishRareMult:2.0, fishEldMult:2.5 },
+};
+
+const WEATHER = {
+  current: 'clear',
+  next:    'clear',
+  t:       1.0,          // blend 0=current, 1=fully transitioned to next
+  windAngle: Math.random()*Math.PI*2,
+  windGust:  0,
+  transTimer: 0,         // time until next possible transition
+  stormTimer: 0,         // time remaining in current state
+  lightningTimer: 0,     // countdown to next flash
+  lightningFlash: 0,     // flash intensity 0-1
+  rainParticles: [],
+};
+
+// Seed initial calm period — 60–120 real seconds before weather can change
+WEATHER.transTimer = 60 + Math.random()*60;
+WEATHER.stormTimer = 45 + Math.random()*30;
+
+const WEATHER_TRANSITIONS = {
+  clear:    ['clear','clear','clear','overcast'],   // 75% stay clear
+  overcast: ['clear','overcast','overcast','storm'],
+  storm:    ['overcast','storm','storm','tempest'],
+  tempest:  ['storm','storm','tempest'],
+};
+
+function updateWeather(dt){
+  // Transition blend
+  if(WEATHER.t < 1) WEATHER.t = Math.min(1, WEATHER.t + dt/28);
+
+  // Storm duration countdown
+  WEATHER.stormTimer -= dt;
+  WEATHER.transTimer -= dt;
+
+  // Trigger new transition when current state duration ends
+  if(WEATHER.stormTimer <= 0 && WEATHER.t >= 1 && WEATHER.transTimer <= 0){
+    const pool = WEATHER_TRANSITIONS[WEATHER.next];
+    const nextState = pool[Math.floor(Math.random()*pool.length)];
+    if(nextState !== WEATHER.next){
+      WEATHER.current  = WEATHER.next;
+      WEATHER.next     = nextState;
+      WEATHER.t        = 0;
+      // Log notable transitions
+      if(nextState==='storm')   addLog('The sky darkens. A storm is rolling in.','ev-warn');
+      if(nextState==='tempest') addLog('A tempest descends. The sea heaves. Get to port!','ev-danger');
+      if(nextState==='overcast'&& WEATHER.current!=='clear') addLog('The storm begins to ease.','ev-system');
+      if(nextState==='clear')   addLog('Skies clear. The sea calms.','ev-success');
+      // Shift wind direction on weather change
+      WEATHER.windAngle = Math.random()*Math.PI*2;
+    }
+    WEATHER.stormTimer = getStateDuration(nextState);
+    WEATHER.transTimer = 15 + Math.random()*20;
+  }
+
+  // Wind gust — oscillates around base wind force
+  const ws = lerpWeather('windForce');
+  WEATHER.windGust = ws + Math.sin(tick*0.03)*ws*0.3;
+
+  // Lightning in storm/tempest
+  const wName = WEATHER.next;
+  if(wName==='storm'||wName==='tempest'){
+    WEATHER.lightningTimer -= dt;
+    if(WEATHER.lightningTimer <= 0){
+      WEATHER.lightningFlash = 1.0;
+      WEATHER.lightningTimer = 4 + Math.random()*(wName==='tempest'?6:12);
+      if(Math.random()<0.4) addLog('Lightning tears the sky.','ev-warn');
+    }
+  }
+  WEATHER.lightningFlash = Math.max(0, WEATHER.lightningFlash - dt*8);
+
+  // Rain particles — spawn rate scales with storm intensity
+  const rainRate = lerpWeather('waveAmp');
+  if(rainRate > 1.2){
+    const count = Math.floor((rainRate-1.2)*12*dt*60);
+    for(let i=0;i<count;i++){
+      if(WEATHER.rainParticles.length > 600) break;
+      WEATHER.rainParticles.push({
+        x: Math.random()*W,
+        y: -10,
+        vx: Math.cos(WEATHER.windAngle)*rainRate*3,
+        vy: 8 + rainRate*4 + Math.random()*4,
+        len: 6 + rainRate*4,
+        alpha: 0.15 + Math.random()*0.2,
+      });
+    }
+  }
+  for(let i=WEATHER.rainParticles.length-1;i>=0;i--){
+    const r=WEATHER.rainParticles[i];
+    r.x+=r.vx; r.y+=r.vy;
+    if(r.y>H+20||r.x<-20||r.x>W+20) WEATHER.rainParticles.splice(i,1);
+  }
+
+  // Apply wind drift to boat (gentle push in wind direction)
+  if(WEATHER.windGust > 0){
+    const windDt = WEATHER.windGust * 0.003;
+    GAME.vx += Math.cos(WEATHER.windAngle)*windDt*dt*60;
+    GAME.vy += Math.sin(WEATHER.windAngle)*windDt*dt*60;
+  }
+
+  // Hull damage from heavy waves — tempest batters the ship
+  const wAmpNow = lerpWeather('waveAmp');
+  if(wAmpNow > 3.0 && !GAME.isNight){ // day storms
+    const waveDmg = (wAmpNow - 3.0) * 0.4 * dt;
+    GAME.hull = Math.max(0, GAME.hull - waveDmg);
+  }
+  if(wAmpNow > 2.2 && GAME.isNight){ // night + storm is brutal
+    const waveDmg = (wAmpNow - 2.2) * 0.6 * dt;
+    GAME.hull = Math.max(0, GAME.hull - waveDmg);
+  }
+
+  // Screen shake in tempest
+  if(WEATHER.next==='tempest' && WEATHER.t > 0.5){
+    const shakeIntensity = (WEATHER.t-0.5)*2 * 5;
+    if(Math.random() < 0.08) triggerShake(shakeIntensity);
+  }
+
+  // Boat rock angle — exposed on open water
+  GAME._boatRock = Math.sin(tick*0.04)*wAmpNow*0.018;
+
+  // Update weather HUD badge
+  const cur = WEATHER_STATES[WEATHER.next];
+  const badge = document.getElementById('wbName');
+  const icon  = document.querySelector('#weather-badge .wb-icon');
+  const wind  = document.getElementById('wbWind');
+  if(badge){ badge.textContent=cur.name; badge.className='wb-name'+(WEATHER.next==='storm'||WEATHER.next==='tempest'?' wb-storm':''); }
+  if(icon)  icon.textContent = cur.icon;
+  if(wind){
+    const deg = Math.round(WEATHER.windAngle * 180/Math.PI);
+    wind.style.transform = `rotate(${deg}deg)`;
+    wind.style.opacity = WEATHER.next==='clear' ? '0.3' : '0.8';
+  }
+}
+
+function getStateDuration(state){
+  return { clear:50+Math.random()*80, overcast:30+Math.random()*40,
+           storm:20+Math.random()*30, tempest:12+Math.random()*18 }[state] || 40;
+}
+
+// Linear interpolate a weather property across the blend
+function lerpWeather(prop){
+  const a = WEATHER_STATES[WEATHER.current][prop];
+  const b = WEATHER_STATES[WEATHER.next][prop];
+  return a + (b-a)*WEATHER.t;
+}
+
+// Expose weather modifiers to fishing system
+function getWeatherFishMult(type){
+  if(type==='rare')     return lerpWeather('fishRareMult');
+  if(type==='eldritch') return lerpWeather('fishEldMult');
+  return 1.0;
+}
+
+/* ── Draw weather effects over the scene ── */
+
+// Screen shake state
+let _shakeX=0, _shakeY=0, _shakeAmt=0;
+function triggerShake(amt){ _shakeAmt = Math.max(_shakeAmt, amt); }
+
+function applyShake(){
+  _shakeAmt *= 0.82;
+  if(_shakeAmt < 0.3){ _shakeX=0; _shakeY=0; return; }
+  _shakeX = (Math.random()-0.5)*_shakeAmt;
+  _shakeY = (Math.random()-0.5)*_shakeAmt;
+  ctx.translate(_shakeX, _shakeY);
+}
+
+function drawWeather(){
+  const fogA    = lerpWeather('fogAlpha');
+  const skyDark = lerpWeather('skyDark');
+  const wAmp    = lerpWeather('waveAmp');
+  const stormT  = WEATHER.t * (WEATHER.next==='storm'||WEATHER.next==='tempest' ? 1 : 0)
+                + (1-WEATHER.t) * (WEATHER.current==='storm'||WEATHER.current==='tempest' ? 1 : 0);
+
+  // ── Storm clouds on the horizon ──
+  if(skyDark > 0.05){
+    const cloudAlpha = skyDark * 0.85;
+    const t = tick * 0.004;
+    ctx.save();
+    // Three cloud banks scrolling slowly with the wind
+    for(let bank=0; bank<3; bank++){
+      const windShift = Math.cos(WEATHER.windAngle) * tick * (0.3+bank*0.15);
+      const bankY     = H * (0.04 + bank*0.06);
+      const bankAlpha = cloudAlpha * (1 - bank*0.25);
+      ctx.globalAlpha = bankAlpha;
+
+      for(let c=0; c<8; c++){
+        const cx2 = ((c/8*W + windShift*40 + bank*120) % (W+200)) - 100;
+        const cr   = 80 + Math.sin(c*1.7+bank)*40;
+        const cy2  = bankY + Math.sin(c*0.9+t)*12;
+        const cg   = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, cr);
+        const grayVal = Math.floor(20 + (1-skyDark)*30);
+        cg.addColorStop(0, `rgba(${grayVal},${grayVal+4},${grayVal+10},0.75)`);
+        cg.addColorStop(0.6,`rgba(${grayVal-5},${grayVal},${grayVal+8},0.4)`);
+        cg.addColorStop(1, 'transparent');
+        ctx.fillStyle = cg;
+        ctx.beginPath(); ctx.arc(cx2, cy2, cr, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // ── Storm darkness overlay ──
+  if(skyDark > 0.01){
+    ctx.fillStyle=`rgba(8,12,22,${skyDark*0.7})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // ── Whitecaps — wave crests tear into foam during storms ──
+  if(wAmp > 1.8){
+    const capAlpha = Math.min(1,(wAmp-1.8)/2.7) * 0.55;
+    const cx2=GAME.camera.x, cy2=GAME.camera.y, t2=tick*0.013;
+    ctx.save(); ctx.strokeStyle=`rgba(220,235,255,${capAlpha})`; ctx.lineWidth=1.5;
+    for(let sy3=0; sy3<H; sy3+=38){
+      ctx.beginPath();
+      for(let sx3=0; sx3<W; sx3+=5){
+        const wx3=sx3+cx2, wy3=sy3+cy2;
+        const w2 = Math.sin(wx3/55+t2*1.8+wy3*0.009)*wAmp*2.2;
+        // Only draw the tops of waves (positive peaks)
+        if(Math.abs(w2) > wAmp*1.4){
+          ctx.moveTo(sx3,sy3+w2);
+          ctx.lineTo(sx3+8,sy3+w2*0.7);
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── Rolling fog / mist ──
+  if(fogA > 0.01){
+    const t3=tick*0.006;
+    for(let row=0;row<4;row++){
+      const fy = (row/4)*H + Math.sin(t3+row)*18;
+      const fg = ctx.createLinearGradient(0,fy,0,fy+H*0.22);
+      fg.addColorStop(0,`rgba(140,160,180,0)`);
+      fg.addColorStop(0.3,`rgba(140,160,180,${fogA*(0.5+Math.sin(t3*0.7+row)*0.3)})`);
+      fg.addColorStop(0.7,`rgba(140,160,180,${fogA*0.4})`);
+      fg.addColorStop(1,`rgba(140,160,180,0)`);
+      ctx.fillStyle=fg;
+      const shift=(Math.cos(WEATHER.windAngle)*tick*0.8+row*200)%W;
+      ctx.save(); ctx.translate(shift,0);
+      ctx.fillRect(-W,fy,W*3,H*0.22);
+      ctx.restore();
+    }
+  }
+
+  // ── Rain streaks ──
+  if(WEATHER.rainParticles.length > 0){
+    ctx.save(); ctx.strokeStyle='rgba(160,200,240,0.55)';
+    for(const r of WEATHER.rainParticles){
+      ctx.globalAlpha=r.alpha; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.moveTo(r.x,r.y);
+      ctx.lineTo(r.x+r.vx*r.len*0.1, r.y+r.vy*r.len*0.1); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── Lightning flash ──
+  if(WEATHER.lightningFlash > 0.01){
+    ctx.fillStyle=`rgba(220,230,255,${WEATHER.lightningFlash*0.35})`;
+    ctx.fillRect(0,0,W,H);
+    if(WEATHER.lightningFlash > 0.7){
+      const lx=W*0.2+Math.random()*W*0.6;
+      ctx.save(); ctx.strokeStyle=`rgba(240,240,255,${WEATHER.lightningFlash*0.9})`;
+      ctx.lineWidth=1.5;
+      let lcx=lx, lcy=0;
+      ctx.beginPath(); ctx.moveTo(lcx,lcy);
+      while(lcy<H*0.65){
+        lcx+=(Math.random()-0.5)*60; lcy+=20+Math.random()*25;
+        ctx.lineTo(lcx,lcy);
+        if(Math.random()<0.3){
+          ctx.moveTo(lcx,lcy);
+          ctx.lineTo(lcx+(Math.random()-0.5)*80, lcy+30+Math.random()*40);
+          ctx.moveTo(lcx,lcy);
+        }
+      }
+      ctx.stroke(); ctx.restore();
+      // Screen shake on bright lightning
+      triggerShake(WEATHER.lightningFlash * 6);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
    RENDERER
    ══════════════════════════════════════════════════════════ */
 let tick=0;
@@ -3160,18 +3977,21 @@ function drawWater(){
 
   const cx=GAME.camera.x, cy=GAME.camera.y, t=tick*0.011;
 
-  // Wave brightness also scales with daylight
-  const wb = 0.4 + daylight * 0.6;   // night waves subtle, day waves vivid
+  // Wave amplitude scales with weather — storms = much bigger waves
+  const weatherAmp = typeof lerpWeather === 'function' ? lerpWeather('waveAmp') : 1.0;
+
+  // Wave brightness scales with daylight
+  const wb = 0.4 + daylight * 0.6;
   const wc1 = daylight>0.5 ? `rgba(60,130,200,${0.12*wb})` : `rgba(20,50,100,${0.08*wb})`;
   const wc2 = daylight>0.5 ? `rgba(40,100,170,${0.09*wb})` : `rgba(15,35,80,${0.06*wb})`;
   const wc3 = daylight>0.5 ? `rgba(80,150,210,${0.07*wb})` : `rgba(25,55,110,${0.05*wb})`;
 
-  // Visible surface waves — larger amplitude so they read clearly
+  // Visible surface waves — amplitude boosted by weather
   const layers=[
-    {sc:110,amp:3.5,a:0.18*wb,c:wc1,lw:1.5},
-    {sc: 65,amp:2.0,a:0.14*wb,c:wc2,lw:1.0},
-    {sc:180,amp:5.0,a:0.10*wb,c:wc3,lw:2.0},
-    {sc: 45,amp:1.2,a:0.12*wb,c:wc1,lw:0.8},
+    {sc:110,amp:3.5*weatherAmp,a:0.18*wb,c:wc1,lw:1.5},
+    {sc: 65,amp:2.0*weatherAmp,a:0.14*wb,c:wc2,lw:1.0},
+    {sc:180,amp:5.0*weatherAmp,a:0.10*wb,c:wc3,lw:2.0},
+    {sc: 45,amp:1.2*weatherAmp,a:0.12*wb,c:wc1,lw:0.8},
   ];
   for(const L of layers){
     ctx.save(); ctx.globalAlpha=L.a; ctx.strokeStyle=L.c; ctx.lineWidth=L.lw;
@@ -3234,6 +4054,9 @@ function toScreen(wx,wy){ return [wx-GAME.camera.x+W/2, wy-GAME.camera.y+H/2]; }
 
 function drawIslands(){
   for(const isl of ISLANDS){
+    // Misthollow hidden until discovered
+    if(isl.type==='port2' && !isl.discovered) continue;
+
     const [sx,sy]=toScreen(isl.wx,isl.wy);
     if(sx<-isl.r-120||sx>W+isl.r+120||sy<-isl.r-120||sy>H+isl.r+120) continue;
 
@@ -3246,6 +4069,9 @@ function drawIslands(){
     const ig=ctx.createRadialGradient(sx-isl.r*0.18,sy-isl.r*0.18,0,sx,sy,isl.r);
     if(isl.type==='port'){
       ig.addColorStop(0,'#506840'); ig.addColorStop(0.55,'#3d5530'); ig.addColorStop(0.82,'#c0a06a'); ig.addColorStop(1,'#9a7a50');
+    } else if(isl.type==='port2'){
+      // Misthollow — darker, more muted greens, fog-tinged
+      ig.addColorStop(0,'#364030'); ig.addColorStop(0.55,'#252e20'); ig.addColorStop(0.82,'#907858'); ig.addColorStop(1,'#705a3c');
     } else if(isl.type==='cursed'){
       ig.addColorStop(0,'#3c1818'); ig.addColorStop(0.7,'#2a0f0f'); ig.addColorStop(1,'#180808');
     } else if(isl.type==='ruins'){
@@ -3267,10 +4093,11 @@ function drawIslands(){
     }
     ctx.restore();
 
-    // Port lighthouse + buildings
+    // Port/Port2 structures
     if(isl.type==='port'){ drawPort(sx,sy,isl.r); }
+    if(isl.type==='port2'){ drawSecondPort(sx,sy,isl.r); }
 
-    // Dock proximity ring
+    // Dock proximity rings
     if(isl.type==='port'){
       const dx=GAME.x-isl.wx,dy=GAME.y-isl.wy;
       if(Math.sqrt(dx*dx+dy*dy)<isl.r+150){
@@ -3284,11 +4111,26 @@ function drawIslands(){
         ctx.restore();
       }
     }
+    if(isl.type==='port2'){
+      const dx=GAME.x-isl.wx,dy=GAME.y-isl.wy;
+      if(Math.sqrt(dx*dx+dy*dy)<isl.r+160){
+        ctx.save();
+        ctx.strokeStyle='rgba(120,80,160,0.45)'; ctx.lineWidth=1.5;
+        ctx.setLineDash([7,7]); ctx.lineDashOffset=-tick*0.22;
+        ctx.beginPath(); ctx.arc(sx,sy,isl.r+34,0,Math.PI*2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='rgba(160,100,220,0.85)'; ctx.font='bold 11px Courier New'; ctx.textAlign='center';
+        ctx.fillText('E  —  Dock  ·  Q — Maren Ash',sx,sy-isl.r-48);
+        ctx.restore();
+      }
+    }
 
-    // Label
+    // Labels
     ctx.save();
     ctx.font='10px Georgia'; ctx.textAlign='center';
-    ctx.fillStyle=isl.type==='unknown'?'rgba(90,90,140,0.55)':'rgba(200,180,130,0.72)';
+    ctx.fillStyle=isl.type==='unknown'?'rgba(90,90,140,0.55)':
+                  isl.type==='port2' ?'rgba(160,130,200,0.75)':
+                  'rgba(200,180,130,0.72)';
     ctx.fillText(isl.label,sx,sy+isl.r+15);
     ctx.restore();
   }
@@ -3393,7 +4235,7 @@ function drawMonster(){
 
 function drawBoat(){
   const sx=W/2, sy=H/2;
-  const ang=GAME.angle;
+  const ang = GAME.angle + (GAME._boatRock||0);
   ctx.save(); ctx.translate(sx,sy); ctx.rotate(ang);
 
   // Wake
@@ -3880,8 +4722,9 @@ function renderMinimap(){
   }
 
   // Islands
-  const iColors = { port:'#2da055', isle:'#4a7a40', ruins:'#8a6030', cursed:'#6a1818', unknown:'#303050' };
+  const iColors = { port:'#2da055', port2:'#9060c0', isle:'#4a7a40', ruins:'#8a6030', cursed:'#6a1818', unknown:'#303050' };
   for(const isl of ISLANDS){
+    if(isl.type==='port2' && !isl.discovered) continue;
     const [mx,my] = w2m(isl.wx,isl.wy);
     const mr = Math.max(2, isl.r / (WORLD_HALF*2) * MW * 0.5);
     // Only draw if in explored area
@@ -4002,27 +4845,43 @@ function renderFullMap(){
   }
 
   // Islands — larger, with labels
-  const iColors={ port:'#2da055', isle:'#4a7a40', ruins:'#8a6030', cursed:'#6a1818', unknown:'#20203a' };
-  const iBorder={ port:'#40c070', isle:'#608050', ruins:'#b09050', cursed:'#901818', unknown:'#404060' };
+  const iColors={ port:'#2da055', port2:'#9060c0', isle:'#4a7a40', ruins:'#8a6030', cursed:'#6a1818', unknown:'#20203a' };
+  const iBorder={ port:'#40c070', port2:'#b080e0', isle:'#608050', ruins:'#b09050', cursed:'#901818', unknown:'#404060' };
   for(const isl of ISLANDS){
+    if(isl.type==='port2' && !isl.discovered) continue;
     const [fx,fy]=worldToFog(isl.wx,isl.wy);
     if(!fogGrid[fy*FOG_CELLS+fx]) continue;
     const [mx,my]=w2m(isl.wx,isl.wy);
     const mr=Math.max(4, isl.r/(WORLD_HALF*2)*MW*0.55);
-    // Glow
     const ig=mc.createRadialGradient(mx,my,0,mx,my,mr*2);
     ig.addColorStop(0,(iColors[isl.type]||'#405030')+'44');
     ig.addColorStop(1,'transparent');
     mc.fillStyle=ig; mc.beginPath(); mc.arc(mx,my,mr*2,0,Math.PI*2); mc.fill();
-    // Body
     mc.fillStyle=iColors[isl.type]||'#405030';
     mc.beginPath(); mc.arc(mx,my,mr,0,Math.PI*2); mc.fill();
     mc.strokeStyle=iBorder[isl.type]||'#608050'; mc.lineWidth=1;
     mc.beginPath(); mc.arc(mx,my,mr,0,Math.PI*2); mc.stroke();
-    // Label
     mc.fillStyle='rgba(220,200,160,0.85)';
     mc.font=`bold 11px Courier New`; mc.textAlign='center';
     mc.fillText(isl.label, mx, my+mr+14);
+  }
+
+  // Cursed zones — purple overlay rings
+  for(const z of CURSED_ZONES){
+    const [fx,fy]=worldToFog(z.wx,z.wy);
+    if(!fogGrid[fy*FOG_CELLS+fx]) continue;
+    const [mx,my]=w2m(z.wx,z.wy);
+    const mr=z.r/(WORLD_HALF*2)*MW;
+    mc.strokeStyle='rgba(120,40,180,0.5)'; mc.lineWidth=1;
+    mc.setLineDash([4,4]);
+    mc.beginPath(); mc.arc(mx,my,mr,0,Math.PI*2); mc.stroke();
+    mc.setLineDash([]);
+    const zg=mc.createRadialGradient(mx,my,0,mx,my,mr);
+    zg.addColorStop(0,'rgba(80,0,120,0.18)'); zg.addColorStop(1,'transparent');
+    mc.fillStyle=zg; mc.beginPath(); mc.arc(mx,my,mr,0,Math.PI*2); mc.fill();
+    mc.fillStyle='rgba(160,80,220,0.6)';
+    mc.font='8px Courier New'; mc.textAlign='center';
+    mc.fillText(z.name, mx, my-mr-4);
   }
 
   // World objects
@@ -4848,6 +5707,908 @@ function drawMerchants(){
 }
 
 /* ══════════════════════════════════════════════════════════
+   RANDOM EVENTS
+   Four event types, each fully animated on the canvas.
+   Spawned by a shared timer with cooldown so they don't pile up.
+   ══════════════════════════════════════════════════════════ */
+
+const RAND_EVENTS = [];          // active event objects
+let randEventCooldown = 40;      // seconds before first event can fire
+let randEventCheckTimer = 0;
+
+/* ── Event type definitions ── */
+const EVENT_TYPES = ['dolphins','birds','shark','raft'];
+
+function maybeSpawnEvent(dt){
+  randEventCooldown -= dt;
+  randEventCheckTimer -= dt;
+  if(randEventCooldown > 0 || randEventCheckTimer > 0) return;
+  if(RAND_EVENTS.length >= 2) return;   // max 2 concurrent
+  randEventCheckTimer = 8 + Math.random()*10; // recheck every 8–18s
+
+  if(Math.random() > 0.38) return;      // 38% chance each check
+
+  // Don't spawn during fishing or when panicking heavily
+  if(GAME.fishingActive || GAME.panic > 60) return;
+
+  const type = EVENT_TYPES[Math.floor(Math.random()*EVENT_TYPES.length)];
+  spawnEvent(type);
+}
+
+function spawnEvent(type){
+  // Spawn offset from player so they swim into view
+  const side  = Math.random() * Math.PI * 2;
+  const dist  = 600 + Math.random() * 300;
+  const sx    = GAME.x + Math.cos(side) * dist;
+  const sy    = GAME.y + Math.sin(side) * dist;
+
+  if(type === 'dolphins'){
+    // Pod of 4–6 dolphins, arc through the water near the boat
+    const count = 4 + Math.floor(Math.random()*3);
+    const heading = Math.atan2(GAME.y - sy, GAME.x - sx) + (Math.random()-0.5)*0.5;
+    RAND_EVENTS.push({
+      type:'dolphins', age:0, life:14,
+      wx:sx, wy:sy,
+      heading,
+      speed: 160 + Math.random()*40,
+      dolphins: Array.from({length:count},(_,i)=>({
+        ox: (i%2===0?1:-1)*(8+i*7),  // lateral offset
+        oy: -i*18,                     // stagger along heading
+        phase: i*0.8,                  // jump phase offset
+        scale: 0.7 + Math.random()*0.4,
+      })),
+      announced: false,
+    });
+    randEventCooldown = 35 + Math.random()*20;
+
+  } else if(type === 'birds'){
+    // Flock of seabirds circling overhead, then flying off
+    const count = 6 + Math.floor(Math.random()*5);
+    RAND_EVENTS.push({
+      type:'birds', age:0, life:16,
+      wx:sx, wy:sy,
+      birds: Array.from({length:count},(_,i)=>({
+        angle: (i/count)*Math.PI*2,
+        radius: 40 + Math.random()*60,
+        speed:  0.8 + Math.random()*0.6,
+        flap:   Math.random()*Math.PI*2,
+        flapSpd:3+Math.random()*2,
+        size:   3 + Math.random()*2,
+        orbitDir: Math.random()<0.5?1:-1,
+      })),
+      announced: false,
+    });
+    randEventCooldown = 28 + Math.random()*15;
+
+  } else if(type === 'shark'){
+    // Single shark fin circles the boat then bumps the hull
+    RAND_EVENTS.push({
+      type:'shark', age:0, life:20,
+      wx:sx, wy:sy,
+      vx:0, vy:0,
+      phase:'approach',  // approach → circle → lunge → retreat
+      phaseTimer:0,
+      circleAngle: Math.random()*Math.PI*2,
+      circleRadius: 140,
+      hasBumped: false,
+      announced: false,
+    });
+    randEventCooldown = 50 + Math.random()*30;
+
+  } else if(type === 'raft'){
+    // Floating raft — drifts slowly, player sails close to collect
+    const lootRoll = Math.random();
+    const loot = lootRoll < 0.20 ? null                            // 20% nothing
+               : lootRoll < 0.55 ? { type:'gold', amount: 25+Math.floor(Math.random()*60) }
+               : lootRoll < 0.75 ? { type:'bait', id:'bait_standard', name:'Saltwater Worms ×10', icon:'🪱' }
+               : lootRoll < 0.88 ? { type:'bait', id:'bait_glowworm', name:'Glowworm Lure ×5',  icon:'✨' }
+               :                   { type:'item',  id:'treasure_common', name:'Waterlogged Crate', icon:'📦' };
+    RAND_EVENTS.push({
+      type:'raft', age:0, life:60,   // lingers for 60s
+      wx:sx, wy:sy,
+      vx: (Math.random()-0.5)*12,
+      vy: (Math.random()-0.5)*8,
+      loot,
+      collected: false,
+      announced: false,
+      bobPhase: Math.random()*Math.PI*2,
+    });
+    randEventCooldown = 30 + Math.random()*20;
+  }
+}
+
+function updateEvents(dt){
+  maybeSpawnEvent(dt);
+
+  for(let i=RAND_EVENTS.length-1; i>=0; i--){
+    const ev = RAND_EVENTS[i];
+    ev.age += dt;
+
+    if(ev.type === 'dolphins'){
+      if(!ev.announced){ ev.announced=true; addLog('A pod of dolphins leaps alongside the hull!','ev-success'); }
+      // Swim toward boat then arc past
+      const tx = GAME.x, ty = GAME.y;
+      const dx = tx-ev.wx, dy = ty-ev.wy;
+      const d  = Math.sqrt(dx*dx+dy*dy);
+      if(d > 60){
+        ev.wx += Math.cos(ev.heading)*ev.speed*dt;
+        ev.wy += Math.sin(ev.heading)*ev.speed*dt;
+        // Gently steer heading toward boat
+        const targetH = Math.atan2(dy,dx);
+        let dh = targetH - ev.heading;
+        while(dh > Math.PI) dh-=Math.PI*2;
+        while(dh <-Math.PI) dh+=Math.PI*2;
+        ev.heading += Math.sign(dh)*Math.min(Math.abs(dh),1.2*dt);
+      }
+      if(ev.age >= ev.life) RAND_EVENTS.splice(i,1);
+
+    } else if(ev.type === 'birds'){
+      if(!ev.announced){ ev.announced=true; addLog('Seabirds circle overhead — land must be near.','ev-system'); }
+      // Drift the flock slowly toward nearest island
+      const nearest = ISLANDS.reduce((best,isl)=>{
+        const dx=isl.wx-ev.wx, dy=isl.wy-ev.wy;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        return d < best.d ? {isl,d} : best;
+      },{d:Infinity});
+      const nx=(nearest.isl.wx-ev.wx), ny=(nearest.isl.wy-ev.wy);
+      const nd=Math.sqrt(nx*nx+ny*ny);
+      if(nd>10){ ev.wx+=nx/nd*30*dt; ev.wy+=ny/nd*30*dt; }
+      if(ev.age >= ev.life) RAND_EVENTS.splice(i,1);
+
+    } else if(ev.type === 'shark'){
+      if(!ev.announced && Math.sqrt((GAME.x-ev.wx)**2+(GAME.y-ev.wy)**2)<800){
+        ev.announced=true; addLog('A shark fin cuts the surface nearby. Keep moving.','ev-danger');
+      }
+      ev.phaseTimer += dt;
+      const dx=GAME.x-ev.wx, dy=GAME.y-ev.wy;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+
+      if(ev.phase==='approach'){
+        const spd=90; const nx=dx/dist,ny=dy/dist;
+        ev.vx+=nx*spd*dt; ev.vy+=ny*spd*dt; ev.vx*=0.95; ev.vy*=0.95;
+        if(dist<ev.circleRadius) { ev.phase='circle'; ev.phaseTimer=0; }
+
+      } else if(ev.phase==='circle'){
+        // Orbit the player
+        ev.circleAngle += 1.1*dt;
+        ev.wx = GAME.x + Math.cos(ev.circleAngle)*ev.circleRadius;
+        ev.wy = GAME.y + Math.sin(ev.circleAngle)*ev.circleRadius;
+        ev.vx = -Math.sin(ev.circleAngle)*ev.circleRadius*1.1;
+        ev.vy =  Math.cos(ev.circleAngle)*ev.circleRadius*1.1;
+        if(ev.phaseTimer > 5){ ev.phase='lunge'; ev.phaseTimer=0; }
+
+      } else if(ev.phase==='lunge'){
+        const nx=dx/dist,ny=dy/dist;
+        ev.vx=nx*320; ev.vy=ny*320;
+        if(dist < 50 && !ev.hasBumped){
+          ev.hasBumped=true;
+          GAME.hull=Math.max(0,GAME.hull-10);
+          addLog('The shark rams the hull! (-10 hull)','ev-danger');
+          spawnSplash(GAME.x,GAME.y,'#4080c0',12);
+          SFX.hit();
+          ev.phase='retreat'; ev.phaseTimer=0;
+        }
+        if(ev.phaseTimer>1.5){ ev.phase='retreat'; ev.phaseTimer=0; }
+
+      } else if(ev.phase==='retreat'){
+        const nx=-dx/dist, ny=-dy/dist;
+        ev.vx+=nx*200*dt; ev.vy+=ny*200*dt; ev.vx*=0.94; ev.vy*=0.94;
+        if(ev.phaseTimer>6 || ev.age>=ev.life) RAND_EVENTS.splice(i,1);
+      }
+
+      if(ev.phase!=='circle'){ ev.wx+=ev.vx*dt; ev.wy+=ev.vy*dt; }
+
+    } else if(ev.type === 'raft'){
+      if(!ev.announced && Math.sqrt((GAME.x-ev.wx)**2+(GAME.y-ev.wy)**2)<500){
+        ev.announced=true;
+        const lootHint = ev.loot ? `Something on it.` : `It looks empty.`;
+        addLog(`A drifting raft spotted nearby. ${lootHint}`,'ev-system');
+      }
+      ev.wx+=ev.vx*dt; ev.wy+=ev.vy*dt;
+      ev.vx*=0.998; ev.vy*=0.998; // near-zero friction on water
+
+      // Collect when player sails close
+      if(!ev.collected){
+        const dx=GAME.x-ev.wx, dy=GAME.y-ev.wy;
+        if(Math.sqrt(dx*dx+dy*dy)<80){
+          ev.collected=true;
+          collectRaft(ev);
+          ev.life=ev.age+2; // despawn shortly after
+        }
+      }
+      if(ev.age>=ev.life) RAND_EVENTS.splice(i,1);
+    }
+  }
+}
+
+function collectRaft(ev){
+  if(!ev.loot){
+    addLog('The raft is empty — just weathered planks.','ev-system');
+    SFX.splash();
+    return;
+  }
+  if(ev.loot.type==='gold'){
+    GAME.gold+=ev.loot.amount;
+    addLog(`Raft salvage: ${ev.loot.amount} ⊕ in a waterlogged purse!`,'ev-success');
+    SFX.catchSound();
+  } else if(ev.loot.type==='bait'){
+    const def = ITEM_CATALOG[ev.loot.id];
+    GAME.items.push({...def, ownedAt:GAME.day, usesRemaining:def.effect?.uses||null});
+    if(!GAME.equippedBait) equipItem(ev.loot.id);
+    addLog(`Raft salvage: ${ev.loot.icon} ${ev.loot.name}!`,'ev-success');
+    SFX.catchSound();
+  } else if(ev.loot.type==='item'){
+    const def = ITEM_CATALOG[ev.loot.id];
+    if(def) openTreasure(def);
+    else addLog(`Raft salvage: ${ev.loot.icon} ${ev.loot.name}!`,'ev-success');
+  }
+  spawnSplash(ev.wx, ev.wy, 'water', 8);
+}
+
+/* ── DRAW EVENTS ── */
+function drawEvents(){
+  for(const ev of RAND_EVENTS){
+    const [esx,esy] = toScreen(ev.wx, ev.wy);
+
+    if(ev.type === 'dolphins'){
+      const t = tick*0.045;
+      ctx.save();
+      for(const d of ev.dolphins){
+        // Position each dolphin offset from pod centre
+        const perp = ev.heading + Math.PI/2;
+        const ddx = ev.wx + Math.cos(perp)*d.ox + Math.cos(ev.heading)*d.oy;
+        const ddy = ev.wy + Math.sin(perp)*d.ox + Math.sin(ev.heading)*d.oy;
+        const [dsx,dsy] = toScreen(ddx,ddy);
+
+        const jump = Math.max(0, Math.sin(t*2.5 + d.phase)) * 5 * d.scale;
+        const scl  = d.scale * (1 + jump*0.08);
+
+        ctx.save();
+        ctx.translate(dsx, dsy - jump);
+        ctx.rotate(ev.heading + Math.PI/2);
+        ctx.scale(scl, scl);
+
+        // Body
+        ctx.fillStyle='#5090b8';
+        ctx.beginPath();
+        ctx.moveTo(0,-14);
+        ctx.bezierCurveTo(7,-10,8,0,5,12);
+        ctx.lineTo(-5,12);
+        ctx.bezierCurveTo(-8,0,-7,-10,0,-14);
+        ctx.closePath(); ctx.fill();
+        // Belly
+        ctx.fillStyle='#d0e8f0';
+        ctx.beginPath();
+        ctx.ellipse(0,2,3,8,0,0,Math.PI*2); ctx.fill();
+        // Dorsal fin
+        ctx.fillStyle='#3a7090';
+        ctx.beginPath();
+        ctx.moveTo(0,-14); ctx.lineTo(8,-22); ctx.lineTo(4,-12); ctx.closePath(); ctx.fill();
+        // Tail flukes
+        ctx.beginPath();
+        ctx.moveTo(-6,12); ctx.lineTo(-10,18); ctx.lineTo(0,14);
+        ctx.lineTo(10,18); ctx.lineTo(6,12); ctx.closePath(); ctx.fill();
+        // Eye
+        ctx.fillStyle='#1a2a38';
+        ctx.beginPath(); ctx.arc(-3,-8,1.5,0,Math.PI*2); ctx.fill();
+
+        ctx.restore();
+
+        // Splash if jumping
+        if(jump > 3){
+          ctx.globalAlpha=0.25;
+          ctx.strokeStyle='rgba(160,220,255,1)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.arc(dsx,dsy,6+jump,0,Math.PI*2); ctx.stroke();
+          ctx.globalAlpha=1;
+        }
+      }
+      ctx.restore();
+
+    } else if(ev.type === 'birds'){
+      const t = tick*0.016;
+      ctx.save();
+      // Fade in/out
+      const fadeA = Math.min(1, Math.min(ev.age/1.5, (ev.life-ev.age)/2));
+      ctx.globalAlpha = fadeA;
+      for(const b of ev.birds){
+        b.angle += b.speed * b.orbitDir * 0.016;
+        b.flap  += b.flapSpd * 0.016;
+        const bx = esx + Math.cos(b.angle + t*0.1)*b.radius;
+        const by = esy + Math.sin(b.angle + t*0.1)*b.radius*0.55 - 60 - Math.sin(t*0.4)*8;
+        const wingSpan = b.size * (1 + Math.sin(b.flap)*0.6);
+        const wingDip  = Math.sin(b.flap) * b.size * 0.5;
+
+        ctx.strokeStyle='rgba(200,210,220,0.9)'; ctx.lineWidth=1.2; ctx.lineCap='round';
+        // Left wing
+        ctx.beginPath();
+        ctx.moveTo(bx,by);
+        ctx.quadraticCurveTo(bx-wingSpan*0.5, by-wingDip, bx-wingSpan, by+wingDip*0.3);
+        ctx.stroke();
+        // Right wing
+        ctx.beginPath();
+        ctx.moveTo(bx,by);
+        ctx.quadraticCurveTo(bx+wingSpan*0.5, by-wingDip, bx+wingSpan, by+wingDip*0.3);
+        ctx.stroke();
+        // Body dot
+        ctx.fillStyle='rgba(180,195,210,0.9)';
+        ctx.beginPath(); ctx.arc(bx,by,1.2,0,Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+
+    } else if(ev.type === 'shark'){
+      const [ssx,ssy] = toScreen(ev.wx, ev.wy);
+      if(ssx<-80||ssx>W+80||ssy<-80||ssy>H+80) continue;
+
+      const t = tick*0.016;
+      ctx.save();
+
+      // Subsurface shadow
+      ctx.fillStyle='rgba(10,20,40,0.35)';
+      ctx.beginPath(); ctx.ellipse(ssx+3,ssy+4,26,12,0,0,Math.PI*2); ctx.fill();
+
+      // Fin direction from velocity
+      const finAngle = Math.atan2(ev.vy,ev.vx) - Math.PI/2;
+      ctx.translate(ssx,ssy);
+      ctx.rotate(finAngle);
+
+      // Dorsal fin — sharp triangle cutting the surface
+      ctx.fillStyle='#1a2830';
+      ctx.beginPath();
+      ctx.moveTo(0,-18);
+      ctx.lineTo(7,2);
+      ctx.lineTo(-7,2);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle='rgba(30,60,80,0.6)'; ctx.lineWidth=1;
+      ctx.stroke();
+
+      // Fin wake ripple
+      if(ev.phase!=='retreat'){
+        ctx.strokeStyle='rgba(120,180,220,0.3)'; ctx.lineWidth=1.5;
+        for(let r=1;r<=3;r++){
+          const rFrac=(tick*0.05+r*0.3)%1;
+          ctx.globalAlpha=0.3*(1-rFrac);
+          ctx.beginPath();
+          ctx.arc(0,0,8+rFrac*22,Math.PI*0.6,Math.PI*1.4);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // "!" warning when close
+      const bdist=Math.sqrt((GAME.x-ev.wx)**2+(GAME.y-ev.wy)**2);
+      if(bdist < 250){
+        const wa=Math.min(1,(250-bdist)/100);
+        ctx.save(); ctx.globalAlpha=wa;
+        ctx.fillStyle='rgba(200,40,40,0.9)';
+        ctx.font='bold 14px Courier New'; ctx.textAlign='center';
+        ctx.fillText('⚠',ssx,ssy-28);
+        ctx.restore();
+      }
+
+    } else if(ev.type === 'raft'){
+      if(ev.collected) continue;
+      const [rsx,rsy]=toScreen(ev.wx,ev.wy);
+      if(rsx<-80||rsx>W+80||rsy<-80||rsy>H+80) continue;
+
+      const bob=Math.sin(tick*0.04 + ev.bobPhase)*3;
+      const tilt=Math.sin(tick*0.025 + ev.bobPhase)*0.08;
+      ctx.save();
+      ctx.translate(rsx,rsy+bob);
+      ctx.rotate(tilt);
+
+      // Raft planks
+      const planks=[[-12,-3,24,5],[-12,3,24,5],[-12,-9,24,5]];
+      for(const [px,py,pw,ph] of planks){
+        ctx.fillStyle='#5a3c1a';
+        ctx.fillRect(px,py,pw,ph);
+        ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=0.6;
+        ctx.strokeRect(px,py,pw,ph);
+      }
+      // Cross-lashing
+      ctx.strokeStyle='rgba(160,120,60,0.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(-10,-10); ctx.lineTo(-10,8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(10,-10);  ctx.lineTo(10,8);  ctx.stroke();
+
+      // Loot hint
+      if(ev.loot){
+        ctx.font='14px sans-serif'; ctx.textAlign='center';
+        ctx.fillText(ev.loot.icon||'📦',0,-16);
+      } else {
+        ctx.globalAlpha=0.5;
+        ctx.fillStyle='#7a5a30';
+        ctx.beginPath(); ctx.ellipse(0,-10,5,4,0,0,Math.PI*2); ctx.fill();
+      }
+
+      // Proximity label
+      const rdist=Math.sqrt((GAME.x-ev.wx)**2+(GAME.y-ev.wy)**2);
+      if(rdist<220){
+        const la=Math.min(1,(220-rdist)/80);
+        ctx.globalAlpha=la;
+        ctx.fillStyle='rgba(6,10,18,0.85)';
+        ctx.strokeStyle='rgba(180,140,80,0.45)'; ctx.lineWidth=1;
+        ctx.fillRect(-40,-38,80,16); ctx.strokeRect(-40,-38,80,16);
+        ctx.fillStyle='rgba(200,170,90,0.9)';
+        ctx.font='9px Courier New';
+        ctx.fillText('Sail close to collect',0,-27);
+      }
+
+      ctx.restore();
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CURSED ZONES
+   Defined areas of the world with unique environmental rules.
+   Entering triggers: black-tinged fog, compass spin, panic
+   surge, eldritch-only fish, occasional void whispers.
+   Exits clear the effect over ~5 seconds.
+   ══════════════════════════════════════════════════════════ */
+const CURSED_ZONES = [
+  // Pale Atoll and its surrounding waters
+  { wx:-450, wy: 650, r:320, name:'The Pale Atoll',
+    fog:'rgba(40,0,60,', panicRate:2.2, compassSpin:true, eldritchOnly:false },
+  // Deep void patch — mid-ocean, no island anchor
+  { wx: 400, wy:-600, r:200, name:'The Drowned Eye',
+    fog:'rgba(0,20,40,', panicRate:2.8, compassSpin:true, eldritchOnly:true },
+  // Eastern cursed stretch near the unknown island
+  { wx:-150, wy:-800, r:260, name:'The Still Waters',
+    fog:'rgba(20,0,40,', panicRate:1.8, compassSpin:false, eldritchOnly:false },
+];
+
+const CURSED = {
+  active:    false,
+  zoneName:  '',
+  intensity: 0,    // 0→1 blend
+  compassOffset: 0,
+  whisperTimer: 0,
+};
+
+const CURSED_WHISPERS = [
+  'Something in the water knows your name.',
+  'The depth beneath you has no bottom.',
+  'Do not look at the foam.',
+  'It has been watching since you entered.',
+  'Turn back. Turn back. Turn back.',
+  'The fish here have too many teeth.',
+  'You are not the first to come here.',
+];
+
+function updateCursedZones(dt){
+  // Find if player is in any cursed zone
+  let inZone = null;
+  let closest = Infinity;
+  for(const z of CURSED_ZONES){
+    const dx=GAME.x-z.wx, dy=GAME.y-z.wy;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d < z.r && d < closest){ inZone=z; closest=d; }
+  }
+
+  if(inZone){
+    CURSED.active = true;
+    CURSED.zoneName = inZone.name;
+    CURSED.intensity = Math.min(1, CURSED.intensity + dt*0.18);
+
+    // Announce entry
+    if(CURSED.intensity > 0.1 && !CURSED._entered){
+      CURSED._entered = true;
+      addLog(`You have entered ${inZone.name}.`,'ev-eldritch');
+    }
+
+    // Compass spin — overrides wind arrow with jitter
+    if(inZone.compassSpin){
+      CURSED.compassOffset += (Math.random()-0.5)*4*dt*60*CURSED.intensity;
+    }
+
+    // Panic surge (stacks with night panic)
+    if(GAME.isNight || CURSED.intensity > 0.5){
+      GAME.panic = Math.min(100, GAME.panic + inZone.panicRate * CURSED.intensity * dt);
+    }
+
+    // Whispers
+    CURSED.whisperTimer -= dt;
+    if(CURSED.whisperTimer <= 0 && CURSED.intensity > 0.4){
+      CURSED.whisperTimer = 8 + Math.random()*12;
+      const w = CURSED_WHISPERS[Math.floor(Math.random()*CURSED_WHISPERS.length)];
+      addLog(w,'ev-eldritch');
+    }
+
+    // Eldritch-only zones force fish pool at night
+    CURSED._eldritchOnly = inZone.eldritchOnly && GAME.isNight;
+
+  } else {
+    // Fade out
+    if(CURSED.active && CURSED.intensity < 0.05){
+      CURSED.active = false;
+      CURSED._entered = false;
+      CURSED._eldritchOnly = false;
+      CURSED.compassOffset = 0;
+      if(CURSED.intensity < 0.05) addLog('The oppressive feeling lifts.','ev-system');
+    }
+    CURSED.intensity = Math.max(0, CURSED.intensity - dt*0.12);
+    CURSED.compassOffset *= 0.95;
+  }
+
+  // Apply cursed fog vignette (separate from panic vignette)
+  const vign = document.getElementById('vignette');
+  if(CURSED.intensity > 0.05 && vign){
+    const ci = CURSED.intensity;
+    const existingBox = vign.style.boxShadow;
+    // Blend purple-black cursed vignette
+    const cursedShadow = `inset 0 0 ${ci*280}px rgba(40,0,70,${ci*0.5})`;
+    // Don't overwrite panic vignette — append if panic is also active
+    if(!GAME.panic || GAME.panic < 20){
+      vign.style.boxShadow = cursedShadow;
+    }
+  }
+}
+
+function drawCursedZones(){
+  const t = tick*0.008;
+  for(const z of CURSED_ZONES){
+    const [sx,sy]=toScreen(z.wx,z.wy);
+    if(sx<-z.r*2||sx>W+z.r*2||sy<-z.r*2||sy>H+z.r*2) continue;
+
+    // Check fog visibility
+    const [fx,fy]=worldToFog(z.wx,z.wy);
+    const explored = fogGrid[fy*FOG_CELLS+fx];
+
+    // Outer aura — always faintly visible even in fog (Lovecraftian wrongness)
+    const auraAlpha = 0.08 + Math.sin(t+z.wx*0.01)*0.04;
+    const ag=ctx.createRadialGradient(sx,sy,z.r*0.4,sx,sy,z.r*1.8);
+    ag.addColorStop(0,`${z.fog}${auraAlpha*1.5})`);
+    ag.addColorStop(0.6,`${z.fog}${auraAlpha*0.6})`);
+    ag.addColorStop(1,'transparent');
+    ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(sx,sy,z.r*1.8,0,Math.PI*2); ctx.fill();
+
+    if(!explored) continue;
+
+    // Inner void — darker, more opaque
+    const pulse = 0.18 + Math.sin(t*1.4+z.wy*0.008)*0.07;
+    const ig=ctx.createRadialGradient(sx,sy,0,sx,sy,z.r);
+    ig.addColorStop(0,`${z.fog}${pulse})`);
+    ig.addColorStop(0.5,`${z.fog}${pulse*0.6})`);
+    ig.addColorStop(1,'transparent');
+    ctx.fillStyle=ig; ctx.beginPath(); ctx.arc(sx,sy,z.r,0,Math.PI*2); ctx.fill();
+
+    // Slow-spinning tendrils of dark mist
+    ctx.save(); ctx.globalAlpha=0.12+Math.sin(t*0.8)*0.06;
+    ctx.strokeStyle=`${z.fog}0.8)`;
+    for(let arm=0;arm<5;arm++){
+      const armAngle = t*0.3*((arm%2===0)?1:-1) + arm/5*Math.PI*2;
+      ctx.beginPath();
+      for(let step=0;step<=40;step++){
+        const frac=step/40;
+        const r2=z.r*(0.2+frac*0.8);
+        const ang2=armAngle + frac*Math.PI*1.8 + Math.sin(frac*4+t)*0.4;
+        const px=sx+Math.cos(ang2)*r2, py=sy+Math.sin(ang2)*r2*0.7;
+        step===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+      }
+      ctx.lineWidth=2+arm*0.5; ctx.stroke();
+    }
+    ctx.restore();
+
+    // Warning label with cursed zone name
+    const bdx=GAME.x-z.wx, bdy=GAME.y-z.wy;
+    const bdist=Math.sqrt(bdx*bdx+bdy*bdy);
+    if(bdist < z.r*1.4){
+      const la=Math.min(1,(z.r*1.4-bdist)/(z.r*0.4));
+      ctx.save(); ctx.globalAlpha=la;
+      ctx.fillStyle='rgba(120,40,180,0.8)';
+      ctx.font='bold 10px Courier New'; ctx.textAlign='center';
+      ctx.fillText(z.name,sx,sy-z.r-8);
+      ctx.restore();
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SECOND SETTLEMENT — MISTHOLLOW
+   A fog-shrouded fishing village further east. Discovered
+   by sailing there. Has its own dock, a different NPC
+   (Harbour Witch), unique stock, and slightly darker tone.
+   ══════════════════════════════════════════════════════════ */
+
+// Misthollow is ISLANDS[6] — only show/interact once discovered
+function getMisthollow(){ return ISLANDS[6]; }
+
+function checkMisthollow(){
+  const m = getMisthollow();
+  if(m.discovered) return;
+  const dx=GAME.x-m.wx, dy=GAME.y-m.wy;
+  if(Math.sqrt(dx*dx+dy*dy) < m.r+300){
+    m.discovered = true;
+    revealFogAt(m.wx, m.wy, 12);
+    addLog('Through the mist — a settlement. Misthollow.','ev-success');
+    addLog('A second harbour. Someone has been living here a long time.','ev-system');
+    SFX.dock();
+  }
+}
+
+function tryDockMisthollow(){
+  const m = getMisthollow();
+  if(!m.discovered){ addLog('There is nothing out here.','ev-warn'); return; }
+  const dx=GAME.x-m.wx, dy=GAME.y-m.wy;
+  if(Math.sqrt(dx*dx+dy*dy) > m.r+140){ addLog('Sail closer to Misthollow.','ev-warn'); return; }
+
+  const sold = GAME.cargo.reduce((s,f)=>s+f.value,0);
+  GAME.cargo=[]; GAME.panic=0;
+  GAME.hull=Math.min(100, GAME.hull+20);  // less repair than Port Harrow
+  GAME.gold+=sold;
+  GAME.gameMins=DAWN_M; GAME.day++; GAME.isNight=false;
+  if(GAME.monster) despawnMonster();
+  addLog(`Misthollow harbour. Haul sold: ${sold} ⊕.`,'ev-success');
+  addLog('The villagers watch from the shadows. Hull patched.','ev-system');
+  SFX.dock();
+  document.getElementById('vignette').style.boxShadow='none';
+}
+
+function drawSecondPort(sx,sy,r){
+  ctx.save();
+  // Darker, more weathered buildings — this place is older and stranger
+  for(const [bx,by,bw,bh] of [[-28,-6,16,10],[6,-10,14,16],[-10,-20,12,14],[20,-4,12,10],[-20,8,10,8]]){
+    ctx.fillStyle='#2a2820'; ctx.fillRect(sx+bx,sy+by,bw,bh);
+    ctx.fillStyle='#6a4820'; ctx.fillRect(sx+bx,sy+by,bw,2);
+    // Lit windows (faint orange)
+    if(Math.random()<0.6){
+      ctx.fillStyle=`rgba(200,120,40,${0.3+Math.sin(tick*0.04+bx)*0.1})`;
+      ctx.fillRect(sx+bx+2,sy+by+3,4,4);
+    }
+  }
+  // Watchtower instead of lighthouse — taller, darker
+  ctx.fillStyle='#1a1810'; ctx.fillRect(sx-4,sy-r*0.5-30,8,30);
+  ctx.fillStyle='#2a2018'; ctx.fillRect(sx-7,sy-r*0.5-34,14,8);
+  // Lantern — dimmer, more amber
+  const la=0.3+Math.sin(tick*0.05)*0.1;
+  ctx.fillStyle=`rgba(200,120,40,${la})`;
+  ctx.beginPath(); ctx.arc(sx,sy-r*0.5-38,3,0,Math.PI*2); ctx.fill();
+  const lg=ctx.createRadialGradient(sx,sy-r*0.5-38,0,sx,sy-r*0.5-38,28);
+  lg.addColorStop(0,`rgba(200,120,40,${la*0.35})`); lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(sx,sy-r*0.5-38,28,0,Math.PI*2); ctx.fill();
+  // Permanent mist ring around Misthollow
+  const mg=ctx.createRadialGradient(sx,sy,r*0.5,sx,sy,r*1.6);
+  mg.addColorStop(0,'rgba(80,70,100,0)');
+  mg.addColorStop(0.5,`rgba(80,70,100,${0.15+Math.sin(tick*0.02)*0.05})`);
+  mg.addColorStop(1,'transparent');
+  ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(sx,sy,r*1.6,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// Harbour Witch — NPC at Misthollow (pressed Q near Misthollow)
+function talkToHarbourWitch(){
+  const m = getMisthollow();
+  if(!m.discovered || Math.sqrt((GAME.x-m.wx)**2+(GAME.y-m.wy)**2) > m.r+220){
+    addLog('Sail closer to Misthollow.','ev-warn'); return;
+  }
+  showNPCDialogue({
+    portrait:'🧙',
+    name:'Maren Ash',
+    title:'Harbour Witch, Misthollow',
+    text:`"You found us. Not many do. Misthollow does not <em>want</em> to be found. I sell what Port Harrow will not stock. If your hands don't shake at the sight of void bait, you're ready. Come to the dock — <strong>press E</strong> to trade."`,
+    btns:[
+      { label:'I want to see your wares', action:'witch_shop', cls:'accept' },
+      { label:'What is this place?',       action:'witch_lore', cls:'decline' },
+    ]
+  });
+}
+
+// Hook witch shop action into handleNPCAction
+const _origHandleNPCAction = handleNPCAction;
+function handleNPCAction(action, qid){
+  if(action==='witch_shop'){ closeNPCDialogue(); openWitchShop(); return; }
+  if(action==='witch_lore'){
+    showNPCDialogue({
+      portrait:'🧙', name:'Maren Ash', title:'Harbour Witch, Misthollow',
+      text:`"Misthollow has been here longer than Port Harrow. We fish the deep zones — the ones on no chart. The catches here are not always fish. Come back after dark if you want the real stock."`,
+      btns:[{ label:'I see.', action:'close', cls:'decline' }]
+    });
+    return;
+  }
+  _origHandleNPCAction(action, qid);
+}
+
+function openWitchShop(){
+  // Misthollow shop — cursed and rare items only, no mundane bait
+  const witchStock = [
+    { ...ITEM_CATALOG.bait_eldritch,   qty:2, price:380 },
+    { ...ITEM_CATALOG.rod_abyssal,     qty:1, price:650 },
+    { ...ITEM_CATALOG.rod_ghost,       qty:1, price:920 },
+    { ...ITEM_CATALOG.treasure_legendary, qty:1, price:280,
+      name:'Misthollow Chest', desc:'What the deep gives up, Maren keeps. Until now.', icon:'🫙' },
+    { ...MERCHANT_NOTES[2], type:'note', rarity:'cursed', price:90, qty:1,
+      desc:'Found washed up on the Misthollow shore, still sealed.' },
+    { ...MERCHANT_NOTES[4], type:'note', rarity:'cursed', price:90, qty:1 },
+  ];
+  const witchMerchant = {
+    npc:{ portrait:'🧙', name:'Maren Ash', title:'Harbour Witch, Misthollow',
+          tagline:'"I don\'t ask what you\'ll do with it. I don\'t want to know."' },
+    stock: witchStock,
+    shopOpen: true,
+  };
+  openShop(witchMerchant);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP DRAGGABLE PANELS + COLLAPSIBLE (both platforms)
+   ══════════════════════════════════════════════════════════ */
+const PANEL_POSITIONS = {};  // id → {top, left, right, bottom} saved state
+const PANEL_COLLAPSED = {};  // id → bool
+
+// Default positions — right column stacked neatly
+const PANEL_DEFAULTS = {
+  'hud-stats':      { top:14,  right:14 },
+  'hud-gold':       { top:200, right:14 },
+  'hud-log':        { top:14,  right:14 }, // JS stacks these on init
+  'quest-tracker':  { top:14,  right:14 },
+  'minimap':        { bottom:20, right:14 },
+};
+
+function initPanels(){
+  if(IS_TOUCH) return;  // mobile uses fixed CSS layout
+
+  // Load saved positions from localStorage
+  try {
+    const saved = JSON.parse(localStorage.getItem('et_panel_pos')||'{}');
+    Object.assign(PANEL_POSITIONS, saved);
+  } catch(e){}
+
+  // Stack panels in a right-side column if no saved position
+  const panelIds = ['hud-log','hud-stats','hud-gold','quest-tracker'];
+  let stackTop = 14;
+  for(const id of panelIds){
+    const el = document.getElementById(id);
+    if(!el) continue;
+    el.style.position = 'absolute';
+    if(PANEL_POSITIONS[id]){
+      applyPanelPos(el, PANEL_POSITIONS[id]);
+    } else {
+      el.style.top   = stackTop+'px';
+      el.style.right = '14px';
+      el.style.left  = '';
+      el.style.bottom= '';
+    }
+    // Advance stack — rough estimate based on panel type
+    stackTop += (el.offsetHeight || 120) + 8;
+  }
+
+  // Minimap — bottom right, not in the column
+  const mm = document.getElementById('minimap');
+  if(mm){
+    const mmPos = PANEL_POSITIONS['minimap'];
+    if(mmPos) applyPanelPos(mm, mmPos);
+    else { mm.style.bottom='20px'; mm.style.right='14px'; mm.style.top=''; mm.style.left=''; }
+  }
+
+  // Wire drag on all panel headers
+  document.querySelectorAll('[data-drag]').forEach(header => {
+    makeDraggable(header, document.getElementById(header.dataset.drag));
+  });
+  // Also make minimap draggable via itself
+  if(mm) makeDraggable(mm, mm);
+}
+
+function applyPanelPos(el, pos){
+  el.style.top    = pos.top    != null ? pos.top+'px'    : '';
+  el.style.left   = pos.left   != null ? pos.left+'px'   : '';
+  el.style.right  = pos.right  != null ? pos.right+'px'  : '';
+  el.style.bottom = pos.bottom != null ? pos.bottom+'px' : '';
+}
+
+function savePanelPositions(){
+  try { localStorage.setItem('et_panel_pos', JSON.stringify(PANEL_POSITIONS)); } catch(e){}
+}
+
+function makeDraggable(handle, panel){
+  if(!panel) return;
+  let startX, startY, startLeft, startTop;
+
+  handle.addEventListener('mousedown', e => {
+    if(e.target.tagName === 'BUTTON') return; // don't drag on collapse buttons
+    e.preventDefault();
+    // Convert right/bottom to left/top so we can move freely
+    const rect  = panel.getBoundingClientRect();
+    panel.style.left   = rect.left+'px';
+    panel.style.top    = rect.top+'px';
+    panel.style.right  = '';
+    panel.style.bottom = '';
+
+    startX    = e.clientX;
+    startY    = e.clientY;
+    startLeft = rect.left;
+    startTop  = rect.top;
+
+    panel.style.zIndex = '15';
+    panel.style.transition = 'none';
+
+    function onMove(e){
+      const nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  startLeft + e.clientX - startX));
+      const ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, startTop  + e.clientY - startY));
+      panel.style.left = nx+'px';
+      panel.style.top  = ny+'px';
+    }
+    function onUp(){
+      panel.style.zIndex = '';
+      panel.style.transition = '';
+      // Save position
+      PANEL_POSITIONS[panel.id] = {
+        top:  parseFloat(panel.style.top),
+        left: parseFloat(panel.style.left),
+      };
+      savePanelPositions();
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup',   onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup',   onUp);
+  });
+}
+
+function togglePanelCollapse(id, btn){
+  const el = document.getElementById(id+'-body') ||
+             document.getElementById('hud-'+id+'-body') ||
+             document.querySelector(`#${id} .hud-panel-body`);
+  if(!el) return;
+  const collapsed = PANEL_COLLAPSED[id] = !PANEL_COLLAPSED[id];
+  el.classList.toggle('collapsed', collapsed);
+  if(btn) btn.textContent = collapsed ? '+' : '−';
+}
+
+// Keep old mobile collapse system working too
+const collapseState = {};
+function initCollapsible(){ /* no-op now — handled by initPanels */ }
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE / TOUCH SUPPORT
+   ══════════════════════════════════════════════════════════ */
+const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+// Show virtual controls on touch devices using .active class
+if(IS_TOUCH){
+  document.getElementById('virtual-controls').classList.add('active');
+  document.getElementById('mobile-top-bar').classList.add('active');
+  const tt = document.getElementById('touch-tip');
+  if(tt) tt.style.display = 'inline';
+}
+
+// Virtual key press — syncs with the existing keys{} map
+function mobileKey(code, down){
+  if(down && !keys[code]) onKeyDown(code);
+  keys[code] = down;
+  // Visual feedback on dpad
+  const el = document.getElementById('dpad-'+code.replace('Key','').toLowerCase());
+  if(el) el.classList.toggle('pressed', down);
+}
+
+// One-shot tap (for Fish, Cannon, Dock, Talk)
+function mobileTap(code){
+  onKeyDown(code);
+  // Brief visual flash on the button
+  const map = { KeyF:'btn-fish', KeyC:'btn-cannon', KeyE:'btn-dock', KeyQ:'btn-talk' };
+  const el = document.getElementById(map[code]);
+  if(el){ el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),200); }
+}
+
+// Show/hide reel button with fishing overlay
+const _origFishActive = () => {};
+function syncReelBtn(){
+  const rb = document.getElementById('reel-btn');
+  if(rb) rb.classList.toggle('active', IS_TOUCH && GAME.fishingActive && !GAME.catchPopup);
+}
+
+// Touch-to-dismiss catch popup
+document.addEventListener('touchstart', e => {
+  if(GAME.catchPopup){
+    dismissCatchPopup();
+    e.preventDefault();
+  }
+}, { passive:false });
+
+// Prevent default touch scroll/zoom on the canvas
+const _canvas = document.getElementById('c');
+_canvas.addEventListener('touchstart', e=>e.preventDefault(), {passive:false});
+_canvas.addEventListener('touchmove',  e=>e.preventDefault(), {passive:false});
+
+/* ══════════════════════════════════════════════════════════
    MAIN LOOP
    ══════════════════════════════════════════════════════════ */
 let lastTime=null;
@@ -4866,16 +6627,23 @@ function loop(ts){
     updateFishing(dt);
     updateMonster(dt);
     updateWhirlpools(dt);
+    updateWeather(dt);
+    updateEvents(dt);
+    updateCursedZones(dt);
+    checkMisthollow();
     updatePanic(dt);
     updateFog(dt);
     updateDiscovery();
     updateHUD();
-    MUSIC.tick(dt, GAME._daylight||0, GAME.panic);
+    MUSIC.tick(dt, GAME._daylight||0, GAME.panic, lerpWeather('skyDark'));
     updateQuestProximity(dt);
 
     drawWater();
+    ctx.save();
+    applyShake();
     drawIslands();
     drawWorldObjects();
+    drawCursedZones();
     drawNPCs();
     drawWhirlpools();
     drawParticles();
@@ -4883,9 +6651,12 @@ function loop(ts){
     drawSplashes();
     drawPirates();
     drawMerchants();
+    drawEvents();
     drawNightOverlay();
+    drawWeather();
     drawMonster();
     drawBoat();
+    ctx.restore();
     renderMinimap();
   }
 
@@ -4906,6 +6677,7 @@ window.addEventListener('keydown', _startMusic, {once:true});
 window.addEventListener('click',   _startMusic, {once:true});
 // Auto-load save if one exists
 if(hasSave()){ addLog('Save detected — press Esc → Save → Load to restore.','ev-system'); }
+initPanels();
 requestAnimationFrame(loop);
 </script>
 </body>
