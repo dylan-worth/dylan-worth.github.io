@@ -2,283 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Eldritch Tides</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:'Georgia',serif;
-             touch-action:none; -webkit-user-select:none; user-select:none; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:'Georgia',serif; }
 canvas { display:block; }
 #ui { position:fixed; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:10; }
-
-/* ════ VIRTUAL CONTROLS (mobile only) ════ */
-#virtual-controls {
-  display:none;
-  position:fixed; bottom:0; left:0; right:0;
-  height:175px; pointer-events:none; z-index:30;
-  padding-bottom:env(safe-area-inset-bottom, 8px);
-}
-#virtual-controls.active { display:block; }
-
-/* D-pad — bottom-left */
-#dpad {
-  position:absolute; bottom:16px; left:14px;
-  width:132px; height:132px; pointer-events:auto;
-}
-.dpad-btn {
-  position:absolute; width:42px; height:42px;
-  background:rgba(6,10,18,0.82); border:1.5px solid rgba(180,140,80,0.4);
-  border-radius:10px; display:flex; align-items:center; justify-content:center;
-  font-size:18px; color:rgba(220,190,130,0.95); touch-action:none;
-  -webkit-tap-highlight-color:transparent;
-}
-.dpad-btn:active, .dpad-btn.pressed {
-  background:rgba(180,140,80,0.28); border-color:rgba(220,180,80,0.8);
-}
-#dpad-up    { top:0;    left:45px; }
-#dpad-down  { bottom:0; left:45px; }
-#dpad-left  { top:45px; left:0; }
-#dpad-right { top:45px; right:0; }
-#dpad-center {
-  position:absolute; top:45px; left:45px; width:42px; height:42px;
-  background:rgba(6,10,18,0.45); border:1px solid rgba(180,140,80,0.12);
-  border-radius:8px;
-}
-
-/* Action buttons — bottom-right 2×2 */
-#action-btns {
-  position:absolute; bottom:16px; right:14px;
-  display:grid; grid-template-columns:52px 52px; grid-template-rows:52px 52px;
-  gap:7px; pointer-events:auto;
-}
-.act-btn {
-  width:52px; height:52px;
-  background:rgba(6,10,18,0.82); border:1.5px solid rgba(180,140,80,0.3);
-  border-radius:12px; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:2px;
-  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-}
-.act-btn:active, .act-btn.pressed { background:rgba(180,140,80,0.22); }
-.act-btn-icon  { font-size:20px; line-height:1; }
-.act-btn-label { font-family:'Courier New',monospace; font-size:7px;
-                 letter-spacing:0.08em; color:rgba(160,140,100,0.8); text-transform:uppercase; }
-#btn-fish   { border-color:rgba(40,160,80,0.45); }
-#btn-fish.pressed   { background:rgba(40,160,80,0.22); }
-#btn-cannon { border-color:rgba(200,80,30,0.45); }
-#btn-cannon.pressed { background:rgba(200,80,30,0.22); }
-#btn-dock   { border-color:rgba(40,120,220,0.45); }
-#btn-dock.pressed   { background:rgba(40,120,220,0.22); }
-#btn-talk   { border-color:rgba(220,170,40,0.45); }
-#btn-talk.pressed   { background:rgba(220,170,40,0.22); }
-
-/* Reel button */
-#reel-btn {
-  display:none; position:fixed; bottom:0; left:0; right:0; height:70px;
-  background:rgba(15,70,30,0.92); border-top:2px solid rgba(40,180,80,0.6);
-  align-items:center; justify-content:center;
-  font-family:'Courier New',monospace; font-size:14px; letter-spacing:0.2em;
-  color:rgba(80,230,120,1); text-transform:uppercase;
-  pointer-events:auto; touch-action:none; z-index:35;
-}
-#reel-btn.active { display:flex; }
-
-/* Mobile top bar — always visible on touch, fixed position */
-#mobile-top-bar {
-  display:none; position:fixed; bottom:185px; right:14px;
-  flex-direction:column; gap:8px; pointer-events:auto; z-index:30;
-}
-#mobile-top-bar.active { display:flex; }
-.mtb-btn {
-  width:44px; height:44px; background:rgba(6,10,18,0.88);
-  border:1.5px solid rgba(180,140,80,0.35); border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; touch-action:manipulation; cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.mtb-btn:active { background:rgba(180,140,80,0.22); border-color:rgba(220,180,80,0.7); }
-
-/* Collapse button on panels */
-.panel-collapse-btn {
-  position:absolute; top:4px; right:6px;
-  font-size:11px; color:rgba(180,140,80,0.5);
-  font-family:'Courier New',monospace; cursor:pointer;
-  pointer-events:auto; padding:2px 5px;
-  background:none; border:none; line-height:1;
-}
-.panel-body { transition:opacity 0.12s; }
-.panel-body.hidden { display:none; }
-
-/* ════ MOBILE RESPONSIVE OVERRIDES ════ */
-@media (max-width: 768px) {
-
-  /* ── Clock bar — compact, centered, no overflow ── */
-  #hud-top {
-    top:10px; padding:5px 12px; gap:8px;
-    max-width:calc(100vw - 20px);
-    left:50%; right:auto; transform:translateX(-50%);
-  }
-  .hud-clock { font-size:16px; letter-spacing:0.04em; }
-  .hud-sep   { font-size:13px; }
-  .hud-phase { font-size:8px; padding:2px 7px; letter-spacing:0.1em; }
-
-  /* ── Weather badge — below clock ── */
-  #weather-badge {
-    top:46px; left:50%; transform:translateX(-50%);
-    position:absolute; padding:3px 10px; font-size:9px;
-  }
-  .wb-icon { font-size:11px; }
-
-  /* ── Stats — small, top-left ── */
-  #hud-stats {
-    top:44px; left:8px; bottom:auto; right:auto;
-    min-width:0; width:auto; padding:6px 10px; gap:4px;
-  }
-  .stat-row  { gap:2px; }
-  .stat-name { font-size:7px; letter-spacing:0.1em; }
-  .stat-num  { font-size:9px; }
-  .stat-bar  { height:3px; }
-
-  /* ── Gold — above d-pad ── */
-  #hud-gold {
-    bottom:185px; left:14px; top:auto; right:auto;
-    padding:5px 10px; text-align:left;
-  }
-  .gold-label { font-size:7px; }
-  .gold-val   { font-size:14px; }
-
-  /* ── Minimap — top-right, small ── */
-  #minimap {
-    width:88px; height:88px;
-    top:44px; right:8px; bottom:auto; left:auto;
-  }
-  #minimap canvas { width:88px; height:88px; }
-  .minimap-label { font-size:7px; }
-
-  /* ── Cannon HUD — above action buttons ── */
-  #cannon-hud {
-    bottom:185px; right:14px; left:auto; transform:none;
-    padding:4px 10px; gap:7px;
-  }
-  .cannon-label    { font-size:8px; }
-  .cannon-bar-wrap { width:60px; }
-
-  /* ── Log — narrow, mid-left ── */
-  #hud-log {
-    width:175px; top:auto; right:auto; left:8px; bottom:185px;
-    position:absolute;
-  }
-  #log-scroll    { max-height:80px; }
-  .log-entry     { font-size:10px; }
-  .log-time      { font-size:8px; }
-  .log-header-title { font-size:8px; }
-  #log-toggle    { font-size:8px; }
-
-  /* ── Quest tracker — above log ── */
-  #quest-tracker {
-    left:8px; top:auto; bottom:290px; right:auto;
-    min-width:155px; max-width:185px;
-    padding:7px 10px; gap:3px;
-  }
-  .qt-title      { font-size:7px; }
-  .qt-quest-name { font-size:11px; }
-  .qt-step       { font-size:9px; }
-  .qt-item       { font-size:10px; }
-  .qt-reward     { font-size:9px; }
-
-  /* ── Inventory — full screen ── */
-  #inv-panel {
-    top:0; left:0; right:0; bottom:0; transform:none;
-    width:100%; min-width:0; border-radius:0;
-    padding:12px 12px 80px; overflow-y:auto;
-  }
-  .inv-title { font-size:10px; }
-  .inv-tabs  { gap:3px; margin-bottom:8px; }
-  .inv-tab   { padding:5px 0; font-size:8px; }
-  #inv-tab-cargo, #inv-tab-items, #inv-tab-fishlog,
-  #inv-tab-quests, #inv-tab-skills {
-    overflow-y:auto; max-height:calc(100vh - 130px);
-  }
-  .inv-grid  { grid-template-columns:repeat(4,1fr); gap:4px; }
-  .inv-slot  { width:auto; height:58px; }
-  .slot-icon { font-size:18px; }
-  .slot-name,.slot-val { font-size:7px; }
-  .inv-footer { padding-top:8px; }
-  .inv-close  { font-size:9px; }
-
-  /* ── Shop — slide up from bottom ── */
-  #shop-overlay  { align-items:flex-end; }
-  .shop-panel {
-    min-width:0; width:100%; max-height:88vh;
-    border-radius:16px 16px 0 0; padding:20px 16px 16px;
-    overflow-y:auto;
-  }
-  .shop-items { max-height:55vh; }
-  .si-name    { font-size:12px; }
-  .si-desc    { font-size:9px; }
-  .si-icon    { font-size:20px; }
-
-  /* ── NPC dialogue — bottom sheet ── */
-  #npc-dialogue {
-    bottom:0; left:0; right:0; top:auto; transform:none;
-    min-width:0; max-width:100%; border-radius:16px 16px 0 0;
-    padding:18px 16px 16px; border-bottom:none;
-    max-height:65vh; overflow-y:auto;
-  }
-  .npc-text     { font-size:12px; }
-  .npc-portrait { font-size:24px; }
-  .npc-name     { font-size:11px; }
-  .npc-btn      { font-size:9px; padding:7px 12px; }
-
-  /* ── Fishing panel ── */
-  #fishing-panel   { padding:14px 16px; }
-  .fish-bar-wrap   { height:180px; }
-  .tension-track   { width:130px; height:14px; }
-  .fish-tip        { font-size:10px; }
-  .catch-dismiss   { font-size:11px; }
-
-  /* ── Full map ── */
-  #full-map { padding:10px; }
-  #full-map canvas { width:100% !important; height:auto !important; }
-  .map-legend      { gap:8px; }
-  .map-leg-item    { font-size:8px; }
-  .map-hint        { font-size:9px; }
-
-  /* ── Pause card ── */
-  .pause-card {
-    padding:22px 16px; min-width:0;
-    width:calc(100vw - 20px); max-height:88vh; overflow-y:auto;
-  }
-  .pause-title { font-size:18px; }
-  .pause-btn   { width:100%; padding:10px 0; }
-  .pause-tabs  { flex-wrap:wrap; gap:4px; }
-  .ptab        { flex:1; min-width:0; font-size:8px; padding:6px 2px; }
-
-  /* ── Monster warning ── */
-  .monster-text { font-size:20px; }
-}
-
-/* Extra small */
-@media (max-width: 390px) {
-  .hud-clock { font-size:13px; }
-  #hud-stats { padding:4px 8px; }
-  .gold-val  { font-size:12px; }
-  #minimap, #minimap canvas { width:72px; height:72px; }
-  #action-btns { grid-template-columns:46px 46px; grid-template-rows:46px 46px; gap:5px; }
-  .act-btn { width:46px; height:46px; }
-  .act-btn-icon { font-size:18px; }
-  #dpad { width:120px; height:120px; }
-  .dpad-btn { width:38px; height:38px; font-size:16px; }
-  #dpad-up, #dpad-down { left:41px; }
-  #dpad-left, #dpad-right { top:41px; }
-  #dpad-center { top:41px; left:41px; width:38px; height:38px; }
-  .mtb-btn { width:40px; height:40px; font-size:16px; }
-  #mobile-top-bar { right:10px; bottom:178px; gap:6px; }
-}
-
-
 
 
 /* ── HUD top bar — centered, compact ── */
@@ -975,45 +704,6 @@ canvas { display:block; }
     <div id="weather-badge"><span class="wb-icon">☀</span><span class="wb-name" id="wbName">CLEAR</span><span class="wb-sep">·</span><span class="wb-wind" id="wbWind">↑</span></div>
   </div>
 
-  <!-- MOBILE SIDE BAR — Menu / Inventory / Map -->
-  <div id="mobile-top-bar">
-    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();pauseGame()}" onclick="pauseGame()" title="Menu">⚙</button>
-    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();openInventory()}" onclick="openInventory()" title="Inventory">🎒</button>
-    <button class="mtb-btn" ontouchstart="e=>{e.preventDefault();openFullMap()}" onclick="openFullMap()" title="Map">🗺</button>
-  </div>
-
-  <!-- VIRTUAL D-PAD + ACTION BUTTONS -->
-  <div id="virtual-controls">
-    <div id="dpad">
-      <button class="dpad-btn" id="dpad-up"    ontouchstart="mobileKey('KeyW',true)"  ontouchend="mobileKey('KeyW',false)">▲</button>
-      <button class="dpad-btn" id="dpad-down"   ontouchstart="mobileKey('KeyS',true)"  ontouchend="mobileKey('KeyS',false)">▼</button>
-      <button class="dpad-btn" id="dpad-left"   ontouchstart="mobileKey('KeyA',true)"  ontouchend="mobileKey('KeyA',false)">◀</button>
-      <button class="dpad-btn" id="dpad-right"  ontouchstart="mobileKey('KeyD',true)"  ontouchend="mobileKey('KeyD',false)">▶</button>
-      <div id="dpad-center"></div>
-    </div>
-    <div id="action-btns">
-      <button class="act-btn" id="btn-fish"   ontouchstart="mobileTap('KeyF')"   onclick="mobileTap('KeyF')">
-        <span class="act-btn-icon">🎣</span><span class="act-btn-label">Fish</span>
-      </button>
-      <button class="act-btn" id="btn-cannon" ontouchstart="mobileTap('KeyC')"   onclick="mobileTap('KeyC')">
-        <span class="act-btn-icon">💥</span><span class="act-btn-label">Cannon</span>
-      </button>
-      <button class="act-btn" id="btn-dock"   ontouchstart="mobileTap('KeyE')"   onclick="mobileTap('KeyE')">
-        <span class="act-btn-icon">⚓</span><span class="act-btn-label">Dock</span>
-      </button>
-      <button class="act-btn" id="btn-talk"   ontouchstart="mobileTap('KeyQ')"   onclick="mobileTap('KeyQ')">
-        <span class="act-btn-icon">💬</span><span class="act-btn-label">Talk</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- REEL BUTTON (fishing touch target — replaces Space hold) -->
-  <div id="reel-btn"
-    ontouchstart="mobileKey('Space',true);this.classList.add('pressed')"
-    ontouchend="mobileKey('Space',false);this.classList.remove('pressed')">
-    ▲ HOLD TO REEL
-  </div>
-
   <!-- Log -->
   <div id="hud-log" class="hud-panel" data-collapsible="log">
     <div id="log-header" class="hud-panel-header" data-drag="hud-log">
@@ -1070,6 +760,85 @@ canvas { display:block; }
     <span class="cannon-label">CANNON</span>
     <div class="cannon-bar-wrap"><div class="cannon-bar-fill" id="cannonBar" style="width:100%"></div></div>
     <span class="cannon-label" id="cannonReady">READY</span>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="game-over" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.96);
+    align-items:center;justify-content:center;z-index:100;pointer-events:auto;flex-direction:column;gap:0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px;max-width:440px;padding:40px 32px;
+      background:rgba(6,8,14,0.98);border:1px solid rgba(180,60,40,0.4);border-radius:14px;
+      box-shadow:0 0 120px rgba(0,0,0,0.95);">
+      <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.3em;color:rgba(180,60,40,0.7);text-transform:uppercase;">The Pale Meridian</div>
+      <div id="go-title" style="font-family:'Courier New',monospace;font-size:32px;letter-spacing:0.12em;color:#c03030;
+        text-transform:uppercase;text-shadow:0 0 30px rgba(200,20,20,0.5);">Sunk</div>
+      <div id="go-subtitle" style="font-size:13px;color:#607080;font-style:italic;text-align:center;line-height:1.7;max-width:340px;"></div>
+      <div style="width:100%;height:1px;background:rgba(180,60,40,0.2);"></div>
+      <!-- Stats -->
+      <div id="go-stats" style="display:flex;flex-direction:column;gap:8px;width:100%;"></div>
+      <div style="width:100%;height:1px;background:rgba(180,60,40,0.15);"></div>
+      <div style="display:flex;gap:12px;width:100%;">
+        <button onclick="startNewVoyage()" style="flex:1;padding:12px 0;font-family:'Courier New',monospace;
+          font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#c8b880;
+          background:rgba(180,140,80,0.1);border:1px solid rgba(180,140,80,0.35);
+          border-radius:6px;cursor:pointer;pointer-events:auto;transition:all 0.15s;"
+          onmouseover="this.style.background='rgba(180,140,80,0.22)'"
+          onmouseout="this.style.background='rgba(180,140,80,0.1)'">
+          ↺ New Voyage
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCK REPAIR MODAL -->
+  <div id="repair-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,10,0.75);
+    align-items:flex-end;justify-content:center;z-index:60;pointer-events:auto;backdrop-filter:blur(4px);">
+    <div style="background:rgba(6,10,18,0.98);border:1px solid rgba(180,140,80,0.4);
+      border-radius:14px 14px 0 0;padding:24px 28px;width:100%;max-width:480px;
+      display:flex;flex-direction:column;gap:14px;box-shadow:0 0 60px rgba(0,0,0,0.9);">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.2em;color:#9a8050;text-transform:uppercase;" id="repairPortName">Port Harrow — Shipwright</div>
+        <div style="font-family:'Courier New',monospace;font-size:16px;color:#c8a040;" id="repairGold">0 ⊕</div>
+      </div>
+      <div style="font-size:12px;color:#8090a0;font-style:italic;" id="repairDesc">Choose how much to repair.</div>
+      <!-- Hull bar -->
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'Courier New',monospace;">
+          <span style="color:#7090a8;">HULL</span>
+          <span style="color:#d0c8b0;" id="repairHullDisplay">0% → 0%</span>
+        </div>
+        <div style="height:8px;border-radius:4px;background:rgba(255,255,255,0.06);overflow:hidden;">
+          <div id="repairHullBar" style="height:100%;border-radius:4px;background:#2da055;transition:width 0.2s;width:0%"></div>
+        </div>
+      </div>
+      <!-- Slider -->
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:10px;color:#606070;font-family:'Courier New',monospace;letter-spacing:0.1em;">REPAIR AMOUNT</div>
+        <input type="range" id="repairSlider" min="0" max="100" value="0"
+          style="width:100%;accent-color:#c8a040;"
+          oninput="updateRepairUI()">
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-family:'Courier New',monospace;">
+          <span style="color:#c09040;">Cost: <span id="repairCost">0</span> ⊕</span>
+          <span style="color:#607080;" id="repairAffordable"></span>
+        </div>
+      </div>
+      <!-- Also sell cargo option -->
+      <div style="font-size:11px;color:#506070;font-style:italic;" id="repairCargoNote"></div>
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;">
+        <button onclick="confirmRepair()" id="repairConfirmBtn"
+          style="flex:2;padding:10px 0;font-family:'Courier New',monospace;font-size:11px;
+          letter-spacing:0.14em;text-transform:uppercase;color:#40a060;
+          background:rgba(40,160,80,0.1);border:1px solid rgba(40,160,80,0.35);
+          border-radius:6px;cursor:pointer;pointer-events:auto;transition:all 0.15s;"
+          onmouseover="this.style.background='rgba(40,160,80,0.22)'"
+          onmouseout="this.style.background='rgba(40,160,80,0.1)'">Repair</button>
+        <button onclick="closeRepairModal()"
+          style="flex:1;padding:10px 0;font-family:'Courier New',monospace;font-size:11px;
+          letter-spacing:0.14em;text-transform:uppercase;color:#607080;
+          background:rgba(255,255,255,0.04);border:1px solid rgba(180,140,80,0.18);
+          border-radius:6px;cursor:pointer;pointer-events:auto;">Cast off</button>
+      </div>
+    </div>
   </div>
 
   <!-- PAUSE MENU -->
@@ -1236,8 +1005,7 @@ canvas { display:block; }
           </div>
           <div class="fish-tip">
             Keep the <span class="fish-key">green bar</span> over the fish.<br>
-            Hold <span class="fish-key">Space</span> to raise it.<br>
-            <span id="touch-tip" style="display:none;color:#40a060">On mobile — hold the Reel button below.</span>
+            Hold <span class="fish-key">Space</span> to raise it.
           </div>
         </div>
       </div>
@@ -1712,7 +1480,7 @@ function updateMonster(dt){
   if(dist < MONSTER_RAMMING_DIST){
     const impactDmg = m.phase==='lunge' ? 22 : 8;
     GAME.hull = Math.max(0, GAME.hull - impactDmg * dt * 8);
-    if(GAME.hull < 0.5){ addLog('Hull destroyed by the creature.','ev-danger'); }
+    if(GAME.hull < 0.5){ GAME._deathCause='monster'; addLog('Hull destroyed by the creature.','ev-danger'); }
     // Knockback
     const nx=dx/dist, ny=dy/dist;
     GAME.vx += nx*600*dt; GAME.vy += ny*600*dt;
@@ -1921,7 +1689,7 @@ function updatePanic(dt){
     const msgs=['The compass spins freely.','Faces in the foam, watching.','A lighthouse — but there is none here.','Your name. From below the hull.'];
     addLog(msgs[Math.floor(Math.random()*msgs.length)],'ev-eldritch');
   }
-  if(GAME.panic>=100) gameOver();
+  if(GAME.panic>=100){ GAME._deathCause='panic'; gameOver(); }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1938,22 +1706,192 @@ function tryDock(){
   const port = ISLANDS[0];
   const dx=GAME.x-port.wx, dy=GAME.y-port.wy;
   if(Math.sqrt(dx*dx+dy*dy)>port.r+130){ addLog('Sail closer to a port.','ev-warn'); return; }
+
+  // Sell cargo automatically
   const sold = GAME.cargo.reduce((s,f)=>s+f.value,0);
-  GAME.cargo=[]; GAME.panic=0;
-  GAME.hull=Math.min(100,GAME.hull+30);
+  GAME.cargo=[]; GAME.panic=0; GAME.isNight=false;
   GAME.gold+=sold;
-  GAME.gameMins=DAWN_M; GAME.day++; GAME.isNight=false;
+  GAME.gameMins=DAWN_M; GAME.day++;
   if(GAME.monster){ despawnMonster(); }
-  addLog(`Safe harbour. Haul: ${sold} ⊕. Hull patched.`,'ev-success');
   SFX.dock();
-  addLog(`Day ${GAME.day} — the sea is quiet… for now.`,'ev-system');
   document.getElementById('vignette').style.boxShadow='none';
+
+  if(sold>0) addLog(`Cargo sold: ${sold} ⊕. Day ${GAME.day}.`,'ev-success');
+  else addLog(`Port Harrow. Day ${GAME.day} — the sea is quiet.`,'ev-system');
+
+  // Open repair modal — player chooses how much to spend
+  openRepairModal('Port Harrow');
 }
 
 function gameOver(){
-  addLog('Panic consumed you. The Pale Meridian sank.','ev-eldritch');
-  addLog('Nothing remains but dark water.','ev-danger');
+  if(GAME._gameOver) return;   // prevent double-trigger
+  GAME._gameOver = true;
+  paused = true;
+
+  // Pick death message based on cause
+  const cause = GAME._deathCause || 'unknown';
+  const subtitles = {
+    hull:    '"The sea does not mourn. It simply moves on."',
+    panic:   '"The darkness took what remained of your mind. The ship drifted empty."',
+    monster: '"It did not sink you out of malice. You were simply in the way."',
+    waves:   '"The tempest was indifferent. So was the ocean floor."',
+  };
+  const sub = subtitles[cause] || subtitles.hull;
+
+  // Gather run stats
+  const fishCount = Object.values(FISH_LOG).reduce((s,f)=>s+f.count,0);
+  const statsHtml = [
+    ['Days survived',       `${GAME.day}`],
+    ['Gold earned',         `${GAME.gold.toLocaleString()} ⊕`],
+    ['Fish caught',         `${fishCount}`],
+    ['Species discovered',  `${Object.keys(FISH_LOG).length} / 9`],
+    ['Cause of loss',       cause === 'panic' ? 'Panic / madness' :
+                            cause === 'monster' ? 'The creature' :
+                            cause === 'waves' ? 'Storm waves' : 'Hull breach'],
+  ].map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;
+      font-family:'Courier New',monospace;font-size:11px;border-bottom:1px solid rgba(180,140,80,0.08);padding-bottom:5px;">
+      <span style="color:#506070;letter-spacing:0.1em;">${k}</span>
+      <span style="color:#c0b080;">${v}</span>
+    </div>`).join('');
+
+  document.getElementById('go-subtitle').innerHTML = sub;
+  document.getElementById('go-stats').innerHTML    = statsHtml;
+
+  // Delete save so they truly start fresh
+  deleteSave();
+
+  const go = document.getElementById('game-over');
+  go.style.display = 'flex';
+  // Animate in
+  go.style.opacity = '0';
+  requestAnimationFrame(()=>{ go.style.transition='opacity 1.8s ease'; go.style.opacity='1'; });
+
+  SFX.warning();
+  addLog('The Pale Meridian is lost.','ev-danger');
 }
+
+function startNewVoyage(){
+  // Full reset
+  location.reload();
+}
+
+// Hull threshold warnings — fires once per threshold per voyage
+const _hullWarned = {};
+function checkHullWarnings(){
+  // Grace period — don't check until at least 1 second has passed
+  // Prevents a stale save with hull=0 from triggering gameOver on load
+  if((GAME._aliveTime || 0) < 1.0) return;
+
+  const h = GAME.hull;
+  if(h <= 0 && !GAME._gameOver){
+    GAME._deathCause = GAME._deathCause || 'hull';
+    gameOver(); return;
+  }
+  if(h < 10 && !_hullWarned[10]){
+    _hullWarned[10] = true;
+    addLog('CRITICAL — Hull at 10%. One more hit will sink us.','ev-danger');
+    SFX.warning();
+  } else if(h < 25 && !_hullWarned[25]){
+    _hullWarned[25] = true;
+    addLog('Hull at 25%. Find port or an emergency kit.','ev-warn');
+  } else if(h < 50 && !_hullWarned[50]){
+    _hullWarned[50] = true;
+    addLog('Hull below 50%. Taking on water.','ev-warn');
+  }
+}
+
+/* ── REPAIR MODAL ── */
+// Cost per HP repaired — Port Harrow more expensive, Misthollow cheaper
+const REPAIR_COST_PER_HP = { 'Port Harrow':3, 'Misthollow':2 };
+let _repairPort = 'Port Harrow';
+let _repairMaxHP = 0;
+
+function openRepairModal(portName){
+  _repairPort   = portName;
+  _repairMaxHP  = Math.floor(100 - GAME.hull);
+  if(_repairMaxHP <= 0){
+    addLog('Hull is already at full integrity.','ev-system');
+    return;
+  }
+  document.getElementById('repairPortName').textContent = `${portName} — Shipwright`;
+  document.getElementById('repairGold').textContent     = `${GAME.gold.toLocaleString()} ⊕`;
+  document.getElementById('repairDesc').textContent     =
+    portName === 'Misthollow'
+      ? '"I can patch the planks. Cheaper than Harrow, but slower work." — 2 ⊕ per HP'
+      : '"Standard repair rate. Bring her in and we\'ll have her seaworthy." — 3 ⊕ per HP';
+
+  const slider = document.getElementById('repairSlider');
+  slider.max   = _repairMaxHP;
+  slider.value = Math.min(_repairMaxHP, GAME.gold / REPAIR_COST_PER_HP[portName] | 0);
+
+  // Sold cargo note
+  const cargoVal = GAME.cargo.reduce((s,f)=>s+f.value,0);
+  document.getElementById('repairCargoNote').textContent =
+    cargoVal > 0 ? `Your cargo is worth ${cargoVal} ⊕ — will be sold automatically on docking.` : '';
+
+  updateRepairUI();
+  const modal = document.getElementById('repair-modal');
+  modal.style.display = 'flex';
+  paused = true;
+}
+
+function updateRepairUI(){
+  const slider   = document.getElementById('repairSlider');
+  const amount   = parseInt(slider.value)||0;
+  const cost     = amount * REPAIR_COST_PER_HP[_repairPort];
+  const canAfford= GAME.gold >= cost;
+  const newHull  = Math.min(100, Math.floor(GAME.hull) + amount);
+
+  document.getElementById('repairHullDisplay').textContent =
+    `${Math.floor(GAME.hull)}% → ${newHull}%`;
+  document.getElementById('repairHullBar').style.width = newHull+'%';
+  document.getElementById('repairHullBar').style.background =
+    newHull > 60 ? '#2da055' : newHull > 30 ? '#c07030' : '#c03030';
+  document.getElementById('repairCost').textContent      = cost.toLocaleString();
+  document.getElementById('repairAffordable').textContent=
+    canAfford ? '' : '(not enough gold)';
+  document.getElementById('repairConfirmBtn').style.opacity = canAfford ? '1' : '0.4';
+  document.getElementById('repairConfirmBtn').disabled       = !canAfford;
+}
+
+function confirmRepair(){
+  const slider = document.getElementById('repairSlider');
+  const amount = parseInt(slider.value)||0;
+  const cost   = amount * REPAIR_COST_PER_HP[_repairPort];
+  if(GAME.gold < cost || amount <= 0) return;
+
+  GAME.gold -= cost;
+  GAME.hull  = Math.min(100, GAME.hull + amount);
+  addLog(`Hull repaired +${amount}HP for ${cost} ⊕.`,'ev-success');
+  SFX.dock();
+  closeRepairModal();
+  updateHUD();
+}
+
+function closeRepairModal(){
+  document.getElementById('repair-modal').style.display = 'none';
+  paused = false;
+}
+
+// Repair kit is defined inside ITEM_CATALOG below
+
+// Hook repair kit use into equipItem / use action
+function useRepairKit(){
+  const kit = GAME.items.find(i=>i.id==='repair_kit' && (i.usesRemaining||1)>0);
+  if(!kit){ addLog('No repair kit in hold.','ev-warn'); return; }
+  kit.usesRemaining = (kit.usesRemaining||1) - 1;
+  if(kit.usesRemaining <= 0){
+    GAME.items.splice(GAME.items.indexOf(kit),1);
+  }
+  const repaired = Math.min(25, 100 - GAME.hull);
+  GAME.hull = Math.min(100, GAME.hull + 25);
+  addLog(`Repair kit used — hull +${repaired}HP.`,'ev-success');
+  spawnSplash(GAME.x, GAME.y, 'water', 6);
+  SFX.dock();
+}
+
+// Repair kit added directly to merchant stock below (see generateMerchantStock)
 
 /* ══════════════════════════════════════════════════════════
    SFX — Web Audio procedural sounds (no files needed)
@@ -2203,7 +2141,7 @@ function loadGame(){
     const d = JSON.parse(raw);
     GAME.gameMins = d.gameMins||600;
     GAME.day      = d.day||1;
-    GAME.hull     = d.hull||100;
+    GAME.hull     = Math.max(10, d.hull||100);  // never load a dead ship
     GAME.gold     = d.gold||350;
     GAME.cargo    = d.cargo||[];
     GAME.panic    = d.panic||0;
@@ -3476,6 +3414,7 @@ function onKeyDown(code){
   if(code==='KeyE') tryDock();
   if(code==='KeyC') fireCannons();
   if(code==='KeyQ') talkToNPC();
+  if(code==='KeyR') useRepairKit();
   if(code==='KeyS' && GAME.invOpen) saveGame();
 }
 
@@ -3506,7 +3445,6 @@ function updateHUD(){
   document.getElementById('speedBar').style.width=spd+'%';
 
   document.getElementById('hudGold').textContent=GAME.gold.toLocaleString();
-  syncReelBtn();
 
   if(GAME.isNight||GAME.panic>0){
     document.getElementById('panicRow').style.display='flex';
@@ -3747,13 +3685,15 @@ function updateWeather(dt){
 
   // Hull damage from heavy waves — tempest batters the ship
   const wAmpNow = lerpWeather('waveAmp');
-  if(wAmpNow > 3.0 && !GAME.isNight){ // day storms
+  if(wAmpNow > 3.0 && !GAME.isNight){
     const waveDmg = (wAmpNow - 3.0) * 0.4 * dt;
     GAME.hull = Math.max(0, GAME.hull - waveDmg);
+    if(GAME.hull < 1) GAME._deathCause = 'waves';
   }
-  if(wAmpNow > 2.2 && GAME.isNight){ // night + storm is brutal
+  if(wAmpNow > 2.2 && GAME.isNight){
     const waveDmg = (wAmpNow - 2.2) * 0.6 * dt;
     GAME.hull = Math.max(0, GAME.hull - waveDmg);
+    if(GAME.hull < 1) GAME._deathCause = 'waves';
   }
 
   // Screen shake in tempest
@@ -5235,6 +5175,14 @@ const ITEM_CATALOG = {
     desc:'Covered in barnacles. Whatever is inside has waited a long time.',
     loot:[ ['gold',200,500], ['bait_eldritch',1], ['rod_abyssal',0.2], ['rod_ghost',0.1] ],
   },
+
+  repair_kit: {
+    id:'repair_kit', type:'tool', icon:'🔧', rarity:'common',
+    name:'Emergency Repair Kit',
+    desc:'Pitch, rope, and spare planking. Repairs 25 hull at sea. Single use.',
+    effect:{ uses:1, hullRepair:25 },
+    price:120,
+  },
 };
 
 /* ── NOTE CATALOG — found in bottles at merchant ── */
@@ -5300,10 +5248,13 @@ function generateMerchantStock(){
     stock.push({ ...chest, price: chest.rarity==='legendary'?320:chest.rarity==='rare'?140:60, qty:1 });
   }
 
-  return stock;
-}
+  // Repair kit — common enough to be useful when damaged at sea
+  if(Math.random() < 0.55){
+    stock.push({ ...ITEM_CATALOG.repair_kit, qty:2, price:120 });
+  }
 
-let merchantSpawnTimer = 60; // first merchant after 60 real seconds
+  return stock;
+} // first merchant after 60 real seconds
 
 function spawnMerchant(){
   if(MERCHANTS.length >= 1) return;
@@ -5329,6 +5280,8 @@ function spawnMerchant(){
   });
   addLog('A merchant vessel appears on the horizon.', 'ev-system');
 }
+
+let merchantSpawnTimer = 60; // first merchant after 60 real seconds
 
 function updateMerchants(dt){
   merchantSpawnTimer -= dt;
@@ -6332,15 +6285,18 @@ function tryDockMisthollow(){
   if(Math.sqrt(dx*dx+dy*dy) > m.r+140){ addLog('Sail closer to Misthollow.','ev-warn'); return; }
 
   const sold = GAME.cargo.reduce((s,f)=>s+f.value,0);
-  GAME.cargo=[]; GAME.panic=0;
-  GAME.hull=Math.min(100, GAME.hull+20);  // less repair than Port Harrow
+  GAME.cargo=[]; GAME.panic=0; GAME.isNight=false;
   GAME.gold+=sold;
-  GAME.gameMins=DAWN_M; GAME.day++; GAME.isNight=false;
+  GAME.gameMins=DAWN_M; GAME.day++;
   if(GAME.monster) despawnMonster();
-  addLog(`Misthollow harbour. Haul sold: ${sold} ⊕.`,'ev-success');
-  addLog('The villagers watch from the shadows. Hull patched.','ev-system');
   SFX.dock();
   document.getElementById('vignette').style.boxShadow='none';
+
+  if(sold>0) addLog(`Misthollow. Cargo sold: ${sold} ⊕.`,'ev-success');
+  else addLog(`Misthollow harbour. Day ${GAME.day}.`,'ev-system');
+  addLog('The villagers watch from the shadows.','ev-system');
+
+  openRepairModal('Misthollow');
 }
 
 function drawSecondPort(sx,sy,r){
@@ -6413,6 +6369,7 @@ function openWitchShop(){
     { ...ITEM_CATALOG.bait_eldritch,   qty:2, price:380 },
     { ...ITEM_CATALOG.rod_abyssal,     qty:1, price:650 },
     { ...ITEM_CATALOG.rod_ghost,       qty:1, price:920 },
+    { ...ITEM_CATALOG.repair_kit,      qty:3, price:90  },
     { ...ITEM_CATALOG.treasure_legendary, qty:1, price:280,
       name:'Misthollow Chest', desc:'What the deep gives up, Maren keeps. Until now.', icon:'🫙' },
     { ...MERCHANT_NOTES[2], type:'note', rarity:'cursed', price:90, qty:1,
@@ -6444,7 +6401,6 @@ const PANEL_DEFAULTS = {
 };
 
 function initPanels(){
-  if(IS_TOUCH) return;  // mobile uses fixed CSS layout
 
   // Load saved positions from localStorage
   try {
@@ -6558,57 +6514,6 @@ const collapseState = {};
 function initCollapsible(){ /* no-op now — handled by initPanels */ }
 
 /* ══════════════════════════════════════════════════════════
-   MOBILE / TOUCH SUPPORT
-   ══════════════════════════════════════════════════════════ */
-const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-
-// Show virtual controls on touch devices using .active class
-if(IS_TOUCH){
-  document.getElementById('virtual-controls').classList.add('active');
-  document.getElementById('mobile-top-bar').classList.add('active');
-  const tt = document.getElementById('touch-tip');
-  if(tt) tt.style.display = 'inline';
-}
-
-// Virtual key press — syncs with the existing keys{} map
-function mobileKey(code, down){
-  if(down && !keys[code]) onKeyDown(code);
-  keys[code] = down;
-  // Visual feedback on dpad
-  const el = document.getElementById('dpad-'+code.replace('Key','').toLowerCase());
-  if(el) el.classList.toggle('pressed', down);
-}
-
-// One-shot tap (for Fish, Cannon, Dock, Talk)
-function mobileTap(code){
-  onKeyDown(code);
-  // Brief visual flash on the button
-  const map = { KeyF:'btn-fish', KeyC:'btn-cannon', KeyE:'btn-dock', KeyQ:'btn-talk' };
-  const el = document.getElementById(map[code]);
-  if(el){ el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),200); }
-}
-
-// Show/hide reel button with fishing overlay
-const _origFishActive = () => {};
-function syncReelBtn(){
-  const rb = document.getElementById('reel-btn');
-  if(rb) rb.classList.toggle('active', IS_TOUCH && GAME.fishingActive && !GAME.catchPopup);
-}
-
-// Touch-to-dismiss catch popup
-document.addEventListener('touchstart', e => {
-  if(GAME.catchPopup){
-    dismissCatchPopup();
-    e.preventDefault();
-  }
-}, { passive:false });
-
-// Prevent default touch scroll/zoom on the canvas
-const _canvas = document.getElementById('c');
-_canvas.addEventListener('touchstart', e=>e.preventDefault(), {passive:false});
-_canvas.addEventListener('touchmove',  e=>e.preventDefault(), {passive:false});
-
-/* ══════════════════════════════════════════════════════════
    MAIN LOOP
    ══════════════════════════════════════════════════════════ */
 let lastTime=null;
@@ -6619,6 +6524,7 @@ function loop(ts){
 
   if(!paused){
     updateBoat(dt);
+    GAME._aliveTime = (GAME._aliveTime||0) + dt;
     updateParticles(dt);
     updateCannons(dt);
     updatePirates(dt);
@@ -6632,6 +6538,7 @@ function loop(ts){
     updateCursedZones(dt);
     checkMisthollow();
     updatePanic(dt);
+    checkHullWarnings();
     updateFog(dt);
     updateDiscovery();
     updateHUD();
