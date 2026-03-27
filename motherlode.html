@@ -2,77 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motherlode Mine - OSRS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Motherlode Mine - Dwarf Cart Pusher</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
         }
 
         body {
             font-family: 'Courier New', monospace;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
-            min-height: 100vh;
-            color: #f0e68c;
-            overflow-x: hidden;
+            background: #1a1a2e;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
-        .game-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 10px;
+        #gameCanvas {
+            display: block;
+            background: #2a2318;
         }
 
-        .header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(180deg, #3d2914 0%, #2a1d0d 100%);
-            border: 3px solid #8b7355;
+        .ui-overlay {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .stats-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8b7355;
             border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 10px;
+            color: #f0e68c;
+            font-size: 12px;
+            min-width: 150px;
+            pointer-events: auto;
         }
 
-        .header h1 {
+        .stats-panel h3 {
             color: #ffd700;
-            text-shadow: 2px 2px 4px #000;
-            font-size: 2.5em;
-        }
-
-        .header p {
-            color: #daa520;
-            margin-top: 5px;
-        }
-
-        .main-area {
-            display: grid;
-            grid-template-columns: 250px 1fr 280px;
-            gap: 15px;
-        }
-
-        .panel {
-            background: linear-gradient(180deg, #2d2d44 0%, #1e1e2f 100%);
-            border: 2px solid #5a5a8a;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .panel h3 {
-            color: #87ceeb;
-            border-bottom: 2px solid #5a5a8a;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
             text-align: center;
         }
 
-        .stats-panel .stat {
+        .stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px;
-            margin: 5px 0;
-            background: rgba(0,0,0,0.3);
-            border-radius: 5px;
+            margin: 4px 0;
         }
 
         .stat-value {
@@ -80,274 +65,220 @@
             font-weight: bold;
         }
 
-        .mine-area {
-            background: linear-gradient(180deg, #3d3222 0%, #2a2318 100%);
-            border: 3px solid #6b5344;
-            border-radius: 10px;
-            min-height: 500px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mine-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(6, 1fr);
-            gap: 5px;
-            padding: 15px;
-            height: 100%;
-        }
-
-        .mine-tile {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 2em;
-            position: relative;
-            min-height: 60px;
-        }
-
-        .ore-vein {
-            background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 50%, #5a4a3a 100%);
-            border: 2px solid #6a5a4a;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .ore-vein:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-            border-color: #ffd700;
-        }
-
-        .ore-vein.depleted {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border-color: #3a3a3a;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .ore-vein.mining {
-            animation: mining 0.5s infinite;
-        }
-
-        @keyframes mining {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-        }
-
-        .rockfall {
-            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
-            border: 2px solid #a0522d;
-            animation: shake 0.5s infinite;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        .water-channel {
-            background: linear-gradient(180deg, #1e90ff 0%, #0066cc 100%);
-            border: 2px solid #4169e1;
-            animation: water-flow 1s infinite linear;
-        }
-
-        @keyframes water-flow {
-            0% { background-position: 0 0; }
-            100% { background-position: 20px 20px; }
-        }
-
-        .hopper {
-            background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
-            border: 3px solid #daa520;
-            font-size: 1.5em;
-        }
-
-        .hopper:hover {
-            box-shadow: 0 0 20px rgba(218, 165, 32, 0.7);
-        }
-
-        .sack {
-            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
-            border: 3px solid #cd853f;
-        }
-
-        .sack:hover {
-            box-shadow: 0 0 20px rgba(205, 133, 63, 0.7);
-        }
-
-        .strut {
-            background: linear-gradient(135deg, #5c4033 0%, #3c2a23 100%);
-            border: 2px solid #8b7355;
-        }
-
-        .strut.broken {
-            background: linear-gradient(135deg, #8b0000 0%, #5c0000 100%);
-            border-color: #ff0000;
-            animation: pulse-red 1s infinite;
-        }
-
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 5px #ff0000; }
-            50% { box-shadow: 0 0 20px #ff0000; }
-        }
-
-        .upper-level {
-            background: linear-gradient(135deg, #6b5b4a 0%, #4a3f34 100%);
-            border: 2px solid #8b7765;
-            position: relative;
-        }
-
-        .upper-level.locked::after {
-            content: '🔒';
-            position: absolute;
-            font-size: 1.5em;
-        }
-
         .inventory-panel {
-            max-height: 600px;
-            overflow-y: auto;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8b7355;
+            border-radius: 10px;
+            padding: 10px;
+            color: #f0e68c;
+            pointer-events: auto;
+        }
+
+        .inventory-panel h3 {
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-align: center;
         }
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(4, 35px);
+            gap: 3px;
         }
 
         .inv-slot {
-            aspect-ratio: 1;
-            background: rgba(0,0,0,0.4);
+            width: 35px;
+            height: 35px;
+            background: rgba(50, 50, 50, 0.8);
             border: 1px solid #5a5a8a;
             border-radius: 5px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 1.5em;
+            font-size: 18px;
             position: relative;
-            min-height: 50px;
         }
 
         .inv-slot .count {
             position: absolute;
-            bottom: 2px;
-            right: 4px;
-            font-size: 0.5em;
+            bottom: 1px;
+            right: 3px;
+            font-size: 10px;
             color: #ffff00;
             text-shadow: 1px 1px 1px #000;
         }
 
+        .cart-inventory {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #5a5a8a;
+        }
+
+        .cart-inventory h4 {
+            color: #87ceeb;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .controls-container {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+
+        .joystick-container {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        .joystick-base {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(100, 100, 100, 0.6) 0%, rgba(50, 50, 50, 0.8) 100%);
+            border: 3px solid rgba(139, 115, 85, 0.8);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .joystick-stick {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #8b7355 0%, #5c4033 100%);
+            border: 2px solid #daa520;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
         .action-buttons {
-            margin-top: 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            pointer-events: auto;
         }
 
         .action-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9em;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-deposit {
-            background: linear-gradient(180deg, #4a9c4a 0%, #2d7d2d 100%);
-            color: white;
-        }
-
-        .btn-collect {
-            background: linear-gradient(180deg, #9c9c4a 0%, #7d7d2d 100%);
-            color: white;
-        }
-
-        .btn-fix {
-            background: linear-gradient(180deg, #9c4a4a 0%, #7d2d2d 100%);
-            color: white;
-        }
-
-        .btn-shop {
-            background: linear-gradient(180deg, #4a4a9c 0%, #2d2d7d 100%);
-            color: white;
-        }
-
-        .progress-container {
-            margin-top: 15px;
-        }
-
-        .progress-bar {
-            height: 25px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #5a5a8a;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ffd700 0%, #ffaa00 100%);
-            transition: width 0.3s;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid;
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #000;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-interact {
+            background: radial-gradient(circle, #4a9c4a 0%, #2d7d2d 100%);
+            border-color: #7fff00;
+        }
+
+        .btn-cart {
+            background: radial-gradient(circle, #9c7a4a 0%, #7d5a2d 100%);
+            border-color: #daa520;
+        }
+
+        .message-box {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #8b7355;
+            border-radius: 10px;
+            padding: 15px 25px;
+            color: #f0e68c;
+            font-size: 14px;
+            text-align: center;
+            max-width: 300px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .message-box.visible {
+            opacity: 1;
+        }
+
+        .npc-dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(180deg, #3d2914 0%, #2a1d0d 100%);
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 350px;
+            color: #f0e68c;
+            display: none;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        .npc-dialog.visible {
+            display: block;
+        }
+
+        .npc-name {
+            color: #ffd700;
             font-weight: bold;
-            font-size: 0.8em;
+            font-size: 16px;
+            margin-bottom: 10px;
         }
 
-        .message-log {
-            margin-top: 15px;
-            background: rgba(0,0,0,0.4);
+        .npc-text {
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .dialog-btn {
+            background: linear-gradient(180deg, #4a9c4a 0%, #2d7d2d 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
             border-radius: 5px;
-            padding: 10px;
-            height: 150px;
-            overflow-y: auto;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
         }
-
-        .message {
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.85em;
-        }
-
-        .message.success { color: #7fff00; }
-        .message.info { color: #87ceeb; }
-        .message.warning { color: #ffa500; }
-        .message.rare { color: #ff00ff; }
-        .message.nugget { color: #ffd700; }
 
         .shop-modal {
-            display: none;
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
             align-items: center;
             justify-content: center;
+            z-index: 200;
+            pointer-events: auto;
         }
 
-        .shop-modal.active {
+        .shop-modal.visible {
             display: flex;
         }
 
@@ -355,1129 +286,1464 @@
             background: linear-gradient(180deg, #3d2914 0%, #2a1d0d 100%);
             border: 3px solid #8b7355;
             border-radius: 15px;
-            padding: 25px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90vh;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 80%;
             overflow-y: auto;
+            color: #f0e68c;
         }
 
         .shop-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .shop-header h2 {
             color: #ffd700;
+            font-size: 18px;
         }
 
         .close-btn {
             background: #8b0000;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
         }
 
-        .shop-items {
+        .shop-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
 
         .shop-item {
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             border: 2px solid #5a5a8a;
             border-radius: 10px;
-            padding: 15px;
+            padding: 10px;
             text-align: center;
         }
 
         .shop-item.owned {
             border-color: #7fff00;
-            background: rgba(0,128,0,0.2);
         }
 
-        .shop-item-icon {
-            font-size: 3em;
-            margin-bottom: 10px;
+        .shop-icon {
+            font-size: 30px;
         }
 
-        .shop-item-name {
+        .shop-name {
             color: #87ceeb;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-size: 12px;
+            margin: 5px 0;
         }
 
-        .shop-item-desc {
-            font-size: 0.8em;
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-
-        .shop-item-price {
+        .shop-price {
             color: #ffd700;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 11px;
         }
 
-        .buy-btn {
-            background: linear-gradient(180deg, #4a9c4a 0%, #2d7d2d 100%);
+        .shop-buy {
+            background: #4a9c4a;
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .buy-btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-
-        .lore-section {
-            background: linear-gradient(180deg, #2d2d44 0%, #1e1e2f 100%);
-            border: 2px solid #5a5a8a;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .lore-section h3 {
-            color: #daa520;
-            margin-bottom: 10px;
-        }
-
-        .lore-section p {
-            font-size: 0.9em;
-            line-height: 1.6;
-            color: #ccc;
-        }
-
-        .npc-dialog {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(180deg, #2a1d0d 0%, #1a1008 100%);
-            border: 3px solid #8b7355;
-            border-radius: 10px;
-            padding: 20px;
-            max-width: 600px;
-            z-index: 500;
-        }
-
-        .npc-dialog.active {
-            display: block;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-
-        .npc-name {
-            color: #ffd700;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .npc-text {
-            color: #f0e68c;
-            line-height: 1.5;
-        }
-
-        .equipment-display {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .equipment-slot {
-            width: 40px;
-            height: 40px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid #5a5a8a;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-        }
-
-        .equipment-slot.equipped {
-            border-color: #7fff00;
-            background: rgba(0,128,0,0.2);
-        }
-
-        .tooltip {
-            position: relative;
-        }
-
-        .tooltip:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
             padding: 5px 10px;
             border-radius: 5px;
-            white-space: nowrap;
-            font-size: 0.8em;
-            z-index: 100;
+            margin-top: 5px;
+            cursor: pointer;
+            font-size: 11px;
         }
 
-        .xp-popup {
+        .shop-buy:disabled {
+            background: #555;
+        }
+
+        .minimap {
             position: absolute;
-            color: #7fff00;
-            font-weight: bold;
-            animation: floatUp 1s ease-out forwards;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
-        }
-
-        .level-up {
-            position: fixed;
-            top: 50%;
+            top: 10px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
-            color: #000;
-            padding: 30px 50px;
-            border-radius: 15px;
-            font-size: 1.5em;
-            font-weight: bold;
-            z-index: 2000;
-            animation: levelUp 2s ease-out forwards;
-        }
-
-        @keyframes levelUp {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-        }
-
-        .bank-display {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8b7355;
             border-radius: 5px;
+            padding: 5px;
         }
 
-        .bank-item {
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 0.3s;
+        }
+
+        .interaction-prompt {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #7fff00;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #7fff00;
+            font-size: 12px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .lore-btn {
+            position: absolute;
+            top: 10px;
+            left: 170px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #daa520;
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: #daa520;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            pointer-events: auto;
+        }
+
+        .lore-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            pointer-events: auto;
+            padding: 20px;
+        }
+
+        .lore-modal.visible {
             display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            font-size: 0.85em;
         }
 
-        .ore-icon {
-            display: inline-block;
-            width: 20px;
+        .lore-content {
+            background: linear-gradient(180deg, #2d2d44 0%, #1e1e2f 100%);
+            border: 3px solid #daa520;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 500px;
+            max-height: 80%;
+            overflow-y: auto;
+            color: #f0e68c;
+        }
+
+        .lore-content h2 {
+            color: #ffd700;
             text-align: center;
+            margin-bottom: 15px;
         }
 
-        @media (max-width: 1200px) {
-            .main-area {
-                grid-template-columns: 1fr;
-            }
-            
-            .mine-area {
-                order: -1;
-            }
+        .lore-content h3 {
+            color: #daa520;
+            margin: 15px 0 10px;
+        }
+
+        .lore-content p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .lore-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .lore-content li {
+            margin: 5px 0;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <h1>⛏️ Motherlode Mine ⛏️</h1>
-            <p>Welcome to the Dwarven Mine beneath Falador - Prospector Percy's Domain</p>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel">
+        <h3>⛏️ Mining Stats</h3>
+        <div class="stat-row">
+            <span>Level:</span>
+            <span class="stat-value" id="levelDisplay">30</span>
         </div>
+        <div class="stat-row">
+            <span>XP:</span>
+            <span class="stat-value" id="xpDisplay">0</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="xpBar" style="width: 0%"></div>
+        </div>
+        <div class="stat-row" style="margin-top: 8px;">
+            <span>🪙 Nuggets:</span>
+            <span class="stat-value" id="nuggetDisplay">0</span>
+        </div>
+        <div class="stat-row">
+            <span>💰 GP:</span>
+            <span class="stat-value" id="gpDisplay">0</span>
+        </div>
+    </div>
 
-        <div class="main-area">
-            <!-- Left Panel - Stats -->
-            <div class="panel stats-panel">
-                <h3>⚒️ Mining Stats</h3>
-                <div class="stat">
-                    <span>Mining Level:</span>
-                    <span class="stat-value" id="miningLevel">30</span>
-                </div>
-                <div class="stat">
-                    <span>Mining XP:</span>
-                    <span class="stat-value" id="miningXP">0</span>
-                </div>
-                <div class="stat">
-                    <span>Next Level:</span>
-                    <span class="stat-value" id="xpToLevel">0</span>
-                </div>
-                
-                <div class="progress-container">
-                    <label>XP Progress:</label>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="xpProgress" style="width: 0%"></div>
-                    </div>
-                </div>
+    <!-- Lore Button -->
+    <button class="lore-btn" onclick="showLore()">📜 Lore</button>
 
-                <h3 style="margin-top: 20px">💰 Currency</h3>
-                <div class="stat">
-                    <span>🪙 Golden Nuggets:</span>
-                    <span class="stat-value" id="nuggets">0</span>
-                </div>
-                <div class="stat">
-                    <span>💵 GP:</span>
-                    <span class="stat-value" id="gold">0</span>
-                </div>
+    <!-- Inventory Panel -->
+    <div class="inventory-panel">
+        <h3>🎒 Inventory</h3>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+        <div class="cart-inventory">
+            <h4>🛒 Cart (<span id="cartCount">0</span>/60)</h4>
+            <div class="inventory-grid" id="cartGrid"></div>
+        </div>
+    </div>
 
-                <h3 style="margin-top: 20px">📊 Statistics</h3>
-                <div class="stat">
-                    <span>Pay-dirt Mined:</span>
-                    <span class="stat-value" id="totalPaydirt">0</span>
-                </div>
-                <div class="stat">
-                    <span>Ores Collected:</span>
-                    <span class="stat-value" id="totalOres">0</span>
-                </div>
-                <div class="stat">
-                    <span>Rockfalls Cleared:</span>
-                    <span class="stat-value" id="rockfallsCleared">0</span>
-                </div>
-                <div class="stat">
-                    <span>Struts Fixed:</span>
-                    <span class="stat-value" id="strutsFixed">0</span>
-                </div>
-
-                <h3 style="margin-top: 20px">🎽 Equipment</h3>
-                <div class="equipment-display">
-                    <div class="equipment-slot tooltip" id="slot-helmet" data-tooltip="Prospector Helmet (+2.5% XP)">-</div>
-                    <div class="equipment-slot tooltip" id="slot-jacket" data-tooltip="Prospector Jacket (+2.5% XP)">-</div>
-                    <div class="equipment-slot tooltip" id="slot-legs" data-tooltip="Prospector Legs (+2.5% XP)">-</div>
-                    <div class="equipment-slot tooltip" id="slot-boots" data-tooltip="Prospector Boots (+2.5% XP)">-</div>
-                </div>
-                <div class="stat" style="margin-top: 10px">
-                    <span>XP Bonus:</span>
-                    <span class="stat-value" id="xpBonus">0%</span>
-                </div>
-            </div>
-
-            <!-- Center - Mine Area -->
-            <div class="mine-area" id="mineArea">
-                <div class="mine-grid" id="mineGrid">
-                    <!-- Mine tiles generated by JS -->
-                </div>
-            </div>
-
-            <!-- Right Panel - Inventory & Actions -->
-            <div class="panel inventory-panel">
-                <h3>🎒 Inventory (<span id="invCount">0</span>/28)</h3>
-                <div class="inventory-grid" id="inventory">
-                    <!-- Inventory slots generated by JS -->
-                </div>
-
-                <div class="action-buttons">
-                    <button class="action-btn btn-deposit" onclick="depositPaydirt()">
-                        📥 Deposit Pay-dirt into Hopper
-                    </button>
-                    <button class="action-btn btn-collect" onclick="collectFromSack()">
-                        📤 Collect from Sack (<span id="sackCount">0</span>/<span id="sackMax">81</span>)
-                    </button>
-                    <button class="action-btn btn-fix" onclick="fixStrut()" id="fixStrutBtn" style="display: none;">
-                        🔧 Fix Broken Strut
-                    </button>
-                    <button class="action-btn btn-shop" onclick="openShop()">
-                        🏪 Prospector Percy's Shop
-                    </button>
-                </div>
-
-                <h3 style="margin-top: 20px">⏳ Hopper Status</h3>
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="hopperProgress" style="width: 0%; background: linear-gradient(90deg, #4a9c4a 0%, #2d7d2d 100%);">
-                            <span id="hopperText">Empty</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bank-display">
-                    <strong>🏦 Banked Ores:</strong>
-                    <div class="bank-item"><span><span class="ore-icon">ite</span> Coal:</span><span id="bank-coal">0</span></div>
-                    <div class="bank-item"><span><span class="ore-icon">🥇</span> Gold:</span><span id="bank-gold">0</span></div>
-                    <div class="bank-item"><span><span class="ore-icon">💜</span> Mithril:</span><span id="bank-mithril">0</span></div>
-                    <div class="bank-item"><span><span class="ore-icon">💚</span> Adamantite:</span><span id="bank-adamantite">0</span></div>
-                    <div class="bank-item"><span><span class="ore-icon">💎</span> Runite:</span><span id="bank-runite">0</span></div>
-                </div>
-
-                <div class="message-log" id="messageLog">
-                    <div class="message info">Welcome to the Motherlode Mine!</div>
-                    <div class="message info">Click on ore veins to mine pay-dirt.</div>
-                </div>
+    <!-- Controls -->
+    <div class="controls-container">
+        <div class="joystick-container" id="joystickContainer">
+            <div class="joystick-base" id="joystickBase">
+                <div class="joystick-stick" id="joystickStick"></div>
             </div>
         </div>
-
-        <div class="lore-section">
-            <h3>📜 The Lore of Motherlode Mine</h3>
-            <p>
-                Deep beneath the great city of Falador lies the <strong>Dwarven Mine</strong>, a vast network of tunnels 
-                carved by the industrious dwarves of old. Within this labyrinth, the eccentric dwarf <strong>Prospector Percy</strong> 
-                discovered a revolutionary mining technique that would change mining forever.
-            </p>
-            <p style="margin-top: 10px;">
-                Percy's method involves mining <strong>pay-dirt</strong> - a special ore-bearing gravel found in the cave walls. 
-                This pay-dirt is then washed through an ingenious water-powered system using a <strong>hopper</strong> and 
-                <strong>sluice</strong> mechanism. The rushing water separates the valuable ores from the worthless rock, 
-                depositing clean ores into collection sacks.
-            </p>
-            <p style="margin-top: 10px;">
-                Miners who prove their worth can earn <strong>Golden Nuggets</strong> - rare treasures hidden within the pay-dirt. 
-                These nuggets can be traded with Percy for the legendary <strong>Prospector Outfit</strong>, which 
-                magically enhances one's mining abilities, as well as useful tools like the <strong>Coal Bag</strong> and <strong>Gem Bag</strong>.
-            </p>
-            <p style="margin-top: 10px;">
-                The mine is not without its dangers - <strong>rockfalls</strong> frequently block passages, and the ancient 
-                <strong>water wheel struts</strong> require constant maintenance. Experienced miners (level 72+) may gain access 
-                to the <strong>upper level</strong>, where richer ore veins await those brave enough to climb.
-            </p>
+        <div class="action-buttons">
+            <button class="action-btn btn-interact" id="btnInteract">⛏️</button>
+            <button class="action-btn btn-cart" id="btnCart">🛒</button>
         </div>
+    </div>
+
+    <!-- Message Box -->
+    <div class="message-box" id="messageBox"></div>
+
+    <!-- NPC Dialog -->
+    <div class="npc-dialog" id="npcDialog">
+        <div class="npc-name">🧔 Prospector Percy</div>
+        <div class="npc-text" id="npcText"></div>
+        <button class="dialog-btn" onclick="closeDialog()">Continue</button>
     </div>
 
     <!-- Shop Modal -->
     <div class="shop-modal" id="shopModal">
         <div class="shop-content">
             <div class="shop-header">
-                <h2>🏪 Prospector Percy's Nugget Shop</h2>
-                <button class="close-btn" onclick="closeShop()">Close</button>
+                <h2>🏪 Percy's Shop</h2>
+                <button class="close-btn" onclick="closeShop()">✕</button>
             </div>
-            <p style="margin-bottom: 20px; color: #daa520;">
-                "Ahoy there, miner! Ye be wantin' to spend yer hard-earned nuggets? Take a gander at me wares!"
+            <p style="font-size: 12px; margin-bottom: 10px; color: #daa520;">
+                "Trade yer nuggets for me finest wares!"
             </p>
-            <div class="shop-items" id="shopItems">
-                <!-- Shop items generated by JS -->
-            </div>
+            <div class="shop-grid" id="shopGrid"></div>
         </div>
     </div>
 
-    <!-- NPC Dialog -->
-    <div class="npc-dialog" id="npcDialog">
-        <div class="npc-name">🧔 Prospector Percy</div>
-        <div class="npc-text" id="npcText"></div>
+    <!-- Lore Modal -->
+    <div class="lore-modal" id="loreModal">
+        <div class="lore-content">
+            <h2>📜 The Motherlode Mine</h2>
+            
+            <h3>🏔️ History</h3>
+            <p>Deep beneath Falador lies the ancient Dwarven Mine, a vast network of tunnels carved centuries ago by the skilled dwarves of Keldagrim. Within these depths, the eccentric prospector Percy discovered a revolutionary mining method that would change Gielinor forever.</p>
+            
+            <h3>⚙️ The Pay-dirt System</h3>
+            <p>Percy's ingenious invention uses water-powered sluices to separate valuable ores from worthless rock. Miners extract "pay-dirt" from ore veins, load it into carts, and transport it to the hopper. The water wheel powers the separation process, depositing clean ores into collection sacks.</p>
+            
+            <h3>🪙 Golden Nuggets</h3>
+            <p>Rarely, miners discover golden nuggets hidden within the pay-dirt - precious treasures that can be traded with Percy for special rewards:</p>
+            <ul>
+                <li><strong>Prospector Outfit</strong> - Magical mining gear (+2.5% XP per piece)</li>
+                <li><strong>Coal Bag</strong> - Holds 27 additional coal</li>
+                <li><strong>Gem Bag</strong> - Stores up to 60 uncut gems</li>
+                <li><strong>Upper Level Access</strong> - Reach richer ore veins</li>
+            </ul>
+            
+            <h3>⚠️ Hazards</h3>
+            <p><strong>Rockfalls:</strong> Unstable tunnels frequently collapse, blocking passages. Clear them to proceed!</p>
+            <p><strong>Broken Struts:</strong> The water wheel's wooden supports sometimes break. Repair them quickly or the hopper stops working!</p>
+            
+            <h3>💎 Ore Types</h3>
+            <ul>
+                <li>�ite <strong>Coal</strong> - Common, 150 GP</li>
+                <li>🥇 <strong>Gold Ore</strong> - Level 40+, 250 GP</li>
+                <li>💜 <strong>Mithril Ore</strong> - Level 55+, 300 GP</li>
+                <li>💚 <strong>Adamantite Ore</strong> - Level 70+, 1,000 GP</li>
+                <li>💎 <strong>Runite Ore</strong> - Level 85+, 11,000 GP</li>
+            </ul>
+            
+            <h3>🛒 The Minecart</h3>
+            <p>Push your trusty minecart through the tunnels! It can hold up to 60 pay-dirt at once, making your mining trips much more efficient. Don't forget to deposit at the hopper!</p>
+            
+            <button class="dialog-btn" onclick="closeLore()" style="margin-top: 15px;">Close</button>
+        </div>
     </div>
 
+    <!-- Interaction Prompt -->
+    <div class="interaction-prompt" id="interactionPrompt" style="display: none;"></div>
+
     <script>
-        // Game State
-        const gameState = {
-            miningLevel: 30,
-            miningXP: 0,
-            nuggets: 0,
-            gold: 0,
-            inventory: [],
-            maxInventory: 28,
-            sackContents: [],
-            maxSack: 81,
-            hopperContents: 0,
-            hopperProcessing: false,
-            
-            // Statistics
-            totalPaydirt: 0,
-            totalOres: 0,
-            rockfallsCleared: 0,
-            strutsFixed: 0,
-            
-            // Bank
-            bank: {
-                coal: 0,
-                gold: 0,
-                mithril: 0,
-                adamantite: 0,
-                runite: 0
-            },
-            
-            // Equipment & Unlocks
-            equipment: {
-                helmet: false,
-                jacket: false,
-                legs: false,
-                boots: false
-            },
-            unlocks: {
-                biggerSack: false,
-                upperLevel: false,
-                coalBag: false,
-                gemBag: false,
-                softClayPack: false
-            },
-            
-            // Mine state
-            tiles: [],
-            brokenStrut: false,
-            miningTile: null
-        };
+        // Canvas setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        // XP Table (simplified)
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Game constants
+        const TILE_SIZE = 48;
+        const PLAYER_SIZE = 40;
+        const CART_SIZE = 44;
+
+        // XP Table
         const xpTable = [0, 83, 174, 276, 388, 512, 650, 801, 969, 1154, 1358, 1584, 1833, 2107, 2411, 2746, 3115, 3523, 3973, 4470, 5018, 5624, 6291, 7028, 7842, 8740, 9730, 10824, 12031, 13363, 14833, 16456, 18247, 20224, 22406, 24815, 27473, 30408, 33648, 37224, 41171, 45529, 50339, 55649, 61512, 67983, 75127, 83014, 91721, 101333, 111945, 123660, 136594, 150872, 166636, 184040, 203254, 224466, 247886, 273742, 302288, 333804, 368599, 407015, 449428, 496254, 547953, 605032, 668051, 737627, 814445, 899257, 992895, 1096278, 1210421, 1336443, 1475581, 1629200, 1798808, 1986068, 2192818, 2421087, 2673114, 2951373, 3258594, 3597792, 3972294, 4385776, 4842295, 5346332, 5902831, 6517253, 7195629, 7944614, 8771558, 9684577, 10692629, 11805606, 13034431];
-
-        // Items
-        const items = {
-            paydirt: { name: 'Pay-dirt', icon: '🪨', stackable: true },
-            coal: { name: 'Coal', icon: '�ite', value: 150 },
-            goldOre: { name: 'Gold Ore', icon: '🥇', value: 250 },
-            mithril: { name: 'Mithril Ore', icon: '💜', value: 300 },
-            adamantite: { name: 'Adamantite Ore', icon: '💚', value: 1000 },
-            runite: { name: 'Runite Ore', icon: '💎', value: 11000 }
-        };
 
         // Shop items
         const shopItems = [
-            { id: 'helmet', name: 'Prospector Helmet', icon: '⛑️', price: 40, desc: '+2.5% Mining XP', type: 'equipment' },
-            { id: 'jacket', name: 'Prospector Jacket', icon: '🦺', price: 60, desc: '+2.5% Mining XP', type: 'equipment' },
-            { id: 'legs', name: 'Prospector Legs', icon: '👖', price: 50, desc: '+2.5% Mining XP', type: 'equipment' },
-            { id: 'boots', name: 'Prospector Boots', icon: '👢', price: 30, desc: '+2.5% Mining XP', type: 'equipment' },
-            { id: 'biggerSack', name: 'Bigger Sack', icon: '🎒', price: 200, desc: 'Increases sack to 162 capacity', type: 'unlock' },
-            { id: 'upperLevel', name: 'Upper Level Access', icon: '🪜', price: 100, desc: 'Access to upper level (requires 72 Mining)', type: 'unlock' },
-            { id: 'coalBag', name: 'Coal Bag', icon: '💼', price: 100, desc: 'Holds 27 coal', type: 'unlock' },
-            { id: 'gemBag', name: 'Gem Bag', icon: '💎', price: 100, desc: 'Holds 60 gems', type: 'unlock' },
-            { id: 'softClayPack', name: 'Soft Clay Pack', icon: '📦', price: 10, desc: 'Contains 100 soft clay', type: 'consumable' },
-            { id: 'bagOfGems', name: 'Bag Full of Gems', icon: '💰', price: 40, desc: 'Contains 40 random gems', type: 'consumable' }
+            { id: 'helmet', name: 'Prospector Helmet', icon: '⛑️', price: 40, desc: '+2.5% XP' },
+            { id: 'jacket', name: 'Prospector Jacket', icon: '🦺', price: 60, desc: '+2.5% XP' },
+            { id: 'legs', name: 'Prospector Legs', icon: '👖', price: 50, desc: '+2.5% XP' },
+            { id: 'boots', name: 'Prospector Boots', icon: '👢', price: 30, desc: '+2.5% XP' },
+            { id: 'coalBag', name: 'Coal Bag', icon: '💼', price: 100, desc: 'Hold 27 coal' },
+            { id: 'gemBag', name: 'Gem Bag', icon: '💎', price: 100, desc: 'Hold 60 gems' },
+            { id: 'bigSack', name: 'Bigger Sack', icon: '🎒', price: 200, desc: 'Double capacity' },
+            { id: 'upperLevel', name: 'Upper Access', icon: '🪜', price: 100, desc: 'Upper level' }
         ];
 
-        // Tile types
-        const tileTypes = {
-            ORE_VEIN: 'ore_vein',
-            DEPLETED: 'depleted',
-            ROCKFALL: 'rockfall',
-            WATER: 'water',
-            HOPPER: 'hopper',
-            SACK: 'sack',
-            STRUT: 'strut',
-            UPPER_LEVEL: 'upper_level',
-            EMPTY: 'empty'
+        // Game state
+        const game = {
+            // Player
+            player: {
+                x: 400,
+                y: 400,
+                speed: 3,
+                direction: 0, // radians
+                animFrame: 0,
+                mining: false,
+                miningProgress: 0,
+                pushingCart: false
+            },
+            
+            // Cart
+            cart: {
+                x: 450,
+                y: 400,
+                contents: [],
+                maxCapacity: 60
+            },
+            
+            // Stats
+            stats: {
+                level: 30,
+                xp: 0,
+                nuggets: 0,
+                gp: 0
+            },
+            
+            // Inventory (player's personal, small)
+            inventory: [],
+            maxInventory: 8,
+            
+            // Equipment/unlocks
+            equipment: {},
+            
+            // Hopper/Sack
+            hopper: {
+                contents: 0,
+                processing: false,
+                sackContents: [],
+                maxSack: 81
+            },
+            
+            // Camera
+            camera: { x: 0, y: 0 },
+            
+            // Input
+            joystick: { x: 0, y: 0, active: false },
+            
+            // World
+            tiles: [],
+            entities: [],
+            
+            // Messages
+            currentMessage: '',
+            messageTimer: 0,
+            
+            // Interaction
+            nearbyInteractable: null,
+            
+            // Strut
+            strutBroken: false
         };
 
-        // Initialize game
-        function initGame() {
-            generateMine();
-            renderInventory();
-            updateStats();
-            renderShop();
-            
-            // Random events
-            setInterval(randomRockfall, 15000);
-            setInterval(checkStrut, 20000);
-            setInterval(respawnOres, 10000);
-            
-            // Percy's greetings
-            setTimeout(() => showPercyDialog(getRandomGreeting()), 2000);
-        }
+        // Tile types
+        const TILES = {
+            FLOOR: 0,
+            WALL: 1,
+            ORE_VEIN: 2,
+            WATER: 3,
+            HOPPER: 4,
+            SACK: 5,
+            STRUT: 6,
+            LADDER: 7,
+            ROCKFALL: 8,
+            PERCY: 9
+        };
 
-        // Generate mine grid
-        function generateMine() {
-            const grid = document.getElementById('mineGrid');
-            grid.innerHTML = '';
-            gameState.tiles = [];
+        // Map layout (larger mine)
+        const MAP_WIDTH = 20;
+        const MAP_HEIGHT = 15;
+        const mapData = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,2,0,0,0,2,2,1,3,3,3,1,2,2,0,0,2,2,1],
+            [1,2,0,0,0,0,0,2,1,3,3,3,1,2,0,0,0,0,2,1],
+            [1,0,0,0,0,0,0,0,6,3,3,3,6,0,0,0,0,0,0,1],
+            [1,2,0,0,0,0,0,0,1,3,4,3,1,0,0,0,0,0,2,1],
+            [1,2,2,0,0,0,0,0,1,1,0,1,1,0,0,0,0,2,2,1],
+            [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+            [1,2,0,0,0,0,9,0,0,0,5,0,0,0,0,0,0,0,2,1],
+            [1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,2,0,0,0,2,2,0,0,0,0,0,0,2,2,0,0,0,2,1],
+            [1,2,2,0,0,2,2,0,0,0,0,0,0,2,2,0,0,2,2,1],
+            [1,2,2,2,0,0,0,0,0,0,7,0,0,0,0,0,2,2,2,1],
+            [1,2,2,2,2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
 
-            const layout = [
-                ['ore', 'ore', 'water', 'water', 'water', 'ore', 'ore', 'upper'],
-                ['ore', 'ore', 'strut', 'water', 'strut', 'ore', 'ore', 'upper'],
-                ['ore', 'empty', 'empty', 'hopper', 'empty', 'empty', 'ore', 'ore'],
-                ['ore', 'ore', 'empty', 'empty', 'empty', 'ore', 'ore', 'ore'],
-                ['ore', 'ore', 'ore', 'sack', 'ore', 'ore', 'ore', 'ore'],
-                ['ore', 'ore', 'ore', 'ore', 'ore', 'ore', 'ore', 'ore']
-            ];
+        // Ore vein states
+        const oreVeins = {};
 
-            layout.forEach((row, y) => {
-                row.forEach((type, x) => {
-                    const tile = document.createElement('div');
-                    tile.className = 'mine-tile';
-                    tile.dataset.x = x;
-                    tile.dataset.y = y;
-                    
-                    const tileData = { type, depleted: false, x, y };
-                    gameState.tiles.push(tileData);
-
-                    switch(type) {
-                        case 'ore':
-                            tile.className += ' ore-vein';
-                            tile.innerHTML = '⛏️';
-                            tile.onclick = () => mineOre(tileData, tile);
-                            break;
-                        case 'water':
-                            tile.className += ' water-channel';
-                            tile.innerHTML = '💧';
-                            break;
-                        case 'hopper':
-                            tile.className += ' hopper';
-                            tile.innerHTML = '📥';
-                            tile.onclick = () => depositPaydirt();
-                            break;
-                        case 'sack':
-                            tile.className += ' sack';
-                            tile.innerHTML = '🎒';
-                            tile.onclick = () => collectFromSack();
-                            break;
-                        case 'strut':
-                            tile.className += ' strut';
-                            tile.innerHTML = '🪵';
-                            tile.dataset.strutId = y * 8 + x;
-                            break;
-                        case 'upper':
-                            tile.className += ' upper-level';
-                            if (!gameState.unlocks.upperLevel || gameState.miningLevel < 72) {
-                                tile.className += ' locked';
-                            } else {
-                                tile.innerHTML = '⛏️';
-                                tile.onclick = () => mineUpperLevel(tileData, tile);
-                            }
-                            break;
-                        case 'empty':
-                            tile.style.background = 'transparent';
-                            tile.style.border = 'none';
-                            break;
+        // Initialize ore veins
+        function initOreVeins() {
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    if (mapData[y][x] === TILES.ORE_VEIN) {
+                        oreVeins[`${x},${y}`] = {
+                            depleted: false,
+                            respawnTimer: 0
+                        };
                     }
-
-                    grid.appendChild(tile);
-                });
-            });
-        }
-
-        // Mine ore
-        function mineOre(tileData, tileElement) {
-            if (tileData.depleted) {
-                addMessage('This ore vein is depleted.', 'warning');
-                return;
-            }
-
-            if (gameState.miningTile) {
-                addMessage('You are already mining!', 'warning');
-                return;
-            }
-
-            if (getInventoryCount() >= gameState.maxInventory) {
-                addMessage('Your inventory is full!', 'warning');
-                return;
-            }
-
-            if (gameState.brokenStrut && gameState.hopperProcessing) {
-                addMessage('The strut is broken! Fix it to continue processing.', 'warning');
-                return;
-            }
-
-            gameState.miningTile = tileData;
-            tileElement.classList.add('mining');
-            addMessage('You swing your pickaxe at the ore vein...', 'info');
-
-            const miningTime = Math.max(1000, 3000 - (gameState.miningLevel * 20));
-            
-            setTimeout(() => {
-                if (gameState.miningTile === tileData) {
-                    // Success!
-                    const xpGain = Math.floor(60 * getXPMultiplier());
-                    gameState.miningXP += xpGain;
-                    gameState.totalPaydirt++;
-                    
-                    // Add to inventory
-                    addToInventory('paydirt');
-                    
-                    // Chance for nugget
-                    if (Math.random() < 0.025) {
-                        const nuggetAmount = Math.floor(Math.random() * 3) + 1;
-                        gameState.nuggets += nuggetAmount;
-                        addMessage(`You found ${nuggetAmount} golden nugget${nuggetAmount > 1 ? 's' : ''}!`, 'nugget');
-                    }
-
-                    showXPPopup(tileElement, `+${xpGain} XP`);
-                    addMessage('You mine some pay-dirt.', 'success');
-
-                    // Check level up
-                    checkLevelUp();
-
-                    // Chance to deplete
-                    if (Math.random() < 0.3) {
-                        tileData.depleted = true;
-                        tileElement.classList.add('depleted');
-                        tileElement.innerHTML = '💨';
-                    }
-
-                    tileElement.classList.remove('mining');
-                    gameState.miningTile = null;
-                    updateStats();
-                    renderInventory();
                 }
-            }, miningTime);
+            }
+        }
+        initOreVeins();
+
+        // Joystick controls
+        const joystickBase = document.getElementById('joystickBase');
+        const joystickStick = document.getElementById('joystickStick');
+        const joystickContainer = document.getElementById('joystickContainer');
+
+        let joystickData = {
+            active: false,
+            startX: 0,
+            startY: 0,
+            currentX: 0,
+            currentY: 0
+        };
+
+        function handleJoystickStart(e) {
+            e.preventDefault();
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = joystickBase.getBoundingClientRect();
+            joystickData.active = true;
+            joystickData.startX = rect.left + rect.width / 2;
+            joystickData.startY = rect.top + rect.height / 2;
+            handleJoystickMove(e);
         }
 
-        // Mine upper level (better ores)
-        function mineUpperLevel(tileData, tileElement) {
-            if (!gameState.unlocks.upperLevel) {
-                addMessage('You need to purchase upper level access!', 'warning');
-                return;
-            }
-            if (gameState.miningLevel < 72) {
-                addMessage('You need level 72 Mining to access the upper level!', 'warning');
-                return;
-            }
-            mineOre(tileData, tileElement);
+        function handleJoystickMove(e) {
+            if (!joystickData.active) return;
+            e.preventDefault();
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - joystickData.startX;
+            const dy = touch.clientY - joystickData.startY;
+            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 50);
+            const angle = Math.atan2(dy, dx);
+            
+            const stickX = Math.cos(angle) * distance;
+            const stickY = Math.sin(angle) * distance;
+            
+            joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+            
+            game.joystick.x = stickX / 50;
+            game.joystick.y = stickY / 50;
+            game.joystick.active = distance > 5;
         }
 
-        // Add to inventory
-        function addToInventory(itemId) {
-            const existingSlot = gameState.inventory.find(slot => slot.id === itemId && items[itemId].stackable);
-            if (existingSlot) {
-                existingSlot.count++;
+        function handleJoystickEnd(e) {
+            e.preventDefault();
+            joystickData.active = false;
+            joystickStick.style.transform = 'translate(-50%, -50%)';
+            game.joystick.x = 0;
+            game.joystick.y = 0;
+            game.joystick.active = false;
+        }
+
+        joystickBase.addEventListener('touchstart', handleJoystickStart);
+        joystickBase.addEventListener('mousedown', handleJoystickStart);
+        document.addEventListener('touchmove', handleJoystickMove);
+        document.addEventListener('mousemove', handleJoystickMove);
+        document.addEventListener('touchend', handleJoystickEnd);
+        document.addEventListener('mouseup', handleJoystickEnd);
+
+        // Keyboard controls
+        const keys = {};
+        document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        // Action buttons
+        document.getElementById('btnInteract').addEventListener('touchstart', e => { e.preventDefault(); interact(); });
+        document.getElementById('btnInteract').addEventListener('click', interact);
+        document.getElementById('btnCart').addEventListener('touchstart', e => { e.preventDefault(); toggleCart(); });
+        document.getElementById('btnCart').addEventListener('click', toggleCart);
+
+        // Collision detection
+        function getTile(x, y) {
+            const tileX = Math.floor(x / TILE_SIZE);
+            const tileY = Math.floor(y / TILE_SIZE);
+            if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT) return TILES.WALL;
+            return mapData[tileY][tileX];
+        }
+
+        function isWalkable(x, y) {
+            const tile = getTile(x, y);
+            return tile !== TILES.WALL && tile !== TILES.WATER && tile !== TILES.ROCKFALL;
+        }
+
+        function canMoveTo(x, y, size) {
+            const halfSize = size / 2 - 4;
+            return isWalkable(x - halfSize, y - halfSize) &&
+                   isWalkable(x + halfSize, y - halfSize) &&
+                   isWalkable(x - halfSize, y + halfSize) &&
+                   isWalkable(x + halfSize, y + halfSize);
+        }
+
+        // Movement
+        function updatePlayer() {
+            let dx = game.joystick.x;
+            let dy = game.joystick.y;
+            
+            // Keyboard input
+            if (keys['w'] || keys['arrowup']) dy = -1;
+            if (keys['s'] || keys['arrowdown']) dy = 1;
+            if (keys['a'] || keys['arrowleft']) dx = -1;
+            if (keys['d'] || keys['arrowright']) dx = 1;
+            
+            if (keys['e'] || keys[' ']) interact();
+            if (keys['q']) toggleCart();
+            
+            const magnitude = Math.sqrt(dx * dx + dy * dy);
+            if (magnitude > 0.1) {
+                const speed = game.player.speed * (game.player.pushingCart ? 0.6 : 1);
+                const moveX = (dx / magnitude) * speed;
+                const moveY = (dy / magnitude) * speed;
+                
+                // Try to move
+                let newX = game.player.x + moveX;
+                let newY = game.player.y + moveY;
+                
+                if (canMoveTo(newX, game.player.y, PLAYER_SIZE)) {
+                    game.player.x = newX;
+                }
+                if (canMoveTo(game.player.x, newY, PLAYER_SIZE)) {
+                    game.player.y = newY;
+                }
+                
+                game.player.direction = Math.atan2(dy, dx);
+                game.player.animFrame += 0.15;
+                
+                // Push cart if attached
+                if (game.player.pushingCart) {
+                    const cartDist = 35;
+                    const targetX = game.player.x - Math.cos(game.player.direction) * cartDist;
+                    const targetY = game.player.y - Math.sin(game.player.direction) * cartDist;
+                    
+                    if (canMoveTo(targetX, targetY, CART_SIZE)) {
+                        game.cart.x += (targetX - game.cart.x) * 0.3;
+                        game.cart.y += (targetY - game.cart.y) * 0.3;
+                    }
+                }
+            }
+            
+            // Mining progress
+            if (game.player.mining) {
+                game.player.miningProgress += 1;
+                if (game.player.miningProgress >= 60) {
+                    completeMining();
+                }
+            }
+        }
+
+        // Find nearby interactable
+        function findNearbyInteractable() {
+            const px = Math.floor(game.player.x / TILE_SIZE);
+            const py = Math.floor(game.player.y / TILE_SIZE);
+            
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const tx = px + dx;
+                    const ty = py + dy;
+                    if (tx < 0 || tx >= MAP_WIDTH || ty < 0 || ty >= MAP_HEIGHT) continue;
+                    
+                    const tile = mapData[ty][tx];
+                    const dist = Math.sqrt(
+                        Math.pow(game.player.x - (tx * TILE_SIZE + TILE_SIZE/2), 2) +
+                        Math.pow(game.player.y - (ty * TILE_SIZE + TILE_SIZE/2), 2)
+                    );
+                    
+                    if (dist < TILE_SIZE * 1.2) {
+                        if (tile === TILES.ORE_VEIN) {
+                            const vein = oreVeins[`${tx},${ty}`];
+                            if (!vein.depleted) {
+                                return { type: 'ore', x: tx, y: ty };
+                            }
+                        } else if (tile === TILES.HOPPER) {
+                            return { type: 'hopper', x: tx, y: ty };
+                        } else if (tile === TILES.SACK) {
+                            return { type: 'sack', x: tx, y: ty };
+                        } else if (tile === TILES.PERCY) {
+                            return { type: 'percy', x: tx, y: ty };
+                        } else if (tile === TILES.STRUT && game.strutBroken) {
+                            return { type: 'strut', x: tx, y: ty };
+                        } else if (tile === TILES.ROCKFALL) {
+                            return { type: 'rockfall', x: tx, y: ty };
+                        } else if (tile === TILES.LADDER) {
+                            return { type: 'ladder', x: tx, y: ty };
+                        }
+                    }
+                }
+            }
+            
+            // Check cart proximity
+            const cartDist = Math.sqrt(
+                Math.pow(game.player.x - game.cart.x, 2) +
+                Math.pow(game.player.y - game.cart.y, 2)
+            );
+            if (cartDist < 60 && !game.player.pushingCart) {
+                return { type: 'cart' };
+            }
+            
+            return null;
+        }
+
+        // Interact action
+        function interact() {
+            const interactable = findNearbyInteractable();
+            if (!interactable) {
+                showMessage("Nothing to interact with here.");
+                return;
+            }
+            
+            switch (interactable.type) {
+                case 'ore':
+                    startMining(interactable.x, interactable.y);
+                    break;
+                case 'hopper':
+                    depositToHopper();
+                    break;
+                case 'sack':
+                    collectFromSack();
+                    break;
+                case 'percy':
+                    talkToPercy();
+                    break;
+                case 'strut':
+                    fixStrut();
+                    break;
+                case 'rockfall':
+                    clearRockfall(interactable.x, interactable.y);
+                    break;
+                case 'ladder':
+                    useLadder();
+                    break;
+                case 'cart':
+                    toggleCart();
+                    break;
+            }
+        }
+
+        // Start mining
+        function startMining(tx, ty) {
+            if (game.player.mining) return;
+            
+            const totalItems = game.player.pushingCart ? 
+                game.cart.contents.length : game.inventory.length;
+            const maxItems = game.player.pushingCart ? 
+                game.cart.maxCapacity : game.maxInventory;
+            
+            if (totalItems >= maxItems) {
+                showMessage(game.player.pushingCart ? 
+                    "The cart is full!" : "Your inventory is full!");
+                return;
+            }
+            
+            game.player.mining = true;
+            game.player.miningProgress = 0;
+            game.player.miningTarget = { x: tx, y: ty };
+            showMessage("Mining...");
+        }
+
+        // Complete mining
+        function completeMining() {
+            game.player.mining = false;
+            const target = game.player.miningTarget;
+            
+            if (!target) return;
+            
+            // Add pay-dirt
+            if (game.player.pushingCart) {
+                game.cart.contents.push('paydirt');
             } else {
-                gameState.inventory.push({ id: itemId, count: 1 });
+                game.inventory.push('paydirt');
             }
-        }
-
-        // Get inventory count
-        function getInventoryCount() {
-            return gameState.inventory.reduce((total, slot) => {
-                return total + (items[slot.id].stackable ? 1 : slot.count);
-            }, 0);
-        }
-
-        // Deposit pay-dirt
-        function depositPaydirt() {
-            const paydirtSlot = gameState.inventory.find(slot => slot.id === 'paydirt');
             
-            if (!paydirtSlot || paydirtSlot.count === 0) {
-                addMessage('You have no pay-dirt to deposit!', 'warning');
+            // XP gain
+            const xpBonus = getXPBonus();
+            const xp = Math.floor(60 * (1 + xpBonus / 100));
+            game.stats.xp += xp;
+            checkLevelUp();
+            
+            // Nugget chance
+            if (Math.random() < 0.025) {
+                const amt = Math.floor(Math.random() * 3) + 1;
+                game.stats.nuggets += amt;
+                showMessage(`Found ${amt} golden nugget${amt > 1 ? 's' : ''}! ⭐`);
+            } else {
+                showMessage(`+${xp} Mining XP`);
+            }
+            
+            // Deplete chance
+            if (Math.random() < 0.25) {
+                oreVeins[`${target.x},${target.y}`].depleted = true;
+                oreVeins[`${target.x},${target.y}`].respawnTimer = 300;
+            }
+            
+            updateUI();
+        }
+
+        // Deposit to hopper
+        function depositToHopper() {
+            let count = 0;
+            
+            // From cart
+            if (game.player.pushingCart) {
+                count = game.cart.contents.filter(i => i === 'paydirt').length;
+                game.cart.contents = game.cart.contents.filter(i => i !== 'paydirt');
+            } else {
+                count = game.inventory.filter(i => i === 'paydirt').length;
+                game.inventory = game.inventory.filter(i => i !== 'paydirt');
+            }
+            
+            if (count === 0) {
+                showMessage("No pay-dirt to deposit!");
                 return;
             }
-
-            const amount = paydirtSlot.count;
-            gameState.hopperContents += amount;
-            gameState.inventory = gameState.inventory.filter(slot => slot.id !== 'paydirt');
             
-            addMessage(`You deposit ${amount} pay-dirt into the hopper.`, 'success');
-            renderInventory();
+            game.hopper.contents += count;
+            showMessage(`Deposited ${count} pay-dirt!`);
             
-            if (!gameState.hopperProcessing) {
-                startHopperProcessing();
+            if (!game.hopper.processing && !game.strutBroken) {
+                startProcessing();
             }
             
-            updateStats();
+            updateUI();
         }
 
         // Start hopper processing
-        function startHopperProcessing() {
-            if (gameState.hopperContents === 0) return;
-            if (gameState.brokenStrut) {
-                addMessage('The strut is broken! The hopper cannot process.', 'warning');
-                return;
-            }
+        function startProcessing() {
+            if (game.hopper.contents <= 0 || game.strutBroken) return;
             
-            gameState.hopperProcessing = true;
-            processPaydirt();
+            game.hopper.processing = true;
+            processNext();
         }
 
-        // Process pay-dirt
-        function processPaydirt() {
-            if (gameState.hopperContents === 0 || gameState.brokenStrut) {
-                gameState.hopperProcessing = false;
-                updateHopperDisplay();
+        function processNext() {
+            if (game.hopper.contents <= 0 || game.strutBroken) {
+                game.hopper.processing = false;
                 return;
             }
-
-            if (gameState.sackContents.length >= gameState.maxSack) {
-                addMessage('The sack is full! Collect your ores.', 'warning');
-                gameState.hopperProcessing = false;
-                return;
-            }
-
-            // Process one pay-dirt
-            gameState.hopperContents--;
             
-            // Determine ore type based on mining level
+            if (game.hopper.sackContents.length >= game.hopper.maxSack) {
+                showMessage("Sack is full! Collect your ores.");
+                game.hopper.processing = false;
+                return;
+            }
+            
+            game.hopper.contents--;
+            
+            // Determine ore
             const ore = determineOre();
-            gameState.sackContents.push(ore);
+            game.hopper.sackContents.push(ore);
             
-            updateHopperDisplay();
-            updateStats();
-
-            // Continue processing
-            setTimeout(() => processPaydirt(), 500);
+            setTimeout(processNext, 300);
         }
 
-        // Determine ore type
         function determineOre() {
-            const level = gameState.miningLevel;
+            const level = game.stats.level;
             const roll = Math.random() * 100;
             
-            // Upper level gives better odds
-            const bonus = gameState.unlocks.upperLevel ? 10 : 0;
-            
-            if (level >= 85 && roll < 2 + bonus) return 'runite';
-            if (level >= 70 && roll < 8 + bonus) return 'adamantite';
-            if (level >= 55 && roll < 20 + bonus) return 'mithril';
-            if (level >= 40 && roll < 35) return 'goldOre';
+            if (level >= 85 && roll < 2) return 'runite';
+            if (level >= 70 && roll < 8) return 'adamantite';
+            if (level >= 55 && roll < 18) return 'mithril';
+            if (level >= 40 && roll < 30) return 'gold';
             return 'coal';
-        }
-
-        // Update hopper display
-        function updateHopperDisplay() {
-            const progress = document.getElementById('hopperProgress');
-            const text = document.getElementById('hopperText');
-            const percentage = (gameState.hopperContents / 28) * 100;
-            
-            progress.style.width = Math.min(percentage, 100) + '%';
-            text.textContent = gameState.hopperContents > 0 ? `Processing: ${gameState.hopperContents}` : 'Empty';
         }
 
         // Collect from sack
         function collectFromSack() {
-            if (gameState.sackContents.length === 0) {
-                addMessage('The sack is empty!', 'warning');
+            if (game.hopper.sackContents.length === 0) {
+                showMessage("The sack is empty!");
                 return;
             }
-
-            // Transfer to bank
-            const collected = {};
-            while (gameState.sackContents.length > 0) {
-                const ore = gameState.sackContents.pop();
-                const bankKey = ore === 'goldOre' ? 'gold' : ore;
-                gameState.bank[bankKey] = (gameState.bank[bankKey] || 0) + 1;
-                collected[ore] = (collected[ore] || 0) + 1;
-                gameState.totalOres++;
-            }
-
-            // Calculate GP value
-            let totalValue = 0;
-            for (const [ore, count] of Object.entries(collected)) {
-                totalValue += (items[ore]?.value || 0) * count;
-                addMessage(`Collected ${count}x ${items[ore]?.name || ore}`, 'success');
+            
+            const oreValues = {
+                coal: 150,
+                gold: 250,
+                mithril: 300,
+                adamantite: 1000,
+                runite: 11000
+            };
+            
+            let totalGP = 0;
+            const counts = {};
+            
+            while (game.hopper.sackContents.length > 0) {
+                const ore = game.hopper.sackContents.pop();
+                totalGP += oreValues[ore] || 0;
+                counts[ore] = (counts[ore] || 0) + 1;
             }
             
-            gameState.gold += totalValue;
-            addMessage(`Total value: ${totalValue.toLocaleString()} GP`, 'nugget');
+            game.stats.gp += totalGP;
             
-            updateStats();
-        }
-
-        // Random rockfall
-        function randomRockfall() {
-            const oreTiles = gameState.tiles.filter(t => t.type === 'ore' && !t.depleted);
-            if (oreTiles.length > 0 && Math.random() < 0.3) {
-                const tile = oreTiles[Math.floor(Math.random() * oreTiles.length)];
-                const element = document.querySelector(`[data-x="${tile.x}"][data-y="${tile.y}"]`);
-                
-                if (element && !element.classList.contains('rockfall')) {
-                    tile.hasRockfall = true;
-                    element.classList.remove('ore-vein');
-                    element.classList.add('rockfall');
-                    element.innerHTML = '🪨';
-                    element.onclick = () => clearRockfall(tile, element);
-                    addMessage('A rockfall has blocked a passage!', 'warning');
-                }
+            let msg = "Collected: ";
+            for (const [ore, count] of Object.entries(counts)) {
+                msg += `${count} ${ore}, `;
             }
-        }
-
-        // Clear rockfall
-        function clearRockfall(tileData, tileElement) {
-            addMessage('You clear the rockfall...', 'info');
+            msg += `(${totalGP.toLocaleString()} GP)`;
+            showMessage(msg);
             
-            setTimeout(() => {
-                tileData.hasRockfall = false;
-                tileElement.classList.remove('rockfall');
-                tileElement.classList.add('ore-vein');
-                tileElement.innerHTML = '⛏️';
-                tileElement.onclick = () => mineOre(tileData, tileElement);
-                gameState.rockfallsCleared++;
-                gameState.miningXP += 10;
-                addMessage('You cleared the rockfall! +10 XP', 'success');
-                checkLevelUp();
-                updateStats();
-            }, 2000);
+            updateUI();
         }
 
-        // Check strut
-        function checkStrut() {
-            if (!gameState.brokenStrut && Math.random() < 0.2) {
-                gameState.brokenStrut = true;
-                const struts = document.querySelectorAll('.strut');
-                struts.forEach(s => s.classList.add('broken'));
-                document.getElementById('fixStrutBtn').style.display = 'block';
-                addMessage('WARNING: A water wheel strut has broken!', 'warning');
-                showPercyDialog("Arr! One of me struts has broken! Fix it quick or the water wheel won't work!");
-            }
+        // Talk to Percy
+        function talkToPercy() {
+            const dialogs = [
+                "Arr, welcome to me mine! Use the hopper to clean yer pay-dirt!",
+                "Golden nuggets can be traded for special equipment!",
+                "Mind the rockfalls! They'll block yer path if ye ain't careful!",
+                "The water wheel needs them struts. Fix 'em if they break!",
+                "Higher mining levels mean better ores from the sack!",
+                "Push that cart around - it holds way more than yer pockets!"
+            ];
+            
+            const text = dialogs[Math.floor(Math.random() * dialogs.length)];
+            document.getElementById('npcText').textContent = text;
+            document.getElementById('npcDialog').classList.add('visible');
+        }
+
+        function closeDialog() {
+            document.getElementById('npcDialog').classList.remove('visible');
         }
 
         // Fix strut
         function fixStrut() {
-            if (!gameState.brokenStrut) return;
+            if (!game.strutBroken) return;
             
-            addMessage('You repair the broken strut...', 'info');
-            
+            showMessage("Fixing strut...");
             setTimeout(() => {
-                gameState.brokenStrut = false;
-                const struts = document.querySelectorAll('.strut');
-                struts.forEach(s => s.classList.remove('broken'));
-                document.getElementById('fixStrutBtn').style.display = 'none';
-                gameState.strutsFixed++;
-                gameState.miningXP += 15;
-                addMessage('You fixed the strut! +15 XP', 'success');
+                game.strutBroken = false;
+                game.stats.xp += 15;
+                showMessage("Strut repaired! +15 XP");
                 checkLevelUp();
-                updateStats();
                 
-                // Resume processing
-                if (gameState.hopperContents > 0) {
-                    startHopperProcessing();
+                if (game.hopper.contents > 0) {
+                    startProcessing();
                 }
-            }, 3000);
+            }, 2000);
         }
 
-        // Respawn ores
-        function respawnOres() {
-            gameState.tiles.forEach(tile => {
-                if (tile.depleted && Math.random() < 0.3) {
-                    tile.depleted = false;
-                    const element = document.querySelector(`[data-x="${tile.x}"][data-y="${tile.y}"]`);
-                    if (element && !tile.hasRockfall) {
-                        element.classList.remove('depleted');
-                        element.innerHTML = '⛏️';
-                    }
-                }
-            });
+        // Clear rockfall
+        function clearRockfall(tx, ty) {
+            showMessage("Clearing rockfall...");
+            setTimeout(() => {
+                mapData[ty][tx] = TILES.ORE_VEIN;
+                oreVeins[`${tx},${ty}`] = { depleted: false, respawnTimer: 0 };
+                game.stats.xp += 10;
+                showMessage("Cleared! +10 XP");
+                checkLevelUp();
+            }, 2000);
         }
 
-        // Render inventory
-        function renderInventory() {
-            const inv = document.getElementById('inventory');
-            inv.innerHTML = '';
-            
-            for (let i = 0; i < gameState.maxInventory; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'inv-slot';
-                
-                if (gameState.inventory[i]) {
-                    const item = items[gameState.inventory[i].id];
-                    slot.innerHTML = item.icon;
-                    if (gameState.inventory[i].count > 1) {
-                        const countSpan = document.createElement('span');
-                        countSpan.className = 'count';
-                        countSpan.textContent = gameState.inventory[i].count;
-                        slot.appendChild(countSpan);
-                    }
-                }
-                
-                inv.appendChild(slot);
+        // Use ladder
+        function useLadder() {
+            if (!game.equipment.upperLevel && game.stats.level < 72) {
+                showMessage("You need level 72 Mining or Upper Access!");
+                return;
             }
-            
-            document.getElementById('invCount').textContent = getInventoryCount();
+            showMessage("You climb the ladder... (Upper level coming soon!)");
         }
 
-        // Update stats
-        function updateStats() {
-            document.getElementById('miningLevel').textContent = gameState.miningLevel;
-            document.getElementById('miningXP').textContent = gameState.miningXP.toLocaleString();
-            document.getElementById('nuggets').textContent = gameState.nuggets;
-            document.getElementById('gold').textContent = gameState.gold.toLocaleString();
-            document.getElementById('totalPaydirt').textContent = gameState.totalPaydirt;
-            document.getElementById('totalOres').textContent = gameState.totalOres;
-            document.getElementById('rockfallsCleared').textContent = gameState.rockfallsCleared;
-            document.getElementById('strutsFixed').textContent = gameState.strutsFixed;
-            document.getElementById('sackCount').textContent = gameState.sackContents.length;
-            document.getElementById('sackMax').textContent = gameState.maxSack;
+        // Toggle cart attachment
+        function toggleCart() {
+            const cartDist = Math.sqrt(
+                Math.pow(game.player.x - game.cart.x, 2) +
+                Math.pow(game.player.y - game.cart.y, 2)
+            );
             
-            // XP progress
-            const currentLevelXP = xpTable[gameState.miningLevel - 1] || 0;
-            const nextLevelXP = xpTable[gameState.miningLevel] || currentLevelXP;
-            const progress = ((gameState.miningXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-            document.getElementById('xpProgress').style.width = Math.min(progress, 100) + '%';
-            document.getElementById('xpToLevel').textContent = Math.max(0, nextLevelXP - gameState.miningXP).toLocaleString();
-            
-            // Bank
-            document.getElementById('bank-coal').textContent = gameState.bank.coal;
-            document.getElementById('bank-gold').textContent = gameState.bank.gold;
-            document.getElementById('bank-mithril').textContent = gameState.bank.mithril;
-            document.getElementById('bank-adamantite').textContent = gameState.bank.adamantite;
-            document.getElementById('bank-runite').textContent = gameState.bank.runite;
-            
-            // Equipment display
-            const bonus = getXPBonus();
-            document.getElementById('xpBonus').textContent = bonus + '%';
-            
-            ['helmet', 'jacket', 'legs', 'boots'].forEach(slot => {
-                const el = document.getElementById(`slot-${slot}`);
-                if (gameState.equipment[slot]) {
-                    el.classList.add('equipped');
-                    el.textContent = shopItems.find(i => i.id === slot).icon;
-                } else {
-                    el.classList.remove('equipped');
-                    el.textContent = '-';
-                }
-            });
-            
-            updateHopperDisplay();
+            if (game.player.pushingCart) {
+                game.player.pushingCart = false;
+                showMessage("Released the cart.");
+            } else if (cartDist < 70) {
+                game.player.pushingCart = true;
+                showMessage("Grabbed the cart! (Move slower but more capacity)");
+            } else {
+                showMessage("Get closer to the cart!");
+            }
         }
 
         // Get XP bonus from equipment
         function getXPBonus() {
             let bonus = 0;
-            if (gameState.equipment.helmet) bonus += 2.5;
-            if (gameState.equipment.jacket) bonus += 2.5;
-            if (gameState.equipment.legs) bonus += 2.5;
-            if (gameState.equipment.boots) bonus += 2.5;
+            if (game.equipment.helmet) bonus += 2.5;
+            if (game.equipment.jacket) bonus += 2.5;
+            if (game.equipment.legs) bonus += 2.5;
+            if (game.equipment.boots) bonus += 2.5;
             return bonus;
-        }
-
-        // Get XP multiplier
-        function getXPMultiplier() {
-            return 1 + (getXPBonus() / 100);
         }
 
         // Check level up
         function checkLevelUp() {
-            while (gameState.miningLevel < 99 && gameState.miningXP >= xpTable[gameState.miningLevel]) {
-                gameState.miningLevel++;
-                showLevelUp();
-                addMessage(`Congratulations! You've reached Mining level ${gameState.miningLevel}!`, 'rare');
-                
-                // Update upper level access
-                if (gameState.miningLevel >= 72 && gameState.unlocks.upperLevel) {
-                    generateMine();
-                }
+            while (game.stats.level < 99 && game.stats.xp >= xpTable[game.stats.level]) {
+                game.stats.level++;
+                showMessage(`⬆️ Mining level ${game.stats.level}!`);
             }
         }
 
-        // Show level up notification
-        function showLevelUp() {
-            const notification = document.createElement('div');
-            notification.className = 'level-up';
-            notification.innerHTML = `⬆️ Mining Level Up! ⬆️<br>Level ${gameState.miningLevel}`;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 2000);
+        // Show message
+        function showMessage(text) {
+            game.currentMessage = text;
+            game.messageTimer = 180;
+            const box = document.getElementById('messageBox');
+            box.textContent = text;
+            box.classList.add('visible');
         }
 
-        // Show XP popup
-        function showXPPopup(element, text) {
-            const popup = document.createElement('div');
-            popup.className = 'xp-popup';
-            popup.textContent = text;
-            popup.style.left = element.offsetLeft + 'px';
-            popup.style.top = element.offsetTop + 'px';
-            element.parentElement.appendChild(popup);
-            setTimeout(() => popup.remove(), 1000);
-        }
-
-        // Add message to log
-        function addMessage(text, type = 'info') {
-            const log = document.getElementById('messageLog');
-            const msg = document.createElement('div');
-            msg.className = `message ${type}`;
-            msg.textContent = text;
-            log.insertBefore(msg, log.firstChild);
+        // Update UI
+        function updateUI() {
+            document.getElementById('levelDisplay').textContent = game.stats.level;
+            document.getElementById('xpDisplay').textContent = game.stats.xp.toLocaleString();
+            document.getElementById('nuggetDisplay').textContent = game.stats.nuggets;
+            document.getElementById('gpDisplay').textContent = game.stats.gp.toLocaleString();
             
-            // Keep only last 50 messages
-            while (log.children.length > 50) {
-                log.removeChild(log.lastChild);
+            // XP bar
+            const currentXP = xpTable[game.stats.level - 1] || 0;
+            const nextXP = xpTable[game.stats.level] || currentXP;
+            const progress = ((game.stats.xp - currentXP) / (nextXP - currentXP)) * 100;
+            document.getElementById('xpBar').style.width = Math.min(progress, 100) + '%';
+            
+            // Cart count
+            document.getElementById('cartCount').textContent = game.cart.contents.length;
+            
+            // Inventories
+            renderInventory('inventoryGrid', game.inventory, game.maxInventory);
+            renderInventory('cartGrid', game.cart.contents, 8); // Show first 8 slots
+        }
+
+        function renderInventory(elementId, items, maxSlots) {
+            const grid = document.getElementById(elementId);
+            grid.innerHTML = '';
+            
+            const icons = {
+                paydirt: '🪨',
+                coal: '�ite',
+                gold: '🥇',
+                mithril: '💜',
+                adamantite: '💚',
+                runite: '💎'
+            };
+            
+            // Count items
+            const counts = {};
+            items.forEach(item => {
+                counts[item] = (counts[item] || 0) + 1;
+            });
+            
+            let slotIndex = 0;
+            for (const [item, count] of Object.entries(counts)) {
+                if (slotIndex >= maxSlots) break;
+                const slot = document.createElement('div');
+                slot.className = 'inv-slot';
+                slot.innerHTML = `${icons[item] || '?'}<span class="count">${count}</span>`;
+                grid.appendChild(slot);
+                slotIndex++;
+            }
+            
+            // Empty slots
+            while (slotIndex < maxSlots) {
+                const slot = document.createElement('div');
+                slot.className = 'inv-slot';
+                grid.appendChild(slot);
+                slotIndex++;
             }
         }
 
-        // Shop functions
+        // Shop
         function openShop() {
-            document.getElementById('shopModal').classList.add('active');
-            renderShop();
-        }
-
-        function closeShop() {
-            document.getElementById('shopModal').classList.remove('active');
-        }
-
-        function renderShop() {
-            const container = document.getElementById('shopItems');
-            container.innerHTML = '';
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
             
             shopItems.forEach(item => {
-                const owned = item.type === 'equipment' ? gameState.equipment[item.id] : 
-                             item.type === 'unlock' ? gameState.unlocks[item.id] : false;
-                
+                const owned = game.equipment[item.id];
                 const div = document.createElement('div');
                 div.className = `shop-item ${owned ? 'owned' : ''}`;
                 div.innerHTML = `
-                    <div class="shop-item-icon">${item.icon}</div>
-                    <div class="shop-item-name">${item.name}</div>
-                    <div class="shop-item-desc">${item.desc}</div>
-                    <div class="shop-item-price">🪙 ${item.price} Nuggets</div>
-                    <button class="buy-btn" ${owned || gameState.nuggets < item.price ? 'disabled' : ''} onclick="buyItem('${item.id}')">
+                    <div class="shop-icon">${item.icon}</div>
+                    <div class="shop-name">${item.name}</div>
+                    <div class="shop-price">🪙 ${item.price}</div>
+                    <button class="shop-buy" ${owned || game.stats.nuggets < item.price ? 'disabled' : ''} onclick="buyItem('${item.id}', ${item.price})">
                         ${owned ? 'Owned' : 'Buy'}
                     </button>
                 `;
-                container.appendChild(div);
+                grid.appendChild(div);
             });
+            
+            document.getElementById('shopModal').classList.add('visible');
         }
 
-        function buyItem(itemId) {
-            const item = shopItems.find(i => i.id === itemId);
-            if (!item || gameState.nuggets < item.price) return;
+        function closeShop() {
+            document.getElementById('shopModal').classList.remove('visible');
+        }
+
+        function buyItem(id, price) {
+            if (game.stats.nuggets < price || game.equipment[id]) return;
             
-            gameState.nuggets -= item.price;
+            game.stats.nuggets -= price;
+            game.equipment[id] = true;
             
-            if (item.type === 'equipment') {
-                gameState.equipment[item.id] = true;
-                addMessage(`You purchased the ${item.name}!`, 'rare');
-            } else if (item.type === 'unlock') {
-                gameState.unlocks[item.id] = true;
-                addMessage(`You unlocked: ${item.name}!`, 'rare');
-                
-                if (item.id === 'biggerSack') {
-                    gameState.maxSack = 162;
-                }
-                if (item.id === 'upperLevel') {
-                    generateMine();
-                }
-            } else if (item.type === 'consumable') {
-                if (item.id === 'softClayPack') {
-                    gameState.gold += 5000;
-                    addMessage('You received soft clay worth 5,000 GP!', 'success');
-                } else if (item.id === 'bagOfGems') {
-                    gameState.gold += 20000;
-                    addMessage('You received gems worth 20,000 GP!', 'success');
+            if (id === 'bigSack') {
+                game.hopper.maxSack = 162;
+            }
+            
+            showMessage(`Purchased ${shopItems.find(i => i.id === id).name}!`);
+            updateUI();
+            openShop(); // Refresh
+        }
+
+        // Lore
+        function showLore() {
+            document.getElementById('loreModal').classList.add('visible');
+        }
+
+        function closeLore() {
+            document.getElementById('loreModal').classList.remove('visible');
+        }
+
+        // Drawing
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Camera follow
+            game.camera.x = game.player.x - canvas.width / 2;
+            game.camera.y = game.player.y - canvas.height / 2;
+            
+            ctx.save();
+            ctx.translate(-game.camera.x, -game.camera.y);
+            
+            // Draw tiles
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    drawTile(x, y, mapData[y][x]);
                 }
             }
             
-            updateStats();
-            renderShop();
+            // Draw cart
+            drawCart();
+            
+            // Draw player
+            drawPlayer();
+            
+            // Draw interaction prompt
+            updateInteractionPrompt();
+            
+            ctx.restore();
+            
+            // Draw mining progress bar
+            if (game.player.mining) {
+                drawMiningProgress();
+            }
         }
 
-        // Percy dialogs
-        function showPercyDialog(text) {
-            const dialog = document.getElementById('npcDialog');
-            document.getElementById('npcText').textContent = text;
-            dialog.classList.add('active');
-            setTimeout(() => dialog.classList.remove('active'), 5000);
+        function drawTile(x, y, type) {
+            const px = x * TILE_SIZE;
+            const py = y * TILE_SIZE;
+            
+            // Base floor
+            ctx.fillStyle = '#3d3222';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            
+            switch (type) {
+                case TILES.WALL:
+                    ctx.fillStyle = '#1a1a1a';
+                    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    break;
+                    
+                case TILES.ORE_VEIN:
+                    const vein = oreVeins[`${x},${y}`];
+                    if (vein && vein.depleted) {
+                        ctx.fillStyle = '#2a2a2a';
+                    } else {
+                        ctx.fillStyle = '#5a4a3a';
+                        // Sparkle
+                        ctx.fillStyle = '#8a7a6a';
+                        ctx.beginPath();
+                        ctx.arc(px + 15, py + 15, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#6a5a4a';
+                        ctx.beginPath();
+                        ctx.arc(px + 32, py + 28, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.strokeStyle = '#4a3a2a';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    
+                    // Icon
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = vein && vein.depleted ? '#555' : '#fff';
+                    ctx.fillText(vein && vein.depleted ? '💨' : '⛏️', px + 12, py + 32);
+                    break;
+                    
+                case TILES.WATER:
+                    ctx.fillStyle = '#1e90ff';
+                    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                    // Waves
+                    ctx.strokeStyle = '#4169e1';
+                    ctx.lineWidth = 2;
+                    const waveOffset = (Date.now() / 200) % 20;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(px, py + 10 + i * 15 + waveOffset % 15);
+                        ctx.lineTo(px + TILE_SIZE, py + 10 + i * 15 + waveOffset % 15);
+                        ctx.stroke();
+                    }
+                    ctx.font = '16px Arial';
+                    ctx.fillText('💧', px + 14, py + 30);
+                    break;
+                    
+                case TILES.HOPPER:
+                    ctx.fillStyle = '#8b7355';
+                    ctx.fillRect(px + 5, py + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+                    ctx.strokeStyle = '#daa520';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(px + 5, py + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+                    ctx.font = '24px Arial';
+                    ctx.fillText('📥', px + 10, py + 34);
+                    break;
+                    
+                case TILES.SACK:
+                    ctx.fillStyle = '#8b4513';
+                    ctx.beginPath();
+                    ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#cd853f';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.font = '20px Arial';
+                    ctx.fillText('🎒', px + 12, py + 32);
+                    // Show count
+                    if (game.hopper.sackContents.length > 0) {
+                        ctx.fillStyle = '#ffff00';
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillText(game.hopper.sackContents.length.toString(), px + 35, py + 15);
+                    }
+                    break;
+                    
+                case TILES.STRUT:
+                    ctx.fillStyle = game.strutBroken ? '#8b0000' : '#5c4033';
+                    ctx.fillRect(px + 15, py, 18, TILE_SIZE);
+                    ctx.strokeStyle = game.strutBroken ? '#ff0000' : '#8b7355';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(px + 15, py, 18, TILE_SIZE);
+                    ctx.font = '18px Arial';
+                    ctx.fillText(game.strutBroken ? '⚠️' : '🪵', px + 12, py + 30);
+                    break;
+                    
+                case TILES.LADDER:
+                    ctx.fillStyle = '#654321';
+                    ctx.fillRect(px + 10, py + 5, 8, TILE_SIZE - 10);
+                    ctx.fillRect(px + 30, py + 5, 8, TILE_SIZE - 10);
+                    for (let i = 0; i < 4; i++) {
+                        ctx.fillRect(px + 10, py + 8 + i * 10, 28, 4);
+                    }
+                    ctx.font = '20px Arial';
+                    ctx.fillText('🪜', px + 12, py + 34);
+                    break;
+                    
+                case TILES.ROCKFALL:
+                    ctx.fillStyle = '#8b4513';
+                    ctx.beginPath();
+                    ctx.moveTo(px + TILE_SIZE/2, py + 5);
+                    ctx.lineTo(px + TILE_SIZE - 5, py + TILE_SIZE - 5);
+                    ctx.lineTo(px + 5, py + TILE_SIZE - 5);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.font = '24px Arial';
+                    ctx.fillText('🪨', px + 10, py + 36);
+                    break;
+                    
+                case TILES.PERCY:
+                    ctx.fillStyle = '#4a4a4a';
+                    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                    ctx.font = '28px Arial';
+                    ctx.fillText('🧔', px + 8, py + 36);
+                    break;
+            }
         }
 
-        function getRandomGreeting() {
-            const greetings = [
-                "Welcome to me mine! Grab a pickaxe and get to work, ye lazy landlubber!",
-                "Arr, another miner seeking fortune! The pay-dirt awaits!",
-                "Mind the rockfalls! And keep an eye on them struts!",
-                "Golden nuggets be hidden in the dirt. Mine well and ye might find some!",
-                "The upper level has richer veins, but ye need experience to climb up there!",
-                "Deposit yer pay-dirt in the hopper, then collect yer clean ores from the sack!",
-                "Me water wheels be temperamental. If a strut breaks, fix it quick!",
-                "Save yer nuggets and buy me fine prospector gear. It'll serve ye well!"
-            ];
-            return greetings[Math.floor(Math.random() * greetings.length)];
+        function drawCart() {
+            const cx = game.cart.x;
+            const cy = game.cart.y;
+            
+            // Cart body
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(cx - 22, cy - 18, 44, 36);
+            
+            // Cart outline
+            ctx.strokeStyle = game.player.pushingCart ? '#ffd700' : '#8b7355';
+            ctx.lineWidth = game.player.pushingCart ? 3 : 2;
+            ctx.strokeRect(cx - 22, cy - 18, 44, 36);
+            
+            // Wheels
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(cx - 15, cy + 20, 8, 0, Math.PI * 2);
+            ctx.arc(cx + 15, cy + 20, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Cart icon
+            ctx.font = '24px Arial';
+            ctx.fillText('🛒', cx - 14, cy + 8);
+            
+            // Contents count
+            if (game.cart.contents.length > 0) {
+                ctx.fillStyle = '#ffff00';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(game.cart.contents.length.toString(), cx, cy - 22);
+                ctx.textAlign = 'left';
+            }
         }
 
-        // Initialize on load
-        window.onload = initGame;
+        function drawPlayer() {
+            const px = game.player.x;
+            const py = game.player.y;
+            
+            ctx.save();
+            ctx.translate(px, py);
+            
+            // Body bob animation
+            const bob = Math.sin(game.player.animFrame) * 2;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(0, 15, 15, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Legs
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(-8, 5 + bob, 6, 12);
+            ctx.fillRect(2, 5 + bob, 6, 12);
+            
+            // Body
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(-12, -10 + bob, 24, 20);
+            
+            // Belt
+            ctx.fillStyle = '#333';
+            ctx.fillRect(-12, 5 + bob, 24, 4);
+            
+            // Head
+            ctx.fillStyle = '#deb887';
+            ctx.beginPath();
+            ctx.arc(0, -15 + bob, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beard
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.moveTo(-8, -10 + bob);
+            ctx.lineTo(8, -10 + bob);
+            ctx.lineTo(4, 0 + bob);
+            ctx.lineTo(-4, 0 + bob);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Helmet
+            ctx.fillStyle = game.equipment.helmet ? '#ffd700' : '#696969';
+            ctx.beginPath();
+            ctx.arc(0, -20 + bob, 10, Math.PI, 0);
+            ctx.fill();
+            
+            // Pickaxe
+            ctx.save();
+            const pickAngle = game.player.mining ? 
+                Math.sin(game.player.miningProgress * 0.3) * 0.5 : 0;
+            ctx.rotate(pickAngle);
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(15, -5 + bob, 20, 4);
+            ctx.fillStyle = '#708090';
+            ctx.beginPath();
+            ctx.moveTo(35, -10 + bob);
+            ctx.lineTo(40, 0 + bob);
+            ctx.lineTo(35, 0 + bob);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            
+            ctx.restore();
+        }
+
+        function drawMiningProgress() {
+            const barWidth = 150;
+            const barHeight = 15;
+            const x = (canvas.width - barWidth) / 2;
+            const y = 100;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(x - 5, y - 5, barWidth + 10, barHeight + 10);
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x, y, barWidth, barHeight);
+            
+            const progress = game.player.miningProgress / 60;
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x, y, barWidth * progress, barHeight);
+            
+            ctx.strokeStyle = '#8b7355';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+
+        function updateInteractionPrompt() {
+            const prompt = document.getElementById('interactionPrompt');
+            const interactable = findNearbyInteractable();
+            game.nearbyInteractable = interactable;
+            
+            if (interactable) {
+                let text = '';
+                switch (interactable.type) {
+                    case 'ore': text = '⛏️ Mine Ore'; break;
+                    case 'hopper': text = '📥 Deposit Pay-dirt'; break;
+                    case 'sack': text = '📤 Collect Ores'; break;
+                    case 'percy': text = '💬 Talk to Percy'; break;
+                    case 'strut': text = '🔧 Fix Strut'; break;
+                    case 'rockfall': text = '💪 Clear Rockfall'; break;
+                    case 'ladder': text = '🪜 Climb Ladder'; break;
+                    case 'cart': text = '🛒 Grab Cart'; break;
+                }
+                
+                const screenX = (interactable.type === 'cart' ? game.cart.x : interactable.x * TILE_SIZE + TILE_SIZE/2) - game.camera.x;
+                const screenY = (interactable.type === 'cart' ? game.cart.y : interactable.y * TILE_SIZE) - game.camera.y - 30;
+                
+                prompt.style.left = screenX + 'px';
+                prompt.style.top = screenY + 'px';
+                prompt.style.transform = 'translateX(-50%)';
+                prompt.style.display = 'block';
+                prompt.textContent = text;
+            } else {
+                prompt.style.display = 'none';
+            }
+        }
+
+        // Update ore respawn
+        function updateOres() {
+            for (const key in oreVeins) {
+                const vein = oreVeins[key];
+                if (vein.depleted && vein.respawnTimer > 0) {
+                    vein.respawnTimer--;
+                    if (vein.respawnTimer <= 0) {
+                        vein.depleted = false;
+                    }
+                }
+            }
+        }
+
+        // Random events
+        function randomEvents() {
+            // Random strut break
+            if (!game.strutBroken && Math.random() < 0.001) {
+                game.strutBroken = true;
+                game.hopper.processing = false;
+                showMessage("⚠️ A strut has broken! Fix it!");
+            }
+            
+            // Random rockfall (convert an ore vein to rockfall)
+            if (Math.random() < 0.0005) {
+                const oreKeys = Object.keys(oreVeins);
+                if (oreKeys.length > 0) {
+                    const key = oreKeys[Math.floor(Math.random() * oreKeys.length)];
+                    const [x, y] = key.split(',').map(Number);
+                    if (mapData[y][x] === TILES.ORE_VEIN) {
+                        mapData[y][x] = TILES.ROCKFALL;
+                        showMessage("⚠️ Rockfall!");
+                    }
+                }
+            }
+        }
+
+        // Message timer
+        function updateMessage() {
+            if (game.messageTimer > 0) {
+                game.messageTimer--;
+                if (game.messageTimer <= 0) {
+                    document.getElementById('messageBox').classList.remove('visible');
+                }
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            updatePlayer();
+            updateOres();
+            randomEvents();
+            updateMessage();
+            updateUI();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        renderInventory('inventoryGrid', [], game.maxInventory);
+        renderInventory('cartGrid', [], 8);
+        updateUI();
+        
+        // Initial dialog
+        setTimeout(() => {
+            talkToPercy();
+        }, 1000);
+
+        // Start game
+        gameLoop();
     </script>
 </body>
 </html>
