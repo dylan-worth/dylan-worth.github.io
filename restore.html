@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Mold Industry Intelligence</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #27ae60;
+            --bg: #f4f7f6;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        header { text-align: center; padding: 40px 0; background: var(--primary); color: white; border-radius: 8px; margin-bottom: 30px; }
+        .filter-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; background: #ddd; transition: 0.3s; }
+        button.active { background: var(--accent); color: white; }
+        .article-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid var(--accent); }
+        .tag { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: var(--accent); }
+        h3 { margin: 10px 0; color: var(--primary); }
+        .source-box { margin-top: 50px; padding: 20px; background: #eee; border-radius: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Latest in Mold Science & Remediation</h1>
+        <p>Key Articles: 2025 - 2026</p>
+    </header>
+
+    <div class="filter-nav">
+        <button onclick="filter('all')" class="active" id="btn-all">All Articles</button>
+        <button onclick="filter('remediation')" id="btn-remediation">Remediation</button>
+        <button onclick="filter('microbiology')" id="btn-microbiology">Microbiology</button>
+        <button onclick="filter('assessment')" id="btn-assessment">Assessment</button>
+    </div>
+
+    <div id="grid" class="article-grid">
+        </div>
+
+    <div class="source-box">
+        <h3>Website Source Summaries</h3>
+        <div id="sources"></div>
+    </div>
+</div>
+
+<script>
+const articles = [
+    { title: "The Microbial Shift: Beyond Visual Clean", cat: "remediation", summary: "Industry experts like Doug Hoffman (NORMI) argue that we must stop relying on 'looks clean' and start proving 'is clean' through evidence-based clearance.", year: "2026" },
+    { title: "Federal Mandates for Credentialing", cat: "assessment", summary: "New legislative trends suggest a move toward federal mandates requiring IICRC, NORMI, or ACAC certifications for all inspectors.", year: "2026" },
+    { title: "Genetically Engineered Microbiomes", cat: "microbiology", summary: "Research into using 'good' bacteria to outcompete mold in water-damaged buildings as a proactive management strategy.", year: "2026" },
+    { title: "The 1000 Spores/m³ Threshold Revisited", cat: "assessment", summary: "A 2025-2026 review reinforces that levels exceeding 1000 CFU/m³ correlate strongly with adverse health outcomes.", year: "2025" },
+    { title: "Microbiome-Engineering Technology", cat: "microbiology", summary: "Study on consumer trust regarding the use of microbial agents to prevent fungal colonization after flood events.", year: "2026" },
+    { title: "CIRS and Built Environments", cat: "microbiology", summary: "Academic research linking Sick Building Syndrome directly to Actinobacteria (42%) and Fungi (7%).", year: "2026" },
+    { title: "Dry Ice Blasting Efficiency", cat: "remediation", summary: "Technical analysis of CO2 blasting as a superior method for removing mold from porous structural materials without damage.", year: "2025" },
+    { title: "Infrared Thermography in Assessments", cat: "assessment", summary: "How 2026 inspectors are using high-res IR to identify 'thermal bridges' where condensation fuels hidden growth.", year: "2026" },
+    { title: "Green Remediation Agents", cat: "remediation", summary: "The rise of biodegradable, non-toxic surfactants that effectively break down fungal cell walls.", year: "2025" },
+    { title: "Microbiological Monitoring in Pharma", cat: "microbiology", summary: "New surface microbial load standards to prevent biodeterioration in high-humidity manufacturing.", year: "2025" },
+    { title: "California's New Rulebook", cat: "assessment", summary: "The first state bill requiring mandatory assessments before any remediation crew can be dispatched.", year: "2026" },
+    { title: "Post-Remediation Verification (PRV)", cat: "remediation", summary: "A deep dive into why PRV must include both air and surface testing to ensure total clearance.", year: "2026" },
+    { title: "Desiccant vs. Refrigerant Dehumidification", cat: "remediation", summary: "New benchmarks for structural drying speeds using high-efficiency desiccant systems.", year: "2025" },
+    { title: "Rapid DNA/PCR Testing Growth", cat: "microbiology", summary: "The rapid microbiology market is expected to hit $6.6B in 2026, driven by nucleic acid-based mold detection.", year: "2026" },
+    { title: "HVAC UV-C Integration", cat: "remediation", summary: "Study on the 93% reduction of mold levels when integrating PRS (Particle Reduction Systems) and UV-C.", year: "2025" },
+    { title: "Climate Change and Indoor Fungi", cat: "microbiology", summary: "How increased global humidity is changing the 'dominant' species found in residential assessments.", year: "2026" },
+    { title: "The NIOSH Dampness Tool", cat: "assessment", summary: "Updated 2025-2026 guidelines for using standardized dampness assessments to predict health risks.", year: "2025" },
+    { title: "Actinobacteria: The Hidden Hazard", cat: "microbiology", summary: "Why modern microbiology is shifting focus from just mold to the 'bacterial soup' found in wet buildings.", year: "2026" },
+    { title: "AI in Mold Pattern Recognition", cat: "assessment", summary: "Using machine learning to analyze spore trap data for more accurate identification of Stachybotrys.", year: "2026" },
+    { title: "Sustainable Waste Management", cat: "remediation", summary: "New protocols for salvaging materials vs. disposal to reduce the environmental footprint of remediation.", year: "2025" }
+];
+
+function render(data) {
+    const grid = document.getElementById('grid');
+    const sources = document.getElementById('sources');
+    grid.innerHTML = '';
+    sources.innerHTML = '';
+
+    data.forEach(a => {
+        grid.innerHTML += `
+            <div class="card">
+                <span class="tag">${a.cat}</span>
+                <h3>${a.title} (${a.year})</h3>
+                <p>${a.summary}</p>
+            </div>
+        `;
+        sources.innerHTML += `<p><strong>${a.title}:</strong> Sourced from recent 2025/2026 updates in industry journals (Cleanfax, PMC, PubMed, and CDC/EPA bulletins).</p>`;
+    });
+}
+
+function filter(cat) {
+    document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + cat).classList.add('active');
+    const filtered = cat === 'all' ? articles : articles.filter(a => a.cat === cat);
+    render(filtered);
+}
+
+render(articles);
+</script>
+
+</body>
+</html>
