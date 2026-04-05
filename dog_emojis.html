@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Emoji Picker</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-color: #2d2d2d;
+            --text-color: #ffffff;
+            --accent: #ffd700;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        /* THE VIEWPORT: This is the "window" that shows one dog at a time */
+        #emoji-viewer {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border: 4px solid var(--accent);
+            border-radius: 15px;
+            background-image: url('https://lh3.googleusercontent.com/d/1vC1jV70EaN-fWqL9S0Yv6N69A5G9f_0a');
+            background-repeat: no-repeat;
+            
+            /* Logic: Image is 2 dogs wide (200%) and 4 dogs tall (400%) */
+            background-size: 200% 400%; 
+            
+            /* Default to the "Sad Dog" you wanted */
+            background-position: 100% 66.6%; 
+            transition: background-position 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #444;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: black;
+        }
+
+        .status {
+            margin-top: 15px;
+            font-style: italic;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 id="emotion-title">Sad Dog</h2>
+        
+        <div id="emoji-viewer"></div>
+
+        <div class="grid">
+            <button onclick="update('Suspicious', 0, 0)">Suspicious</button>
+            <button onclick="update('Happy', 100, 0)">Happy</button>
+            <button onclick="update('Angry', 0, 33.3)">Angry</button>
+            <button onclick="update('Wink', 100, 33.3)">Wink</button>
+            <button onclick="update('Surprised', 0, 66.6)">Surprised</button>
+            <button onclick="update('Sad', 100, 66.6)">Sad</button>
+            <button onclick="update('Side-Eye', 0, 100)">Side-Eye</button>
+            <button onclick="update('Puppy Eyes', 100, 100)">Puppy Eyes</button>
+        </div>
+
+        <p class="status">Click to switch faces</p>
+    </div>
+
+    <script>
+        function update(label, x, y) {
+            const viewer = document.getElementById('emoji-viewer');
+            const title = document.getElementById('emotion-title');
+            
+            // Move the background sprite
+            viewer.style.backgroundPosition = `${x}% ${y}%`;
+            title.innerText = `${label} Dog`;
+        }
+    </script>
+
+</body>
+</html>
