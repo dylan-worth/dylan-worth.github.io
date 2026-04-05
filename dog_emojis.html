@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dog Emoji Studio</title>
+    <title>Dog Emoji Studio - Full Ear Edition</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --accent: #fbbf24; --text: #f8fafc;
@@ -11,10 +11,9 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg); color: var(--text);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0;
+            min-height: 100vh; margin: 0; padding: 20px;
         }
 
         .container {
@@ -22,35 +21,37 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; width: 340px;
         }
 
+        /* Adjusted background-size to 180% to "Zoom Out" and catch the ears */
         #emoji-viewer {
             width: 250px; height: 250px; margin: 0 auto 1.5rem;
             border: 4px solid var(--accent); border-radius: 20px;
             background-image: url('https://lh3.googleusercontent.com/u/0/d/1Qanjg4hrXBIA7QMfOpjz39ov2NoeDBUI');
             background-repeat: no-repeat;
-            background-size: 200% 400%;
-            background-position: 100% 66.6%; /* Defaults to Sad */
+            background-size: 190% 390%; 
+            background-position: 100% 66%; 
             transition: background-position 0.3s ease;
+            background-color: #000;
         }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
 
         button {
             padding: 10px; border: 1px solid #334155; border-radius: 10px;
-            background: #1e293b; color: #94a3b8; cursor: pointer; font-weight: 600;
+            background: #1e293b; color: #94a3b8; cursor: pointer; font-weight: 600; font-size: 0.8rem;
         }
 
-        button:hover { background: #334155; color: white; }
+        button:hover { background: #334155; color: white; border-color: var(--accent); }
+        button.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
         .download-btn {
             width: 100%; padding: 15px; background: var(--accent);
             color: #000; border: none; border-radius: 12px;
             font-size: 1rem; font-weight: 800; cursor: pointer;
-            text-transform: uppercase; letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .download-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .download-btn:hover { transform: scale(1.02); opacity: 0.9; }
         
-        /* Hidden canvas for processing */
         canvas { display: none; }
     </style>
 </head>
@@ -60,28 +61,28 @@
         <h2 id="label">Sad Dog</h2>
         <div id="emoji-viewer"></div>
 
-        <div class="grid">
+        <div class="grid" id="btnGroup">
             <button onclick="update('Suspicious', 0, 0)">Suspicious</button>
             <button onclick="update('Happy', 1, 0)">Happy</button>
             <button onclick="update('Angry', 0, 1)">Angry</button>
             <button onclick="update('Wink', 1, 1)">Wink</button>
             <button onclick="update('Surprised', 0, 2)">Surprised</button>
-            <button onclick="update('Sad', 1, 2)">Sad</button>
+            <button onclick="update('Sad', 1, 2)" class="active">Sad</button>
             <button onclick="update('Side-Eye', 0, 3)">Side-Eye</button>
             <button onclick="update('Puppy Eyes', 1, 3)">Puppy Eyes</button>
         </div>
 
-        <button class="download-btn" onclick="downloadEmoji()">Download This Sticker</button>
-        <canvas id="exportCanvas" width="500" height="500"></canvas>
+        <button class="download-btn" onclick="downloadEmoji()">Download Sticker</button>
+        <canvas id="exportCanvas" width="600" height="600"></canvas>
     </div>
 
     <script>
-        let currentX = 1; // Start at Sad
+        let currentX = 1; 
         let currentY = 2;
         let currentName = "Sad";
 
         const img = new Image();
-        img.crossOrigin = "anonymous"; // Necessary to avoid "Tainted Canvas" errors
+        img.crossOrigin = "anonymous"; 
         img.src = 'https://lh3.googleusercontent.com/u/0/d/1Qanjg4hrXBIA7QMfOpjz39ov2NoeDBUI';
 
         function update(name, x, y) {
@@ -92,27 +93,33 @@
             const viewer = document.getElementById('emoji-viewer');
             const label = document.getElementById('label');
             
-            // CSS handles the visual switch
+            // CSS positioning logic
             viewer.style.backgroundPosition = `${x * 100}% ${y * 33.3}%`;
             label.innerText = `${name} Dog`;
+
+            // UI feedback
+            document.querySelectorAll('#btnGroup button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
         }
 
         function downloadEmoji() {
             const canvas = document.getElementById('exportCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Calculate the source dimensions based on the original image size
-            // Since it's a 2x4 grid:
+            // 2x4 Grid logic
             const sWidth = img.width / 2;
             const sHeight = img.height / 4;
             const sx = currentX * sWidth;
-            const sy = currentY * sHeight;
+            
+            // Adjusting Y upward by 10% to capture the tall ears
+            const earPadding = sHeight * 0.08; 
+            const sy = (currentY * sHeight) - earPadding;
 
-            // Clear and Draw the specific section to canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+            
+            // Draw into the 600x600 canvas
+            ctx.drawImage(img, sx, Math.max(0, sy), sWidth, sHeight, 0, 0, canvas.width, canvas.height);
 
-            // Trigger the download
             const link = document.createElement('a');
             link.download = `${currentName}-Dog-Sticker.png`;
             link.href = canvas.toDataURL("image/png");
