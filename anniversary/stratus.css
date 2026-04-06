@@ -1,0 +1,82 @@
+/* The "Cell-Shaded" Dashboard Container */
+.stratus-experience {
+    background: #1a1a1a;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 8px solid #000;
+    border-bottom: 8px solid #000;
+}
+
+.dash-display {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    height: 250px;
+    background: #333; /* Dark plastic dash color */
+    border: 6px solid #000;
+    border-radius: 40px 40px 10px 10px;
+    box-shadow: 10px 10px 0px #000; /* Sharp cell-shaded shadow */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* The Glowing Radio Screen */
+.radio-screen {
+    width: 70%;
+    height: 100px;
+    background: #003300; /* Old school backlit LCD */
+    border: 4px solid #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 5px 5px 0px rgba(0,0,0,0.5);
+}
+
+.scrolling-text {
+    font-family: 'Courier New', monospace;
+    color: #20eb20;
+    font-weight: bold;
+    text-shadow: 0 0 5px #20eb20;
+    margin: 5px 0;
+}
+
+/* Cell-Shaded Buttons */
+#play-btn {
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: #d4af37; /* Stratus Gold */
+    border: 4px solid #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px #000;
+    transition: all 0.1s;
+}
+
+#play-btn:active {
+    box-shadow: 0px 0px 0px #000;
+    transform: translate(5px, 5px);
+}
+
+/* The Typewriter Text Overlay */
+#typewriter-text {
+    margin-top: 30px;
+    font-family: 'Satisfy', cursive;
+    font-size: 1.8rem;
+    color: #fff;
+    text-align: center;
+    max-width: 80%;
+    /* Subtle outline to keep it cell-shaded */
+    text-shadow: 
+        2px 2px 0 #000,
+       -1px -1px 0 #000,  
+        1px -1px 0 #000,
+       -1px 1px 0 #000,
+        1px 1px 0 #000;
+}

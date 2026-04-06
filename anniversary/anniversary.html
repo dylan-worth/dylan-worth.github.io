@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>10 Years of Us | Dylan & Kimberly</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&family=Satisfy&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="anniversary.css">
+</head>
+<body>
+
+    <!-- MAGICAL HEADER -->
+    <header>
+        <h1>A Decade of Us</h1>
+        <p>Ten Years. One Love. Forever to Go.</p>
+    </header>
+
+    <!-- STRATUS RADIO SECTION -->
+    <section class="stratus-experience">
+        <div class="dash-display">
+            <div class="radio-screen">
+                <p class="scrolling-text" id="status-msg">STRATUS AUDIO V1.0</p>
+                <audio id="anniversary-audio">
+                    <!-- Ensure your mp3 is named exactly this -->
+                    <source src="5sos-song.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+            
+            <button onclick="playMemories()" id="play-btn">POWER ON</button>
+        </div>
+        
+        <!-- Animated Typewriter Text from stratus.js -->
+        <div id="typewriter-text">Ready to go back to the beginning?</div>
+    </section>
+
+    <!-- INSTAGRAM PHOTO GRID -->
+    <!-- This is populated by photo.js -->
+    <main class="gallery" id="photo-grid"></main>
+
+    <!-- DISNEY JOURNEY SECTION -->
+    <section class="disney-path">
+        <div class="magic-castle">✨🏰✨</div>
+        <h2>From First Trip to Port Orleans</h2>
+        
+        <div class="disney-split">
+            <!-- First Trip Card -->
+            <div class="disney-card">
+                <h3>Our First Trip</h3>
+                <div class="disney-frame">
+                    <img src="img/first-trip.jpg" alt="Our First Disney Trip">
+                </div>
+                <p>The moment the magic started. I knew then I'd never want to see the world with anyone else.</p>
+            </div>
+
+            <!-- Honeymoon Card -->
+            <div class="disney-card">
+                <h3>Our Honeymoon</h3>
+                <div class="disney-frame">
+                    <img src="img/neworleans.jpg" alt="Our Honeymoon at Port Orleans">
+                </div>
+                <p>Port Orleans French Quarter. The perfect start to our life as one.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAGIC QUOTES SECTION -->
+    <section class="magic-quotes">
+        <div class="quote-bubble left">
+            <p>"I was an unfinished puzzle and you were the missing piece that completed me."</p>
+        </div>
+
+        <div class="quote-bubble right">
+            <p>"In your eyes, I can see forever and in that moment I realized that forever was absolutely beautiful."</p>
+        </div>
+
+        <div class="quote-bubble center">
+            <span class="joke-tag">Our Classic:</span>
+            <p class="big-quote">ChocoLATE</p>
+        </div>
+    </section>
+
+    <!-- FINAL 2026 ANNIVERSARY CARD -->
+    <section class="final-card-section">
+        <!-- Castle Silhouette is generated via CSS -->
+        <div class="castle-background-silhouette"></div>
+        
+        <div class="card-outer">
+            <div class="card-header">
+                <span class="card-title">Happy Anniversary</span>
+                <span class="card-date">2026</span>
+            </div>
+
+            <div class="card-body">
+                <div class="letter-content">
+                    <p>Kimberly,</p>
+                    <p>So, you may know that our current plans for our anniversary had to be postponed and I didn't want to get you a lame card or even cut it out with scissors and construction paper.</p>
+                    <p>I wanted to do something that would be just like us - <strong>forever</strong>. You were the one that made things right in relationships. The one that brought the trust and like I've always said I loved you since the beginning.</p>
+                    <p>You are an amazing wife and amazing mother. You are my whole entire world.</p>
+                    <p>Unlike my nemesis that are micron sized, my love for you is the opposite. I love you at the most macro level.</p>
+                    <p class="signature">Forever yours, <br> Dylan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <footer class="final-footer">
+    <div class="mickey-icon">
+        <div class="mickey-ear left"></div>
+        <div class="mickey-ear right"></div>
+        <div class="mickey-head"></div>
+    </div>
+    
+    <div class="footer-credits">
+        <p class="footer-line">Designed & Developed with Love for Kimberly</p>
+        <p class="footer-date">Est. 2016 • Celebrating 10 Years • 2026</p>
+        <div class="terminal-text">
+            <span class="prompt">dylan@anniversary:~$</span> echo "I love you forever"
+        </div>
+    </div>
+</footer>
+
+    <!-- Scripts -->
+    <script src="photo.js"></script>
+    <script src="stratus.js"></script>
+
+</body>
+</html>

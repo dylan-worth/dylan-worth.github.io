@@ -1,0 +1,298 @@
+/* =========================================
+   ANNIVERSARY.CSS - THE COMPLETE MASTER FILE
+   ========================================= */
+
+:root {
+    --disney-blue: #0071ad;
+    --disney-gold: #d4af37;
+    --insta-gray: #fafafa;
+    --border-black: #000000;
+    --dash-green: #20eb20;
+    --magic-sparkle: #fff5d7;
+}
+
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--insta-gray);
+    color: #262626;
+    overflow-x: hidden;
+}
+
+/* --- MAGICAL HEADER --- */
+header {
+    background: white;
+    padding: 60px 20px;
+    text-align: center;
+    border-bottom: 5px solid var(--border-black);
+    position: relative;
+    overflow: hidden;
+}
+
+header h1 {
+    font-family: 'Satisfy', cursive;
+    font-size: 3.5rem;
+    margin: 0;
+    color: var(--disney-blue);
+    position: relative;
+    z-index: 2;
+}
+
+/* --- CELL-SHADED STRATUS SECTION --- */
+.stratus-experience {
+    background: #1a1a1a;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 8px solid var(--border-black);
+}
+
+.dash-display {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    height: 250px;
+    background: #333;
+    border: 6px solid var(--border-black);
+    border-radius: 40px 40px 10px 10px;
+    box-shadow: 12px 12px 0px var(--border-black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.radio-screen {
+    width: 70%;
+    height: 100px;
+    background: #002200;
+    border: 4px solid var(--border-black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 5px 5px 0px rgba(0,0,0,0.5);
+}
+
+.scrolling-text {
+    font-family: 'Courier New', monospace;
+    color: var(--dash-green);
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--dash-green);
+}
+
+#play-btn {
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: var(--disney-gold);
+    border: 4px solid var(--border-black);
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px var(--border-black);
+    transition: 0.1s;
+}
+
+#play-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px 0px;
+}
+
+#typewriter-text {
+    margin-top: 30px;
+    font-family: 'Satisfy', cursive;
+    font-size: 1.8rem;
+    color: #fff;
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+    text-shadow: 2px 2px 0 #000;
+    min-height: 3em;
+}
+
+/* --- INSTAGRAM GRID --- */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 935px;
+    margin: 40px auto;
+}
+
+.photo-item {
+    aspect-ratio: 1 / 1;
+    border: 3px solid var(--border-black);
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+.photo-item img { width: 100%; height: 100%; object-fit: cover; }
+.photo-item:hover { transform: scale(1.03); z-index: 5; box-shadow: 8px 8px 0 var(--disney-gold); }
+
+/* --- DISNEY JOURNEY --- */
+.disney-path {
+    background: #fff;
+    padding: 80px 20px;
+    text-align: center;
+    border-top: 8px solid var(--border-black);
+    background-image: radial-gradient(var(--magic-sparkle) 15%, transparent 16%);
+    background-size: 30px 30px;
+}
+
+.disney-split { display: flex; justify-content: center; gap: 30px; margin: 40px auto; max-width: 1000px; }
+.disney-card { flex: 1; background: #fff; padding: 20px; border: 5px solid var(--border-black); box-shadow: 10px 10px 0 var(--border-black); border-radius: 15px; }
+.disney-frame { width: 100%; aspect-ratio: 16/9; border: 4px solid var(--border-black); overflow: hidden; margin-bottom: 15px; }
+.disney-frame img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.5); }
+
+/* --- MAGIC QUOTES --- */
+.magic-quotes { padding: 60px 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.quote-bubble { 
+    max-width: 500px; padding: 20px; background: #fff; border: 4px solid var(--border-black); 
+    box-shadow: 8px 8px 0 var(--border-black); position: relative; font-style: italic;
+}
+.quote-bubble.left { align-self: flex-start; border-radius: 20px 20px 20px 0; }
+.quote-bubble.right { align-self: flex-end; border-radius: 20px 20px 0 20px; }
+.quote-bubble.center { text-align: center; background: var(--disney-gold); border-radius: 20px; }
+.big-quote { font-family: 'Satisfy', cursive; font-size: 2.2rem; margin: 0; font-style: normal; }
+
+/* --- THE 2026 CARD --- */
+.final-card-section { padding: 80px 20px; background: var(--magic-sparkle); display: flex; justify-content: center; }
+.card-outer { width: 100%; max-width: 700px; background: #fff; border: 8px solid var(--border-black); border-radius: 25px 25px 5px 5px; box-shadow: 15px 15px 0 var(--disney-blue); }
+.card-header { background: var(--disney-gold); padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 8px solid var(--border-black); }
+.card-date { font-weight: 900; font-size: 1.5rem; background: #fff; padding: 5px 15px; border: 4px solid var(--border-black); transform: rotate(3deg); }
+.card-body { padding: 40px; font-size: 1.1rem; line-height: 1.8; }
+.signature { font-family: 'Satisfy', cursive; font-size: 2rem; text-align: right; margin-top: 30px; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .gallery { grid-template-columns: repeat(2, 1fr); }
+    .disney-split { flex-direction: column; align-items: center; }
+    .quote-bubble { width: 85%; align-self: center !important; }
+}
+/* --- DISNEY CASTLE BACKGROUND (FINAL TOUCH) --- */
+.final-card-section {
+    position: relative; /* Essential for the castle to sit behind the card */
+    overflow: hidden; /* Keeps the castle from making the page scroll weird */
+    z-index: 1; /* Sets the base layer */
+}
+
+.castle-background-silhouette {
+    position: absolute;
+    bottom: -100px; /* Sits below and peeks up behind the card */
+    right: -10%; /* Positions it off-center for that artistic feel */
+    width: 600px;
+    height: 700px;
+    background: var(--disney-gold); /* Gold, vector color */
+    
+    /* THE MAGIC: Gives it the precise castle shape using pure CSS */
+    clip-path: polygon(
+        50% 0%, 55% 10%, 65% 15%, 70% 25%, 75% 35%, 80% 45%, 85% 55%, 90% 65%, 95% 75%, 100% 85%, 
+        100% 100%, 0% 100%, 0% 85%, 5% 75%, 10% 65%, 15% 55%, 20% 45%, 25% 35%, 30% 25%, 35% 15%, 45% 10%
+    );
+    
+    border: 8px solid var(--border-black); /* BOLD, cell-shaded outline */
+    opacity: 0.15; /* Makes it a subtle, ghostly background hint */
+    z-index: -1; /* Pushes it behind the 2026 Card */
+    transform: rotate(5deg); /* Slight, magical tilt */
+    filter: drop-shadow(10px 10px 0 #000); /* Extra sharp cell-shadow */
+}
+
+/* Ensure the card sits *above* the new background */
+.card-outer {
+    position: relative;
+    z-index: 2; /* Pushes the card forward */
+}
+
+@media (max-width: 800px) {
+    .castle-background-silhouette {
+        width: 300px;
+        height: 400px;
+        right: -20%;
+        bottom: -50px;
+    }
+}
+/* --- THE GRAND FINALE FOOTER --- */
+.final-footer {
+    background: #000; /* Deep black for that "end credits" feel */
+    padding: 80px 20px;
+    text-align: center;
+    border-top: 8px solid var(--disney-gold);
+    color: #fff;
+    position: relative;
+}
+
+/* Custom CSS Hidden Mickey */
+.mickey-icon {
+    position: relative;
+    width: 100px; /* Widened to 100px so ears don't disappear */
+    height: 70px;
+    margin: 0 auto 30px;
+    /* border: 1px dashed #333;  <-- Uncomment this line to see the "box" while you align */
+}
+
+.mickey-head {
+    width: 45px;
+    height: 45px;
+    background: var(--disney-gold);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%); /* Keeps head perfectly centered */
+    z-index: 2;
+}
+
+.mickey-ear {
+    width: 30px;
+    height: 30px;
+    background: var(--disney-gold);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 5px; /* Adjust this to move ears up or down */
+    z-index: 1;
+}
+
+.mickey-ear.left { left: 11px; }
+.mickey-ear.right { right: 11px; }
+
+/* Credits Text */
+.footer-credits p {
+    margin: 5px 0;
+    letter-spacing: 2px;
+}
+
+.footer-line {
+    font-family: 'Satisfy', cursive;
+    font-size: 1.8rem;
+    color: var(--disney-gold);
+}
+
+.footer-date {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 20px !important;
+}
+
+/* Arch Linux / Developer Easter Egg */
+.terminal-text {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.terminal-text .prompt {
+    color: var(--dash-green);
+    margin-right: 10px;
+}
+
+@media (max-width: 600px) {
+    .footer-line { font-size: 1.4rem; }
+}
