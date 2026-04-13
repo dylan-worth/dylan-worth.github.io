@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Social Studio Pro</title>
+    <style>
+        :root {
+            --fb-blue: #2D88FF;
+            --fb-card-bg: #242526;
+            --fb-border: #3E4042;
+            --fb-text: #E4E6EB;
+            --x-main: #1D9BF0;
+            --x-card-bg: #000000;
+            --app-bg: #18191A;
+            --container-bg: #242526;
+            --input-bg: #3A3B3C;
+            --accent: #00f2ea;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--app-bg);
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        /* Toggles */
+        .toggle-group {
+            display: flex;
+            background: var(--input-bg);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #aaa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .toggle-btn.active[data-mode="fb"] { background: var(--fb-blue); color: white; }
+        .toggle-btn.active[data-mode="x"] { background: #fff; color: #000; }
+
+        /* Input Area */
+        textarea {
+            width: 100%;
+            height: 140px;
+            padding: 15px;
+            background-color: var(--input-bg);
+            color: #fff;
+            border: 1px solid #4E4F50;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+        }
+
+        /* Emoji Bar */
+        .emoji-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .emoji-btn {
+            background: #3A3B3C;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* Preview */
+        .preview-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            border: 1px solid #333;
+        }
+
+        .fb-style { background: var(--fb-card-bg); color: var(--fb-text); }
+        .x-style { background: var(--x-card-bg); color: #E7E9EA; border-color: #2F3336; }
+
+        /* History Section */
+        .history-section {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 30px;
+        }
+
+        .history-item {
+            background: #2b2c2d;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            border-left: 4px solid var(--fb-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
+        }
+
+        .post-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .fb-btn { background-color: var(--fb-blue); color: white; }
+        .x-btn { background-color: #fff; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="toggle-group">
+        <button class="toggle-btn active" data-mode="fb" onclick="setMode('fb')">Facebook</button>
+        <button class="toggle-btn" data-mode="x" onclick="setMode('x')">X (Twitter)</button>
+    </div>
+
+    <textarea id="postInput" placeholder="Draft your content..." oninput="updatePreview()"></textarea>
+    
+    <div class="emoji-bar">
+        <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+        <button class="emoji-btn" onclick="addEmoji('✨')">✨</button>
+        <button class="emoji-btn" onclick="addEmoji('🚀')">🚀</button>
+        <button class="emoji-btn" onclick="addEmoji('✅')">✅</button>
+        <button class="emoji-btn" onclick="addEmoji('🧵')">🧵</button>
+        <button class="emoji-btn" onclick="addEmoji('👇')">👇</button>
+    </div>
+
+    <div class="stats">
+        <span id="charCount">0 characters</span>
+        <span id="limitLabel">Limit: 63,206</span>
+    </div>
+
+    <div id="previewCard" class="preview-card fb-style">
+        <div id="previewText" style="white-space: pre-wrap;">Drafting...</div>
+    </div>
+
+    <button id="actionBtn" class="post-btn fb-btn" onclick="copyAndSave()">Copy & Save to History</button>
+</div>
+
+<div class="history-section">
+    <h3 style="font-size: 14px; color: #777;">RECENT HISTORY</h3>
+    <div id="historyList"></div>
+</div>
+
+<script>
+    let currentMode = 'fb';
+    const limits = { fb: 63206, x: 280 };
+    let history = JSON.parse(localStorage.getItem('post_history') || '[]');
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+        
+        const btn = document.getElementById('actionBtn');
+        const card = document.getElementById('previewCard');
+        
+        btn.className = mode === 'fb' ? 'post-btn fb-btn' : 'post-btn x-btn';
+        card.className = mode === 'fb' ? 'preview-card fb-style' : 'preview-card x-style';
+        document.getElementById('limitLabel').innerText = `Limit: ${limits[mode].toLocaleString()}`;
+        updatePreview();
+    }
+
+    function addEmoji(emoji) {
+        const input = document.getElementById('postInput');
+        input.value += emoji;
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const text = document.getElementById('postInput').value;
+        document.getElementById('charCount').innerText = `${text.length} chars`;
+        document.getElementById('previewText').innerText = text || "Drafting...";
+        // Auto-save current draft to local storage so you don't lose it on refresh
+        localStorage.setItem('current_draft', text);
+    }
+
+    function copyAndSave() {
+        const text = document.getElementById('postInput').value;
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            // Save to History Array
+            history.unshift({ text, date: new Date().toLocaleTimeString(), mode: currentMode });
+            if (history.length > 5) history.pop(); // Keep last 5
+            localStorage.setItem('post_history', JSON.stringify(history));
+            
+            renderHistory();
+            
+            const btn = document.getElementById('actionBtn');
+            btn.innerText = "COPIED & SAVED!";
+            setTimeout(() => btn.innerText = "Copy & Save to History", 1500);
+        });
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = history.map((item, index) => `
+            <div class="history-item" onclick="loadHistory(${index})">
+                <div class="history-text"><strong>[${item.mode.toUpperCase()}]</strong> ${item.text}</div>
+                <div style="font-size:10px; color:#666;">${item.date}</div>
+            </div>
+        `).join('');
+    }
+
+    function loadHistory(index) {
+        const item = history[index];
+        document.getElementById('postInput').value = item.text;
+        setMode(item.mode);
+        updatePreview();
+    }
+
+    // Load state on start
+    window.onload = () => {
+        const savedDraft = localStorage.getItem('current_draft');
+        if (savedDraft) {
+            document.getElementById('postInput').value = savedDraft;
+            updatePreview();
+        }
+        renderHistory();
+    };
+</script>
+
+</body>
+</html>
